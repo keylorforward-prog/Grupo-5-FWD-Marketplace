@@ -1,3 +1,4 @@
+SUJETO A CAMBIOS (CAMBIAR)
 # FWD Marketplace
 
 A freelance project marketplace designed to connect FWD graduates with companies offering short-term professional opportunities. The platform provides a trusted environment where junior talent can gain real-world experience while businesses can discover and hire verified emerging professionals.
