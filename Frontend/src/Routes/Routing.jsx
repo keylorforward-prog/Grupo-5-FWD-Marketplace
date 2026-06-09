@@ -10,7 +10,7 @@ import ProtectedRoute from './ProtectedRoute';
 import LoginPage from '../Pages/LoginPage';
 import RegisterPage from '../Pages/RegisterPage';
 import DashboardPage from '../Pages/DashboardPage';
-import GestionPostulaciones from '../Home/Postulaciones/GestionPostulaciones';
+import GestionPostulaciones from '../Pages/Postulaciones/GestionPostulaciones';
 
 export default function Routing() {
   return (
