@@ -137,7 +137,7 @@ export default function GestionPostulaciones() {
     <div className="flex min-h-screen bg-surface">
       <Sidebar />
 
-      <main className="flex-1 ml-64 bg-[#F8FAFC]">
+      <main className="flex-1 ml-[260px] max-w-[1200px] mx-auto relative bg-[#F8FAFC]">
         {/* Sticky header */}
         <header className="sticky top-0 z-30 bg-[#F8FAFC] pb-2">
           <div className="px-8 py-5">
@@ -192,7 +192,7 @@ export default function GestionPostulaciones() {
                   }}
                 >
                   <div className="relative z-10">
-                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${card.textLabel}`}>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider mb-3 ${card.textLabel}`}>
                       {card.label}
                     </p>
                     <p className={`text-5xl font-bold tabular-nums tracking-tight ${card.textValue}`}>
@@ -300,9 +300,9 @@ export default function GestionPostulaciones() {
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((p) => p + 1)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center
-                    text-gray-400 hover:bg-white hover:shadow-sm hover:text-gray-700
-                    disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  className="w-8 h-8 rounded-full flex items-center justify-center
+                    text-gray-400 hover:bg-gray-100 hover:text-gray-700
+                    disabled:opacity-30 disabled:cursor-not-allowed transition-all border border-gray-200"
                   aria-label="Página siguiente"
                 >
                   <ChevronRight className="w-4 h-4" />
