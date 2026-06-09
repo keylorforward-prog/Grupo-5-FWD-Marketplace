@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "../Pages/Log/Login";
+import LoginPage from "../Pages/LoginPage";
 import DashboardEngresado from "../Pages/Home/DashboardEngresado/DashboardEngresado";
 import PerfilEngresado from "../Pages/Profile/PerfilEngresado/PerfilEngresado";
 
@@ -9,7 +9,7 @@ function Routing() {
             <Routes>
 
                 {/* Rutas publicas */}
-                <Route path="/" element={<Login />} />
+                <Route path="/" element={<LoginPage />} />
                 <Route path="/DashboardEngresado" element={<DashboardEngresado />} />
                 <Route path="/PerfilEngresado" element={<PerfilEngresado />} />
 

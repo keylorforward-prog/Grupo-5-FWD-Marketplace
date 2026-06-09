@@ -6,10 +6,10 @@ import './AuthPages.css';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmPassword: '', cedula: '', rol: 'ESTUDIANTE', telefono_whatsapp: '', titulo_fwd_file: null, tipo_empresa: '', sector: '', cedula_juridica_file: null });
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -42,14 +42,14 @@ const RegisterPage = () => {
 
     setLoading(true);
     setError('');
+    setSuccessMsg('');
 
     try {
       const data = await authService.register({ nombre, email, password, cedula, rol, telefono_whatsapp, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file });
-      if (data.success) {
-        // Guardar token en localStorage para interceptors futuros
-        localStorage.setItem('token', data.token);
-        login(data.user, data.token);
-        navigate('/dashboard');
+      if (data.success && data.pendingApproval) {
+        setSuccessMsg(data.message);
+        // Redirigir al login después de 4 segundos
+        setTimeout(() => navigate('/login'), 4000);
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Error al registrarse. Intenta de nuevo.';
@@ -80,6 +80,36 @@ const RegisterPage = () => {
               <div className="auth-error" role="alert">
                 <span className="error-icon">⚠️</span>
                 {error}
+              </div>
+            )}
+
+            {successMsg && (
+              <div className="auth-success" role="status" style={{
+                background: 'linear-gradient(135deg, rgba(10, 108, 185, 0.1), rgba(32, 190, 198, 0.1))',
+                border: '1px solid rgba(10, 108, 185, 0.35)',
+                color: '#0a6cb9',
+                padding: '1.25rem',
+                borderRadius: '1.25rem',
+                marginBottom: '1rem',
+                fontSize: '0.95rem',
+                lineHeight: '1.6',
+                textAlign: 'center',
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 4px 12px rgba(10, 108, 185, 0.08)'
+              }}>
+                <div style={{
+                  width: '48px', height: '48px', margin: '0 auto 0.75rem',
+                  background: 'linear-gradient(135deg, #ffcb05, #f7901e)',
+                  borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1.4rem', boxShadow: '0 2px 8px rgba(255, 203, 5, 0.35)'
+                }}>⏳</div>
+                <strong style={{ fontSize: '1.05rem', display: 'block', marginBottom: '0.35rem', color: '#0a6cb9' }}>
+                  Cuenta creada exitosamente
+                </strong>
+                <span style={{ color: '#52525b' }}>{successMsg}</span>
+                <div style={{
+                  marginTop: '0.75rem', fontSize: '0.82rem', color: '#20bec6', fontWeight: 600
+                }}>Redirigiendo al inicio de sesión...</div>
               </div>
             )}
 
