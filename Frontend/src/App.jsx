@@ -1,10 +1,10 @@
-import Routing from "./Routes/Routing"
+import AppRouter from "./routes/AppRouter"
 
 function App() {
 
   return (
     <>
-      <Routing />
+      <AppRouter />
     </>
   )
 }
