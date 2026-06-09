@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-import DashboardEngresado from "../Pages/Home/DashboardEngresado/DashboardEngresado";
-import PerfilEngresado from "../Pages/Profile/PerfilEngresado/PerfilEngresado";
+import LoginPage  from "../Login/Pages/LoginPage";
 import GestionPostulaciones from "../Pages/Postulaciones/GestionPostulaciones";
+import RegisterPage from "../Registro/pages/RegisterPage";
+
 
 function Routing() {
     return (
@@ -10,10 +10,8 @@ function Routing() {
             <Routes>
 
                 {/* Rutas publicas */}
-               
-                <Route path="/DashboardEngresado" element={<DashboardEngresado />} />
-                <Route path="/PerfilEngresado" element={<PerfilEngresado />} />
-
+                <Route path="/" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
                 {/* Rutas privadas */}
                 <Route path="/postulaciones" element={<GestionPostulaciones />} />
                 

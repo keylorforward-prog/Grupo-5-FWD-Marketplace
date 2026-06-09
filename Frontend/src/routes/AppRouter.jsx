@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
-import LoginPage from '../Pages/LoginPage';
-import RegisterPage from '../Pages/RegisterPage';
+import LoginPage from '../Login/Pages/LoginPage';
+import RegisterPage from '../Registro/pages/RegisterPage';
 import DashboardPage from '../Pages/DashboardPage';
 
 const AppRouter = () => {
@@ -14,6 +14,7 @@ const AppRouter = () => {
         {/* Rutas públicas */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+
 
         {/* Rutas protegidas */}
         <Route

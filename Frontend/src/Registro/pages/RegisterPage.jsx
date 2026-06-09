@@ -1,21 +1,19 @@
 import { useState } from 'react';
-
-import LoginForm from "../Components/LoginForm";
+import RegisterForm from "../components/RegisterForm";
 import '../../Pages/AuthPages.css';
 
-const LoginPage = () => {
+const RegisterPage = () => {
+  
 
   return (
     <div className="auth-bg">
-      {/* Orbes decorativos */}
       <div className="orb orb-1" />
       <div className="orb orb-2" />
       <div className="orb orb-3" />
+       <RegisterForm/>
       
-      <LoginForm/>
-
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

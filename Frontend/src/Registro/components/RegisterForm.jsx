@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
-import { useAuth } from '../context/AuthContext';
-import './AuthPages.css';
+import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
+import '../../Pages/AuthPages.css';
 
-const RegisterPage = () => {
+const RegisterForm = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmPassword: '', cedula: '', rol: 'ESTUDIANTE', telefono_whatsapp: '', titulo_fwd_file: null, tipo_empresa: '', sector: '', cedula_juridica_file: null });
@@ -60,12 +60,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="auth-bg">
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-      <div className="orb orb-3" />
-
-      <div className="auth-container">
+     <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo">
             <span className="logo-icon">🛒</span>
@@ -344,13 +339,11 @@ const RegisterPage = () => {
             <span>¿Ya tienes cuenta?</span>
           </div>
 
-          <Link to="/login" className="auth-link-btn">
+          <Link to="/" className="auth-link-btn">
             Iniciar sesión
           </Link>
         </div>
       </div>
-    </div>
   );
-};
-
-export default RegisterPage;
+  }
+   export default RegisterForm;
