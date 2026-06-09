@@ -14,7 +14,7 @@ import {
 
 // Importación de módulos aislados (Corregido para coincidir con la carpeta "components" en minúscula)
 import SidebarItem from '../Components/SidebarItem';
-import StatCard from '../components/StatCard';
+import StatCard from '../Components/StatCard';
 import StatusBadge from '../Components/StatusBadge';
 
 export default function AdminProfile() {

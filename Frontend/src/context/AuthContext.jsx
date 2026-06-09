@@ -1,0 +1,60 @@
+import { createContext, useContext, useState, useEffect } from 'react';
+import { authService } from '../services/authService';
+
+const AuthContext = createContext(null);
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true);
+
+  // Al cargar la app, verifica si el token guardado sigue siendo válido
+  useEffect(() => {
+    const initAuth = async () => {
+      const savedToken = localStorage.getItem('token');
+      if (savedToken) {
+        try {
+          const data = await authService.getMe(savedToken);
+          setUser(data.user);
+          setToken(savedToken);
+        } catch {
+          // Token inválido o expirado
+          localStorage.removeItem('token');
+          setToken(null);
+          setUser(null);
+        }
+      }
+      setLoading(false);
+    };
+    initAuth();
+  }, []);
+
+  const login = (userData, userToken) => {
+    setUser(userData);
+    setToken(userToken);
+    localStorage.setItem('token', userToken);
+  };
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch {}
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+  };
+
+  const isAuthenticated = !!token && !!user;
+
+  return (
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth debe usarse dentro de AuthProvider');
+  return context;
+};
