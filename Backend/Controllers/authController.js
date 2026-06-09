@@ -88,20 +88,10 @@ const register = async (req, res) => {
       });
     }
     
-    const token = generateToken(newUser);
-
-    res.cookie('token', token, cookieOptions);
-
     return res.status(201).json({
       success: true,
-      message: '¡Cuenta creada exitosamente!',
-      token,
-      user: {
-        id: newUser.id_usuario,
-        nombre: newUser.nombre,
-        email: newUser.correo,
-        rol: newUser.rol,
-      },
+      pendingApproval: true,
+      message: '¡Cuenta creada exitosamente! Tu cuenta está pendiente de aprobación por un administrador. Te notificaremos cuando sea activada.',
     });
   } catch (error) {
     console.error('Error en register:', error);
@@ -138,6 +128,24 @@ const login = async (req, res) => {
         message: 'Credenciales inválidas',
       });
     }
+
+    // Verificar estado de la cuenta
+    if (user.estado_cuenta === 'PENDIENTE') {
+      return res.status(403).json({
+        success: false,
+        pendingApproval: true,
+        message: 'Tu cuenta aún está pendiente de aprobación por un administrador.',
+      });
+    }
+    if (user.estado_cuenta === 'SUSPENDIDA') {
+      return res.status(403).json({
+        success: false,
+        message: 'Tu cuenta ha sido suspendida. Contacta al administrador.',
+      });
+    }
+
+    // Actualizar último acceso
+    await user.update({ ultimo_acceso: new Date() });
 
     const token = generateToken(user);
 
