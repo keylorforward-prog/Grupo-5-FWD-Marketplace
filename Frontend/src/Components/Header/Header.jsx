@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
@@ -101,7 +101,7 @@ function Header() {
 
               {/* ✅ Usando <Link> directamente en el modal */}
               <Link
-                to="/PerfilEngresado"
+                to="/PerfilEgresado"
                 className="itemModal"
                 onClick={() => setModalUsuarioAbierto(false)}
               >

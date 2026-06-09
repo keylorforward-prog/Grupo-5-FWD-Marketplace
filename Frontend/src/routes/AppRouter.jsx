@@ -3,6 +3,7 @@ import ProtectedRoute from './ProtectedRoute';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
+import SettingsEgresado from '../Pages/ProfileEgresado/PerfilEgresado/SettingsEgresado/SettingsEgresado';
 
 const AppRouter = () => {
   return (
@@ -21,6 +22,14 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Configuracion"
+          element={
+            <ProtectedRoute>
+              <SettingsEgresado />
             </ProtectedRoute>
           }
         />

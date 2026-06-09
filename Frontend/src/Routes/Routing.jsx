@@ -1,7 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+﻿import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "../Pages/LoginPage";
-import DashboardEngresado from "../Pages/Home/DashboardEngresado/DashboardEngresado";
-import PerfilEngresado from "../Pages/Profile/PerfilEngresado/PerfilEngresado";
+import DashboardEgresado from "../Pages/ProfileEgresado/DashboardEgresado/DashboardEgresado";
+import PerfilEgresado from "../Pages/ProfileEgresado/PerfilEgresado/PerfilEgresado";
 
 function Routing() {
     return (
@@ -10,8 +10,8 @@ function Routing() {
 
                 {/* Rutas publicas */}
                 <Route path="/" element={<LoginPage />} />
-                <Route path="/DashboardEngresado" element={<DashboardEngresado />} />
-                <Route path="/PerfilEngresado" element={<PerfilEngresado />} />
+                <Route path="/DashboardEgresado" element={<DashboardEgresado />} />
+                <Route path="/PerfilEgresado" element={<PerfilEgresado />} />
 
                 {/* Rutas privadas */}
                 
