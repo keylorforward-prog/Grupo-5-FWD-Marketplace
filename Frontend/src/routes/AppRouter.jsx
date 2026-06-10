@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from './ProtectedRoute';
 import LoginPage from '../Login/Pages/LoginPage';
 import RegisterPage from '../Registro/pages/RegisterPage';
 import DashboardPage from '../Pages/DashboardPage';
+import SettingsEgresado from '../ProfileEgresado/SettingsEgresado/SettingsEgresado';
+
 
 const AppRouter = () => {
   return (
@@ -22,6 +23,14 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Configuracion"
+          element={
+            <ProtectedRoute>
+              <SettingsEgresado />
             </ProtectedRoute>
           }
         />
