@@ -1,15 +1,4 @@
-import { useState, useRef, useEffect, type ReactNode } from 'react';
-
-interface ConfirmDialogProps {
-  open: boolean;
-  title: string;
-  message: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  variant?: 'danger' | 'default';
-  onConfirm: () => void;
-  onCancel: () => void;
-}
+import { useRef, useEffect } from 'react';
 
 export default function ConfirmDialog({
   open,
@@ -20,8 +9,8 @@ export default function ConfirmDialog({
   variant = 'default',
   onConfirm,
   onCancel,
-}: ConfirmDialogProps) {
-  const dialogRef = useRef<HTMLDivElement>(null);
+}) {
+  const dialogRef = useRef(null);
 
   useEffect(() => {
     if (open) {

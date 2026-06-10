@@ -1,27 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { Download, FileSpreadsheet, FileText, ChevronDown, X } from 'lucide-react';
-import type { ExportFormat } from '../../types/postulaciones';
 
-interface BulkActionsProps {
-  selectedCount: number;
-  totalCount: number;
-  onExport: (format: ExportFormat, onlySelected: boolean) => void;
-  onClearSelection: () => void;
-}
-
-export default function BulkActions({ selectedCount, totalCount, onExport, onClearSelection }: BulkActionsProps) {
+export default function BulkActions({ selectedCount, totalCount, onExport, onClearSelection }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef(null);
 
   useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    const handle = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
   }, []);
 
-  const handleExport = (format: ExportFormat) => {
+  const handleExport = (format) => {
     onExport(format, selectedCount > 0);
     setOpen(false);
   };
@@ -85,14 +77,14 @@ export default function BulkActions({ selectedCount, totalCount, onExport, onCle
             <div className="py-1.5">
               {[
                 {
-                  format: 'csv' as ExportFormat,
+                  format: 'csv',
                   icon: FileSpreadsheet,
                   iconColor: 'text-emerald-500',
                   label: 'CSV / Excel',
                   desc: 'Datos tabulares',
                 },
                 {
-                  format: 'pdf' as ExportFormat,
+                  format: 'pdf',
                   icon: FileText,
                   iconColor: 'text-red-500',
                   label: 'PDF con Cartas',

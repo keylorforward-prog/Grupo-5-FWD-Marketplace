@@ -1,21 +1,8 @@
 import { MapPin } from 'lucide-react';
-import type { Candidate } from '../../types/postulaciones';
 import ActionButtons from './ActionButtons';
 import CandidateNotes from './CandidateNotes';
 
-interface CandidateRowProps {
-  candidate: Candidate;
-  isSelected: boolean;
-  index?: number;
-  onSelect: (id: string) => void;
-  onView: (id: string) => void;
-  onInvite: (id: string, date: string, time: string, message: string) => void;
-  onReject: (id: string) => void;
-  onAddNote: (id: string, note: string) => void;
-  onDeleteNote: (id: string, index: number) => void;
-}
-
-const statusConfig: Record<string, { label: string; bg: string; text: string; dot: string }> = {
+const statusConfig = {
   nuevo: { label: 'Nuevo', bg: 'rgba(37,99,235,0.1)', text: '#2563eb', dot: '#3b82f6' },
   en_revision: { label: 'En revisión', bg: 'rgba(245,158,11,0.12)', text: '#b45309', dot: '#f59e0b' },
   entrevistado: { label: 'Entrevistado', bg: 'rgba(124,58,237,0.1)', text: '#7c3aed', dot: '#a78bfa' },
@@ -23,7 +10,7 @@ const statusConfig: Record<string, { label: string; bg: string; text: string; do
 };
 
 // Pastel colors for stacks like in the photo
-const STACK_PASTEL_COLORS: Record<string, string> = {
+const STACK_PASTEL_COLORS = {
   React: 'bg-blue-200 text-blue-800',
   'Node.js': 'bg-purple-200 text-purple-800',
   TypeScript: 'bg-blue-300 text-blue-900',
@@ -56,7 +43,7 @@ export default function CandidateRow({
   onReject,
   onAddNote,
   onDeleteNote,
-}: CandidateRowProps) {
+}) {
   const { id, name, location, stacks, coverLetter, status, isInvited, avatar } = candidate;
   const statusInfo = statusConfig[status] ?? statusConfig.nuevo;
 

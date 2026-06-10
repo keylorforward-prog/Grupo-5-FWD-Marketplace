@@ -1,15 +1,9 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Clock, Send } from 'lucide-react';
 
-interface MiniCalendarProps {
-  candidateName: string;
-  onSchedule: (date: string, time: string, message: string) => void;
-  onClose: () => void;
-}
-
-export default function MiniCalendar({ candidateName, onSchedule, onClose }: MiniCalendarProps) {
+export default function MiniCalendar({ candidateName, onSchedule, onClose }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState('10:00');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
@@ -21,7 +15,7 @@ export default function MiniCalendar({ candidateName, onSchedule, onClose }: Min
     const m = currentMonth.getMonth();
     const firstDay = new Date(y, m, 1).getDay();
     const daysInMonth = new Date(y, m + 1, 0).getDate();
-    const daysArray: (number | null)[] = Array(firstDay).fill(null);
+    const daysArray = Array(firstDay).fill(null);
     for (let i = 1; i <= daysInMonth; i++) daysArray.push(i);
     return {
       days: daysArray,
@@ -41,7 +35,7 @@ export default function MiniCalendar({ candidateName, onSchedule, onClose }: Min
     }
   };
 
-  const navMonth = (dir: number) => {
+  const navMonth = (dir) => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + dir, 1));
     setSelectedDate(null);
   };

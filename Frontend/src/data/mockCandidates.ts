@@ -1,6 +1,4 @@
-import type { Candidate } from '../types/postulaciones';
-
-const STACK_COLORS: Record<string, string> = {
+const STACK_COLORS = {
   React: 'bg-blue-500',
   'Node.js': 'bg-green-600',
   TypeScript: 'bg-blue-700',
@@ -23,7 +21,7 @@ const STACK_COLORS: Record<string, string> = {
   Java: 'bg-red-700',
 };
 
-export const mockCandidates: Candidate[] = [
+export const mockCandidates = [
   {
     id: '1',
     name: 'Mateo Salazar',

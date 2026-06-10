@@ -1,18 +1,12 @@
-import { useState, useRef, useEffect, type ReactNode } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
-interface PopoverProps {
-  trigger: ReactNode;
-  children: ReactNode;
-  align?: 'left' | 'right' | 'center';
-}
-
-export default function Popover({ trigger, children, align = 'right' }: PopoverProps) {
+export default function Popover({ trigger, children, align = 'right' }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef(null);
 
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);

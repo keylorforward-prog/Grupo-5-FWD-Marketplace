@@ -1,4 +1,4 @@
-import Routing from "./Routes/Routing.tsx"
+import Routing from "./Routes/Routing.jsx"
 
 function App() {
 
