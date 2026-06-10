@@ -1,10 +1,8 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
 import LoginPage from "../Login/Pages/LoginPage";
 import RegisterPage from "../Registro/pages/RegisterPage";
 import DashboardEngresado from "../Pages/Home/DashboardEngresado/DashboardEngresado";
 import PerfilEngresado from "../Pages/Profile/PerfilEngresado/PerfilEngresado";
-import GestionPostulaciones from "../Pages/Postulaciones/GestionPostulaciones";
+import GestionPostulaciones from "../Postulaciones/GestionPostulaciones";
 import React from 'react';
 import ProtectedRoute from './ProtectedRoute';
 import DashboardPage from '../Pages/DashboardPage';
@@ -36,7 +34,6 @@ export default function Routing() {
                     }
                 />
                 <Route path="/postulaciones" element={<GestionPostulaciones />} />
-
                 {/* Tu espacio de trabajo (Admin) */}
                 <Route path="/admin" element={<AdminProfile />} />
 
