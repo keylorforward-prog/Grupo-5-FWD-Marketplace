@@ -542,3 +542,132 @@
     border-radius: 16px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DOUBLE SLIDER ANIMATION
+   ══════════════════════════════════════════════════════════════════════════ */
+.fwd-auth-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--canvas);
+}
+
+.fwd-auth-wrapper .form-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  background: var(--canvas);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.fwd-auth-wrapper .auth-card {
+  margin: auto;
+  width: 100%;
+}
+
+.fwd-auth-wrapper .overlay-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.fwd-auth-wrapper .overlay {
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
+  background: linear-gradient(160deg, #7b3fac 0%, var(--secondary) 45%, #8a4cbf 100%);
+}
+
+.fwd-auth-wrapper .overlay-panel {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+}
+
+.fwd-auth-wrapper .overlay-left {
+  left: 0;
+}
+
+.fwd-auth-wrapper .overlay-right {
+  right: 0;
+}
+
+.fwd-auth-wrapper .inner-panel {
+  width: 100%;
+  height: 100%;
+  padding: 4rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 0;
+  background: transparent;
+}
+
+.switch-mode-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.switch-mode-btn:hover {
+  color: var(--secondary);
+  text-decoration: underline;
+}
+
+.auth-btn.ghost {
+  background: transparent;
+  border: 2px solid #fff;
+  margin-top: 1.5rem;
+  width: auto;
+  align-self: flex-start;
+  padding: 0.75rem 2rem;
+  box-shadow: none;
+}
+.auth-btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 900px) {
+  .fwd-auth-wrapper .form-container {
+    width: 100%;
+    position: relative;
+    left: 0 !important;
+    transform: none !important;
+    opacity: 1 !important;
+    z-index: 1 !important;
+  }
+  .fwd-auth-wrapper .overlay-container {
+    display: none;
+  }
+  .fwd-auth-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+  .fwd-auth-wrapper .sign-up-container,
+  .fwd-auth-wrapper .sign-in-container {
+    display: none;
+  }
+  .fwd-auth-wrapper .form-container[style*="z-index: 5"] {
+    display: flex;
+  }
+}

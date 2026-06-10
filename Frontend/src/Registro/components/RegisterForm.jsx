@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import '../../Pages/AuthPages.css';
 
-const RegisterForm = () => {
+const RegisterForm = ({ onSwitchMode }) => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmPassword: '', cedula: '', rol: 'ESTUDIANTE', telefono_whatsapp: '', titulo_fwd_file: null, tipo_empresa: '', sector: '', cedula_juridica_file: null });
@@ -48,7 +48,7 @@ const RegisterForm = () => {
       if (data.success && data.pendingApproval) {
         setSuccessMsg(data.message);
         // Redirigir al login después de 4 segundos
-        setTimeout(() => navigate('/login'), 4000);
+        setTimeout(() => navigate('/'), 4000);
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Error al registrarse. Intenta de nuevo.';
@@ -255,7 +255,7 @@ const RegisterForm = () => {
             </div>
             <div className="form-group">
               <label htmlFor="reg-cedula-juridica" className="form-label">
-                Cédula Jurídica (PDF o Imagen) <span style={{fontSize: '0.85em', color: '#888'}}>- Opcional</span>
+                Cédula Jurídica (PDF o Imagen) <span style={{ fontSize: '0.85em', color: '#888' }}>- Opcional</span>
               </label>
               <div className="input-wrapper">
                 <span className="input-icon">📄</span>
@@ -338,7 +338,7 @@ const RegisterForm = () => {
       {/* Footer */}
       <div className="auth-footer">
         ¿Ya tienes cuenta?{' '}
-        <Link to="/">Iniciar sesión</Link>
+        <button type="button" className="switch-mode-btn" onClick={onSwitchMode}>Iniciar sesión</button>
       </div>
     </div>
   );

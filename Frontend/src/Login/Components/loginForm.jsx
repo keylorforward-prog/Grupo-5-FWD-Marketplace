@@ -4,7 +4,7 @@ import { authService } from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
 import '../../Pages/AuthPages.css';
 
-const LoginForm = () => {
+const LoginForm = ({ onSwitchMode }) => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -159,7 +159,7 @@ const LoginForm = () => {
       {/* Footer */}
       <div className="auth-footer">
         ¿No tienes una cuenta?{' '}
-        <Link to="/register">Regístrate ahora</Link>
+        <button type="button" className="switch-mode-btn" onClick={onSwitchMode}>Regístrate ahora</button>
       </div>
     </div>
   );

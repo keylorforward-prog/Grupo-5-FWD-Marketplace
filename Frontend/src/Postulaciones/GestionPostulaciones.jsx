@@ -1,9 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Filter, ChevronLeft, ChevronRight, Users, UserPlus, ClipboardCheck, Award } from 'lucide-react';
-import { mockCandidates } from '../../data/mockCandidates';
-import Sidebar from '../../Components/layout/Sidebar';
-import CandidateRow from '../../Components/postulaciones/CandidateRow';
-import BulkActions from '../../Components/postulaciones/BulkActions';
+import { mockCandidates } from '../data/mockCandidates';
+import Sidebar from '../Components/layout/Sidebar';
+import CandidateRow from '../Components/postulaciones/CandidateRow';
+import BulkActions from '../Components/postulaciones/BulkActions';
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 10, 15, 25];
 
