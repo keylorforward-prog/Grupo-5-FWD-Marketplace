@@ -32,7 +32,7 @@ const LoginPage = () => {
       const data = await authService.login(form);
       if (data.success) {
         login(data.user, data.token);
-        navigate('/dashboard');
+        navigate('/DashboardEgresado');
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Error al iniciar sesión. Intenta de nuevo.';
