@@ -1,39 +1,46 @@
-// ── Types & Interfaces ──────────────────────────────────────────────
+// ── Types & Interfaces (JSDoc for reference) ──────────────────────
+// These types are documented via JSDoc comments for IDE support.
 
-export interface Candidate {
-  id: string;
-  name: string;
-  avatar: string;
-  location: string;
-  stacks: string[];
-  stackColors: Record<string, string>;
-  coverLetter: string;
-  status: 'nuevo' | 'en_revision' | 'entrevistado' | 'rechazado';
-  isInvited: boolean;
-  notes: string[];
-}
+/**
+ * @typedef {Object} Candidate
+ * @property {string} id
+ * @property {string} name
+ * @property {string} avatar
+ * @property {string} location
+ * @property {string[]} stacks
+ * @property {Object<string, string>} stackColors
+ * @property {string} coverLetter
+ * @property {'nuevo' | 'en_revision' | 'entrevistado' | 'rechazado'} status
+ * @property {boolean} isInvited
+ * @property {string[]} notes
+ */
 
-export interface ProjectStats {
-  totalPostulados: number;
-  nuevosHoy: number;
-  enRevision: number;
-  entrevistados: number;
-}
+/**
+ * @typedef {Object} ProjectStats
+ * @property {number} totalPostulados
+ * @property {number} nuevosHoy
+ * @property {number} enRevision
+ * @property {number} entrevistados
+ */
 
-export interface ScheduleSlot {
-  date: string;      // ISO date string
-  time: string;      // HH:mm format
-  message?: string;
-}
+/**
+ * @typedef {Object} ScheduleSlot
+ * @property {string} date - ISO date string
+ * @property {string} time - HH:mm format
+ * @property {string} [message]
+ */
 
-export interface SidebarItem {
-  icon: string;
-  label: string;
-  path: string;
-  badge?: number;
-  active?: boolean;
-}
+/**
+ * @typedef {Object} SidebarItem
+ * @property {string} icon
+ * @property {string} label
+ * @property {string} path
+ * @property {number} [badge]
+ * @property {boolean} [active]
+ */
 
-export type ExportFormat = 'csv' | 'pdf';
-export type SortField = 'name' | 'status' | 'date';
-export type SortDirection = 'asc' | 'desc';
+/**
+ * @typedef {'csv' | 'pdf'} ExportFormat
+ * @typedef {'name' | 'status' | 'date'} SortField
+ * @typedef {'asc' | 'desc'} SortDirection
+ */
