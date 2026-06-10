@@ -5,16 +5,6 @@ import Popover from '../ui/Popover';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import MiniCalendar from './MiniCalendar';
 
-interface ActionButtonsProps {
-  candidateId: string;
-  candidateName: string;
-  isInvited: boolean;
-  status: string;
-  onView: (id: string) => void;
-  onInvite: (id: string, date: string, time: string, message: string) => void;
-  onReject: (id: string) => void;
-}
-
 const btnBase = `
   w-8 h-8 flex items-center justify-center flex-shrink-0
   transition-all duration-200 bg-transparent
@@ -29,7 +19,7 @@ export default function ActionButtons({
   onView,
   onInvite,
   onReject,
-}: ActionButtonsProps) {
+}) {
   const [showConfirm, setShowConfirm] = useState(false);
   const isRejected = status === 'rechazado';
 

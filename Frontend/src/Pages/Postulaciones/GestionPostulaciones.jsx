@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Filter, ChevronLeft, ChevronRight, Users, UserPlus, ClipboardCheck, Award } from 'lucide-react';
-import type { Candidate, ExportFormat } from '../../types/postulaciones';
 import { mockCandidates } from '../../data/mockCandidates';
 import Sidebar from '../../components/layout/Sidebar';
 import CandidateRow from '../../components/postulaciones/CandidateRow';
@@ -9,7 +8,7 @@ import BulkActions from '../../components/postulaciones/BulkActions';
 const ITEMS_PER_PAGE_OPTIONS = [3, 10, 15, 25];
 
 // Stat card config matching the photo
-const buildStatCards = (stats: { total: number; nuevos: number; enRevision: number; entrevistados: number }) => [
+const buildStatCards = (stats) => [
   {
     label: 'TOTAL POSTULADOS',
     value: stats.total,
@@ -26,7 +25,7 @@ const buildStatCards = (stats: { total: number; nuevos: number; enRevision: numb
     textValue: 'text-[#B45309]',
     textLabel: 'text-gray-500',
     border: 'border-gray-200',
-    filter: 'nuevo' as const,
+    filter: 'nuevo',
   },
   {
     label: 'EN REVISIÓN',
@@ -35,7 +34,7 @@ const buildStatCards = (stats: { total: number; nuevos: number; enRevision: numb
     textValue: 'text-[#7C3AED]',
     textLabel: 'text-gray-500',
     border: 'border-gray-200',
-    filter: 'en_revision' as const,
+    filter: 'en_revision',
   },
   {
     label: 'ENTREVISTADOS',
@@ -44,22 +43,22 @@ const buildStatCards = (stats: { total: number; nuevos: number; enRevision: numb
     textValue: 'text-gray-900',
     textLabel: 'text-gray-500',
     border: 'border-gray-200',
-    filter: 'entrevistado' as const,
+    filter: 'entrevistado',
   },
 ];
 
-const STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS = {
   nuevo: 'Nuevos',
   en_revision: 'En revisión',
   entrevistado: 'Entrevistados',
 };
 
 export default function GestionPostulaciones() {
-  const [candidates, setCandidates] = useState<Candidate[]>(mockCandidates);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [candidates, setCandidates] = useState(mockCandidates);
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(3);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState(null);
 
   const filtered = useMemo(
     () => (!statusFilter ? candidates : candidates.filter((c) => c.status === statusFilter)),
@@ -81,7 +80,7 @@ export default function GestionPostulaciones() {
 
   const statCards = buildStatCards(stats);
 
-  const toggleSelect = useCallback((id: string) => {
+  const toggleSelect = useCallback((id) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -99,25 +98,25 @@ export default function GestionPostulaciones() {
     });
   }, [paginated, selectedIds]);
 
-  const handleInvite = useCallback((id: string, date: string, time: string, message: string) => {
+  const handleInvite = useCallback((id, date, time, message) => {
     setCandidates((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, isInvited: true, status: 'entrevistado' as const } : c))
+      prev.map((c) => (c.id === id ? { ...c, isInvited: true, status: 'entrevistado' } : c))
     );
   }, []);
 
-  const handleReject = useCallback((id: string) => {
+  const handleReject = useCallback((id) => {
     setCandidates((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: 'rechazado' as const } : c))
+      prev.map((c) => (c.id === id ? { ...c, status: 'rechazado' } : c))
     );
   }, []);
 
-  const handleAddNote = useCallback((id: string, note: string) => {
+  const handleAddNote = useCallback((id, note) => {
     setCandidates((prev) =>
       prev.map((c) => (c.id === id ? { ...c, notes: [...c.notes, note] } : c))
     );
   }, []);
 
-  const handleDeleteNote = useCallback((id: string, index: number) => {
+  const handleDeleteNote = useCallback((id, index) => {
     setCandidates((prev) =>
       prev.map((c) =>
         c.id === id ? { ...c, notes: c.notes.filter((_, i) => i !== index) } : c
@@ -125,7 +124,7 @@ export default function GestionPostulaciones() {
     );
   }, []);
 
-  const handleExport = useCallback((format: ExportFormat, onlySelected: boolean) => {
+  const handleExport = useCallback((format, onlySelected) => {
     const data = onlySelected ? candidates.filter((c) => selectedIds.has(c.id)) : candidates;
     alert(`Exportando ${data.length} candidatos en formato ${format.toUpperCase()}`);
   }, [candidates, selectedIds]);

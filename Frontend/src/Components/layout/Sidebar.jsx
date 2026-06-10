@@ -1,9 +1,5 @@
 import { LayoutDashboard, Compass, FolderKanban, MessageCircle, Settings, HelpCircle, LogOut } from 'lucide-react';
 
-interface SidebarProps {
-  activeItem?: string;
-}
-
 const navItems = [
   { icon: Compass,         label: 'Explorar',         path: '/explorar',     badge: 0 },
   { icon: FolderKanban,   label: 'Mis Proyectos',    path: '/proyectos',    badge: 0 },
@@ -16,7 +12,7 @@ const bottomItems = [
   { icon: LogOut, label: 'Cerrar Sesión', path: '/logout', badge: 0 },
 ];
 
-export default function Sidebar({ activeItem = 'Mis Proyectos' }: SidebarProps) {
+export default function Sidebar({ activeItem = 'Mis Proyectos' }) {
   return (
     <aside className="w-64 h-screen flex flex-col fixed left-0 top-0 z-40 bg-[#F8FAFC] border-r border-gray-200">
       

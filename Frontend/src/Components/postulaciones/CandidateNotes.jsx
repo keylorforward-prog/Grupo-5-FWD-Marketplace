@@ -1,13 +1,7 @@
 import { useState } from 'react';
 import { StickyNote, X, Send } from 'lucide-react';
 
-interface CandidateNotesProps {
-  notes: string[];
-  onAddNote: (note: string) => void;
-  onDeleteNote: (index: number) => void;
-}
-
-export default function CandidateNotes({ notes, onAddNote, onDeleteNote }: CandidateNotesProps) {
+export default function CandidateNotes({ notes, onAddNote, onDeleteNote }) {
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState('');
 
