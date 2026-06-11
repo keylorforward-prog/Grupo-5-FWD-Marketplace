@@ -9,24 +9,23 @@ import './Styles/SettingsEmpresa.css';
 
 const SettingsEmpresa = () => {
   return (
-    <div className="settings-empresa-layout">
+    <div className="settings-empresa-wrapper">
       <SidebarEmpresa />
-      <div className="settings-empresa-main">
+      
+      <main className="se-main-content">
         <HeaderEmpresa />
-        <div className="settings-empresa-content">
-          {/* Profile Section */}
+        
+        <div className="se-canvas">
           <CompanyProfile />
-
-          {/* Cards Section */}
-          <div className="flex gap-8 w-full">
+          
+          <div className="se-grid-2">
             <RecruitmentTeam />
             <NotificationPreferences />
           </div>
-
-          {/* Danger Zone */}
+          
           <DangerZone />
         </div>
-      </div>
+      </main>
     </div>
   );
 };
