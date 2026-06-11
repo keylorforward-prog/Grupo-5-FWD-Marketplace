@@ -40,6 +40,8 @@ export default function CandidateRow({
   onView,
   onInvite,
   onReject,
+  onAddNote,
+  onDeleteNote,
 }) {
   const { id, name, location, stacks, coverLetter, status, isInvited, avatar } = candidate;
   const statusInfo = statusConfig[status] ?? statusConfig.nuevo;

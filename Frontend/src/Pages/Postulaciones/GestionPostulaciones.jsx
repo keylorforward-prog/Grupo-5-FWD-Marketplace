@@ -98,7 +98,7 @@ export default function GestionPostulaciones() {
     });
   }, [paginated, selectedIds]);
 
-  const handleInvite = useCallback((id) => {
+  const handleInvite = useCallback((id, date, time, message) => {
     setCandidates((prev) =>
       prev.map((c) => (c.id === id ? { ...c, isInvited: true, status: 'entrevistado' } : c))
     );
