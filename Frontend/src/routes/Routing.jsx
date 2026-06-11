@@ -9,6 +9,7 @@ import RegisterPage from '../pages/auth/Registro/RegisterPage';
 import DashboardEmpresario from '../pages/empresa/DashboardEmpresario/DashboardEmpresario';
 import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
 import AdminProfile from '../pages/admin/AdminProfile';
+import SettingsEmpresa from '../pages/empresa/SettingsEmpresa/SettingsEmpresa';
 
 // Egresado
 import DashboardEgresado from '../pages/egresado/DashboardEgresado/DashboardEgresado';
@@ -30,6 +31,7 @@ export default function Routing() {
         <Route path="/DashboardEmpresario" element={<DashboardEmpresario />} />
         <Route path="/postulaciones" element={<GestionPostulaciones />} />
         <Route path="/admin" element={<AdminProfile />} />
+        <Route path="/SettingsEmpresa" element={<SettingsEmpresa />} />
 
         {/* Dashboard Egresado */}
         <Route path="/DashboardEgresado" element={<DashboardEgresado />} />
