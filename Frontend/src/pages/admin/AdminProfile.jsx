@@ -13,9 +13,9 @@ import {
 } from 'lucide-react';
 
 // Importación de módulos aislados (Corregido para coincidir con la carpeta "components" en minúscula)
-import SidebarItem from '../../components/SidebarItem';
-import StatCard from '../../components/StatCard';
-import StatusBadge from '../../components/StatusBadge';
+import ElementoBarraLateral from '../../components/comun/ElementoBarraLateral';
+import TarjetaEstadistica from '../../components/comun/TarjetaEstadistica';
+import InsigniaEstado from '../../components/comun/InsigniaEstado';
 
 export default function AdminProfile() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -27,22 +27,22 @@ export default function AdminProfile() {
       <aside className="w-64 bg-[#0f172a] border-r border-border/10 flex flex-col justify-between shrink-0 h-full z-10">
         <div className="p-6">
           <div className="mb-10 space-y-1">
-            <h1 className="font-heading text-3xl font-extrabold tracking-tight text-canvas cursor-pointer">
-              FWD<span className="text-secondary">.</span>
-            </h1>
+            <div className="flex items-center cursor-pointer">
+              <img src="/Imgs/Logotipo/Digital/FWD - Logotipo.svg" alt="FWD Logotipo" className="h-8 w-auto filter invert brightness-0" />
+            </div>
             <p className="text-xs text-ink-muted font-bold tracking-widest uppercase">Admin Workspace</p>
           </div>
 
           <nav className="space-y-2">
-            <SidebarItem icon={LayoutDashboard} label="Dashboard" isActive={activeMenu === 'dashboard'} onClick={() => setActiveMenu('dashboard')} />
-            <SidebarItem icon={Building} label="Empresas" isActive={activeMenu === 'empresas'} onClick={() => setActiveMenu('empresas')} />
-            <SidebarItem icon={GraduationCap} label="Egresados" isActive={activeMenu === 'egresados'} onClick={() => setActiveMenu('egresados')} />
-            <SidebarItem icon={Users} label="Usuarios" isActive={activeMenu === 'usuarios'} onClick={() => setActiveMenu('usuarios')} />
+            <ElementoBarraLateral icon={LayoutDashboard} label="Dashboard" isActive={activeMenu === 'dashboard'} onClick={() => setActiveMenu('dashboard')} />
+            <ElementoBarraLateral icon={Building} label="Empresas" isActive={activeMenu === 'empresas'} onClick={() => setActiveMenu('empresas')} />
+            <ElementoBarraLateral icon={GraduationCap} label="Egresados" isActive={activeMenu === 'egresados'} onClick={() => setActiveMenu('egresados')} />
+            <ElementoBarraLateral icon={Users} label="Usuarios" isActive={activeMenu === 'usuarios'} onClick={() => setActiveMenu('usuarios')} />
           </nav>
         </div>
 
         <div className="p-6 border-t border-border/10 space-y-2">
-          <SidebarItem icon={Settings} label="Configuración" isActive={activeMenu === 'config'} onClick={() => setActiveMenu('config')} />
+          <ElementoBarraLateral icon={Settings} label="Configuración" isActive={activeMenu === 'config'} onClick={() => setActiveMenu('config')} />
           <button 
             onClick={() => console.log('Ejecutando Logout...')}
             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
@@ -88,9 +88,9 @@ export default function AdminProfile() {
           
           {/* Métricas (StatCards) */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard title="Total Usuarios" value="1,248" icon={Users} trend="+12% mensual" isPositive={true} colorClass="text-accent" />
-            <StatCard title="Empresas Activas" value="342" icon={Building} trend="+5% mensual" isPositive={true} colorClass="text-magenta" />
-            <StatCard title="Procesos Pendientes" value="89" icon={Clock} trend="-2% mensual" isPositive={false} colorClass="text-warning" />
+            <TarjetaEstadistica title="Total Usuarios" value="1,248" icon={Users} trend="+12% mensual" isPositive={true} colorClass="text-accent" />
+            <TarjetaEstadistica title="Empresas Activas" value="342" icon={Building} trend="+5% mensual" isPositive={true} colorClass="text-magenta" />
+            <TarjetaEstadistica title="Procesos Pendientes" value="89" icon={Clock} trend="-2% mensual" isPositive={false} colorClass="text-warning" />
           </section>
 
           {/* Tabla de Actividad Reciente */}
@@ -121,7 +121,7 @@ export default function AdminProfile() {
                     </td>
                     <td className="px-6 py-4 text-ink-muted group-hover:text-canvas transition-colors">Registro de Empresa</td>
                     <td className="px-6 py-4 text-ink-muted">Hoy, 10:23 AM</td>
-                    <td className="px-6 py-4"><StatusBadge status="Pendiente" /></td>
+                    <td className="px-6 py-4"><InsigniaEstado status="Pendiente" /></td>
                     <td className="px-6 py-4 flex justify-end">
                       <button className="text-ink-muted hover:text-accent transition-colors p-2 rounded-full hover:bg-accent/10"><MoreVertical size={18} /></button>
                     </td>
@@ -135,7 +135,7 @@ export default function AdminProfile() {
                     </td>
                     <td className="px-6 py-4 text-ink-muted group-hover:text-canvas transition-colors">Actualización de Perfil</td>
                     <td className="px-6 py-4 text-ink-muted">Ayer, 04:15 PM</td>
-                    <td className="px-6 py-4"><StatusBadge status="Completado" /></td>
+                    <td className="px-6 py-4"><InsigniaEstado status="Completado" /></td>
                     <td className="px-6 py-4 flex justify-end">
                       <button className="text-ink-muted hover:text-accent transition-colors p-2 rounded-full hover:bg-accent/10"><MoreVertical size={18} /></button>
                     </td>
