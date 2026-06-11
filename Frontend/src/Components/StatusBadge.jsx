@@ -1,4 +1,3 @@
-import React from 'react';
 import { CircleCheck, Clock } from 'lucide-react';
 
 export default function StatusBadge({ status }) {

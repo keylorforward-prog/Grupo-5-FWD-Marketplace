@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -13,9 +13,9 @@ import {
 } from 'lucide-react';
 
 // Importación de módulos aislados (Corregido para coincidir con la carpeta "components" en minúscula)
-import SidebarItem from '../Components/SidebarItem';
-import StatCard from '../Components/StatCard';
-import StatusBadge from '../Components/StatusBadge';
+import SidebarItem from '../components/SidebarItem';
+import StatCard from '../components/StatCard';
+import StatusBadge from '../components/StatusBadge';
 
 export default function AdminProfile() {
   const [activeMenu, setActiveMenu] = useState('dashboard');

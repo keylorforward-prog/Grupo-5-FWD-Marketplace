@@ -1,37 +1,42 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-
-// --- Tus Módulos ---
-import Login from '../Pages/Login';
-import AdminProfile from '../Pages/AdminProfile';
-
-// --- Módulos del Equipo ---
 import ProtectedRoute from './ProtectedRoute';
-import LoginPage from '../Pages/LoginPage';
-import RegisterPage from '../Pages/RegisterPage';
-import DashboardPage from '../Pages/DashboardPage';
-import GestionPostulaciones from '../Pages/Postulaciones/GestionPostulaciones';
-import DashboardEngresado from '../pages/Home/DashboardEngresado/DashboardEngresado';
+
+// Autenticación
+import LoginPage from '../pages/Login/Pages/LoginPage';
+import RegisterPage from '../pages/Registro/pages/RegisterPage';
+
+// Empresa
 import DashboardEmpresario from '../pages/Home/DashboardEmpresario/DashboardEmpresario';
-import PerfilEngresado from '../pages/Profile/PerfilEngresado/PerfilEngresado';
+import GestionPostulaciones from '../pages/Postulaciones/GestionPostulaciones';
+import AdminProfile from '../pages/AdminProfile';
+
+// Egresado (nuevo módulo)
+import DashboardEgresado from '../pages/Page Egresado/DashboardEgresado/DashboardEgresado';
+import PerfilEgresado from '../pages/Page Egresado/PerfilEgresado/PerfilEgresado';
+import SettingsEgresado from '../pages/Page Egresado/SettingsEgresado/SettingsEgresado';
 
 export default function Routing() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Raíz redirige a tu Login */}
+        {/* Raíz → Login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-        
-        {/* Rutas Públicas */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<RegisterPage />} />
-        
-        {/* Dashboards extra */}
-        <Route path="/DashboardEngresado" element={<DashboardEngresado />} />
-        <Route path="/DashboardEmpresario" element={<DashboardEmpresario />} />
-        <Route path="/PerfilEngresado" element={<PerfilEngresado />} />
 
-        {/* Rutas del Equipo */}
+        {/* Rutas Públicas */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
+        {/* Dashboard Empresa */}
+        <Route path="/DashboardEmpresario" element={<DashboardEmpresario />} />
+        <Route path="/postulaciones" element={<GestionPostulaciones />} />
+        <Route path="/admin" element={<AdminProfile />} />
+
+        {/* Dashboard Egresado */}
+        <Route path="/DashboardEgresado" element={<DashboardEgresado />} />
+        <Route path="/PerfilEgresado" element={<PerfilEgresado />} />
+        <Route path="/Configuracion" element={<SettingsEgresado />} />
+
+        {/* Rutas Protegidas */}
         <Route
           path="/dashboard"
           element={
@@ -40,17 +45,9 @@ export default function Routing() {
             </ProtectedRoute>
           }
         />
-        <Route path="/postulaciones" element={<GestionPostulaciones />} />
-        
-        {/* Tu espacio de trabajo (Admin) */}
-        <Route path="/admin" element={<AdminProfile />} />
-        
-        {/* Fallback 404 */}
-        <Route path="*" element={
-          <div className="flex h-screen w-full items-center justify-center bg-ink-strong text-canvas">
-            <h1 className="text-2xl font-bold text-magenta">404 - Ruta no encontrada</h1>
-          </div>
-        } />
+
+        {/* 404 */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

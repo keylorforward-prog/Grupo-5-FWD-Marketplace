@@ -1,6 +1,5 @@
 import { MapPin } from 'lucide-react';
 import ActionButtons from './ActionButtons';
-import CandidateNotes from './CandidateNotes';
 
 const statusConfig = {
   nuevo: { label: 'Nuevo', bg: 'rgba(37,99,235,0.1)', text: '#2563eb', dot: '#3b82f6' },
@@ -41,8 +40,6 @@ export default function CandidateRow({
   onView,
   onInvite,
   onReject,
-  onAddNote,
-  onDeleteNote,
 }) {
   const { id, name, location, stacks, coverLetter, status, isInvited, avatar } = candidate;
   const statusInfo = statusConfig[status] ?? statusConfig.nuevo;
@@ -68,6 +65,13 @@ export default function CandidateRow({
       {/* Candidato */}
       <td className="py-4 pl-6 pr-4">
         <div className="flex items-center gap-4">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onSelect(id)}
+            aria-label={`Seleccionar a ${name}`}
+            className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+          />
           {avatar ? (
             <img src={avatar} alt={name} className="w-10 h-10 rounded-full object-cover shrink-0 shadow-sm" />
           ) : (
@@ -84,6 +88,13 @@ export default function CandidateRow({
               <MapPin className="w-3 h-3 flex-shrink-0 text-gray-400" />
               {location}
             </p>
+            <span
+              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold mt-2"
+              style={{ backgroundColor: statusInfo.bg, color: statusInfo.text }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: statusInfo.dot }} />
+              {statusInfo.label}
+            </span>
           </div>
         </div>
       </td>

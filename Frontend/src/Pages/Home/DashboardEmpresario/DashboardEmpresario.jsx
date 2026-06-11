@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import {
   Home,
@@ -21,10 +20,8 @@ import {
   CheckCircle2,
   MoreVertical,
   HelpCircle,
-  ExternalLink,
   Briefcase,
   ClipboardList,
-  Clock,
   TrendingUp,
   UserCheck,
 } from 'lucide-react';
@@ -204,7 +201,6 @@ const sidebarItems = [
 /* ── Component ─────────────────────────────────────────────────────────── */
 const DashboardEmpresario = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState('inicio');
 
   const displayName = user?.nombre || 'David';

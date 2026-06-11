@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, CalendarClock, X, CheckCircle2 } from 'lucide-react';
+import { Eye, X, CheckCircle2 } from 'lucide-react';
 import Tooltip from '../ui/Tooltip';
 import Popover from '../ui/Popover';
 import ConfirmDialog from '../ui/ConfirmDialog';

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Compass, FolderKanban, MessageCircle, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { Compass, FolderKanban, MessageCircle, Settings, HelpCircle, LogOut } from 'lucide-react';
 
 const navItems = [
   { icon: Compass,         label: 'Explorar',         path: '/explorar',     badge: 0 },
