@@ -38,7 +38,9 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await authService.logout();
-    } catch {}
+    } catch {
+      // El cierre de sesión local debe continuar aunque el backend no responda.
+    }
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
@@ -53,6 +55,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth debe usarse dentro de AuthProvider');
