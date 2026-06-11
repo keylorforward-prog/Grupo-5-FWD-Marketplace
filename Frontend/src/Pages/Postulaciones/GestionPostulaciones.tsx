@@ -2,9 +2,9 @@ import { useState, useMemo, useCallback } from 'react';
 import { Filter, ChevronLeft, ChevronRight, Users, UserPlus, ClipboardCheck, Award } from 'lucide-react';
 import type { Candidate, ExportFormat } from '../../types/postulaciones';
 import { mockCandidates } from '../../data/mockCandidates';
-import Sidebar from '../../components/layout/Sidebar';
-import CandidateRow from '../../components/postulaciones/CandidateRow';
-import BulkActions from '../../components/postulaciones/BulkActions';
+import Sidebar from '../../Components/layout/Sidebar';
+import CandidateRow from '../../Components/postulaciones/CandidateRow';
+import BulkActions from '../../Components/postulaciones/BulkActions';
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 10, 15, 25];
 
