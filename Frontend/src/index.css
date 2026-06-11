@@ -154,6 +154,11 @@
     --color-ink-subtle: var(--ink-subtle);
     --color-border: var(--border);
     --color-border-strong: var(--border-strong);
+    --color-surface-alt: var(--surface-sunken);
+    --color-brand-50: oklch(0.96 0.02 245);
+    --color-brand-100: oklch(0.93 0.04 245);
+    --color-brand-700: oklch(0.4 0.1 245);
+    --color-danger: var(--destructive);
 
     --font-sans: 'Inter', sans-serif;
     --font-body: 'Inter', sans-serif;

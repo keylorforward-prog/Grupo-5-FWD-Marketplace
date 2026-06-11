@@ -6,7 +6,7 @@ import ProfessionalPreferences from './components/ProfessionalPreferences';
 import Notifications from './components/Notifications';
 import Security from './components/Security';
 import { User, Briefcase, Bell, Lock } from 'lucide-react';
-import ProfileDefaultImage from '../../../../../../public/Imgs/ProfileDefaultImage.png';
+
 
 const SettingsEgresado = () => {
   const [activeSection, setActiveSection] = useState('cuenta');
@@ -30,7 +30,7 @@ const SettingsEgresado = () => {
           {/* Navigation Card */}
           <aside className="settings-nav-card">
             <div className="profile-summary">
-              <img src={ProfileDefaultImage} alt="Alex Rivera" />
+              <img src="/Imgs/ProfileDefaultImage.png" alt="Alex Rivera" />
               <h3>Alex Rivera</h3>
               <p>Junior Frontend Developer</p>
             </div>

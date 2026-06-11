@@ -1,7 +1,7 @@
-﻿import React from 'react';
+import React from 'react';
 import { Compass, LayoutDashboard, FileText, MessageSquare, User, Settings } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import ProfileDefaultImage from '../../../../../../public/Imgs/ProfileDefaultImage.png';
+
 
 const SidebarSettings = () => {
   const location = useLocation();
@@ -37,7 +37,7 @@ const SidebarSettings = () => {
 
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <img src={ProfileDefaultImage} alt="Alex Rivera" />
+          <img src="/Imgs/ProfileDefaultImage.png" alt="Alex Rivera" />
           <div className="sidebar-user-info">
             <span className="sidebar-user-name">Alex Rivera</span>
             <Link to="/PerfilEgresado" className="sidebar-user-link">Ver Portafolio</Link>

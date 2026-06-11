@@ -1,12 +1,12 @@
 import React from 'react';
 import { Pencil, Globe, Link as LinkIcon } from 'lucide-react';
-import ProfileDefaultImage from '../../../../../public/Imgs/ProfileDefaultImage.png';
+
 
 const TarjetaUsuario = () => {
   return (
     <div className="tarjetaUsuario">
       <div className="contenedorAvatar">
-        <img src={ProfileDefaultImage} alt="Foto de perfil" className="imagenPerfil" />
+        <img src="/Imgs/ProfileDefaultImage.png" alt="Foto de perfil" className="imagenPerfil" />
         <button className="botonEditarAvatar">
           <Pencil size={14} />
         </button>
