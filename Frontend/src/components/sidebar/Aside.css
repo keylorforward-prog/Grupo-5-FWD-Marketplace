@@ -1,0 +1,199 @@
+/* ================================================
+   ASIDE — Barra Lateral Principal
+   Tokens via variables CSS del sistema de diseño
+   ================================================ */
+
+/* ── Contenedor principal ── */
+.barraLateral {
+  width: 260px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 40;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  font-family: var(--font-sans, 'Figtree', sans-serif);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ── Logo ── */
+.barraLateralLogo {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.barraLateralLogoImagen {
+  height: 56px;
+  width: auto;
+  display: block;
+}
+
+/* ── Perfil ── */
+.barraLateralPerfil {
+  padding: 12px 12px;
+}
+
+.barraLateralPerfilEnlace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.barraLateralPerfilEnlace:hover {
+  background-color: var(--surface-sunken);
+}
+
+.barraLateralPerfilAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--primary), var(--magenta));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.barraLateralPerfilInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.barraLateralPerfilNombre {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barraLateralPerfilRol {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Navegación ── */
+.barraLateralNav {
+  flex: 1;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.barraLateralEnlace {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.barraLateralEnlace:hover {
+  background-color: var(--surface-sunken);
+  color: var(--ink-strong);
+}
+
+.barraLateralEnlaceActivo {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--primary) 35%, transparent);
+  transition: background-position var(--duration-base);
+}
+
+.barraLateralEnlaceActivo:hover {
+  background-position: 100% 50%;
+  color: #ffffff;
+}
+
+.barraLateralEnlaceActivo .barraLateralIcono {
+  color: #ffffff;
+}
+
+/* ── Icono ── */
+.barraLateralIcono {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--ink-subtle);
+  transition: color var(--duration-fast);
+}
+
+.barraLateralEnlace:hover .barraLateralIcono {
+  color: var(--ink-strong);
+}
+
+/* ── Pie ── */
+.barraLateralPie {
+  padding: 8px 12px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.barraLateralEnlacePie {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.barraLateralEnlacePie:hover {
+  background-color: var(--surface-sunken);
+  color: var(--ink-strong);
+}
+
+.barraLateralEnlacePieActivo {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.barraLateralEnlacePiePeligro {
+  color: var(--destructive);
+}
+
+.barraLateralEnlacePiePeligro:hover {
+  background-color: color-mix(in srgb, var(--destructive) 8%, transparent);
+  color: var(--destructive);
+}
+
+.barraLateralEnlacePiePeligro .barraLateralIcono {
+  color: var(--destructive);
+}

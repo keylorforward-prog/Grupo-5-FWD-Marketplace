@@ -25,6 +25,8 @@ import {
   TrendingUp,
   UserCheck,
 } from 'lucide-react';
+import MenuUsuario from '../../../components/MenuUsuario/MenuUsuario';
+import { RUTAS } from '../../../routes/rutas';
 import './DashboardEmpresario.css';
 
 /* ── Mock Data ─────────────────────────────────────────────────────────── */
@@ -213,7 +215,7 @@ const DashboardEmpresario = () => {
         <div className="de-header-inner">
           <div className="de-header-left">
             <a href="/" className="de-brand" onClick={(e) => { e.preventDefault(); }}>
-              <span className="de-brand-logo">FWD</span>
+              <img src="/Imgs/Logotipo/Digital/FWD - Logotipo.svg" alt="FWD Logotipo" className="h-7 w-auto" />
               <span className="de-brand-tagline">Talento que impulsa tu innovación</span>
             </a>
 
@@ -244,18 +246,14 @@ const DashboardEmpresario = () => {
           </div>
 
           <div className="de-header-right">
-            <div className="de-header-profile">
-              <img
-                src="https://i.pravatar.cc/100?img=68"
-                alt="Avatar"
-                className="de-header-avatar"
-              />
-              <div className="de-header-profile-info">
-                <span className="de-header-company">{company}</span>
-                <span className="de-header-username">{displayName}</span>
-              </div>
-              <ChevronDown size={14} className="de-profile-chevron" />
-            </div>
+            <MenuUsuario
+              rutaPerfilCompleto={RUTAS.empresaDashboard}
+              items={[
+                { id: 'panel', etiqueta: 'Panel de empresa', icono: Briefcase, ruta: RUTAS.empresaDashboard },
+                { id: 'postulaciones', etiqueta: 'Postulaciones', icono: FolderOpen, ruta: RUTAS.empresaPostulaciones },
+                { id: 'mensajes', etiqueta: 'Mensajes', icono: MessageSquare, ruta: RUTAS.mensajes, badge: '3' },
+              ]}
+            />
           </div>
         </div>
       </header>
