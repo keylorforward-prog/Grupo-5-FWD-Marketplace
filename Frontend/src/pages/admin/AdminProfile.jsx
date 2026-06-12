@@ -11,7 +11,10 @@ import {
   MoreVertical,
   Clock,
   AlertCircle,
-  Filter
+  Filter,
+  X,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import {
   LineChart,
@@ -49,11 +52,11 @@ const fetchDashboardData = async () => {
       { month: 'Jun', egresados: 310, empresas: 40 },
     ],
     recentActivity: [
-      { id: 'ACT-001', type: 'empresa', name: 'TechNova Costa Rica', action: 'Registro de Empresa', date: 'Hoy, 10:23 AM', status: 'Pendiente' },
-      { id: 'ACT-002', type: 'egresado', name: 'Carlos Mendoza', action: 'Actualización de Perfil', date: 'Hoy, 09:15 AM', status: 'Completado' },
-      { id: 'ACT-003', type: 'empresa', name: 'Global Solutions', action: 'Nueva Oferta Publicada', date: 'Ayer, 16:30 PM', status: 'Completado' },
-      { id: 'ACT-004', type: 'egresado', name: 'Ana Rojas', action: 'Postulación a Vacante', date: 'Ayer, 14:20 PM', status: 'Pendiente' },
-      { id: 'ACT-005', type: 'empresa', name: 'Innovatech', action: 'Validación de Cuenta', date: '10 Jun, 11:00 AM', status: 'Rechazado' },
+      { id: 'ACT-001', type: 'empresa', name: 'TechNova Costa Rica', action: 'Registro de Empresa', date: 'Hoy, 10:23 AM', status: 'Pendiente', email: 'contacto@technova.cr', details: 'Solicitud de ingreso a la plataforma como empresa reclutadora del sector TI.' },
+      { id: 'ACT-002', type: 'egresado', name: 'Carlos Mendoza', action: 'Actualización de Perfil', date: 'Hoy, 09:15 AM', status: 'Completado', email: 'carlos.men@fwd.cr', details: 'Añadió certificación en React Senior Developer y nivel de inglés B2.' },
+      { id: 'ACT-003', type: 'empresa', name: 'Global Solutions', action: 'Nueva Oferta Publicada', date: 'Ayer, 16:30 PM', status: 'Completado', email: 'hr@globalsolutions.com', details: 'Publicación de vacante para Desarrollador Fullstack Junior enfocado en Node.js.' },
+      { id: 'ACT-004', type: 'egresado', name: 'Ana Rojas', action: 'Postulación a Vacante', date: 'Ayer, 14:20 PM', status: 'Pendiente', email: 'anarojas@fwd.cr', details: 'Se postuló al puesto de Diseñador UI/UX en TechNova Costa Rica.' },
+      { id: 'ACT-005', type: 'empresa', name: 'Innovatech', action: 'Validación de Cuenta', date: '10 Jun, 11:00 AM', status: 'Rechazado', email: 'info@innovatech.cr', details: 'Cédula jurídica no coincide con los registros oficiales del Ministerio de Hacienda.' },
     ]
   };
 };
@@ -64,8 +67,13 @@ export default function AdminProfile() {
   const [error, setError] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   
-  // Estado para el filtro de la tabla
+  // Filtros de búsqueda y estado
   const [statusFilter, setStatusFilter] = useState('Todos');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Control del Panel Lateral (Drawer)
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -85,14 +93,46 @@ export default function AdminProfile() {
     loadData();
   }, []);
 
-  // Filtrado optimizado en el cliente O(N)
+  // Filtrado optimizado combinando criterios
   const filteredActivity = useMemo(() => {
     if (!dashboardData?.recentActivity) return [];
-    if (statusFilter === 'Todos') return dashboardData.recentActivity;
-    return dashboardData.recentActivity.filter(item => item.status === statusFilter);
-  }, [dashboardData, statusFilter]);
+    
+    return dashboardData.recentActivity.filter(item => {
+      const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
+      const normalizedSearch = searchTerm.toLowerCase().trim();
+      const matchesSearch = normalizedSearch === '' || 
+                            item.name.toLowerCase().includes(normalizedSearch) ||
+                            item.action.toLowerCase().includes(normalizedSearch) ||
+                            item.id.toLowerCase().includes(normalizedSearch);
 
-  // Helper para renderizar iconos dinámicamente según la entidad
+      return matchesStatus && matchesSearch;
+    });
+  }, [dashboardData, statusFilter, searchTerm]);
+
+  // Simulación de acción de administración (Aprobar/Rechazar)
+  const handleUpdateStatus = async (activityId, newStatus) => {
+    try {
+      setIsProcessing(true);
+      // Simulamos latencia de red al impactar la base de datos
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Actualizamos el estado local simulando la respuesta de Supabase
+      setDashboardData(prev => ({
+        ...prev,
+        recentActivity: prev.recentActivity.map(item => 
+          item.id === activityId ? { ...item, status: newStatus } : item
+        )
+      }));
+
+      // Sincronizamos el panel lateral con el nuevo estado modificado
+      setSelectedActivity(prev => prev ? { ...prev, status: newStatus } : null);
+    } catch (err) {
+      console.error("Error al actualizar estado:", err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const renderEntityIcon = (type) => {
     if (type === 'empresa') {
       return (
@@ -109,9 +149,9 @@ export default function AdminProfile() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-ink-strong text-canvas font-body overflow-hidden">
+    <div className="flex h-screen w-full bg-ink-strong text-canvas font-body overflow-hidden relative">
       
-      {/* 1. PANEL LATERAL (Sidebar) */}
+      {/* 1. PANEL LATERAL PRINCIPAL (Sidebar) */}
       <aside className="w-64 bg-[#0f172a] border-r border-border/10 flex flex-col justify-between shrink-0 h-full z-10">
         <div className="p-6">
           <div className="mb-10 space-y-1">
@@ -156,7 +196,10 @@ export default function AdminProfile() {
               <input
                 type="text"
                 placeholder="Buscar registros..."
-                className="pl-10 pr-4 py-2 bg-[#1e293b] border border-border/20 rounded-full text-sm text-canvas focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent w-64 transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                disabled={isLoading}
+                className="pl-10 pr-4 py-2 bg-[#1e293b] border border-border/20 rounded-full text-sm text-canvas focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent w-64 transition-all disabled:opacity-50"
               />
             </div>
             
@@ -233,7 +276,6 @@ export default function AdminProfile() {
             <div className="px-6 py-5 border-b border-border/10 flex justify-between items-center bg-[#0f172a]/50">
               <h3 className="font-bold text-canvas">Actividad Reciente</h3>
               
-              {/* Controles de Filtro */}
               <div className="flex items-center gap-3">
                 <div className="flex items-center bg-[#1e293b] rounded-lg border border-border/20 px-2 py-1">
                   <Filter size={14} className="text-ink-muted mr-2" />
@@ -265,7 +307,6 @@ export default function AdminProfile() {
                 </thead>
                 <tbody className="divide-y divide-border/10">
                   {isLoading ? (
-                    // Skeletons de la tabla
                     [1, 2, 3].map((i) => (
                       <tr key={`skeleton-${i}`}>
                         <td className="px-6 py-4"><div className="h-6 w-32 bg-[#0f172a] rounded animate-pulse"></div></td>
@@ -276,9 +317,12 @@ export default function AdminProfile() {
                       </tr>
                     ))
                   ) : filteredActivity.length > 0 ? (
-                    // Renderizado Dinámico
                     filteredActivity.map((item) => (
-                      <tr key={item.id} className="hover:bg-[#0f172a]/40 transition-colors group cursor-pointer">
+                      <tr 
+                        key={item.id} 
+                        className={`hover:bg-[#0f172a]/40 transition-colors group cursor-pointer ${selectedActivity?.id === item.id ? 'bg-[#0f172a]/60' : ''}`}
+                        onClick={() => setSelectedActivity(item)}
+                      >
                         <td className="px-6 py-4 font-medium flex items-center gap-3">
                           {renderEntityIcon(item.type)}
                           {item.name}
@@ -291,7 +335,7 @@ export default function AdminProfile() {
                             className="text-ink-muted hover:text-accent transition-colors p-2 rounded-full hover:bg-accent/10"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log(`Abriendo detalles de ${item.id}`);
+                              setSelectedActivity(item);
                             }}
                           >
                             <MoreVertical size={18} />
@@ -300,10 +344,9 @@ export default function AdminProfile() {
                       </tr>
                     ))
                   ) : (
-                    // Estado vacío (Cuando el filtro no encuentra nada)
                     <tr>
                       <td colSpan="5" className="px-6 py-8 text-center text-ink-muted">
-                        No se encontraron registros para el estado "{statusFilter}".
+                        No se encontraron registros que coincidan con tu búsqueda o filtros.
                       </td>
                     </tr>
                   )}
@@ -314,6 +357,107 @@ export default function AdminProfile() {
 
         </div>
       </main>
+
+      {/* ============================================================================
+          3. COMPONENTE INTERNO: PANEL LATERAL DE REVISIÓN DE DETALLES (Drawer)
+          ============================================================================ */}
+      {/* Backdrop de Oscurecimiento */}
+      <div 
+        className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${selectedActivity ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => !isProcessing && setSelectedActivity(null)}
+      />
+
+      {/* Caja Contenedora Deslizable */}
+      <div 
+        className={`fixed top-0 right-0 h-full w-full max-w-md bg-[#0f172a] border-l border-border/10 z-50 shadow-elevated flex flex-col transform transition-transform duration-300 ease-out ${selectedActivity ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        {selectedActivity && (
+          <>
+            {/* Encabezado del Panel */}
+            <div className="p-6 border-b border-border/10 flex justify-between items-center bg-[#0f172a]/80 sticky top-0">
+              <div>
+                <span className="text-xs font-bold font-heading tracking-widest text-accent uppercase">{selectedActivity.id}</span>
+                <h3 className="text-xl font-extrabold text-canvas mt-1">Detalle de Solicitud</h3>
+              </div>
+              <button 
+                className="text-ink-muted hover:text-canvas p-2 rounded-xl hover:bg-[#1e293b] transition-colors"
+                onClick={() => !isProcessing && setSelectedActivity(null)}
+                disabled={isProcessing}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Contenido / Cuerpo Informativo */}
+            <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+              
+              {/* Bloque Principal Entidad */}
+              <div className="flex items-center gap-4 bg-[#1e293b]/40 p-4 rounded-xl border border-border/5">
+                {renderEntityIcon(selectedActivity.type)}
+                <div>
+                  <h4 className="font-bold text-canvas text-base">{selectedActivity.name}</h4>
+                  <p className="text-sm text-ink-muted capitalize">Tipo: {selectedActivity.type}</p>
+                </div>
+              </div>
+
+              {/* Información de Metadatos */}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold uppercase text-ink-muted tracking-wider block mb-1">Acción Ejecutada</label>
+                  <p className="text-sm font-medium text-canvas">{selectedActivity.action}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-ink-muted tracking-wider block mb-1">Correo Electrónico</label>
+                  <p className="text-sm font-medium text-accent break-all">{selectedActivity.email}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-ink-muted tracking-wider block mb-1">Fecha de Registro</label>
+                  <p className="text-sm font-medium text-canvas">{selectedActivity.date}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-ink-muted tracking-wider block mb-1">Estado de Gestión</label>
+                  <div className="mt-1">
+                    <StatusBadge status={selectedActivity.status} />
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <label className="text-xs font-bold uppercase text-ink-muted tracking-wider block mb-1">Descripción / Notas</label>
+                  <p className="text-sm text-ink-muted bg-[#1e293b]/20 p-3 rounded-xl border border-border/5 leading-relaxed">
+                    {selectedActivity.details}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Barra Inferior: Panel de Decisiones (Solo si está Pendiente) */}
+            <div className="p-6 border-t border-border/10 bg-[#1e293b]/20 space-y-3">
+              {selectedActivity.status === 'Pendiente' ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => handleUpdateStatus(selectedActivity.id, 'Completado')}
+                    disabled={isProcessing}
+                    className="flex items-center justify-center gap-2 bg-accent text-accent-foreground px-4 py-3 rounded-xl text-sm font-bold shadow-soft hover:bg-accent/90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <CheckCircle size={16} /> {isProcessing ? 'Procesando...' : 'Aprobar'}
+                  </button>
+                  <button
+                    onClick={() => handleUpdateStatus(selectedActivity.id, 'Rechazado')}
+                    disabled={isProcessing}
+                    className="flex items-center justify-center gap-2 bg-magenta text-magenta-foreground px-4 py-3 rounded-xl text-sm font-bold shadow-soft hover:bg-magenta/90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <XCircle size={16} /> {isProcessing ? 'Procesando...' : 'Rechazar'}
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center text-xs font-medium text-ink-muted bg-[#1e293b]/40 py-3 rounded-xl border border-border/5">
+                  Esta solicitud ya fue resuelta. Estado: <span className="font-bold">{selectedActivity.status}</span>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
     </div>
   );
 }
