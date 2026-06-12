@@ -40,6 +40,14 @@ export const dashboardEmpresarioService = {
     return apiClient.put('/dashboard-empresario/perfil', payload).then(extraerData);
   },
 
+  subirFotoPerfil(file) {
+    const formData = new FormData();
+    formData.append('foto_perfil', file);
+    return apiClient.post('/dashboard-empresario/perfil/foto', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then(extraerData);
+  },
+
   obtenerPropuestas(params) {
     return get('/dashboard-empresario/propuestas', params);
   },

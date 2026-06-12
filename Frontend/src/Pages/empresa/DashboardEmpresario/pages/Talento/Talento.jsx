@@ -29,7 +29,7 @@ export default function Talento() {
                 {talent.verified && <CheckCircle2 size={14} className="de-talent-verified" />}
               </div>
               <p className="de-talent-skills">{talent.skills}</p>
-              <p className="de-talent-rating"><span className="de-talent-star">★</span>{talent.rating} ({talent.projects} proyectos)</p>
+              <p className="de-talent-rating">Calificacion {talent.rating} ({talent.projects} proyectos)</p>
             </div>
             <div className="de-talent-match">
               <span className="de-talent-match-pct">{talent.match}%</span>

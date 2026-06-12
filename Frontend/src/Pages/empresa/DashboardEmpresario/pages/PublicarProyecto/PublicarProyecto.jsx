@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
 
+const PRESUPUESTO_MINIMO = 100000;
+
 export default function PublicarProyecto() {
   const navigate = useNavigate();
   const [formulario, setFormulario] = useState({
@@ -15,6 +17,7 @@ export default function PublicarProyecto() {
   });
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
+  const [mostrarGuiaPrecios, setMostrarGuiaPrecios] = useState(false);
 
   const manejarCambio = (evento) => {
     const { name, value } = evento.target;
@@ -35,6 +38,10 @@ export default function PublicarProyecto() {
     }
     if (!formulario.tecnologias_requeridas.trim()) {
       setError('Indica al menos una tecnologia requerida o escribe sin preferencia.');
+      return;
+    }
+    if (presupuestoMin === null || presupuestoMin < PRESUPUESTO_MINIMO) {
+      setError('El presupuesto minimo debe ser de al menos ₡100.000.');
       return;
     }
     if (presupuestoMin !== null && presupuestoMax !== null && presupuestoMin > presupuestoMax) {
@@ -86,12 +93,23 @@ export default function PublicarProyecto() {
 
           <div className="de-form-grid de-form-grid-2">
             <label className="de-form-field">
-              <span>Presupuesto minimo</span>
-              <input className="de-form-control" name="presupuesto_min" value={formulario.presupuesto_min} onChange={manejarCambio} type="number" min="0" step="0.01" placeholder="0.00" />
+              <span className="de-form-label-with-help">
+                Presupuesto minimo
+                <button
+                  className="de-help-button"
+                  type="button"
+                  onClick={() => setMostrarGuiaPrecios((visible) => !visible)}
+                  aria-expanded={mostrarGuiaPrecios}
+                  aria-label="Como puedes ponerle precio al proyecto"
+                >
+                  ?
+                </button>
+              </span>
+              <input className="de-form-control" name="presupuesto_min" value={formulario.presupuesto_min} onChange={manejarCambio} type="number" min={PRESUPUESTO_MINIMO} step="1000" placeholder="100000" />
             </label>
             <label className="de-form-field">
               <span>Presupuesto maximo</span>
-              <input className="de-form-control" name="presupuesto_max" value={formulario.presupuesto_max} onChange={manejarCambio} type="number" min="0" step="0.01" placeholder="0.00" />
+              <input className="de-form-control" name="presupuesto_max" value={formulario.presupuesto_max} onChange={manejarCambio} type="number" min={PRESUPUESTO_MINIMO} step="1000" placeholder="150000" />
             </label>
           </div>
 
@@ -110,6 +128,43 @@ export default function PublicarProyecto() {
           </button>
         </div>
       </div>
+
+      {mostrarGuiaPrecios && (
+        <div className="de-modal-backdrop" role="presentation" onClick={() => setMostrarGuiaPrecios(false)}>
+          <section
+            className="de-price-guide de-price-guide-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Como puedes ponerle precio al proyecto"
+            onClick={(evento) => evento.stopPropagation()}
+          >
+            <div className="de-modal-header">
+              <h3>Como puedes ponerle precio al proyecto</h3>
+              <button className="de-modal-close" type="button" onClick={() => setMostrarGuiaPrecios(false)} aria-label="Cerrar guia de precios">
+                ×
+              </button>
+            </div>
+            <div className="de-price-guide-grid">
+              <div>
+                <strong>₡100.000 - ₡180.000</strong>
+                <span>Ideal para landing pages, ajustes visuales, formularios simples o integraciones pequeñas porque el alcance suele ser corto y claro.</span>
+              </div>
+              <div>
+                <strong>₡180.000 - ₡350.000</strong>
+                <span>Funciona para sitios web de varias secciones, dashboards basicos o CRUDs pequeños porque requiere mas pantallas, validaciones y pruebas.</span>
+              </div>
+              <div>
+                <strong>₡350.000 - ₡700.000</strong>
+                <span>Recomendado para apps con autenticacion, backend, base de datos, roles o flujos completos porque implica mas arquitectura y coordinacion.</span>
+              </div>
+              <div>
+                <strong>₡700.000+</strong>
+                <span>Usalo para sistemas extensos, e-commerce, automatizaciones complejas o proyectos con despliegue y documentacion detallada.</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

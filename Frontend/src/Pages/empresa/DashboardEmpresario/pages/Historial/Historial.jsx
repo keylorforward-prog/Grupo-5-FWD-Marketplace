@@ -21,7 +21,9 @@ export default function Historial() {
         <EstadoDatos loading={loading} error={error} empty={!historial.length} emptyText="No hay historial de proyectos." />
         {!loading && !error && historial.map((project) => (
           <div key={project.id} className="de-project-item">
-            <div className={`de-project-icon-wrap ${project.iconColor}`}>{project.icon}</div>
+            <div className={`de-project-icon-wrap ${project.iconColor}`}>
+              <img src={project.arrowSrc} alt="" className="de-project-arrow" width="24" height="24" loading="lazy" decoding="async" />
+            </div>
             <div className="de-project-info">
               <div className="de-project-name">{project.name}</div>
               <p className="de-project-meta">{project.meta}</p>

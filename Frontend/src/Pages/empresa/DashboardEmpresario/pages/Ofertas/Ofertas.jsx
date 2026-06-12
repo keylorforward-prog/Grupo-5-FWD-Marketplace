@@ -1,3 +1,4 @@
+import { FileText } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
@@ -21,7 +22,7 @@ export default function Ofertas() {
         <EstadoDatos loading={loading} error={error} empty={!ofertas.length} emptyText="No hay ofertas recibidas." />
         {!loading && !error && ofertas.map((offer) => (
           <div key={offer.id} className="de-offer-item">
-            <div className="de-offer-icon-wrap">📄</div>
+            <div className="de-offer-icon-wrap"><FileText size={16} /></div>
             <div className="de-offer-info">
               <p className="de-offer-title">{offer.title}</p>
               <p className="de-offer-sender">{offer.sender}</p>

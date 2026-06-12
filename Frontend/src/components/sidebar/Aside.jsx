@@ -7,7 +7,7 @@ import './Aside.css';
 const usuarioPorDefecto = {
   nombre: 'Alex Rivera',
   rol: 'JUNIOR DEVELOPER',
-  avatar: '/Imgs/ProfileDefaultImage.png',
+  avatar: '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png',
 };
 
 const itemsPorDefecto = [
@@ -20,17 +20,12 @@ const itemsPorDefecto = [
 
 function Aside({ items = itemsPorDefecto, usuario }) {
   const navegar = useNavigate();
-  let auth = null;
-  try {
-    auth = useAuth();
-  } catch {
-    auth = null;
-  }
+  const auth = useAuth();
 
   const usuarioActivo = usuario ?? {
     nombre: auth?.user?.nombre || auth?.user?.name || usuarioPorDefecto.nombre,
     rol: auth?.user?.rol || auth?.user?.role || usuarioPorDefecto.rol,
-    avatar: auth?.user?.avatar || usuarioPorDefecto.avatar,
+    avatar: auth?.user?.foto_perfil || auth?.user?.avatar || usuarioPorDefecto.avatar,
   };
 
   const manejarCerrarSesion = async (e) => {

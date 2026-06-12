@@ -17,6 +17,7 @@ const {
 } = require('../Models');
 
 const ORDEN_DESC = [['fecha_publicacion', 'DESC']];
+const PRESUPUESTO_MINIMO_PROYECTO = 100000;
 
 const obtenerLimite = (valor, defecto = 20) => {
   const numero = Number.parseInt(valor, 10);
@@ -97,6 +98,45 @@ const actualizarPerfil = async (req, res) => {
   }
 };
 
+const subirFotoPerfil = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        message: 'Debes enviar una imagen en el campo foto_perfil.',
+      });
+      return;
+    }
+
+    if (!req.file.mimetype.startsWith('image/')) {
+      res.status(400).json({
+        success: false,
+        message: 'El archivo debe ser una imagen.',
+      });
+      return;
+    }
+
+    const { uploadFileToS3 } = require('../Config/aws');
+    const fotoUrl = await uploadFileToS3(req.file, 'fotos_perfil');
+
+    await Promise.all([
+      perfil.update({ logo: fotoUrl }),
+      perfil.usuario.update({ foto_perfil: fotoUrl }),
+    ]);
+
+    const actualizado = await PerfilEmpresario.findByPk(perfil.id_perfil_empresario, {
+      include: [{ model: Usuario, as: 'usuario' }],
+    });
+
+    res.json({ success: true, data: actualizado });
+  } catch (error) {
+    responderError(res, error, 'Error al subir la foto de perfil empresario.');
+  }
+};
+
 const listarPropuestas = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEmpresario(req, res);
@@ -125,6 +165,29 @@ const crearPropuesta = async (req, res) => {
     if (!perfil) return;
 
     const plazoDias = Number(req.body.plazo_dias);
+    const presupuestoMin = req.body.presupuesto_min === null || req.body.presupuesto_min === undefined
+      ? null
+      : Number(req.body.presupuesto_min);
+    const presupuestoMax = req.body.presupuesto_max === null || req.body.presupuesto_max === undefined
+      ? null
+      : Number(req.body.presupuesto_max);
+
+    if (!presupuestoMin || presupuestoMin < PRESUPUESTO_MINIMO_PROYECTO) {
+      res.status(400).json({
+        success: false,
+        message: 'El presupuesto minimo debe ser de al menos ₡100.000.',
+      });
+      return;
+    }
+
+    if (presupuestoMax !== null && presupuestoMin > presupuestoMax) {
+      res.status(400).json({
+        success: false,
+        message: 'El presupuesto minimo no puede ser mayor al presupuesto maximo.',
+      });
+      return;
+    }
+
     const propuesta = await Propuesta.create({
       id_perfil_empresario: perfil.id_perfil_empresario,
       titulo: req.body.titulo,
@@ -132,8 +195,8 @@ const crearPropuesta = async (req, res) => {
       tecnologias_requeridas: req.body.tecnologias_requeridas,
       usar_ia: req.body.usar_ia === 'SI' ? 'SI' : 'NO',
       plazo_dias: plazoDias,
-      presupuesto_min: req.body.presupuesto_min,
-      presupuesto_max: req.body.presupuesto_max,
+      presupuesto_min: presupuestoMin,
+      presupuesto_max: presupuestoMax,
       estado: 'ACTIVA',
       fecha_limite: construirFechaLimite(plazoDias),
     });
@@ -496,4 +559,5 @@ module.exports = {
   listarPropuestas,
   listarTalento,
   obtenerResumen,
+  subirFotoPerfil,
 };
