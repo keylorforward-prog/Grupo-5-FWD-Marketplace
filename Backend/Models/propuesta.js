@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     presupuesto_max: { type: DataTypes.DECIMAL(10,2), allowNull: true },
     estado: { type: DataTypes.ENUM('ACTIVA','PAUSADA','CERRADA','CANCELADA'), allowNull: false, defaultValue: 'ACTIVA' },
     fecha_publicacion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
-    fecha_limite: { type: DataTypes.DATE, allowNull: true }
+    fecha_limite: { type: DataTypes.DATE, allowNull: true },
+    id_conversacion_ia: { type: DataTypes.INTEGER, allowNull: true }
   }, { tableName: 'propuesta', timestamps: false, underscored: true, freezeTableName: true });
 };

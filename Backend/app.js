@@ -29,6 +29,8 @@ const reporteRoutes = require('./Routes/reporteRoutes');
 const notificacionRoutes = require('./Routes/notificacionRoutes');
 const ofertaRoutes = require('./Routes/ofertaRoutes');
 const catalogoSectorRoutes = require('./Routes/catalogoSectorRoutes');
+const agentRoutes = require('./Routes/agentRoutes');
+const conversacionIARoutes = require('./Routes/conversacionIARoutes');
 
 const app = express();
 
@@ -68,6 +70,8 @@ app.use('/api/reportes', reporteRoutes);
 app.use('/api/notificaciones', notificacionRoutes);
 app.use('/api/ofertas', ofertaRoutes);
 app.use('/api/catalogo-sectores', catalogoSectorRoutes);
+app.use('/api/agent', agentRoutes);
+app.use('/api/conversaciones-ia', conversacionIARoutes);
 
 // ── Health check ───────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
