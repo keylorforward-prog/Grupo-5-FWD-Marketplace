@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -9,16 +9,104 @@ import {
   Search,
   Bell,
   MoreVertical,
-  Clock
+  Clock,
+  AlertCircle,
+  Filter
 } from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend
+} from 'recharts';
 
-// Importación de módulos aislados (Corregido para coincidir con la carpeta "components" en minúscula)
 import SidebarItem from '../../components/SidebarItem';
 import StatCard from '../../components/StatCard';
 import StatusBadge from '../../components/StatusBadge';
 
+// ============================================================================
+// MOCK API (Contrato de Datos Expandido)
+// ============================================================================
+const fetchDashboardData = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  return {
+    stats: {
+      totalUsuarios: "1,248",
+      empresasActivas: "342",
+      procesosPendientes: "89"
+    },
+    chartData: [
+      { month: 'Ene', egresados: 45, empresas: 4 },
+      { month: 'Feb', egresados: 85, empresas: 12 },
+      { month: 'Mar', egresados: 120, empresas: 18 },
+      { month: 'Abr', egresados: 190, empresas: 25 },
+      { month: 'May', egresados: 260, empresas: 34 },
+      { month: 'Jun', egresados: 310, empresas: 40 },
+    ],
+    recentActivity: [
+      { id: 'ACT-001', type: 'empresa', name: 'TechNova Costa Rica', action: 'Registro de Empresa', date: 'Hoy, 10:23 AM', status: 'Pendiente' },
+      { id: 'ACT-002', type: 'egresado', name: 'Carlos Mendoza', action: 'Actualización de Perfil', date: 'Hoy, 09:15 AM', status: 'Completado' },
+      { id: 'ACT-003', type: 'empresa', name: 'Global Solutions', action: 'Nueva Oferta Publicada', date: 'Ayer, 16:30 PM', status: 'Completado' },
+      { id: 'ACT-004', type: 'egresado', name: 'Ana Rojas', action: 'Postulación a Vacante', date: 'Ayer, 14:20 PM', status: 'Pendiente' },
+      { id: 'ACT-005', type: 'empresa', name: 'Innovatech', action: 'Validación de Cuenta', date: '10 Jun, 11:00 AM', status: 'Rechazado' },
+    ]
+  };
+};
+
 export default function AdminProfile() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
+  
+  // Estado para el filtro de la tabla
+  const [statusFilter, setStatusFilter] = useState('Todos');
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await fetchDashboardData();
+        setDashboardData(data);
+      } catch (err) {
+        console.error("Error al cargar datos del dashboard:", err);
+        setError("No se pudo conectar con el servidor. Por favor, reintente más tarde.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Filtrado optimizado en el cliente O(N)
+  const filteredActivity = useMemo(() => {
+    if (!dashboardData?.recentActivity) return [];
+    if (statusFilter === 'Todos') return dashboardData.recentActivity;
+    return dashboardData.recentActivity.filter(item => item.status === statusFilter);
+  }, [dashboardData, statusFilter]);
+
+  // Helper para renderizar iconos dinámicamente según la entidad
+  const renderEntityIcon = (type) => {
+    if (type === 'empresa') {
+      return (
+        <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+          <Building size={14} />
+        </div>
+      );
+    }
+    return (
+      <div className="w-8 h-8 rounded-full bg-magenta/20 flex items-center justify-center text-magenta">
+        <GraduationCap size={14} />
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-screen w-full bg-ink-strong text-canvas font-body overflow-hidden">
@@ -86,18 +174,82 @@ export default function AdminProfile() {
         {/* Cuerpo del Dashboard */}
         <div className="p-10 flex flex-col gap-8">
           
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-6 py-4 rounded-xl flex items-center gap-3">
+              <AlertCircle size={20} />
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          )}
+
           {/* Métricas (StatCards) */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard title="Total Usuarios" value="1,248" icon={Users} trend="+12% mensual" isPositive={true} colorClass="text-accent" />
-            <StatCard title="Empresas Activas" value="342" icon={Building} trend="+5% mensual" isPositive={true} colorClass="text-magenta" />
-            <StatCard title="Procesos Pendientes" value="89" icon={Clock} trend="-2% mensual" isPositive={false} colorClass="text-warning" />
+            {isLoading ? (
+              <>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-32 bg-[#1e293b] rounded-2xl animate-pulse border border-border/5"></div>
+                ))}
+              </>
+            ) : (
+              <>
+                <StatCard title="Total Usuarios" value={dashboardData?.stats.totalUsuarios} icon={Users} trend="+12% mensual" isPositive={true} colorClass="text-accent" />
+                <StatCard title="Empresas Activas" value={dashboardData?.stats.empresasActivas} icon={Building} trend="+5% mensual" isPositive={true} colorClass="text-magenta" />
+                <StatCard title="Procesos Pendientes" value={dashboardData?.stats.procesosPendientes} icon={Clock} trend="-2% mensual" isPositive={false} colorClass="text-warning" />
+              </>
+            )}
+          </section>
+
+          {/* Gráfico Analítico */}
+          <section className="bg-[#1e293b] border border-border/10 rounded-2xl shadow-elevated p-6 flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="font-bold text-canvas text-lg">Crecimiento Bilateral Mensual</h3>
+                <p className="text-xs text-ink-muted mt-1">Comparativa de Egresados vs Ofertas de Empresas</p>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div className="h-[300px] w-full bg-[#0f172a]/50 rounded-xl animate-pulse flex items-center justify-center">
+                <span className="text-ink-muted text-sm font-medium">Cargando métricas...</span>
+              </div>
+            ) : (
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={dashboardData?.chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                    <XAxis dataKey="month" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '0.75rem', color: '#fff' }} itemStyle={{ fontWeight: 'bold' }} />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Line type="monotone" dataKey="egresados" name="Nuevos Egresados" stroke="#20bec6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#1e293b' }} activeDot={{ r: 6, stroke: '#20bec6', strokeWidth: 2, fill: '#fff' }} />
+                    <Line type="monotone" dataKey="empresas" name="Nuevas Empresas" stroke="#662d91" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#1e293b' }} activeDot={{ r: 6, stroke: '#662d91', strokeWidth: 2, fill: '#fff' }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </section>
 
           {/* Tabla de Actividad Reciente */}
           <section className="bg-[#1e293b] border border-border/10 rounded-2xl shadow-elevated overflow-hidden flex flex-col">
             <div className="px-6 py-5 border-b border-border/10 flex justify-between items-center bg-[#0f172a]/50">
               <h3 className="font-bold text-canvas">Actividad Reciente</h3>
-              <button className="text-sm font-medium text-accent hover:text-canvas transition-colors">Ver historial completo</button>
+              
+              {/* Controles de Filtro */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center bg-[#1e293b] rounded-lg border border-border/20 px-2 py-1">
+                  <Filter size={14} className="text-ink-muted mr-2" />
+                  <select 
+                    className="bg-transparent text-sm text-canvas outline-none focus:ring-0 cursor-pointer"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    disabled={isLoading}
+                  >
+                    <option value="Todos">Todos los estados</option>
+                    <option value="Pendiente">Pendientes</option>
+                    <option value="Completado">Completados</option>
+                    <option value="Rechazado">Rechazados</option>
+                  </select>
+                </div>
+              </div>
             </div>
             
             <div className="overflow-x-auto">
@@ -112,34 +264,49 @@ export default function AdminProfile() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/10">
-                  <tr className="hover:bg-[#0f172a]/40 transition-colors group cursor-pointer">
-                    <td className="px-6 py-4 font-medium flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
-                        <Building size={14} />
-                      </div>
-                      TechNova Costa Rica
-                    </td>
-                    <td className="px-6 py-4 text-ink-muted group-hover:text-canvas transition-colors">Registro de Empresa</td>
-                    <td className="px-6 py-4 text-ink-muted">Hoy, 10:23 AM</td>
-                    <td className="px-6 py-4"><StatusBadge status="Pendiente" /></td>
-                    <td className="px-6 py-4 flex justify-end">
-                      <button className="text-ink-muted hover:text-accent transition-colors p-2 rounded-full hover:bg-accent/10"><MoreVertical size={18} /></button>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-[#0f172a]/40 transition-colors group cursor-pointer">
-                    <td className="px-6 py-4 font-medium flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-magenta/20 flex items-center justify-center text-magenta">
-                        <GraduationCap size={14} />
-                      </div>
-                      Carlos Mendoza
-                    </td>
-                    <td className="px-6 py-4 text-ink-muted group-hover:text-canvas transition-colors">Actualización de Perfil</td>
-                    <td className="px-6 py-4 text-ink-muted">Ayer, 04:15 PM</td>
-                    <td className="px-6 py-4"><StatusBadge status="Completado" /></td>
-                    <td className="px-6 py-4 flex justify-end">
-                      <button className="text-ink-muted hover:text-accent transition-colors p-2 rounded-full hover:bg-accent/10"><MoreVertical size={18} /></button>
-                    </td>
-                  </tr>
+                  {isLoading ? (
+                    // Skeletons de la tabla
+                    [1, 2, 3].map((i) => (
+                      <tr key={`skeleton-${i}`}>
+                        <td className="px-6 py-4"><div className="h-6 w-32 bg-[#0f172a] rounded animate-pulse"></div></td>
+                        <td className="px-6 py-4"><div className="h-6 w-40 bg-[#0f172a] rounded animate-pulse"></div></td>
+                        <td className="px-6 py-4"><div className="h-6 w-24 bg-[#0f172a] rounded animate-pulse"></div></td>
+                        <td className="px-6 py-4"><div className="h-6 w-20 bg-[#0f172a] rounded animate-pulse"></div></td>
+                        <td className="px-6 py-4 flex justify-end"><div className="h-6 w-6 bg-[#0f172a] rounded-full animate-pulse"></div></td>
+                      </tr>
+                    ))
+                  ) : filteredActivity.length > 0 ? (
+                    // Renderizado Dinámico
+                    filteredActivity.map((item) => (
+                      <tr key={item.id} className="hover:bg-[#0f172a]/40 transition-colors group cursor-pointer">
+                        <td className="px-6 py-4 font-medium flex items-center gap-3">
+                          {renderEntityIcon(item.type)}
+                          {item.name}
+                        </td>
+                        <td className="px-6 py-4 text-ink-muted group-hover:text-canvas transition-colors">{item.action}</td>
+                        <td className="px-6 py-4 text-ink-muted">{item.date}</td>
+                        <td className="px-6 py-4"><StatusBadge status={item.status} /></td>
+                        <td className="px-6 py-4 flex justify-end">
+                          <button 
+                            className="text-ink-muted hover:text-accent transition-colors p-2 rounded-full hover:bg-accent/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log(`Abriendo detalles de ${item.id}`);
+                            }}
+                          >
+                            <MoreVertical size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    // Estado vacío (Cuando el filtro no encuentra nada)
+                    <tr>
+                      <td colSpan="5" className="px-6 py-8 text-center text-ink-muted">
+                        No se encontraron registros para el estado "{statusFilter}".
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
