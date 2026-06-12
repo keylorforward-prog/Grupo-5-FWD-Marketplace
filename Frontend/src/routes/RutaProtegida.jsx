@@ -12,7 +12,7 @@ import { obtenerRol, rutaDashboardDeRol, RUTAS } from './rutas';
  * Props:
  *  - rolPermitido?: 'estudiante' | 'empresa' | 'admin' | array de roles
  */
-const REQUERIR_SESION = false; // ⚠️ cambiar a `true` en producción
+const REQUERIR_SESION = true;
 
 function RutaProtegida({ children, rolPermitido }) {
   const { isAuthenticated, loading, user } = useAuth();
