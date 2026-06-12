@@ -123,7 +123,9 @@ export default function Proyectos() {
 
           return (
             <div key={p.id} className="de-project-item de-project-item-managed">
-              <div className={`de-project-icon-wrap ${p.iconColor}`}>{p.icon}</div>
+              <div className={`de-project-icon-wrap ${p.iconColor}`}>
+                <img src={p.arrowSrc} alt="" className="de-project-arrow" width="24" height="24" loading="lazy" decoding="async" />
+              </div>
               <div className="de-project-info">
                 <div className="de-project-name">
                   {p.name}
