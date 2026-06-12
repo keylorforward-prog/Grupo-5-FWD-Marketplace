@@ -1,0 +1,53 @@
+{
+  "sidebar": {
+    "recruitmentSuite": "Recruitment Suite",
+    "explore": "Explore",
+    "dashboard": "Dashboard",
+    "applications": "Applications",
+    "messages": "Messages",
+    "profile": "Profile",
+    "postJob": "Post a Job"
+  },
+  "header": {
+    "configuration": "Configuration",
+    "search": "Search...",
+    "adminUser": "Admin User",
+    "administrator": "Administrator"
+  },
+  "companyProfile": {
+    "title": "Company Profile",
+    "commercialName": "Commercial Name",
+    "website": "Website",
+    "legalId": "Legal ID",
+    "industry": "Industry",
+    "selectOption": "Select an option",
+    "softwareDevelopment": "Software Development",
+    "cloudComputing": "Cloud Computing",
+    "aiDataScience": "AI & Data Science",
+    "shortDescription": "Short Description",
+    "descriptionPlaceholder": "Brief overview of your company...",
+    "saveChanges": "Save changes",
+    "saving": "Saving..."
+  },
+  "recruitmentTeam": {
+    "title": "Recruitment Team",
+    "manageTeam": "Manage Team",
+    "seniorRecruiter": "Senior Recruiter",
+    "technicalSourcer": "Technical Sourcer",
+    "inviteMember": "Invite New Member"
+  },
+  "notificationPreferences": {
+    "title": "Notification Preferences",
+    "newApplications": "New Applications",
+    "newApplicationsDesc": "Get notified when someone applies",
+    "weeklySummary": "Weekly Summary",
+    "weeklySummaryDesc": "A recap of your recruitment activity",
+    "directMessages": "Direct Messages",
+    "directMessagesDesc": "Alerts for new DM messages"
+  },
+  "dangerZone": {
+    "title": "Danger Zone",
+    "warning": "These actions are irreversible. Please proceed with caution.",
+    "deactivate": "Deactivate Company"
+  }
+}

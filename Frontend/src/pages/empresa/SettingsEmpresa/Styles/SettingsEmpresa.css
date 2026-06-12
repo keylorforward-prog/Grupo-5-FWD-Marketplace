@@ -466,6 +466,7 @@
 .se-toggle-purple { background-color: rgba(102,45,145,0.05); border: 1px solid rgba(102,45,145,0.1); }
 .se-toggle-teal { background-color: rgba(32,190,198,0.05); border: 1px solid rgba(32,190,198,0.1); }
 .se-toggle-pink { background-color: rgba(236,0,140,0.05); border: 1px solid rgba(236,0,140,0.1); }
+.se-toggle-blue { background-color: rgba(0,143,212,0.05); border: 1px solid rgba(0,143,212,0.1); }
 
 .se-toggle-text { display: flex; flex-direction: column; }
 .se-toggle-label {
@@ -501,6 +502,7 @@
 .se-toggle-input:checked + .se-toggle-track.purple { background-color: var(--color-vibrant-purple); }
 .se-toggle-input:checked + .se-toggle-track.teal { background-color: var(--color-vibrant-teal); }
 .se-toggle-input:checked + .se-toggle-track.pink { background-color: var(--color-vibrant-pink); }
+.se-toggle-input:checked + .se-toggle-track.blue { background-color: var(--color-vibrant-blue); }
 
 /* Danger Zone */
 .se-danger-layout {

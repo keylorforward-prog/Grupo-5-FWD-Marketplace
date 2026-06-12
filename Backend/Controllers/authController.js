@@ -157,9 +157,11 @@ const login = async (req, res) => {
       token,
       user: {
         id: user.id_usuario,
+        id_usuario: user.id_usuario,
         nombre: user.nombre,
         email: user.correo,
         rol: user.rol,
+        foto_perfil: user.foto_perfil,
       },
     });
   } catch (error) {
@@ -184,9 +186,11 @@ const me = async (req, res) => {
     success: true,
     user: {
       id: req.user.id_usuario,
+      id_usuario: req.user.id_usuario,
       nombre: req.user.nombre,
       email: req.user.correo,
-      rol: req.user.rol
+      rol: req.user.rol,
+      foto_perfil: req.user.foto_perfil,
     },
   });
 };

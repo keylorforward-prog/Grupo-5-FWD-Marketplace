@@ -1,14 +1,16 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const RecruitmentTeam = () => {
+  const { t } = useTranslation();
   return (
     <section className="se-card se-card-orange hard-edge-shadow" style={{ height: '100%' }}>
       <div className="se-section-header">
         <h3 className="se-headline-md se-section-title" style={{ margin: 0 }}>
           <span className="material-symbols-outlined" style={{ color: 'var(--color-vibrant-orange)' }}>groups</span>
-          Equipo de Reclutamiento
+          {t('recruitmentTeam.title')}
         </h3>
-        <button className="se-link-btn se-label-bold">Manage Team</button>
+        <button className="se-link-btn se-label-bold">{t('recruitmentTeam.manageTeam')}</button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-base)' }}>
@@ -25,7 +27,7 @@ const RecruitmentTeam = () => {
             </div>
             <div>
               <p className="se-label-bold" style={{ margin: 0, color: 'var(--color-on-surface)' }}>Andrea Mendoza</p>
-              <p className="se-label-sm" style={{ margin: 0, color: 'var(--color-vibrant-orange)' }}>Senior Recruiter</p>
+              <p className="se-label-sm" style={{ margin: 0, color: 'var(--color-vibrant-orange)' }}>{t('recruitmentTeam.seniorRecruiter')}</p>
             </div>
           </div>
           <span className="material-symbols-outlined se-member-check" style={{ color: 'var(--color-vibrant-teal)', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
@@ -44,7 +46,7 @@ const RecruitmentTeam = () => {
             </div>
             <div>
               <p className="se-label-bold" style={{ margin: 0, color: 'var(--color-on-surface)' }}>Roberto Jiménez</p>
-              <p className="se-label-sm" style={{ margin: 0, color: 'var(--color-vibrant-orange)' }}>Technical Sourcer</p>
+              <p className="se-label-sm" style={{ margin: 0, color: 'var(--color-vibrant-orange)' }}>{t('recruitmentTeam.technicalSourcer')}</p>
             </div>
           </div>
           <span className="material-symbols-outlined se-member-check" style={{ color: 'var(--color-vibrant-teal)', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
@@ -53,7 +55,7 @@ const RecruitmentTeam = () => {
 
       <button className="se-invite-btn se-label-bold">
         <span className="material-symbols-outlined">person_add</span>
-        Invite New Member
+        {t('recruitmentTeam.inviteMember')}
       </button>
     </section>
   );

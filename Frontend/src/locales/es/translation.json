@@ -1,0 +1,53 @@
+{
+  "sidebar": {
+    "recruitmentSuite": "Suite de Reclutamiento",
+    "explore": "Explorar",
+    "dashboard": "Panel de Control",
+    "applications": "Postulaciones",
+    "messages": "Mensajes",
+    "profile": "Perfil",
+    "postJob": "Publicar Oferta"
+  },
+  "header": {
+    "configuration": "Configuración",
+    "search": "Buscar...",
+    "adminUser": "Usuario Admin",
+    "administrator": "Administrador"
+  },
+  "companyProfile": {
+    "title": "Perfil de la Empresa",
+    "commercialName": "Nombre Comercial",
+    "website": "Sitio Web",
+    "legalId": "Cédula Jurídica",
+    "industry": "Sector",
+    "selectOption": "Seleccione una opción",
+    "softwareDevelopment": "Desarrollo de Software",
+    "cloudComputing": "Computación en la Nube",
+    "aiDataScience": "IA y Ciencia de Datos",
+    "shortDescription": "Descripción Corta",
+    "descriptionPlaceholder": "Breve descripción de tu empresa...",
+    "saveChanges": "Guardar cambios",
+    "saving": "Guardando..."
+  },
+  "recruitmentTeam": {
+    "title": "Equipo de Reclutamiento",
+    "manageTeam": "Gestionar Equipo",
+    "seniorRecruiter": "Reclutador Senior",
+    "technicalSourcer": "Sourcer Técnico",
+    "inviteMember": "Invitar Nuevo Miembro"
+  },
+  "notificationPreferences": {
+    "title": "Preferencias de Notificación",
+    "newApplications": "Nuevas Postulaciones",
+    "newApplicationsDesc": "Recibe notificaciones cuando alguien se postule",
+    "weeklySummary": "Resumen Semanal",
+    "weeklySummaryDesc": "Un resumen de tu actividad de reclutamiento",
+    "directMessages": "Mensajes Directos",
+    "directMessagesDesc": "Alertas de nuevos mensajes al DM"
+  },
+  "dangerZone": {
+    "title": "Zona de Peligro",
+    "warning": "Estas acciones son irreversibles. Por favor procede con precaución.",
+    "deactivate": "Desactivar Empresa"
+  }
+}

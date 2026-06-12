@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import {
   Home,
@@ -201,6 +202,7 @@ const sidebarItems = [
 /* ── Component ─────────────────────────────────────────────────────────── */
 const DashboardEmpresario = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState('inicio');
 
   const displayName = user?.nombre || 'David';
@@ -271,7 +273,13 @@ const DashboardEmpresario = () => {
                   <button
                     key={item.key}
                     className={`de-sidebar-link ${activeNav === item.key ? 'active' : ''}`}
-                    onClick={() => setActiveNav(item.key)}
+                    onClick={() => {
+                      if (item.key === 'configuracion') {
+                        navigate('/SettingsEmpresa');
+                      } else {
+                        setActiveNav(item.key);
+                      }
+                    }}
                   >
                     <Icon size={18} className="de-sidebar-icon" />
                     {item.label}
