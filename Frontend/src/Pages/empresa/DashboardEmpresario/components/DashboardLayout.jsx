@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import {
@@ -8,6 +9,7 @@ import {
   HelpCircle,
   History,
   Home,
+  LogOut,
   MessageSquare,
   Package,
   Receipt,
@@ -21,8 +23,8 @@ const navLinks = [
   { label: 'Inicio', icon: Home, path: '/DashboardEmpresario', key: 'inicio' },
   { label: 'Mis Proyectos', icon: FolderOpen, path: '/DashboardEmpresario/proyectos', key: 'proyectos' },
   { label: 'Buscar Talento', icon: Search, path: '/DashboardEmpresario/talento', key: 'talento' },
-  { label: 'Mensajes', icon: MessageSquare, path: '/DashboardEmpresario/mensajes', key: 'mensajes', badge: 3 },
-  { label: 'Notificaciones', icon: Bell, path: '/DashboardEmpresario/notificaciones', key: 'notificaciones', badge: 5 },
+  { label: 'Mensajes', icon: MessageSquare, path: '/DashboardEmpresario/mensajes', key: 'mensajes' },
+  { label: 'Notificaciones', icon: Bell, path: '/DashboardEmpresario/notificaciones', key: 'notificaciones' },
 ];
 
 const sidebarItems = [
@@ -39,10 +41,47 @@ const sidebarItems = [
 ];
 
 export default function DashboardLayout({ activePage, children }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const displayName = user?.nombre || 'David';
-  const company = 'TechNova S.A.';
+  const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
+  const [cerrandoSesion, setCerrandoSesion] = useState(false);
+  const menuPerfilRef = useRef(null);
+  const displayName = user?.nombre || 'Empresa';
+  const company = user?.empresa || user?.nombre_empresa || user?.nombre || 'Empresa';
+  const avatar = user?.foto_perfil || '/Imgs/ProfileDefaultImage.png';
+
+  useEffect(() => {
+    if (!menuPerfilAbierto) return undefined;
+
+    const manejarClickAfuera = (evento) => {
+      if (menuPerfilRef.current && !menuPerfilRef.current.contains(evento.target)) {
+        setMenuPerfilAbierto(false);
+      }
+    };
+
+    const manejarTecla = (evento) => {
+      if (evento.key === 'Escape') setMenuPerfilAbierto(false);
+    };
+
+    document.addEventListener('mousedown', manejarClickAfuera);
+    document.addEventListener('keydown', manejarTecla);
+
+    return () => {
+      document.removeEventListener('mousedown', manejarClickAfuera);
+      document.removeEventListener('keydown', manejarTecla);
+    };
+  }, [menuPerfilAbierto]);
+
+  const manejarCerrarSesion = async () => {
+    setCerrandoSesion(true);
+    try {
+      await logout();
+    } finally {
+      setMenuPerfilAbierto(false);
+      setCerrandoSesion(false);
+      navigate('/login', { replace: true });
+    }
+  };
 
   return (
     <div className="de-shell">
@@ -74,14 +113,37 @@ export default function DashboardLayout({ activePage, children }) {
           </div>
 
           <div className="de-header-right">
-            <button className="de-header-profile" type="button" onClick={() => navigate('/admin')}>
-              <img src="https://i.pravatar.cc/100?img=68" alt="Avatar" className="de-header-avatar" />
-              <div className="de-header-profile-info">
-                <span className="de-header-company">{company}</span>
-                <span className="de-header-username">{displayName}</span>
-              </div>
-              <ChevronDown size={14} className="de-profile-chevron" />
-            </button>
+            <div className="de-header-profile-wrapper" ref={menuPerfilRef}>
+              <button
+                className={`de-header-profile ${menuPerfilAbierto ? 'active' : ''}`}
+                type="button"
+                onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}
+                aria-haspopup="menu"
+                aria-expanded={menuPerfilAbierto}
+              >
+                <img src={avatar} alt="Avatar" className="de-header-avatar" />
+                <div className="de-header-profile-info">
+                  <span className="de-header-company">{company}</span>
+                  <span className="de-header-username">{displayName}</span>
+                </div>
+                <ChevronDown size={14} className="de-profile-chevron" />
+              </button>
+
+              {menuPerfilAbierto && (
+                <div className="de-profile-menu" role="menu">
+                  <button
+                    className="de-profile-menu-item danger"
+                    type="button"
+                    onClick={manejarCerrarSesion}
+                    disabled={cerrandoSesion}
+                    role="menuitem"
+                  >
+                    <LogOut size={16} />
+                    <span>{cerrandoSesion ? 'Cerrando sesion...' : 'Cerrar sesion'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

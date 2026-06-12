@@ -12,24 +12,49 @@ import {
   TrendingUp,
   UserCheck,
 } from 'lucide-react';
+import { useAuth } from '../../../../../context/AuthContext';
+import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
 import {
-  mockDeliverables,
-  mockMessages,
-  mockNotifications,
-  mockOffers,
-  mockProjects,
-  mockTalent,
-} from '../../data/dashboardData';
+  formatearEntregable,
+  formatearMensaje,
+  formatearNotificacion,
+  formatearOferta,
+  formatearPropuesta,
+  formatearTalento,
+} from '../../utils/dashboardEmpresarioFormatters';
+import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
+import EstadoDatos from '../../components/EstadoDatos';
 
 export default function Inicio() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data, loading, error } = useDashboardEmpresarioRequest(
+    dashboardEmpresarioService.obtenerInicio.bind(dashboardEmpresarioService),
+    {
+      resumen: {},
+      propuestas: [],
+      talento: [],
+      ofertas: [],
+      entregables: [],
+      mensajes: [],
+      notificaciones: [],
+    },
+    []
+  );
+
+  const propuestas = data.propuestas.map(formatearPropuesta);
+  const talento = data.talento.map(formatearTalento);
+  const ofertas = data.ofertas.map(formatearOferta);
+  const entregables = data.entregables.map(formatearEntregable);
+  const mensajes = data.mensajes.map(formatearMensaje);
+  const notificaciones = data.notificaciones.map(formatearNotificacion);
 
   return (
     <DashboardLayout activePage="inicio">
       <section className="de-hero">
         <div className="de-hero-content">
-          <h1 className="de-hero-title">Bienvenido, David!</h1>
+          <h1 className="de-hero-title">Bienvenido, {user?.nombre || 'Empresa'}!</h1>
           <p className="de-hero-subtitle">Que necesitas desarrollar hoy?</p>
           <p className="de-hero-desc">Publica tu proyecto y conecta con el mejor talento de FWD.</p>
           <div className="de-hero-actions">
@@ -44,7 +69,7 @@ export default function Inicio() {
           </div>
         </div>
         <div className="de-hero-illustration">
-          <div className="de-hero-illus-placeholder">🧑‍💻</div>
+          <img src="/Imgs/Comunidad icon-01.png" alt="Comunidad FWD" />
         </div>
       </section>
 
@@ -53,27 +78,27 @@ export default function Inicio() {
         <div className="de-stats-grid">
           <div className="de-stat-card">
             <div className="de-stat-icon blue"><Briefcase size={20} /></div>
-            <span className="de-stat-value">12</span>
+            <span className="de-stat-value">{data.resumen.proyectosPublicados ?? 0}</span>
             <span className="de-stat-label">Proyectos Publicados</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon green"><ClipboardList size={20} /></div>
-            <span className="de-stat-value">4</span>
+            <span className="de-stat-value">{data.resumen.proyectosActivos ?? 0}</span>
             <span className="de-stat-label">Proyectos Activos</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon orange"><FileText size={20} /></div>
-            <span className="de-stat-value">35</span>
+            <span className="de-stat-value">{data.resumen.ofertasRecibidas ?? 0}</span>
             <span className="de-stat-label">Ofertas Recibidas</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon purple"><TrendingUp size={20} /></div>
-            <span className="de-stat-value">8</span>
+            <span className="de-stat-value">{data.resumen.proyectosFinalizados ?? 0}</span>
             <span className="de-stat-label">Proyectos Finalizados</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon magenta"><UserCheck size={20} /></div>
-            <span className="de-stat-value">15</span>
+            <span className="de-stat-value">{data.resumen.estudiantesContratados ?? 0}</span>
             <span className="de-stat-label">Estudiantes Contratados</span>
           </div>
         </div>
@@ -85,7 +110,8 @@ export default function Inicio() {
             <h3 className="de-panel-title">Mis Proyectos Recientes</h3>
             <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/proyectos')}>Ver todos</button>
           </div>
-          {mockProjects.map((p) => (
+          <EstadoDatos loading={loading} error={error} empty={!propuestas.length} emptyText="Aun no tienes proyectos publicados." />
+          {!loading && !error && propuestas.map((p) => (
             <div key={p.id} className="de-project-item">
               <div className={`de-project-icon-wrap ${p.iconColor}`}>{p.icon}</div>
               <div className="de-project-info">
@@ -110,7 +136,8 @@ export default function Inicio() {
             <h3 className="de-panel-title">Talento Recomendado por IA</h3>
             <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/talento')}>Ver mas</button>
           </div>
-          {mockTalent.map((t) => (
+          <EstadoDatos loading={loading} error={error} empty={!talento.length} emptyText="No hay talento recomendado disponible." />
+          {!loading && !error && talento.map((t) => (
             <div key={t.id} className="de-talent-item">
               <img src={t.avatar} alt={t.name} className="de-talent-avatar" />
               <div className="de-talent-info">
@@ -137,7 +164,8 @@ export default function Inicio() {
             <h3 className="de-panel-title">Ofertas Pendientes <span className="de-alert-dot" /></h3>
             <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/ofertas')}>Ver todas</button>
           </div>
-          {mockOffers.map((o) => (
+          <EstadoDatos loading={loading} error={error} empty={!ofertas.length} emptyText="No hay ofertas pendientes." />
+          {!loading && !error && ofertas.map((o) => (
             <div key={o.id} className="de-offer-item">
               <div className="de-offer-icon-wrap">📄</div>
               <div className="de-offer-info">
@@ -162,7 +190,8 @@ export default function Inicio() {
             <h3 className="de-panel-title">Entregables Pendientes</h3>
             <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/entregables')}>Ver todos</button>
           </div>
-          {mockDeliverables.map((d) => (
+          <EstadoDatos loading={loading} error={error} empty={!entregables.length} emptyText="No hay entregables pendientes." />
+          {!loading && !error && entregables.map((d) => (
             <div key={d.id} className="de-deliverable-item">
               <div className="de-deliverable-icon"><Package size={16} /></div>
               <div className="de-deliverable-info">
@@ -179,7 +208,8 @@ export default function Inicio() {
             <h3 className="de-panel-title">Mensajes Recientes</h3>
             <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/mensajes')}>Ver todos</button>
           </div>
-          {mockMessages.map((m) => (
+          <EstadoDatos loading={loading} error={error} empty={!mensajes.length} emptyText="No hay mensajes recientes." />
+          {!loading && !error && mensajes.map((m) => (
             <div key={m.id} className="de-message-item">
               <img src={m.avatar} alt={m.name} className="de-message-avatar" />
               <div className="de-message-content">
@@ -199,7 +229,8 @@ export default function Inicio() {
             <h3 className="de-panel-title">Notificaciones</h3>
             <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/notificaciones')}>Ver todas</button>
           </div>
-          {mockNotifications.map((n) => (
+          <EstadoDatos loading={loading} error={error} empty={!notificaciones.length} emptyText="No hay notificaciones." />
+          {!loading && !error && notificaciones.map((n) => (
             <div key={n.id} className="de-notif-item">
               <div className={`de-notif-icon ${n.iconType}`}>{n.icon}</div>
               <div className="de-notif-text">

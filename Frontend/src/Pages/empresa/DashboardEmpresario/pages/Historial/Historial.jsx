@@ -1,14 +1,25 @@
+import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
-import { mockProjects } from '../../data/dashboardData';
+import EstadoDatos from '../../components/EstadoDatos';
+import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
+import { formatearHistorial } from '../../utils/dashboardEmpresarioFormatters';
 
 export default function Historial() {
+  const { data, loading, error } = useDashboardEmpresarioRequest(
+    () => dashboardEmpresarioService.obtenerHistorial(),
+    [],
+    []
+  );
+  const historial = data.map(formatearHistorial);
+
   return (
     <DashboardLayout activePage="historial">
       <div className="de-page-heading">
         <h1>Historial de Proyectos</h1>
       </div>
       <div className="de-panel">
-        {mockProjects.map((project) => (
+        <EstadoDatos loading={loading} error={error} empty={!historial.length} emptyText="No hay historial de proyectos." />
+        {!loading && !error && historial.map((project) => (
           <div key={project.id} className="de-project-item">
             <div className={`de-project-icon-wrap ${project.iconColor}`}>{project.icon}</div>
             <div className="de-project-info">
