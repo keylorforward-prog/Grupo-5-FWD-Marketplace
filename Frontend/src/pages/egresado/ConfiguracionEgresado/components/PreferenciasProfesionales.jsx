@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Star, X, Plus } from 'lucide-react';
 
 const ESTADO_INICIAL = {
@@ -10,16 +10,14 @@ const ESTADO_INICIAL = {
 const CLAVE_ALMACENAMIENTO = 'preferenciasProfesionales';
 
 function PreferenciasProfesionales() {
-  const [datosFormulario, setDatosFormulario] = useState(ESTADO_INICIAL);
+  const [datosFormulario, setDatosFormulario] = useState(() => {
+    const datosGuardados = localStorage.getItem(CLAVE_ALMACENAMIENTO);
+    return datosGuardados ? JSON.parse(datosGuardados) : ESTADO_INICIAL;
+  });
   const [mensajeExito, setMensajeExito] = useState(false);
   const [estaAgregandoTecnologia, setEstaAgregandoTecnologia] = useState(false);
   const [nuevaTecnologia, setNuevaTecnologia] = useState('');
   const refEntrada = useRef(null);
-
-  useEffect(() => {
-    const datosGuardados = localStorage.getItem(CLAVE_ALMACENAMIENTO);
-    if (datosGuardados) setDatosFormulario(JSON.parse(datosGuardados));
-  }, []);
 
   const manejarCambio = (e) => {
     const { name, value } = e.target;
