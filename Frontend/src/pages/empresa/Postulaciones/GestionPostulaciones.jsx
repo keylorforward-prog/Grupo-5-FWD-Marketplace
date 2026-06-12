@@ -1,17 +1,17 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-import { mockCandidates } from '../../../data/mockCandidates';
-import Sidebar from '../../../components/layout/Sidebar';
-import CandidateRow from '../../../components/postulaciones/CandidateRow';
-import BulkActions from '../../../components/postulaciones/BulkActions';
+import { candidatosPrueba } from '../../../data/candidatosPrueba';
+import Aside from '../../../components/sidebar/Aside';
+import FilaCandidato from '../../../components/postulaciones/FilaCandidato';
+import AccionesMasivas from '../../../components/postulaciones/AccionesMasivas';
 
-const ITEMS_PER_PAGE_OPTIONS = [3, 10, 15, 25];
+const OPCIONES_POR_PAGINA = [3, 10, 15, 25];
 
 // Stat card config matching the photo
-const buildStatCards = (stats) => [
+const construirTarjetasEstadistica = (estadisticas) => [
   {
     label: 'TOTAL POSTULADOS',
-    value: stats.total,
+    value: estadisticas.total,
     bg: 'bg-[#1868D5]',
     textValue: 'text-white',
     textLabel: 'text-white/80',
@@ -20,7 +20,7 @@ const buildStatCards = (stats) => [
   },
   {
     label: 'NUEVOS (HOY)',
-    value: stats.nuevos,
+    value: estadisticas.nuevos,
     bg: 'bg-white',
     textValue: 'text-[#B45309]',
     textLabel: 'text-gray-500',
@@ -29,7 +29,7 @@ const buildStatCards = (stats) => [
   },
   {
     label: 'EN REVISIÓN',
-    value: stats.enRevision,
+    value: estadisticas.enRevision,
     bg: 'bg-white',
     textValue: 'text-[#7C3AED]',
     textLabel: 'text-gray-500',
@@ -38,7 +38,7 @@ const buildStatCards = (stats) => [
   },
   {
     label: 'ENTREVISTADOS',
-    value: stats.entrevistados,
+    value: estadisticas.entrevistados,
     bg: 'bg-white',
     textValue: 'text-gray-900',
     textLabel: 'text-gray-500',
@@ -47,94 +47,94 @@ const buildStatCards = (stats) => [
   },
 ];
 
-const STATUS_LABELS = {
+const ETIQUETAS_ESTADO = {
   nuevo: 'Nuevos',
   en_revision: 'En revisión',
   entrevistado: 'Entrevistados',
 };
 
 export default function GestionPostulaciones() {
-  const [candidates, setCandidates] = useState(mockCandidates);
-  const [selectedIds, setSelectedIds] = useState(new Set());
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(3);
-  const [statusFilter, setStatusFilter] = useState(null);
+  const [candidatos, setCandidatos] = useState(candidatosPrueba);
+  const [idsSeleccionados, setIdsSeleccionados] = useState(new Set());
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [itemsPorPagina, setItemsPorPagina] = useState(3);
+  const [filtroEstado, setFiltroEstado] = useState(null);
 
-  const filtered = useMemo(
-    () => (!statusFilter ? candidates : candidates.filter((c) => c.status === statusFilter)),
-    [candidates, statusFilter]
+  const filtrados = useMemo(
+    () => (!filtroEstado ? candidatos : candidatos.filter((c) => c.estado === filtroEstado)),
+    [candidatos, filtroEstado]
   );
 
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const paginated = useMemo(
-    () => filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),
-    [filtered, currentPage, itemsPerPage]
+  const totalPaginas = Math.ceil(filtrados.length / itemsPorPagina);
+  const paginados = useMemo(
+    () => filtrados.slice((paginaActual - 1) * itemsPorPagina, paginaActual * itemsPorPagina),
+    [filtrados, paginaActual, itemsPorPagina]
   );
 
-  const stats = useMemo(() => ({
-    total:         candidates.length,
-    nuevos:        candidates.filter((c) => c.status === 'nuevo').length,
-    enRevision:    candidates.filter((c) => c.status === 'en_revision').length,
-    entrevistados: candidates.filter((c) => c.status === 'entrevistado').length,
-  }), [candidates]);
+  const estadisticas = useMemo(() => ({
+    total:         candidatos.length,
+    nuevos:        candidatos.filter((c) => c.estado === 'nuevo').length,
+    enRevision:    candidatos.filter((c) => c.estado === 'en_revision').length,
+    entrevistados: candidatos.filter((c) => c.estado === 'entrevistado').length,
+  }), [candidatos]);
 
-  const statCards = buildStatCards(stats);
+  const tarjetasEstadistica = construirTarjetasEstadistica(estadisticas);
 
-  const toggleSelect = useCallback((id) => {
-    setSelectedIds((prev) => {
+  const alternarSeleccion = useCallback((id) => {
+    setIdsSeleccionados((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
   }, []);
 
-  const toggleSelectAll = useCallback(() => {
-    const pageIds = paginated.map((c) => c.id);
-    const allSelected = pageIds.every((id) => selectedIds.has(id));
-    setSelectedIds((prev) => {
+  const alternarSeleccionAll = useCallback(() => {
+    const pageIds = paginados.map((c) => c.id);
+    const allSelected = pageIds.every((id) => idsSeleccionados.has(id));
+    setIdsSeleccionados((prev) => {
       const next = new Set(prev);
       pageIds.forEach((id) => (allSelected ? next.delete(id) : next.add(id)));
       return next;
     });
-  }, [paginated, selectedIds]);
+  }, [paginados, idsSeleccionados]);
 
-  const handleInvite = useCallback((id, date, time, message) => {
-    setCandidates((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, isInvited: true, status: 'entrevistado' } : c))
+  const manejarInvitacion = useCallback((id, date, time, message) => {
+    setCandidatos((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, estaInvitado: true, status: 'entrevistado' } : c))
     );
   }, []);
 
-  const handleReject = useCallback((id) => {
-    setCandidates((prev) =>
+  const manejarRechazo = useCallback((id) => {
+    setCandidatos((prev) =>
       prev.map((c) => (c.id === id ? { ...c, status: 'rechazado' } : c))
     );
   }, []);
 
-  const handleAddNote = useCallback((id, note) => {
-    setCandidates((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, notes: [...c.notes, note] } : c))
+  const manejarAgregarNota = useCallback((id, note) => {
+    setCandidatos((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, notes: [...c.notas, note] } : c))
     );
   }, []);
 
-  const handleDeleteNote = useCallback((id, index) => {
-    setCandidates((prev) =>
+  const manejarEliminarNota = useCallback((id, index) => {
+    setCandidatos((prev) =>
       prev.map((c) =>
-        c.id === id ? { ...c, notes: c.notes.filter((_, i) => i !== index) } : c
+        c.id === id ? { ...c, notes: c.notas.filter((_, i) => i !== index) } : c
       )
     );
   }, []);
 
-  const handleExport = useCallback((format, onlySelected) => {
-    const data = onlySelected ? candidates.filter((c) => selectedIds.has(c.id)) : candidates;
+  const manejarExportacion = useCallback((formato, soloSeleccionados) => {
+    const data = soloSeleccionados ? candidatos.filter((c) => idsSeleccionados.has(c.id)) : candidatos;
     alert(`Exportando ${data.length} candidatos en formato ${format.toUpperCase()}`);
-  }, [candidates, selectedIds]);
+  }, [candidatos, idsSeleccionados]);
 
-  const allPageSelected = paginated.length > 0 && paginated.every((c) => selectedIds.has(c.id));
-  const somePageSelected = paginated.some((c) => selectedIds.has(c.id)) && !allPageSelected;
+  const todaPaginaSeleccionada = paginados.length > 0 && paginados.every((c) => idsSeleccionados.has(c.id));
+  const algunaPaginaSeleccionada = paginados.some((c) => idsSeleccionados.has(c.id)) && !todaPaginaSeleccionada;
 
   return (
     <div className="flex min-h-screen bg-surface">
-      <Sidebar />
+      <Aside />
 
       <main className="flex-1 ml-[260px] max-w-[1200px] mx-auto relative bg-[#F8FAFC]">
         {/* Sticky header */}
@@ -162,11 +162,11 @@ export default function GestionPostulaciones() {
                   <Filter className="w-4 h-4 text-gray-500" />
                   Filtrar
                 </button>
-                <BulkActions
-                  selectedCount={selectedIds.size}
-                  totalCount={candidates.length}
-                  onExport={handleExport}
-                  onClearSelection={() => setSelectedIds(new Set())}
+                <AccionesMasivas
+                  cantidadSeleccionada={idsSeleccionados.size}
+                  cantidadTotal={candidatos.length}
+                  alExportar={manejarExportacion}
+                  alLimpiarSeleccion={() => setIdsSeleccionados(new Set())}
                 />
               </div>
             </div>
@@ -176,12 +176,12 @@ export default function GestionPostulaciones() {
         <div className="px-8 py-7">
           {/* ── Stat Cards (Staggered Fade-in) ── */}
           <div className="grid grid-cols-4 gap-4 mb-8">
-            {statCards.map((card, i) => {
-              const isActive = statusFilter === card.filter;
+            {tarjetasEstadistica.map((card, i) => {
+              const isActive = filtroEstado === card.filter;
               return (
                 <button
                   key={card.label}
-                  onClick={() => { setStatusFilter(isActive ? null : card.filter); setCurrentPage(1); }}
+                  onClick={() => { setFiltroEstado(isActive ? null : card.filter); setPaginaActual(1); }}
                   className={`relative overflow-hidden rounded-3xl p-6 text-left border
                     transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group
                     animate-slide-up-fade ${card.bg} ${card.border}`}
@@ -211,14 +211,14 @@ export default function GestionPostulaciones() {
             }}
           >
             {/* Active Filters Toolbar */}
-            {statusFilter && (
+            {filtroEstado && (
               <div className="flex items-center px-6 py-4 border-b border-gray-100/60 bg-gray-50/50">
                   <span className="inline-flex items-center gap-1.5 text-xs text-brand-700
                     bg-brand-50 px-3 py-1.5 rounded-xl font-semibold border border-brand-100
                     animate-elastic-in">
-                    Filtro: {STATUS_LABELS[statusFilter] ?? statusFilter}
+                    Filtro: {ETIQUETAS_ESTADO[filtroEstado] ?? filtroEstado}
                     <button
-                      onClick={() => { setStatusFilter(null); setCurrentPage(1); }}
+                      onClick={() => { setFiltroEstado(null); setPaginaActual(1); }}
                       className="text-brand-500 hover:text-brand-700 ml-0.5 transition-colors"
                     >
                       ✕
@@ -236,10 +236,10 @@ export default function GestionPostulaciones() {
                       <label className="inline-flex items-center gap-3">
                         <input
                           type="checkbox"
-                          checked={allPageSelected}
-                          onChange={toggleSelectAll}
+                          checked={todaPaginaSeleccionada}
+                          onChange={alternarSeleccionAll}
                           aria-label={
-                            somePageSelected || allPageSelected
+                            algunaPaginaSeleccionada || todaPaginaSeleccionada
                               ? 'Deseleccionar candidatos de esta página'
                               : 'Seleccionar candidatos de esta página'
                           }
@@ -260,18 +260,18 @@ export default function GestionPostulaciones() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginated.map((candidate, i) => (
-                    <CandidateRow
-                      key={candidate.id}
-                      candidate={candidate}
+                  {paginados.map((candidate, i) => (
+                    <FilaCandidato
+                      key={candidato.id}
+                      candidato={candidate}
                       index={i}
-                      isSelected={selectedIds.has(candidate.id)}
-                      onSelect={toggleSelect}
-                      onView={(id) => console.log('View:', id)}
-                      onInvite={handleInvite}
-                      onReject={handleReject}
-                      onAddNote={handleAddNote}
-                      onDeleteNote={handleDeleteNote}
+                      estaSeleccionado={idsSeleccionados.has(candidato.id)}
+                      alSeleccionar={alternarSeleccion}
+                      alVer={(id) => console.log('View:', id)}
+                      alInvitar={manejarInvitacion}
+                      alRechazar={manejarRechazo}
+                      alAgregarNota={manejarAgregarNota}
+                      alEliminarNota={manejarEliminarNota}
                     />
                   ))}
                 </tbody>
@@ -282,18 +282,18 @@ export default function GestionPostulaciones() {
             <div className="flex items-center justify-between px-6 py-5 border-t border-gray-100 bg-white">
               <div className="flex items-center gap-3">
                 <p className="text-xs text-gray-500">
-                  Mostrando {filtered.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, filtered.length)} de {filtered.length} candidatos
+                  Mostrando {filtrados.length > 0 ? (paginaActual - 1) * itemsPorPagina + 1 : 0}-{Math.min(paginaActual * itemsPorPagina, filtrados.length)} de {filtrados.length} candidatos
                 </p>
                 <select
-                  value={itemsPerPage}
+                  value={itemsPorPagina}
                   onChange={(event) => {
-                    setItemsPerPage(Number(event.target.value));
-                    setCurrentPage(1);
+                    setItemsPorPagina(Number(event.target.value));
+                    setPaginaActual(1);
                   }}
                   className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-200"
                   aria-label="Candidatos por página"
                 >
-                  {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                  {OPCIONES_POR_PAGINA.map((option) => (
                     <option key={option} value={option}>
                       {option} por página
                     </option>
@@ -303,8 +303,8 @@ export default function GestionPostulaciones() {
 
               <div className="flex items-center gap-1.5">
                 <button
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => p - 1)}
+                  disabled={paginaActual === 1}
+                  onClick={() => setPaginaActual((p) => p - 1)}
                   className="w-8 h-8 rounded-full flex items-center justify-center
                     text-gray-400 hover:bg-gray-100 hover:text-gray-700
                     disabled:opacity-30 disabled:cursor-not-allowed transition-all border border-gray-200"
@@ -312,12 +312,12 @@ export default function GestionPostulaciones() {
                   <ChevronLeft className="w-4 h-4" />
                 </button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
-                    onClick={() => setCurrentPage(page)}
+                    onClick={() => setPaginaActual(page)}
                     className={`w-8 h-8 rounded-full text-xs font-semibold transition-all duration-200
-                      ${page === currentPage
+                      ${page === paginaActual
                         ? 'bg-[#1868D5] text-white shadow-sm'
                         : 'text-gray-600 hover:bg-gray-100 border border-transparent hover:border-gray-200'
                       }`}
@@ -327,8 +327,8 @@ export default function GestionPostulaciones() {
                 ))}
 
                 <button
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage((p) => p + 1)}
+                  disabled={paginaActual === totalPaginas}
+                  onClick={() => setPaginaActual((p) => p + 1)}
                   className="w-8 h-8 rounded-full flex items-center justify-center
                     text-gray-400 hover:bg-gray-100 hover:text-gray-700
                     disabled:opacity-30 disabled:cursor-not-allowed transition-all border border-gray-200"

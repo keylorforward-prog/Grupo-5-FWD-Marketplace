@@ -1,111 +1,163 @@
-import React, { useState } from 'react';
-import { Folder, Briefcase, Bot, SlidersHorizontal, Search, Filter } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../../../components/Header/Header';
+import { useState, useMemo } from 'react';
+import { Folder, Briefcase, Bot, Search, X } from 'lucide-react';
+import LayoutEgresado from '../LayoutEgresado';
+import BarraLateralFiltros from './components/BarraLateralFiltros';
+import CuadriculaProyectos from './components/CuadriculaProyectos';
+import { proyectosSimulados, opcionesOrden } from '../../../data/proyectosEgresado';
+import { useFiltroProyectos } from './useFiltroProyectos';
 import './styles/DashboardEgresado.css';
 
-// Mock Data para visualizar como en la imagen
-const proyectosSimulados = [
+const PROYECTOS_POR_PAGINA = 4;
+
+const categoriasRapidas = [
   {
-    id: 1,
-    titulo: 'E-commerce con Next.js',
-    estado: 'ACTIVO',
-    descripcion: 'Desarrollo de tienda online con carrito de compras, pagos y panel de administración.',
-    tecnologias: ['Next.js', 'React', 'Stripe', 'Tailwind CSS'],
-    presupuesto: '$1,200 - $1,800',
-    entrega: '7 - 14 días',
-    iconoUrl: 'https://cdn-icons-png.flaticon.com/512/3081/3081986.png', // Mock icon
-    tipoEstado: 'activo'
+    id: 'todas',
+    color: 'azul',
+    icono: Folder,
+    titulo: 'Proyectos FWD',
+    descripcion: 'Proyectos freelance publicados en la plataforma.',
   },
   {
-    id: 2,
-    titulo: 'Dashboard de Analíticas',
-    estado: 'ACTIVO',
-    descripcion: 'Dashboard interactivo para visualización de datos financieros y métricas de negocio.',
-    tecnologias: ['React', 'TypeScript', 'Chart.js', 'Node.js'],
-    presupuesto: '$2,000 - $3,200',
-    entrega: '10 - 20 días',
-    iconoUrl: 'https://cdn-icons-png.flaticon.com/512/1541/1541433.png',
-    tipoEstado: 'activo'
+    id: 'web',
+    color: 'naranja',
+    icono: Briefcase,
+    titulo: 'Empleos Junior',
+    descripcion: 'Puestos de trabajo, pasantías y prácticas.',
   },
   {
-    id: 3,
-    titulo: 'App Móvil de Tareas',
-    estado: 'PENDIENTE',
-    descripcion: 'Aplicación móvil para gestión de tareas y colaboración en equipo.',
-    tecnologias: ['React Native', 'Firebase', 'Redux'],
-    presupuesto: '$800 - $1,200',
-    entrega: '5 - 10 días',
-    iconoUrl: 'https://cdn-icons-png.flaticon.com/512/5655/5655312.png',
-    tipoEstado: 'pendiente'
+    id: 'data',
+    color: 'aqua',
+    icono: Bot,
+    titulo: 'Oportunidades IA',
+    descripcion: 'Ofertas externas recomendadas para ti.',
+    etiqueta: 'IA',
   },
-  {
-    id: 4,
-    titulo: 'API para Gestión de Usuarios',
-    estado: 'ACTIVO',
-    descripcion: 'API REST segura con autenticación JWT y roles de usuario.',
-    tecnologias: ['Node.js', 'Express', 'MongoDB', 'JWT'],
-    presupuesto: '$600 - $1,000',
-    entrega: '5 - 12 días',
-    iconoUrl: 'https://cdn-icons-png.flaticon.com/512/2111/2111288.png',
-    tipoEstado: 'activo'
-  },
-  {
-    id: 5,
-    titulo: 'Landing Page Corporativa',
-    estado: 'PENDIENTE',
-    descripcion: 'Diseño y desarrollo de landing page moderna y responsiva.',
-    tecnologias: ['HTML', 'CSS', 'JavaScript', 'GSAP'],
-    presupuesto: '$300 - $600',
-    entrega: '3 - 7 días',
-    iconoUrl: 'https://cdn-icons-png.flaticon.com/512/1005/1005141.png',
-    tipoEstado: 'pendiente'
-  },
-  {
-    id: 6,
-    titulo: 'Sistema de Autenticación',
-    estado: 'ACTIVO',
-    descripcion: 'Implementación de autenticación social y verificación en dos pasos.',
-    tecnologias: ['Next.js', 'Auth0', 'PostgreSQL'],
-    presupuesto: '$500 - $900',
-    entrega: '4 - 9 días',
-    iconoUrl: 'https://cdn-icons-png.flaticon.com/512/6301/6301509.png',
-    tipoEstado: 'activo'
-  }
 ];
 
-
-import HeroSection from './components/HeroSection';
-import QuickCategories from './components/QuickCategories';
-import FilterSidebar from './components/FilterSidebar';
-import ProjectGrid from './components/ProjectGrid';
+const filtrosIniciales = {
+  busqueda: '',
+  categoriaActiva: 'todas',
+  tecnologia: '',
+  presupuestoMin: 0,
+  presupuestoMax: 5000,
+  duracion: 'cualquiera',
+  modalidades: ['remoto'],
+  orden: 'recientes',
+};
 
 function DashboardEgresado() {
-  const [categoriaActiva, setCategoriaActiva] = useState('explorar');
+  const [filtros, setFiltros] = useState(filtrosIniciales);
+  const [paginaActual, setPaginaActual] = useState(1);
 
-  const enlacesDashboard = [
-    { clave: 'explorar', etiqueta: 'Explorar', onClick: (e) => { e.preventDefault(); setCategoriaActiva('explorar'); } },
-    { clave: 'proyectos', etiqueta: 'Proyectos FWD' },
-    { clave: 'empleos', etiqueta: 'Empleos Junior' },
-    { clave: 'ia', etiqueta: 'Oportunidades IA', badge: 'IA' },
-    { clave: 'misProyectos', etiqueta: 'Mis Proyectos' },
-    { clave: 'mensajes', etiqueta: 'Mensajes', badge: '2' },
-  ];
+  const proyectosFiltrados = useFiltroProyectos(proyectosSimulados, filtros);
+
+  const totalPaginas = Math.max(1, Math.ceil(proyectosFiltrados.length / PROYECTOS_POR_PAGINA));
+  const proyectosPagina = useMemo(() => {
+    const inicio = (paginaActual - 1) * PROYECTOS_POR_PAGINA;
+    return proyectosFiltrados.slice(inicio, inicio + PROYECTOS_POR_PAGINA);
+  }, [proyectosFiltrados, paginaActual]);
+
+  const actualizarFiltros = (cambios) => {
+    setFiltros((prev) => ({ ...prev, ...cambios }));
+    setPaginaActual(1);
+  };
+
+  const limpiarFiltros = () => {
+    setFiltros(filtrosIniciales);
+    setPaginaActual(1);
+  };
+
+  const seleccionarCategoria = (id) => actualizarFiltros({ categoriaActiva: id });
 
   return (
-    <div className="contenedorDashboard">
-      <Header/>
-
-      <main className="contenidoPrincipal">
-        <HeroSection />
-        <QuickCategories />
-
-        <section className="seccionListado">
-          <FilterSidebar />
-          <ProjectGrid proyectos={proyectosSimulados} />
+    <LayoutEgresado>
+      <div className="contenidoPrincipal fwd-fondo-decorativo">
+        <section className="seccionHero fwd-animar-entrada">
+          <div className="textoHero">
+            <span className="kickerHero">Marketplace FWD</span>
+            <h1 className="tituloHero">
+              Encuentra tu <span className="textoResaltado fwd-texto-gradiente">próximo desafío</span>
+            </h1>
+            <p className="subtituloHero">
+              Explora proyectos freelance, empleos y oportunidades recomendadas para ti.
+            </p>
+            <div className="contenedorBusqueda">
+              <div className="barraBusqueda">
+                <Search size={20} className="iconoBusqueda" />
+                <input
+                  type="text"
+                  placeholder="Buscar por título, tecnología o habilidad..."
+                  className="entradaBusqueda"
+                  value={filtros.busqueda}
+                  onChange={(e) => actualizarFiltros({ busqueda: e.target.value })}
+                />
+                {filtros.busqueda && (
+                  <button
+                    type="button"
+                    className="botonLimpiarBusqueda"
+                    onClick={() => actualizarFiltros({ busqueda: '' })}
+                    aria-label="Limpiar búsqueda"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="ilustracionHero">
+            <div className="orbeHero"></div>
+            <img
+              src="/Imgs/Comunidad icon-01.png"
+              alt="Comunidad FWD"
+              className="ilustracionComunidad"
+            />
+          </div>
         </section>
-      </main>
-    </div>
+
+        <section className="categoriasRapidas fwd-stagger">
+          {categoriasRapidas.map(({ id, color, icono: Icono, titulo, descripcion, etiqueta }) => {
+            const activa = filtros.categoriaActiva === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                className={`tarjetaCategoria ${activa ? 'activa' : ''}`}
+                onClick={() => seleccionarCategoria(id)}
+              >
+                <div className={`iconoCategoria ${color}`}>
+                  <Icono size={24} />
+                </div>
+                <div className="infoCategoria">
+                  <h3 className="tituloCategoria">
+                    {titulo}
+                    {etiqueta && <span className="etiquetaIaPequena">{etiqueta}</span>}
+                  </h3>
+                  <p className="descripcionCategoria">{descripcion}</p>
+                </div>
+              </button>
+            );
+          })}
+        </section>
+
+        <section className="seccionListado fwd-animar-fade">
+          <BarraLateralFiltros
+            filtros={filtros}
+            onCambio={actualizarFiltros}
+            onLimpiar={limpiarFiltros}
+          />
+          <CuadriculaProyectos
+            proyectos={proyectosPagina}
+            total={proyectosFiltrados.length}
+            orden={filtros.orden}
+            onOrdenCambio={(orden) => actualizarFiltros({ orden })}
+            opcionesOrden={opcionesOrden}
+            paginaActual={paginaActual}
+            totalPaginas={totalPaginas}
+            onPaginaCambio={setPaginaActual}
+          />
+        </section>
+      </div>
+    </LayoutEgresado>
   );
 }
 
