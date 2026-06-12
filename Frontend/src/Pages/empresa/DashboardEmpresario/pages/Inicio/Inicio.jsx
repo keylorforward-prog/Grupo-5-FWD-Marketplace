@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
@@ -26,50 +27,68 @@ import {
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
 import EstadoDatos from '../../components/EstadoDatos';
 
+const DATOS_INICIALES_INICIO = {
+  resumen: {},
+  propuestas: [],
+  talento: [],
+  ofertas: [],
+  entregables: [],
+  mensajes: [],
+  notificaciones: [],
+};
+
+const cargarInicio = () => dashboardEmpresarioService.obtenerInicio();
+
 export default function Inicio() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data, loading, error } = useDashboardEmpresarioRequest(
-    dashboardEmpresarioService.obtenerInicio.bind(dashboardEmpresarioService),
-    {
-      resumen: {},
-      propuestas: [],
-      talento: [],
-      ofertas: [],
-      entregables: [],
-      mensajes: [],
-      notificaciones: [],
-    },
+    cargarInicio,
+    DATOS_INICIALES_INICIO,
     []
   );
 
-  const propuestas = data.propuestas.map(formatearPropuesta);
-  const talento = data.talento.map(formatearTalento);
-  const ofertas = data.ofertas.map(formatearOferta);
-  const entregables = data.entregables.map(formatearEntregable);
-  const mensajes = data.mensajes.map(formatearMensaje);
-  const notificaciones = data.notificaciones.map(formatearNotificacion);
+  const propuestas = useMemo(() => data.propuestas.map(formatearPropuesta), [data.propuestas]);
+  const talento = useMemo(() => data.talento.map(formatearTalento), [data.talento]);
+  const ofertas = useMemo(() => data.ofertas.map(formatearOferta), [data.ofertas]);
+  const entregables = useMemo(() => data.entregables.map(formatearEntregable), [data.entregables]);
+  const mensajes = useMemo(() => data.mensajes.map(formatearMensaje), [data.mensajes]);
+  const notificaciones = useMemo(() => data.notificaciones.map(formatearNotificacion), [data.notificaciones]);
+  const irAPublicarProyecto = useCallback(() => navigate('/DashboardEmpresario/publicar-proyecto'), [navigate]);
+  const irACrearProyectoIA = useCallback(() => navigate('/DashboardEmpresario/crear-proyecto-ia'), [navigate]);
 
   return (
     <DashboardLayout activePage="inicio">
-      <section className="de-hero">
+      <section className="de-hero fwd-animar-entrada">
         <div className="de-hero-content">
-          <h1 className="de-hero-title">Bienvenido, {user?.nombre || 'Empresa'}!</h1>
-          <p className="de-hero-subtitle">Que necesitas desarrollar hoy?</p>
-          <p className="de-hero-desc">Publica tu proyecto y conecta con el mejor talento de FWD.</p>
+          <span className="de-hero-kicker">Marketplace FWD</span>
+          <h1 className="de-hero-title">
+            Bienvenido, <span>{user?.nombre || 'Empresa'}</span>
+          </h1>
+          <p className="de-hero-subtitle">
+            Publica tu proyecto y conecta con talento verificado de FWD.
+          </p>
           <div className="de-hero-actions">
-            <button className="de-btn-primary" type="button" onClick={() => navigate('/DashboardEmpresario/publicar-proyecto')}>
+            <button className="de-btn-primary" type="button" onClick={irAPublicarProyecto}>
               <Plus size={16} />
               Publicar Proyecto
             </button>
-            <button className="de-btn-outline" type="button" onClick={() => navigate('/DashboardEmpresario/crear-proyecto-ia')}>
+            <button className="de-btn-outline" type="button" onClick={irACrearProyectoIA}>
               <Sparkles size={16} />
               Crear Proyecto con IA
             </button>
           </div>
         </div>
         <div className="de-hero-illustration">
-          <img src="/Imgs/Comunidad icon-01.png" alt="Comunidad FWD" />
+          <div className="de-hero-orb" />
+          <img
+            src="/Imgs/Comunidad icon-01.png"
+            alt="Comunidad FWD"
+            className="de-hero-community"
+            width="260"
+            height="260"
+            decoding="async"
+          />
         </div>
       </section>
 
@@ -113,7 +132,9 @@ export default function Inicio() {
           <EstadoDatos loading={loading} error={error} empty={!propuestas.length} emptyText="Aun no tienes proyectos publicados." />
           {!loading && !error && propuestas.map((p) => (
             <div key={p.id} className="de-project-item">
-              <div className={`de-project-icon-wrap ${p.iconColor}`}>{p.icon}</div>
+              <div className={`de-project-icon-wrap ${p.iconColor}`}>
+                <img src={p.arrowSrc} alt="" className="de-project-arrow" width="24" height="24" loading="lazy" decoding="async" />
+              </div>
               <div className="de-project-info">
                 <div className="de-project-name">
                   {p.name}
@@ -146,7 +167,7 @@ export default function Inicio() {
                   {t.verified && <CheckCircle2 size={14} className="de-talent-verified" />}
                 </div>
                 <p className="de-talent-skills">{t.skills}</p>
-                <p className="de-talent-rating"><span className="de-talent-star">★</span>{t.rating} ({t.projects} proyectos)</p>
+                <p className="de-talent-rating">Calificacion {t.rating} ({t.projects} proyectos)</p>
               </div>
               <div className="de-talent-match">
                 <span className="de-talent-match-pct">{t.match}%</span>
@@ -167,7 +188,7 @@ export default function Inicio() {
           <EstadoDatos loading={loading} error={error} empty={!ofertas.length} emptyText="No hay ofertas pendientes." />
           {!loading && !error && ofertas.map((o) => (
             <div key={o.id} className="de-offer-item">
-              <div className="de-offer-icon-wrap">📄</div>
+              <div className="de-offer-icon-wrap"><FileText size={16} /></div>
               <div className="de-offer-info">
                 <p className="de-offer-title">{o.title}</p>
                 <p className="de-offer-sender">{o.sender}</p>

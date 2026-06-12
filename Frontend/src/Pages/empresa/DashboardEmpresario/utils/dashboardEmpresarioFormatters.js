@@ -1,4 +1,14 @@
-const AVATAR_DEFECTO = '/Imgs/ProfileDefaultImage.png';
+const AVATAR_DEFECTO = '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
+const FLECHAS_PROYECTO = [
+  '/Imgs/FLECHAS/Flechas-01.png',
+  '/Imgs/FLECHAS/Flechas-02.png',
+  '/Imgs/FLECHAS/Flechas-03.png',
+  '/Imgs/FLECHAS/Flechas-04.png',
+  '/Imgs/FLECHAS/Flechas-05.png',
+  '/Imgs/FLECHAS/Flechas-06.png',
+  '/Imgs/FLECHAS/Flechas-07.png',
+  '/Imgs/FLECHAS/Flechas-08.png',
+];
 
 const formatearFechaRelativa = (fecha) => {
   if (!fecha) return 'Sin fecha';
@@ -51,7 +61,7 @@ export const formatearPropuesta = (propuesta, indice = 0) => {
     statusType,
     meta: partesMeta.join(' - '),
     action: ofertas > 0 ? 'Ver ofertas' : 'Gestionar',
-    icon: ['💼', '📋', '🚀', '🧩'][indice % 4],
+    arrowSrc: FLECHAS_PROYECTO[indice % FLECHAS_PROYECTO.length],
     iconColor: ['blue', 'orange', 'green', 'purple'][indice % 4],
   };
 };
@@ -107,7 +117,7 @@ export const formatearNotificacion = (notificacion) => ({
   id: notificacion.id_notificacion,
   text: notificacion.mensaje,
   time: formatearFechaRelativa(notificacion.fecha),
-  icon: notificacion.leido ? '✓' : '!',
+  icon: notificacion.leido ? 'OK' : 'N',
   iconType: notificacion.leido ? 'green' : 'blue',
 });
 
@@ -117,7 +127,7 @@ export const formatearHistorial = (historial, indice = 0) => ({
   meta: historial.tecnologias_usadas || historial.descripcion || 'Sin detalles registrados',
   status: historial.fecha_fin ? 'Finalizado' : 'En historial',
   statusType: historial.fecha_fin ? 'finalizado' : 'recepcion',
-  icon: ['💼', '📋', '🚀', '🧩'][indice % 4],
+  arrowSrc: FLECHAS_PROYECTO[indice % FLECHAS_PROYECTO.length],
   iconColor: ['blue', 'orange', 'green', 'purple'][indice % 4],
 });
 
@@ -159,7 +169,7 @@ export const formatearPostulacion = (postulacion) => {
   return {
     id: postulacion.id_postulacion,
     name: usuario.nombre || 'Candidato FWD',
-    avatar: usuario.foto_perfil || '',
+    avatar: usuario.foto_perfil || AVATAR_DEFECTO,
     location: perfil.sede_graduacion || 'Ubicacion no registrada',
     stacks: tecnologias,
     coverLetter: postulacion.mensaje_presentacion || 'Sin carta de presentacion registrada.',

@@ -41,7 +41,7 @@ function ConfiguracionEgresado() {
           <aside className="tarjetaNavegacionConfiguracion fwd-animar-slide">
             <div className="resumenPerfilConfiguracion">
               <div className="anilloAvatarConfig">
-                <img src="/Imgs/ProfileDefaultImage.png" alt="Avatar" />
+                <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="Avatar" />
               </div>
               <h3>Alex Rivera</h3>
               <p>Junior Frontend Developer</p>
