@@ -5,7 +5,7 @@ const CLAVE = 'perfilEgresado';
 export const perfilInicial = {
   nombre: 'Alex Rivera',
   rol: 'Estudiante de Desarrollo de Software',
-  avatar: '/Imgs/ProfileDefaultImage.png',
+  avatar: '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png',
   portfolio: 'https://alex-rivera.dev',
   linkedin: 'https://linkedin.com/in/alexrivera',
   bio: 'Soy un estudiante apasionado por la tecnología y la creación de productos digitales, actualmente cursando mis estudios en Desarrollo de Software. Disfruto aprendiendo nuevas tecnologías como React y Node.js en mi tiempo libre. Estoy buscando mi primera oportunidad como practicante o desarrollador Junior para aportar mi energía y seguir creciendo profesionalmente en un entorno colaborativo.',

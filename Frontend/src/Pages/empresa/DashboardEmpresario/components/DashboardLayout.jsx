@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import {
@@ -8,12 +9,16 @@ import {
   HelpCircle,
   History,
   Home,
+  LogOut,
   MessageSquare,
+  Moon,
   Package,
   Receipt,
   Search,
   Settings,
   Star,
+  Sun,
+  User,
   Users,
 } from 'lucide-react';
 
@@ -21,8 +26,8 @@ const navLinks = [
   { label: 'Inicio', icon: Home, path: '/DashboardEmpresario', key: 'inicio' },
   { label: 'Mis Proyectos', icon: FolderOpen, path: '/DashboardEmpresario/proyectos', key: 'proyectos' },
   { label: 'Buscar Talento', icon: Search, path: '/DashboardEmpresario/talento', key: 'talento' },
-  { label: 'Mensajes', icon: MessageSquare, path: '/DashboardEmpresario/mensajes', key: 'mensajes', badge: 3 },
-  { label: 'Notificaciones', icon: Bell, path: '/DashboardEmpresario/notificaciones', key: 'notificaciones', badge: 5 },
+  { label: 'Mensajes', icon: MessageSquare, path: '/DashboardEmpresario/mensajes', key: 'mensajes' },
+  { label: 'Notificaciones', icon: Bell, path: '/DashboardEmpresario/notificaciones', key: 'notificaciones' },
 ];
 
 const sidebarItems = [
@@ -39,10 +44,70 @@ const sidebarItems = [
 ];
 
 export default function DashboardLayout({ activePage, children }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const displayName = user?.nombre || 'David';
-  const company = 'TechNova S.A.';
+  const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
+  const [cerrandoSesion, setCerrandoSesion] = useState(false);
+  const [tema, setTema] = useState(() => {
+    if (typeof document === 'undefined') return 'light';
+    return document.documentElement.dataset.theme || localStorage.getItem('tema') || 'light';
+  });
+  const menuPerfilRef = useRef(null);
+  const displayName = user?.nombre || 'Empresa';
+  const company = user?.empresa || user?.nombre_empresa || user?.nombre || 'Empresa';
+  const email = user?.correo || user?.email || 'empresa@fwd.com';
+  const avatar = user?.foto_perfil || '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
+
+  const profileItems = [
+    { key: 'perfil', label: 'Mi Perfil', icon: User, path: '/DashboardEmpresario/perfil' },
+    { key: 'proyectos', label: 'Mis proyectos', icon: FolderOpen, path: '/DashboardEmpresario/proyectos' },
+    { key: 'configuracion', label: 'Configuración', icon: Settings, path: '/DashboardEmpresario/configuracion' },
+  ];
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = tema;
+    localStorage.setItem('tema', tema);
+  }, [tema]);
+
+  useEffect(() => {
+    if (!menuPerfilAbierto) return undefined;
+
+    const manejarClickAfuera = (evento) => {
+      if (menuPerfilRef.current && !menuPerfilRef.current.contains(evento.target)) {
+        setMenuPerfilAbierto(false);
+      }
+    };
+
+    const manejarTecla = (evento) => {
+      if (evento.key === 'Escape') setMenuPerfilAbierto(false);
+    };
+
+    document.addEventListener('mousedown', manejarClickAfuera);
+    document.addEventListener('keydown', manejarTecla);
+
+    return () => {
+      document.removeEventListener('mousedown', manejarClickAfuera);
+      document.removeEventListener('keydown', manejarTecla);
+    };
+  }, [menuPerfilAbierto]);
+
+  const manejarCerrarSesion = async () => {
+    setCerrandoSesion(true);
+    try {
+      await logout();
+    } finally {
+      setMenuPerfilAbierto(false);
+      setCerrandoSesion(false);
+      navigate('/login', { replace: true });
+    }
+  };
+
+  const navegarDesdeMenuPerfil = (ruta) => {
+    setMenuPerfilAbierto(false);
+    navigate(ruta);
+  };
+
+  const alternarTema = () => setTema((valorActual) => (valorActual === 'light' ? 'dark' : 'light'));
 
   return (
     <div className="de-shell">
@@ -50,8 +115,15 @@ export default function DashboardLayout({ activePage, children }) {
         <div className="de-header-inner">
           <div className="de-header-left">
             <button className="de-brand de-link-button" type="button" onClick={() => navigate('/DashboardEmpresario')}>
-              <span className="de-brand-logo">FWD</span>
-              <span className="de-brand-tagline">Talento que impulsa tu innovacion</span>
+              <img
+                className="de-brand-logo"
+                src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"
+                alt="FWD"
+                width="104"
+                height="53"
+                decoding="async"
+                fetchPriority="high"
+              />
             </button>
 
             <nav className="de-nav">
@@ -74,14 +146,116 @@ export default function DashboardLayout({ activePage, children }) {
           </div>
 
           <div className="de-header-right">
-            <button className="de-header-profile" type="button" onClick={() => navigate('/admin')}>
-              <img src="https://i.pravatar.cc/100?img=68" alt="Avatar" className="de-header-avatar" />
-              <div className="de-header-profile-info">
-                <span className="de-header-company">{company}</span>
-                <span className="de-header-username">{displayName}</span>
-              </div>
-              <ChevronDown size={14} className="de-profile-chevron" />
+            <button
+              className="de-header-bell de-link-button"
+              type="button"
+              onClick={() => navigate('/DashboardEmpresario/notificaciones')}
+              aria-label="Notificaciones"
+              title="Notificaciones"
+            >
+              <Bell size={20} />
+              <span className="de-header-bell-dot" aria-hidden="true" />
             </button>
+
+            <div className="de-header-profile-wrapper" ref={menuPerfilRef}>
+              <button
+                className={`de-header-profile ${menuPerfilAbierto ? 'active' : ''}`}
+                type="button"
+                onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}
+                aria-haspopup="menu"
+                aria-expanded={menuPerfilAbierto}
+              >
+                <img src={avatar} alt="Avatar" className="de-header-avatar" />
+                <div className="de-header-profile-info">
+                  <span className="de-header-company">{company}</span>
+                  <span className="de-header-username">{displayName}</span>
+                </div>
+                <ChevronDown size={14} className="de-profile-chevron" />
+              </button>
+
+              {menuPerfilAbierto && (
+                <div className="de-profile-menu" role="menu">
+                  <div className="de-profile-menu-header">
+                    <div className="de-profile-menu-avatar-wrap">
+                      <img src={avatar} alt={displayName} className="de-profile-menu-avatar" />
+                      <span className="de-profile-menu-status" aria-label="En línea" />
+                    </div>
+                    <div className="de-profile-menu-user">
+                      <p className="de-profile-menu-name">{displayName}</p>
+                      <p className="de-profile-menu-email">{email}</p>
+                      <span className="de-profile-menu-role">Empresa</span>
+                    </div>
+                  </div>
+
+                  <button
+                    className="de-profile-menu-primary"
+                    type="button"
+                    onClick={() => navegarDesdeMenuPerfil('/DashboardEmpresario/perfil')}
+                    role="menuitem"
+                  >
+                    Ver perfil completo
+                  </button>
+
+                  <div className="de-profile-menu-separator" />
+
+                  {profileItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.key}
+                        className="de-profile-menu-item"
+                        type="button"
+                        onClick={() => navegarDesdeMenuPerfil(item.path)}
+                        role="menuitem"
+                      >
+                        <span className="de-profile-menu-icon"><Icon size={18} /></span>
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+
+                  <div className="de-profile-menu-separator" />
+
+                  <button
+                    className="de-profile-menu-item"
+                    type="button"
+                    onClick={alternarTema}
+                    role="menuitem"
+                  >
+                    <span className="de-profile-menu-icon">
+                      {tema === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+                    </span>
+                    <span>Tema {tema === 'light' ? 'oscuro' : 'claro'}</span>
+                    <span className="de-profile-menu-switch" data-active={tema === 'dark'}>
+                      <span className="de-profile-menu-switch-dot" />
+                    </span>
+                  </button>
+
+                  <button
+                    className="de-profile-menu-item"
+                    type="button"
+                    onClick={() => navegarDesdeMenuPerfil('/DashboardEmpresario/ayuda')}
+                    role="menuitem"
+                  >
+                    <span className="de-profile-menu-icon"><HelpCircle size={18} /></span>
+                    <span>Soporte y ayuda</span>
+                  </button>
+
+                  <div className="de-profile-menu-separator" />
+
+                  <button
+                    className="de-profile-menu-item danger"
+                    type="button"
+                    onClick={manejarCerrarSesion}
+                    disabled={cerrandoSesion}
+                    role="menuitem"
+                  >
+                    <span className="de-profile-menu-icon"><LogOut size={18} /></span>
+                    <span>{cerrandoSesion ? 'Cerrando sesión...' : 'Cerrar sesión'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -117,7 +291,7 @@ export default function DashboardLayout({ activePage, children }) {
           </div>
         </aside>
 
-        <main className="de-main">{children}</main>
+        <main className="de-main fwd-fondo-decorativo">{children}</main>
       </div>
 
       <footer className="de-footer">

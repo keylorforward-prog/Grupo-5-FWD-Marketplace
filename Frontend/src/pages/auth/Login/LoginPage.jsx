@@ -29,9 +29,9 @@ const LoginPage = () => {
 
         <div className="brand-social-proof">
           <div className="avatar-group">
-            <img src="/Imgs/ProfileDefaultImage.png" alt="Dev 1" />
-            <img src="/Imgs/ProfileDefaultImage.png" alt="Dev 2" />
-            <img src="/Imgs/ProfileDefaultImage.png" alt="Dev 3" />
+            <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="Dev 1" />
+            <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="Dev 2" />
+            <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="Dev 3" />
           </div>
           <span className="social-proof-text">
             <strong>+2,500</strong> desarrolladores ya están creciendo con nosotros

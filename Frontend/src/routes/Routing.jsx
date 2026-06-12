@@ -24,6 +24,7 @@ import AyudaEmpresario from '../pages/empresa/DashboardEmpresario/pages/Ayuda/Ay
 import PublicarProyecto from '../pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
 import CrearProyectoIA from '../pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
 import ConfiguracionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
+import PerfilEmpresa from '../pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
 import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
 
 // Egresado
@@ -79,6 +80,7 @@ export default function Routing() {
 
         {/* ── Empresa ────────────────────────────────────────────────── */}
         <Route path={RUTAS.empresa} element={<Navigate to={RUTAS.empresaDashboard} replace />} />
+        <Route path="/empresa/dashboard" element={<Navigate to={RUTAS.empresaDashboard} replace />} />
         <Route
           path={RUTAS.empresaDashboard}
           element={
@@ -89,6 +91,7 @@ export default function Routing() {
         />
         
         {/* Subrutas de Empresa Dashboard */}
+        <Route path="/DashboardEmpresario/perfil" element={<RutaProtegida rolPermitido="empresa"><PerfilEmpresa /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/proyectos" element={<RutaProtegida rolPermitido="empresa"><ProyectosEmpresario /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/ofertas" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpresario /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/entregables" element={<RutaProtegida rolPermitido="empresa"><EntregablesEmpresario /></RutaProtegida>} />
