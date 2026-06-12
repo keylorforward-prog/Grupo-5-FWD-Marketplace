@@ -15,7 +15,7 @@
   --magenta: #ec008c;
   --magenta-foreground: #ffffff;
   --success: #20bec6;
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: #dc2626;
 
   /* ---- Light Mode Neutrals (Default) ---- */
   --canvas: oklch(0.985 0.003 245);

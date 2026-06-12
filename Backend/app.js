@@ -29,6 +29,7 @@ const reporteRoutes = require('./Routes/reporteRoutes');
 const notificacionRoutes = require('./Routes/notificacionRoutes');
 const ofertaRoutes = require('./Routes/ofertaRoutes');
 const catalogoSectorRoutes = require('./Routes/catalogoSectorRoutes');
+const dashboardEmpresarioRoutes = require('./Routes/dashboardEmpresarioRoutes');
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use('/api/reportes', reporteRoutes);
 app.use('/api/notificaciones', notificacionRoutes);
 app.use('/api/ofertas', ofertaRoutes);
 app.use('/api/catalogo-sectores', catalogoSectorRoutes);
+app.use('/api/dashboard-empresario', dashboardEmpresarioRoutes);
 
 // ── Health check ───────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
