@@ -1,15 +1,26 @@
 import { CheckCircle2 } from 'lucide-react';
+import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
-import { mockTalent } from '../../data/dashboardData';
+import EstadoDatos from '../../components/EstadoDatos';
+import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
+import { formatearTalento } from '../../utils/dashboardEmpresarioFormatters';
 
 export default function Talento() {
+  const { data, loading, error } = useDashboardEmpresarioRequest(
+    () => dashboardEmpresarioService.obtenerTalentoRecomendado(),
+    [],
+    []
+  );
+  const talento = data.map(formatearTalento);
+
   return (
     <DashboardLayout activePage="talento">
       <div className="de-page-heading">
         <h1>Talento Recomendado</h1>
       </div>
       <div className="de-panel">
-        {mockTalent.map((talent) => (
+        <EstadoDatos loading={loading} error={error} empty={!talento.length} emptyText="No hay talento recomendado disponible." />
+        {!loading && !error && talento.map((talent) => (
           <div key={talent.id} className="de-talent-item">
             <img src={talent.avatar} alt={talent.name} className="de-talent-avatar" />
             <div className="de-talent-info">

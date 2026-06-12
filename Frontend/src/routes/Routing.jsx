@@ -79,6 +79,7 @@ export default function Routing() {
 
         {/* ── Empresa ────────────────────────────────────────────────── */}
         <Route path={RUTAS.empresa} element={<Navigate to={RUTAS.empresaDashboard} replace />} />
+        <Route path="/empresa/dashboard" element={<Navigate to={RUTAS.empresaDashboard} replace />} />
         <Route
           path={RUTAS.empresaDashboard}
           element={

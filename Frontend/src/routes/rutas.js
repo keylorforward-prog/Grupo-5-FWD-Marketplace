@@ -18,7 +18,7 @@ export const RUTAS = {
 
   // Empresa
   empresa: '/empresa',
-  empresaDashboard: '/empresa/dashboard',
+  empresaDashboard: '/DashboardEmpresario',
   empresaPostulaciones: '/empresa/postulaciones',
 
   // Admin
