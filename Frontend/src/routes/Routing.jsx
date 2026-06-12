@@ -9,14 +9,27 @@ import LoginPage from '../pages/auth/Login/LoginPage';
 import RegisterPage from '../pages/auth/Registro/RegisterPage';
 import AdminLogin from '../pages/auth/AdminLogin/AdminLogin';
 
+// Empresa
+import DashboardEmpresario from '../pages/empresa/DashboardEmpresario/DashboardEmpresario';
+import ProyectosEmpresario from '../pages/empresa/DashboardEmpresario/pages/Proyectos/Proyectos';
+import OfertasEmpresario from '../pages/empresa/DashboardEmpresario/pages/Ofertas/Ofertas';
+import EntregablesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Entregables/Entregables';
+import MensajesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Mensajes/Mensajes';
+import TalentoEmpresario from '../pages/empresa/DashboardEmpresario/pages/Talento/Talento';
+import HistorialEmpresario from '../pages/empresa/DashboardEmpresario/pages/Historial/Historial';
+import EvaluacionesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Evaluaciones/Evaluaciones';
+import FacturacionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Facturacion/Facturacion';
+import NotificacionesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Notificaciones/Notificaciones';
+import AyudaEmpresario from '../pages/empresa/DashboardEmpresario/pages/Ayuda/Ayuda';
+import PublicarProyecto from '../pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
+import CrearProyectoIA from '../pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
+import ConfiguracionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
+import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
+
 // Egresado
 import DashboardEgresado from '../pages/egresado/DashboardEgresado/DashboardEgresado';
 import PerfilEgresado from '../pages/egresado/PerfilEgresado/PerfilEgresado';
 import ConfiguracionEgresado from '../pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
-
-// Empresa
-import DashboardEmpresario from '../pages/empresa/DashboardEmpresario/DashboardEmpresario';
-import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
 
 // Admin
 import AdminProfile from '../pages/admin/AdminProfile';
@@ -74,6 +87,22 @@ export default function Routing() {
             </RutaProtegida>
           }
         />
+        
+        {/* Subrutas de Empresa Dashboard */}
+        <Route path="/DashboardEmpresario/proyectos" element={<RutaProtegida rolPermitido="empresa"><ProyectosEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/ofertas" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/entregables" element={<RutaProtegida rolPermitido="empresa"><EntregablesEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/mensajes" element={<RutaProtegida rolPermitido="empresa"><MensajesEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/talento" element={<RutaProtegida rolPermitido="empresa"><TalentoEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/historial" element={<RutaProtegida rolPermitido="empresa"><HistorialEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/evaluaciones" element={<RutaProtegida rolPermitido="empresa"><EvaluacionesEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/facturacion" element={<RutaProtegida rolPermitido="empresa"><FacturacionEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/notificaciones" element={<RutaProtegida rolPermitido="empresa"><NotificacionesEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/ayuda" element={<RutaProtegida rolPermitido="empresa"><AyudaEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/publicar-proyecto" element={<RutaProtegida rolPermitido="empresa"><PublicarProyecto /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/crear-proyecto-ia" element={<RutaProtegida rolPermitido="empresa"><CrearProyectoIA /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/configuracion" element={<RutaProtegida rolPermitido="empresa"><ConfiguracionEmpresario /></RutaProtegida>} />
+        
         <Route
           path={RUTAS.empresaPostulaciones}
           element={
