@@ -1,0 +1,62 @@
+/* ============================================
+   HEADER
+   ============================================ */
+
+.encabezadoComun {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-sans, 'Figtree', sans-serif);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.encabezadoTitulo {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink-strong);
+  letter-spacing: -0.2px;
+}
+
+.accionesUsuario {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Campana */
+.botonCampana {
+  position: relative;
+  background: none;
+  border: none;
+  color: var(--ink-subtle);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--duration-fast), color var(--duration-fast);
+}
+
+.botonCampana:hover {
+  background-color: var(--surface-sunken);
+  color: var(--ink-strong);
+}
+
+.puntoCampana {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 9px;
+  height: 9px;
+  background: var(--magenta);
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  animation: fwdPulso 2.2s ease-out infinite;
+}
