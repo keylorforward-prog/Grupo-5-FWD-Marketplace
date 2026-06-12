@@ -12,6 +12,14 @@ import DashboardChart from '../../components/DashboardChart';
 import logoFwd from '../../assets/logo-fwd.png';
 
 // ============================================================================
+// UTILIDAD DE SEGURIDAD
+// ============================================================================
+const sanitizeInput = (str) => {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[<>]/g, '').trim();
+};
+
+// ============================================================================
 // COMPONENTE AUTHGUARD
 // ============================================================================
 function AuthGuard({ children, user, role }) {
@@ -40,11 +48,11 @@ const fetchDashboardData = async () => {
       { month: 'Jun', egresados: 310, empresas: 40 },
     ],
     recentActivity: [
-      { id: 'ACT-001', type: 'empresa', name: 'TechNova Costa Rica', action: 'Registro de Empresa', date: 'Hoy, 10:23 AM', status: 'Pendiente', email: 'contacto@technova.cr', details: 'Solicitud de ingreso a la plataforma como empresa reclutadora del sector TI.' },
-      { id: 'ACT-002', type: 'egresado', name: 'Carlos Mendoza', action: 'Actualización de Perfil', date: 'Hoy, 09:15 AM', status: 'Completado', email: 'carlos.men@fwd.cr', details: 'Añadió certificación en React Senior Developer y nivel de inglés B2.' },
-      { id: 'ACT-003', type: 'empresa', name: 'Global Solutions', action: 'Nueva Oferta Publicada', date: 'Ayer, 16:30 PM', status: 'Completado', email: 'hr@globalsolutions.com', details: 'Publicación de vacante para Desarrollador Fullstack Junior enfocado en Node.js.' },
-      { id: 'ACT-004', type: 'egresado', name: 'Ana Rojas', action: 'Postulación a Vacante', date: 'Ayer, 14:20 PM', status: 'Pendiente', email: 'anarojas@fwd.cr', details: 'Se postuló al puesto de Diseñador UI/UX en TechNova Costa Rica.' },
-      { id: 'ACT-005', type: 'empresa', name: 'Innovatech', action: 'Validación de Cuenta', date: '10 Jun, 11:00 AM', status: 'Rechazado', email: 'info@innovatech.cr', details: 'Cédula jurídica no coincide con los registros oficiales del Ministerio de Hacienda.' },
+      { id: 'ACT-001', type: 'empresa', name: 'TechNova Costa Rica', action: 'Registro de Empresa', date: 'Hoy, 10:23 AM', status: 'Pendiente', email: 'contacto@technova.cr', details: 'Solicitud de ingreso a la plataforma.' },
+      { id: 'ACT-002', type: 'egresado', name: 'Carlos Mendoza', action: 'Actualización de Perfil', date: 'Hoy, 09:15 AM', status: 'Completado', email: 'carlos.men@fwd.cr', details: 'Añadió certificación en React Senior Developer.' },
+      { id: 'ACT-003', type: 'empresa', name: 'Global Solutions', action: 'Nueva Oferta Publicada', date: 'Ayer, 16:30 PM', status: 'Completado', email: 'hr@globalsolutions.com', details: 'Publicación de vacante.' },
+      { id: 'ACT-004', type: 'egresado', name: 'Ana Rojas', action: 'Postulación a Vacante', date: 'Ayer, 14:20 PM', status: 'Pendiente', email: 'anarojas@fwd.cr', details: 'Se postuló al puesto de Diseñador UI/UX.' },
+      { id: 'ACT-005', type: 'empresa', name: 'Innovatech', action: 'Validación de Cuenta', date: '10 Jun, 11:00 AM', status: 'Rechazado', email: 'info@innovatech.cr', details: 'Cédula jurídica no coincide.' },
     ]
   };
 };
@@ -52,9 +60,7 @@ const fetchDashboardData = async () => {
 export default function AdminProfile() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
-  
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
@@ -69,14 +75,14 @@ export default function AdminProfile() {
   }, [isDarkMode]);
 
   useEffect(() => {
-    fetchDashboardData().then(data => { setDashboardData(data); setIsLoading(false); }).catch(() => setError("Error"));
+    fetchDashboardData().then(data => { setDashboardData(data); setIsLoading(false); });
   }, []);
 
   const filteredActivity = useMemo(() => {
     if (!dashboardData?.recentActivity) return [];
     return dashboardData.recentActivity.filter(item => 
       (statusFilter === 'Todos' || item.status === statusFilter) && 
-      (item.name.toLowerCase().includes(searchTerm.toLowerCase()) || item.action.toLowerCase().includes(searchTerm.toLowerCase()))
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [dashboardData, statusFilter, searchTerm]);
 
@@ -92,7 +98,7 @@ export default function AdminProfile() {
   };
 
   const renderEntityIcon = (type) => (
-    <div className={`w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary dark:text-accent`}>
+    <div className={`w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center ${type === 'empresa' ? 'text-primary dark:text-accent' : 'text-magenta'}`}>
         {type === 'empresa' ? <Building size={14} /> : <GraduationCap size={14} />}
     </div>
   );
@@ -105,7 +111,7 @@ export default function AdminProfile() {
         <aside className="w-64 bg-surface border-r border-border flex flex-col justify-between shrink-0 h-full">
           <div className="p-6">
             <div className="mb-10 space-y-2">
-              <img src={logoFwd} alt="Logo" className="h-10 w-auto" />
+              <img src={logoFwd} alt="Logo" className={`h-10 w-auto ${isDarkMode ? 'brightness-0 invert' : ''}`} />
               <p className="text-xs text-ink-muted font-bold tracking-widest uppercase">Admin Workspace</p>
             </div>
             <nav className="space-y-2">
@@ -128,7 +134,12 @@ export default function AdminProfile() {
           <header className="flex justify-between items-center px-10 py-6 bg-surface/80 border-b border-border sticky top-0 z-20">
             <h2 className="text-2xl font-bold font-heading">Panel de Administración</h2>
             <div className="flex items-center gap-4">
-              <input className="bg-surface-sunken px-4 py-2 rounded-full text-sm w-64" placeholder="Buscar..." onChange={(e) => setSearchTerm(e.target.value)} />
+              <input 
+                className="bg-surface-sunken px-4 py-2 rounded-full text-sm w-64" 
+                placeholder="Buscar..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(sanitizeInput(e.target.value))} 
+              />
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-full hover:bg-surface-sunken">
                   {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
@@ -170,7 +181,7 @@ export default function AdminProfile() {
           </div>
         </main>
 
-        {/* DRAWER COMPLETO */}
+        {/* DRAWER */}
         <div className={`fixed inset-0 bg-ink-strong/40 z-40 transition-opacity ${selectedActivity ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => !isProcessing && setSelectedActivity(null)} />
         <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-surface border-l border-border z-50 transform transition-transform ${selectedActivity ? 'translate-x-0' : 'translate-x-full'}`}>
            {selectedActivity && (
