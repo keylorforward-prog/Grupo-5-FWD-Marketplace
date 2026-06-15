@@ -54,12 +54,55 @@ export default function CrearProyectoIA() {
   const [loading, setLoading] = useState(false);
   const [conversacionId, setConversacionId] = useState(null);
 
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
   const empresarioId = user?.id_perfil_empresario ?? user?.id;
 
+  const historyRef = useRef(history);
+  const conversacionIdRef = useRef(conversacionId);
+  const stateRef = useRef(state);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [history, loading]);
+    historyRef.current = history;
+    conversacionIdRef.current = conversacionId;
+    stateRef.current = state;
+  }, [history, conversacionId, state]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (stateRef.current !== 'done' && historyRef.current.length > 1) {
+        const body = JSON.stringify({
+          id_perfil_empresario: empresarioId,
+          historial: historyRef.current,
+          estado: 'en_progreso'
+        });
+        const cid = conversacionIdRef.current;
+        const url = cid ? `/api/conversaciones-ia/${cid}` : '/api/conversaciones-ia';
+        const method = cid ? 'PUT' : 'POST';
+
+        fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body,
+          keepalive: true
+        }).catch(() => {});
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [empresarioId, token]);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [history]);
 
   useEffect(() => {
     if (!empresarioId) return;
@@ -114,8 +157,6 @@ export default function CrearProyectoIA() {
       const updatedHistory = [...newHistory, agentMsg];
       setHistory(updatedHistory);
 
-      await saveConversacion(updatedHistory, 'en_progreso');
-
       if (result.data.state === 'confirming') {
         setState('confirming');
 
@@ -168,8 +209,21 @@ export default function CrearProyectoIA() {
       </div>
 
       <div className="de-panel" style={{ padding: 0, overflow: 'hidden' }}>
+
+        {/* Header del agente */}
+        <div className="cia-header">
+          <div className="cia-header-dot">
+            <Sparkles size={16} />
+          </div>
+          <div className="cia-header-info">
+            <span className="cia-header-name">Agente FWD</span>
+            <span className="cia-header-status">En línea</span>
+          </div>
+        </div>
+
         <div
           className="cia-chat-area"
+          ref={chatContainerRef}
           role="log"
           aria-live="polite"
           aria-label="Conversación con el agente"
@@ -179,6 +233,11 @@ export default function CrearProyectoIA() {
               key={i}
               className={`cia-msg-row ${msg.role === 'user' ? 'cia-msg-row--user' : 'cia-msg-row--agent'}`}
             >
+              {msg.role === 'assistant' && (
+                <div className="cia-agent-avatar">
+                  <Sparkles size={13} />
+                </div>
+              )}
               <span
                 className={`cia-bubble ${msg.role === 'user' ? 'cia-bubble--user' : 'cia-bubble--agent'}`}
               >
@@ -189,14 +248,19 @@ export default function CrearProyectoIA() {
 
           {loading && (
             <div className="cia-msg-row cia-msg-row--agent">
+              <div className="cia-agent-avatar">
+                <Sparkles size={13} />
+              </div>
               <span className="cia-bubble cia-bubble--agent cia-bubble--thinking">
-                <Sparkles size={13} style={{ display: 'inline', marginRight: 4 }} />
-                Pensando...
+                Pensando
+                <span className="cia-dots">
+                  <span className="cia-dot" />
+                  <span className="cia-dot" />
+                  <span className="cia-dot" />
+                </span>
               </span>
             </div>
           )}
-
-          <div ref={messagesEndRef} />
         </div>
 
         {state !== 'done' && (
