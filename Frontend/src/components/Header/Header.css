@@ -1,287 +1,62 @@
-/* =============================
+/* ============================================
    HEADER
-   ============================= */
+   ============================================ */
 
 .encabezadoComun {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 40px;
+  padding: 14px 32px;
   background-color: var(--surface);
   border-bottom: 1px solid var(--border);
-  font-family: var(--font-sans, 'Inter', sans-serif);
-  position: relative;
+  font-family: var(--font-sans, 'Figtree', sans-serif);
+  position: sticky;
+  top: 0;
   z-index: 100;
 }
 
-/* =============================
-   LOGO
-   ============================= */
-.logoContenedor {
-  font-size: 24px;
+.encabezadoTitulo {
+  font-size: 16px;
   font-weight: 800;
-  letter-spacing: -0.5px;
-  cursor: pointer;
-  text-decoration: none;
+  color: var(--ink-strong);
+  letter-spacing: -0.2px;
 }
 
-.logoFwd {
-  color: var(--primary);
-  margin-right: 2px;
-}
-
-.logoJunior {
-  color: var(--accent);
-  font-weight: 400;
-  margin-left: 3px;
-}
-
-/* =============================
-   NAVEGACIÓN
-   ============================= */
-.navegacionComun {
-  display: flex;
-  gap: 25px;
-  align-items: center;
-}
-
-.enlaceNavegacion {
-  text-decoration: none;
-  color: var(--ink-muted);
-  font-weight: 500;
-  font-size: 14px;
-  position: relative;
-  transition: color var(--duration-base) var(--ease-out);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-}
-
-.enlaceNavegacion:hover {
-  color: var(--primary);
-}
-
-.enlaceNavegacion.activo {
-  color: var(--primary);
-}
-
-.enlaceNavegacion.activo::after {
-  content: '';
-  position: absolute;
-  bottom: -22px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: var(--primary);
-  border-radius: 2px 2px 0 0;
-}
-
-.insigniaNavegacion {
-  background-color: var(--primary);
-  color: white;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 10px;
-  line-height: 1.5;
-  margin-left: 4px;
-}
-
-.insigniaNavegacion.roja {
-  background-color: #ef4444;
-}
-
-/* Acciones */
 .accionesUsuario {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-.botonIcono,
+/* Campana */
 .botonCampana {
+  position: relative;
   background: none;
   border: none;
   color: var(--ink-subtle);
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color var(--duration-fast), color var(--duration-fast);
 }
 
-.botonIcono:hover,
 .botonCampana:hover {
   background-color: var(--surface-sunken);
   color: var(--ink-strong);
 }
 
-/* Botón perfil usuario */
-.contenedorPerfilUsuario {
-  position: relative;
-}
-
-.botonPerfilUsuario {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 40px;
-  padding: 6px 12px 6px 6px;
-  cursor: pointer;
-  transition: background-color var(--duration-fast), border-color var(--duration-fast);
-}
-
-.botonPerfilUsuario:hover {
-  background-color: var(--surface-sunken);
-  border-color: var(--primary);
-}
-
-.imagenAvatarHeader {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.infoUsuarioHeader {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  line-height: 1.2;
-}
-
-.nombreUsuarioHeader {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-strong);
-}
-
-.rolUsuarioHeader {
-  font-size: 11px;
-  color: var(--ink-subtle);
-}
-
-.iconoDesplegable {
-  color: var(--ink-subtle);
-  transition: transform var(--duration-fast);
-}
-
-.iconoDesplegable.rotado {
-  transform: rotate(180deg);
-}
-
-/* Modal de usuario */
-.modalUsuario {
+.puntoCampana {
   position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  width: 240px;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-  padding: 8px;
-  z-index: 200;
-  animation: fadeInDown var(--duration-fast) var(--ease-out);
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.cabeceraModal {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 8px;
-}
-
-.imagenAvatarModal {
-  width: 44px;
-  height: 44px;
+  top: 9px;
+  right: 9px;
+  width: 9px;
+  height: 9px;
+  background: var(--magenta);
+  border: 2px solid var(--surface);
   border-radius: 50%;
-  object-fit: cover;
-}
-
-.nombreModal {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink-strong);
-  margin: 0 0 2px 0;
-}
-
-.correoModal {
-  font-size: 12px;
-  color: var(--ink-subtle);
-  margin: 0;
-}
-
-.separadorModal {
-  height: 1px;
-  background-color: var(--border);
-  margin: 6px 0;
-}
-
-.itemModal,
-a.itemModal {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
-  background: none;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink-strong);
-  cursor: pointer;
-  text-align: left;
-  text-decoration: none;
-  transition: background-color var(--duration-fast);
-}
-
-.itemModal:hover,
-a.itemModal:hover {
-  background-color: var(--surface-sunken);
-}
-
-.itemModal.peligro {
-  color: #dc2626;
-}
-
-.itemModal.peligro:hover {
-  background-color: #fef2f2;
-}
-
-/* Botón Publicar */
-.botonPublicar {
-  background-color: var(--primary);
-  color: var(--surface);
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: opacity var(--duration-fast);
-}
-
-.botonPublicar:hover {
-  opacity: 0.9;
+  animation: fwdPulso 2.2s ease-out infinite;
 }

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: '/api',
   withCredentials: true, // Envía/recibe cookies httpOnly
   headers: { 'Content-Type': 'application/json' },
@@ -20,7 +20,9 @@ export const authService = {
    * Registrar un nuevo usuario
    */
   async register(payload) {
+
     const formData = new FormData();
+    
     Object.keys(payload).forEach(key => {
       if (payload[key] !== null && payload[key] !== undefined) {
         formData.append(key, payload[key]);
@@ -56,6 +58,14 @@ export const authService = {
     const { data } = await api.get('/auth/me', {
       headers: { Authorization: `Bearer ${token}` },
     });
+    return data;
+  },
+
+  /**
+   * Actualizar contraseña
+   */
+  async updatePassword({ currentPassword, newPassword }) {
+    const { data } = await api.put('/auth/update-password', { currentPassword, newPassword });
     return data;
   },
 };

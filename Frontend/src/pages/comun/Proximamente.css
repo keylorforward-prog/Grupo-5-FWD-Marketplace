@@ -1,0 +1,94 @@
+.proximamenteContenedor {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 50%),
+    radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--magenta) 12%, transparent), transparent 50%),
+    var(--canvas);
+  font-family: var(--font-sans, 'Figtree', sans-serif);
+}
+
+.proximamenteTarjeta {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 48px 40px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-elevated);
+}
+
+.proximamenteIcono {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: var(--surface);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.proximamenteIcono.variante404 {
+  background: linear-gradient(135deg, var(--secondary), var(--magenta));
+}
+
+.proximamenteTitulo {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ink-strong);
+  margin: 0 0 10px 0;
+}
+
+.proximamenteDescripcion {
+  font-size: 15px;
+  color: var(--ink-muted);
+  line-height: 1.5;
+  margin: 0 0 28px 0;
+}
+
+.proximamenteAcciones {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.proximamenteBotonVolver,
+.proximamenteBotonInicio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--duration-fast);
+  border: none;
+}
+
+.proximamenteBotonVolver {
+  background: var(--surface-sunken);
+  color: var(--ink-strong);
+}
+
+.proximamenteBotonVolver:hover {
+  background: var(--border);
+}
+
+.proximamenteBotonInicio {
+  background: var(--primary);
+  color: var(--surface);
+}
+
+.proximamenteBotonInicio:hover {
+  background: var(--ink-strong);
+}

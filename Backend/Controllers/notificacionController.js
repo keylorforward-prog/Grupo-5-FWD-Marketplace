@@ -9,6 +9,19 @@ exports.getAll = async (req, res) => {
   }
 };
 
+exports.getMisNotificaciones = async (req, res) => {
+  try {
+    const data = await Notificacion.findAll({
+      where: { id_usuario: req.user.id_usuario },
+      order: [['fecha', 'DESC']],
+      limit: 5
+    });
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.getById = async (req, res) => {
   try {
     const data = await Notificacion.findByPk(req.params.id);

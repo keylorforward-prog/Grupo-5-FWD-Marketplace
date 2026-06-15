@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, logout, me } = require('../Controllers/authController');
+const { register, login, logout, me, updatePassword } = require('../Controllers/authController');
 const { verifyToken } = require('../Middleware/authMiddleware');
 const multer = require('multer');
 
@@ -130,5 +130,37 @@ router.post('/logout', logout);
  *         description: Token inválido o expirado
  */
 router.get('/me', verifyToken, me);
+
+/**
+ * @swagger
+ * /api/auth/update-password:
+ *   put:
+ *     summary: Actualizar la contraseña del usuario autenticado
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada correctamente
+ *       400:
+ *         description: Datos incompletos
+ *       401:
+ *         description: Contraseña actual incorrecta
+ */
+router.put('/update-password', verifyToken, updatePassword);
 
 module.exports = router;

@@ -47,6 +47,23 @@
   box-sizing: border-box;
 }
 
+/* Dark Theme Overrides */
+body.dark-theme .settings-empresa-wrapper,
+.settings-empresa-wrapper.dark-theme,
+body.dark-theme {
+  --color-surface-container-lowest: #121214;
+  --color-on-surface-variant: #9aa2b1;
+  --color-surface: #1a1c1e;
+  --color-surface-variant: #2c2e33;
+  --color-surface-container-low: #25262c;
+  --color-surface-container-high: #33363e;
+  --color-on-surface: #e4e5eb;
+  --color-outline-variant: #444751;
+  
+  /* Retain vibrant brand colors but dim them slightly if needed, here keeping them vibrant */
+  --color-vibrant-blue: #33a8e5;
+}
+
 .settings-empresa-wrapper * {
   box-sizing: border-box;
 }
@@ -126,6 +143,8 @@
   background-color: var(--color-surface-container-low);
   border-right: 1px solid var(--color-outline-variant);
   width: 256px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .se-sidebar-header {
   display: flex;

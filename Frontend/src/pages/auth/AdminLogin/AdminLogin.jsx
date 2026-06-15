@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, ArrowRight } from 'lucide-react';
+import { RUTAS } from '../../../routes/rutas';
 
 /**
  * Vista de Autenticación Administrativa (Login)
@@ -19,7 +20,7 @@ export default function Login() {
     console.log('Autenticando credenciales de administrador...', { email });
     
     // Transición de ruta imperativa hacia el Panel de Administración
-    navigate('/admin');
+    navigate(RUTAS.admin);
   };
 
   return (

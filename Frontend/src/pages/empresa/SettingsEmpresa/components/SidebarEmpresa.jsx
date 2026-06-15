@@ -27,38 +27,79 @@ const SidebarEmpresa = () => {
         </div>
       </div>
       
-      <nav className="se-nav-menu">
-        <NavLink to="#" className={({isActive}) => `se-nav-item se-nav-item-blue se-label-bold ${isActive ? 'active' : ''}`}>
-          <span className="material-symbols-outlined">explore</span>
-          <span>{t('sidebar.explore')}</span>
+      <nav className="se-nav-menu" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <NavLink to="/DashboardEmpresa" className="se-nav-item" style={{ color: 'var(--color-on-surface-variant)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px' }}>
+          <span className="material-symbols-outlined">home</span>
+          <span className="se-label-bold">Inicio</span>
         </NavLink>
         
-        <NavLink to="/DashboardEmpresario" className={({isActive}) => `se-nav-item se-nav-item-purple se-label-bold ${isActive ? 'active' : ''}`}>
-          <span className="material-symbols-outlined">dashboard</span>
-          <span>{t('sidebar.dashboard')}</span>
+        <NavLink to="#" className="se-nav-item" style={{ color: 'var(--color-on-surface-variant)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px' }}>
+          <span className="material-symbols-outlined">folder</span>
+          <span className="se-label-bold">Mis Proyectos</span>
         </NavLink>
         
-        <NavLink to="#" className={({isActive}) => `se-nav-item se-nav-item-pink se-label-bold ${isActive ? 'active' : ''}`}>
+        <NavLink to="#" className="se-nav-item" style={{ color: 'var(--color-on-surface-variant)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px' }}>
           <span className="material-symbols-outlined">description</span>
-          <span>{t('sidebar.applications')}</span>
+          <span className="se-label-bold">Ofertas Recibidas</span>
         </NavLink>
         
-        <NavLink to="#" className={({isActive}) => `se-nav-item se-nav-item-teal se-label-bold ${isActive ? 'active' : ''}`}>
-          <span className="material-symbols-outlined">mail</span>
-          <span>{t('sidebar.messages')}</span>
+        <NavLink to="#" className="se-nav-item" style={{ color: 'var(--color-on-surface-variant)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px' }}>
+          <span className="material-symbols-outlined">inventory_2</span>
+          <span className="se-label-bold">Entregables</span>
         </NavLink>
         
-        <NavLink to="#" className={({isActive}) => `se-nav-item se-nav-item-orange se-label-bold ${isActive ? 'active' : ''}`}>
-          <span className="material-symbols-outlined">person</span>
-          <span>{t('sidebar.profile')}</span>
+        <NavLink to="#" className="se-nav-item" style={{ color: 'var(--color-on-surface-variant)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px' }}>
+          <span className="material-symbols-outlined">chat_bubble</span>
+          <span className="se-label-bold">Mensajes</span>
         </NavLink>
-        
+
+        <NavLink to="#" className="se-nav-item" style={{ color: 'var(--color-on-surface-variant)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px' }}>
+          <span className="material-symbols-outlined">groups</span>
+          <span className="se-label-bold">Talento Recomendado</span>
+        </NavLink>
+
+        <NavLink to="#" className="se-nav-item" style={{ color: 'var(--color-on-surface-variant)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px' }}>
+          <span className="material-symbols-outlined">history</span>
+          <span className="se-label-bold">Historial de Proyectos</span>
+        </NavLink>
+
+        <NavLink to="#" className="se-nav-item" style={{ color: 'var(--color-on-surface-variant)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px' }}>
+          <span className="material-symbols-outlined">star</span>
+          <span className="se-label-bold">Evaluaciones</span>
+        </NavLink>
+
+        <NavLink to="#" className="se-nav-item" style={{ color: 'var(--color-on-surface-variant)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px' }}>
+          <span className="material-symbols-outlined">request_quote</span>
+          <span className="se-label-bold">Facturacion</span>
+        </NavLink>
+
+        <NavLink to="/SettingsEmpresa" className="se-nav-item active" style={{ backgroundColor: 'var(--color-vibrant-teal)', color: '#fff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '24px' }}>
+          <span className="material-symbols-outlined">settings</span>
+          <span className="se-label-bold">Configuracion</span>
+        </NavLink>
       </nav>
       
-      <div style={{ marginTop: 'auto' }}>
-        <button className="se-post-job-btn se-label-bold hard-edge-shadow">
-          <span className="material-symbols-outlined">add</span>
-          {t('sidebar.postJob')}
+      <div style={{ marginTop: 'auto', padding: '16px', border: '1px solid var(--color-vibrant-teal)', borderRadius: '12px', backgroundColor: 'transparent' }}>
+        <p className="se-label-bold" style={{ margin: '0 0 8px 0', color: 'var(--color-on-surface)' }}>¿Necesitas ayuda?</p>
+        <p className="se-label-sm" style={{ margin: '0 0 16px 0', color: 'var(--color-on-surface-variant)', lineHeight: '1.4' }}>
+          Nuestro centro de ayuda está disponible 24/7 para ti.
+        </p>
+        <button style={{ 
+          width: '100%', 
+          padding: '8px', 
+          background: 'transparent', 
+          border: '1px solid var(--color-vibrant-teal)', 
+          color: 'var(--color-vibrant-teal)', 
+          borderRadius: '20px', 
+          cursor: 'pointer', 
+          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px'
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>help</span>
+          Ir al Centro de Ayuda
         </button>
       </div>
     </aside>

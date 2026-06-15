@@ -45,9 +45,15 @@
     "directMessages": "Mensajes Directos",
     "directMessagesDesc": "Alertas de nuevos mensajes al DM"
   },
-  "dangerZone": {
-    "title": "Zona de Peligro",
-    "warning": "Estas acciones son irreversibles. Por favor procede con precaución.",
-    "deactivate": "Desactivar Empresa"
+  "securitySettings": {
+    "title": "Seguridad",
+    "currentPassword": "Contrasena actual",
+    "newPassword": "Nueva contrasena",
+    "saveChanges": "Guardar cambios",
+    "saving": "Guardando...",
+    "emptyFields": "Ambos campos son requeridos",
+    "minLen": "La contraseña debe tener al menos 6 caracteres",
+    "success": "Contraseña actualizada con éxito",
+    "error": "Ocurrió un error"
   }
 }

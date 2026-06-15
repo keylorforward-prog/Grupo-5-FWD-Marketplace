@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../../../services/authService';
+import { RUTAS } from '../../../../routes/rutas';
 import '../../AuthPages.css';
 
 const RegisterForm = () => {
@@ -48,7 +49,7 @@ const RegisterForm = () => {
       if (data.success && data.pendingApproval) {
         setSuccessMsg(data.message);
         // Redirigir al login después de 4 segundos
-        setTimeout(() => navigate('/login'), 4000);
+        setTimeout(() => navigate(RUTAS.login), 4000);
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Error al registrarse. Intenta de nuevo.';
@@ -338,7 +339,7 @@ const RegisterForm = () => {
       {/* Footer */}
       <div className="auth-footer">
         ¿Ya tienes cuenta?{' '}
-        <Link to="/">Iniciar sesión</Link>
+        <Link to={RUTAS.login}>Iniciar sesión</Link>
       </div>
     </div>
   );

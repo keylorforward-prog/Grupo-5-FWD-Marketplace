@@ -45,9 +45,15 @@
     "directMessages": "Direct Messages",
     "directMessagesDesc": "Alerts for new DM messages"
   },
-  "dangerZone": {
-    "title": "Danger Zone",
-    "warning": "These actions are irreversible. Please proceed with caution.",
-    "deactivate": "Deactivate Company"
+  "securitySettings": {
+    "title": "Security",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "saveChanges": "Save changes",
+    "saving": "Saving...",
+    "emptyFields": "Both fields are required",
+    "minLen": "Password must be at least 6 characters",
+    "success": "Password updated successfully",
+    "error": "An error occurred"
   }
 }
