@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../Controllers/usuarioController');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * @swagger
@@ -98,5 +100,33 @@ router.put('/:id', controller.update);
  *         description: Registro eliminado
  */
 router.delete('/:id', controller.delete);
+
+/**
+ * @swagger
+ * /api/usuarios/{id}/foto-perfil:
+ *   put:
+ *     summary: Actualizar la foto de perfil de un Usuario
+ *     tags: [Usuario]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Foto actualizada
+ */
+router.put('/:id/foto-perfil', upload.single('foto'), controller.uploadFotoPerfil);
 
 module.exports = router;

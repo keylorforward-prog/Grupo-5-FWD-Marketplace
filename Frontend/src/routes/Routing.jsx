@@ -26,6 +26,8 @@ import CrearProyectoIA from '../pages/empresa/DashboardEmpresario/pages/CrearPro
 import ConfiguracionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
 import PerfilEmpresa from '../pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
 import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
+import AdminProfile from '../pages/admin/AdminProfile';
+import SettingsEmpresa from '../pages/empresa/SettingsEmpresa/SettingsEmpresa';
 
 // Egresado
 import DashboardEgresado from '../pages/egresado/DashboardEgresado/DashboardEgresado';
@@ -39,8 +41,6 @@ import ExplorarProyectos from '../pages/egresado/DashboardEgresado/pages/Explora
 import PerfilEgresado from '../pages/egresado/PerfilEgresado/PerfilEgresado';
 import ConfiguracionEgresado from '../pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
 
-// Admin
-import AdminProfile from '../pages/admin/AdminProfile';
 
 // Comunes
 import Proximamente from '../pages/comun/Proximamente';
@@ -59,6 +59,16 @@ export default function Routing() {
         <Route path={RUTAS.registro} element={<RegisterPage />} />
         <Route path={RUTAS.googleCallback} element={<GoogleCallback />} />
 
+        {/* Dashboard Empresa */}
+        <Route path="/DashboardEmpresario" element={<DashboardEmpresario />} />
+        <Route path="/postulaciones" element={<GestionPostulaciones />} />
+        <Route path="/admin" element={<AdminProfile />} />
+        <Route path="/SettingsEmpresa" element={<SettingsEmpresa />} />
+
+        {/* Dashboard Egresado */}
+        <Route path="/DashboardEgresado" element={<DashboardEgresado />} />
+        <Route path="/PerfilEgresado" element={<PerfilEgresado />} />
+        {/* Rutas Protegidas */}
         {/* ── Egresado ───────────────────────────────────────────────── */}
         <Route path={RUTAS.egresado} element={<Navigate to={RUTAS.egresadoDashboard} replace />} />
         <Route

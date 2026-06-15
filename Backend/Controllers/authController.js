@@ -157,6 +157,7 @@ const login = async (req, res) => {
       token,
       user: {
         id: user.id_usuario,
+        id_usuario: user.id_usuario,
         nombre: user.nombre,
         email: user.correo,
         rol: user.rol,
@@ -185,6 +186,7 @@ const me = async (req, res) => {
     success: true,
     user: {
       id: req.user.id_usuario,
+      id_usuario: req.user.id_usuario,
       nombre: req.user.nombre,
       email: req.user.correo,
       rol: req.user.rol,
@@ -193,4 +195,58 @@ const me = async (req, res) => {
   });
 };
 
-module.exports = { register, login, logout, me };
+const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id_usuario; // From verifyToken middleware
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ambas contraseñas son requeridas',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'La nueva contraseña debe tener al menos 6 caracteres',
+      });
+    }
+
+    const user = await Usuario.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado',
+      });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.contrasena_hash);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'La contraseña actual es incorrecta',
+      });
+    }
+
+    // Hash new password and save
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.contrasena_hash = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Contraseña actualizada correctamente',
+    });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+    });
+  }
+};
+
+module.exports = { register, login, logout, me, updatePassword };

@@ -1,4 +1,4 @@
-const { PerfilEmpresario } = require('../Models');
+const { PerfilEmpresario, Usuario } = require('../Models');
 
 exports.getAll = async (req, res) => {
   try {
@@ -44,6 +44,49 @@ exports.delete = async (req, res) => {
     const deleted = await PerfilEmpresario.destroy({ where: { id_perfil_empresario: req.params.id } });
     if (!deleted) return res.status(404).json({ success: false, message: 'No encontrado' });
     res.status(200).json({ success: true, message: 'Eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.getProfileByUserId = async (req, res) => {
+  try {
+    const usuario = await Usuario.findByPk(req.params.id_usuario);
+    if (!usuario) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+
+    const perfil = await PerfilEmpresario.findOne({ where: { id_usuario: req.params.id_usuario } });
+    
+    // Devolvemos la estructura combinada para el frontend
+    res.status(200).json({ 
+      success: true, 
+      data: {
+        nombre: usuario.nombre,
+        cedula: usuario.cedula,
+        sitio_web: perfil?.sitio_web || '',
+        sector: perfil?.sector || '',
+        descripcion: perfil?.descripcion || '',
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.updateProfileByUserId = async (req, res) => {
+  try {
+    const { nombre, cedula, sitio_web, sector, descripcion } = req.body;
+    const id_usuario = req.params.id_usuario;
+
+    // Actualizamos Usuario
+    await Usuario.update({ nombre, cedula }, { where: { id_usuario } });
+
+    // Actualizamos PerfilEmpresario
+    await PerfilEmpresario.update(
+      { sitio_web, sector, descripcion },
+      { where: { id_usuario } }
+    );
+
+    res.status(200).json({ success: true, message: 'Perfil de empresa actualizado correctamente' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

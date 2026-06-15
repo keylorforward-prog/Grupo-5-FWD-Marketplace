@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../Controllers/notificacionController');
+const { verifyToken } = require('../Middleware/authMiddleware');
 
 /**
  * @swagger
@@ -20,6 +21,20 @@ const controller = require('../Controllers/notificacionController');
  *         description: Lista de Notificacion
  */
 router.get('/', controller.getAll);
+
+/**
+ * @swagger
+ * /api/notificaciones/mis-notificaciones:
+ *   get:
+ *     summary: Obtener las notificaciones del usuario autenticado
+ *     tags: [Notificacion]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de notificaciones del usuario
+ */
+router.get('/mis-notificaciones', verifyToken, controller.getMisNotificaciones);
 
 /**
  * @swagger
