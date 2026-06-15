@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import RutaProtegida from './RutaProtegida';
 import RedirectorRaiz from './RedirectorRaiz';
 import { RUTAS } from './rutas';
-
 // Autenticación
 import LoginPage from '../pages/auth/Login/LoginPage';
 import RegisterPage from '../pages/auth/Registro/RegisterPage';
@@ -106,7 +105,7 @@ export default function Routing() {
             </RutaProtegida>
           }
         />
-        
+
         {/* Subrutas de Empresa Dashboard */}
         <Route path="/DashboardEmpresario/perfil" element={<RutaProtegida rolPermitido="empresa"><PerfilEmpresa /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/proyectos" element={<RutaProtegida rolPermitido="empresa"><ProyectosEmpresario /></RutaProtegida>} />
@@ -122,7 +121,7 @@ export default function Routing() {
         <Route path="/DashboardEmpresario/publicar-proyecto" element={<RutaProtegida rolPermitido="empresa"><PublicarProyecto /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/crear-proyecto-ia" element={<RutaProtegida rolPermitido="empresa"><CrearProyectoIA /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/configuracion" element={<RutaProtegida rolPermitido="empresa"><ConfiguracionEmpresario /></RutaProtegida>} />
-        
+
         <Route
           path={RUTAS.empresaPostulaciones}
           element={

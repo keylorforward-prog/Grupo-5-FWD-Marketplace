@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../../../services/authService';
 import { useAuth } from '../../../../context/AuthContext';
-import { obtenerRol, rutaDashboardDeRol, RUTAS } from '../../../../routes/rutas';
+import { obtenerRol, rutaDashboardDeRol, RUTAS } from '../../../../routes/rutas.js';
 import "../../AuthPages.css";
 
 const LoginForm = ({ onSwitchMode }) => {
