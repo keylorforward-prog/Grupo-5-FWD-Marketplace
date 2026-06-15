@@ -188,11 +188,38 @@ export default function CrearProyectoIA() {
 
   function handlePublish() {
     if (!extracted) return;
-    sessionStorage.setItem('agent_project_draft', JSON.stringify(extracted));
-    if (conversacionId) {
-      sessionStorage.setItem('agent_conversacion_id', String(conversacionId));
+
+    const plazoDias =
+      extracted.duration_weeks <= 2 ? '5'
+      : extracted.duration_weeks <= 4 ? '15'
+      : '30';
+
+    const presupuestoMin =
+      extracted.budget_min > 0
+        ? Math.max(extracted.budget_min * 520, 100000)
+        : 100000;
+
+    const presupuestoMax =
+      extracted.budget_max > 0 ? extracted.budget_max * 520 : '';
+
+    let descripcion = extracted.description;
+    if (descripcion.length < 100) {
+      descripcion = descripcion + '\n\n' + extracted.raw_requirements;
     }
-    navigate('/DashboardEmpresario/publicar-proyecto?from=agent');
+
+    const datosPrecargados = {
+      titulo: extracted.title.slice(0, 200),
+      descripcion,
+      tecnologias_requeridas: extracted.stack.join(', '),
+      presupuesto_min: String(presupuestoMin),
+      presupuesto_max: presupuestoMax ? String(presupuestoMax) : '',
+      plazo_dias: plazoDias,
+      usar_ia: 'SI',
+    };
+
+    navigate('/DashboardEmpresario/publicar-proyecto', {
+      state: { datosAgente: datosPrecargados },
+    });
   }
 
   return (
