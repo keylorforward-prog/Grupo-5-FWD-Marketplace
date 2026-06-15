@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bookmark, ArrowUpRight, Clock, DollarSign } from 'lucide-react';
+import { Bookmark, Send, Clock, DollarSign } from 'lucide-react';
 
 const formatoMoneda = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -14,9 +14,11 @@ const formatearEntrega = (min, max) => `${min} – ${max} días`;
 
 function TarjetaProyecto({ proyecto }) {
   const [guardado, setGuardado] = useState(false);
+  const [postulado, setPostulado] = useState(false);
 
-  const verDetalle = () => {
-    window.alert(`Próximamente: detalle de "${proyecto.titulo}"`);
+  const manejarPostularse = () => {
+    setPostulado(true);
+    window.alert(`✅ Te has postulado a "${proyecto.titulo}" exitosamente.`);
   };
 
   return (
@@ -72,9 +74,14 @@ function TarjetaProyecto({ proyecto }) {
             </span>
           </div>
         </div>
-        <button type="button" className="botonDetalle" onClick={verDetalle}>
-          Ver detalle
-          <ArrowUpRight size={14} />
+        <button
+          type="button"
+          className={`botonDetalle ${postulado ? 'postulado' : ''}`}
+          onClick={manejarPostularse}
+          disabled={postulado}
+        >
+          <Send size={14} />
+          {postulado ? 'Postulado ✓' : 'Postularme'}
         </button>
       </div>
     </article>
