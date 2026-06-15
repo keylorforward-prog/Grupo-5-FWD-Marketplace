@@ -6,11 +6,11 @@ const RegisterPage = () => {
     <div className="auth-split">
       {/* ── Brand Panel (Left) ── */}
       <div className="auth-brand-panel">
-        <div className="brand-logo-row">
-          <div className="brand-logo-circle">
-            <img src="/Imgs/IconoFWD.png" alt="FWD Logo" />
+        <div className="brand-logo-row flex items-center gap-3">
+          <div className="brand-logo-circle w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-sm">
+            <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis.svg" alt="FWD Logo" className="w-8 h-8 object-contain" />
           </div>
-          <span className="brand-logo-text">FWD Junior</span>
+          <span className="brand-logo-text text-white font-bold text-xl">FWD Junior</span>
         </div>
 
         <div className="brand-heading">
@@ -29,9 +29,9 @@ const RegisterPage = () => {
 
         <div className="brand-social-proof">
           <div className="avatar-group">
-            <img src="/Imgs/ProfileDefaultImage.png" alt="Dev 1" />
-            <img src="/Imgs/ProfileDefaultImage.png" alt="Dev 2" />
-            <img src="/Imgs/ProfileDefaultImage.png" alt="Dev 3" />
+            <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="Dev 1" />
+            <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="Dev 2" />
+            <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="Dev 3" />
           </div>
           <span className="social-proof-text">
             <strong>+2,500</strong> desarrolladores ya están creciendo con nosotros

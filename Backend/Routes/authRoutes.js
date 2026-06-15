@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
+const jwt = require('jsonwebtoken');
+const config = require('../Config/config');
 const { register, login, logout, me } = require('../Controllers/authController');
 const { verifyToken } = require('../Middleware/authMiddleware');
 const multer = require('multer');
@@ -144,14 +146,33 @@ router.get(
     failureRedirect: '/login',
     session: false
   }),
-  (req, res) => {
-    console.log('========== REQ.USER ==========');
-    console.log(req.user);
+  async (req, res) => {
+    try {
 
-    res.json({
-      success: true,
-      profile: req.user
-    });
+      const token = jwt.sign(
+        {
+          id: req.user.id_usuario,
+          email: req.user.correo,
+          rol: req.user.rol
+        },
+        config.jwt.secret,
+        {
+          expiresIn: config.jwt.expiresIn
+        }
+      );
+
+      res.redirect(
+        `${process.env.FRONTEND_URL}/auth/callback?token=${token}`
+      );
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        success: false,
+        message: 'Error generando token'
+      });
+    }
   }
 );
 

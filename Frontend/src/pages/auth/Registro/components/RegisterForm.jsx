@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../../../services/authService';
+import { RUTAS } from '../../../../routes/rutas';
 import '../../AuthPages.css';
 
 const RegisterForm = ({ onSwitchMode }) => {
@@ -30,6 +31,13 @@ const RegisterForm = ({ onSwitchMode }) => {
       setError('Por favor completa todos los campos.');
       return;
     }
+    
+    // Validación de formato de cédula: debe contener guion
+    if (!cedula.includes('-')) {
+      setError('La cédula debe incluir el guion (-). Ejemplo: 1-2342');
+      return;
+    }
+    
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.');
       return;
@@ -48,7 +56,7 @@ const RegisterForm = ({ onSwitchMode }) => {
       if (data.success && data.pendingApproval) {
         setSuccessMsg(data.message);
         // Redirigir al login después de 4 segundos
-        setTimeout(() => navigate('/'), 4000);
+        setTimeout(() => navigate(RUTAS.login), 4000);
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Error al registrarse. Intenta de nuevo.';
@@ -146,7 +154,7 @@ const RegisterForm = ({ onSwitchMode }) => {
 
         {/* Cedula */}
         <div className="form-group">
-          <label htmlFor="reg-cedula" className="form-label">Cédula</label>
+          <label htmlFor="reg-cedula" className="form-label">Cédula <span style={{ color: '#1B6CA8', fontWeight: 500 }}>(incluir guion)</span></label>
           <div className="input-wrapper">
             <span className="input-icon">🆔</span>
             <input
@@ -155,7 +163,7 @@ const RegisterForm = ({ onSwitchMode }) => {
               name="cedula"
               value={form.cedula}
               onChange={handleChange}
-              placeholder="1‑2345‑6789"
+              placeholder="1-2342"
               className="form-input has-icon"
               required
             />
@@ -337,7 +345,7 @@ const RegisterForm = ({ onSwitchMode }) => {
       {/* Footer */}
       <div className="auth-footer">
         ¿Ya tienes cuenta?{' '}
-        <button type="button" className="switch-mode-btn" onClick={onSwitchMode}>Iniciar sesión</button>
+        <Link to={RUTAS.login}>Iniciar sesión</Link>
       </div>
     </div>
   );

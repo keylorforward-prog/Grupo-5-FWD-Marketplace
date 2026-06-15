@@ -1,10 +1,53 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 @source "../src/**/*.{js,jsx,ts,tsx}";
 
-:root {
-  /* ---- FWD brand palette ---- */
-  --primary: #0a6cb9;
+@theme {
+  /* ── Paleta FWD (debe vivir aquí para que Tailwind v4 la conserve) ── */
+  --color-primary: #008fd4;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #662d91;
+  --color-secondary-foreground: #ffffff;
+  --color-accent: #20bec6;
+  --color-accent-foreground: #1a1a1a;
+  --color-highlight: #ffcb05;
+  --color-highlight-foreground: #1a1a1a;
+  --color-warning: #f7901e;
+  --color-warning-foreground: #ffffff;
+  --color-magenta: #ec008c;
+  --color-magenta-foreground: #ffffff;
+  --color-success: #20bec6;
+  --color-destructive: #dc2626;
+
+  /* Neutrales */
+  --color-canvas: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f1f5f9;
+  --color-ink-strong: #0f172a;
+  --color-ink: #1e293b;
+  --color-ink-muted: #475569;
+  --color-ink-subtle: #94a3b8;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  /* Brand scale */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-700: #1d4ed8;
+
+  --color-background: var(--color-canvas);
+  --color-foreground: var(--color-ink-strong);
+
+  --font-sans: 'Figtree', 'Outfit', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Aliases sin prefijo `--color-` para CSS no-tailwind ──
+   Estas no las stripea Tailwind porque están fuera de @theme.
+   Son referenciadas por todos los componentes (var(--primary), var(--accent), etc).
+   Mantienen exactamente los mismos valores que el @theme block. */
+:root,
+:root[data-theme="light"] {
+  --primary: #008fd4;
   --primary-foreground: #ffffff;
   --secondary: #662d91;
   --secondary-foreground: #ffffff;
@@ -17,159 +60,36 @@
   --magenta: #ec008c;
   --magenta-foreground: #ffffff;
   --success: #20bec6;
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: #dc2626;
 
-  /* ---- FWD neutrals ---- */
-  --canvas: oklch(0.985 0.003 245);
-  --surface: oklch(1 0 0);
-  --surface-sunken: oklch(0.97 0.003 245);
-  --ink-strong: oklch(0.18 0.01 245);
-  --ink: oklch(0.3 0.01 245);
-  --ink-muted: oklch(0.52 0.01 245);
-  --ink-subtle: oklch(0.65 0.008 245);
-  --border: oklch(0.92 0.005 245);
-  --border-strong: oklch(0.85 0.005 245);
+  --canvas: #f8fafc;
+  --surface: #ffffff;
+  --surface-sunken: #f1f5f9;
+  --ink-strong: #0f172a;
+  --ink: #1e293b;
+  --ink-muted: #475569;
+  --ink-subtle: #94a3b8;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
 
-  /* ---- Motion ---- */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --duration-fast: 160ms;
   --duration-base: 220ms;
   --duration-slow: 320ms;
 
-  /* ---- Shadows ---- */
-  --shadow-soft: 0 1px 2px oklch(0.55 0.16 245 / 0.04), 0 4px 12px oklch(0.55 0.16 245 / 0.06);
-  --shadow-elevated: 0 4px 8px oklch(0.55 0.16 245 / 0.06), 0 16px 32px oklch(0.55 0.16 245 / 0.1);
+  --shadow-soft: 0 1px 2px rgba(0, 143, 212, 0.04), 0 4px 12px rgba(0, 143, 212, 0.06);
+  --shadow-elevated: 0 4px 8px rgba(0, 143, 212, 0.06), 0 16px 32px rgba(0, 143, 212, 0.1);
 
   --radius: 1.25rem;
 }
 
-@theme {
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e3a5f;
-  --color-brand-900: #0f1d33;
-  --color-accent: #7c3aed;
-  --color-accent-light: #a78bfa;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-surface: #f8fafc;
-  --color-surface-alt: #f1f5f9;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-
-  --color-background: var(--canvas);
-  --color-foreground: var(--ink-strong);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-highlight: var(--highlight);
-  --color-highlight-foreground: var(--highlight-foreground);
-  --color-magenta: var(--magenta);
-  --color-magenta-foreground: var(--magenta-foreground);
-  --color-destructive: var(--destructive);
-  --color-canvas: var(--canvas);
-  --color-surface-sunken: var(--surface-sunken);
-  --color-ink-strong: var(--ink-strong);
-  --color-ink: var(--ink);
-  --color-ink-muted: var(--ink-muted);
-  --color-ink-subtle: var(--ink-subtle);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-}
-:root {
-/* ---- FWD brand palette (Brand Book — hex anchored)	*/
---primary: #0a6cb9;
---primary-foreground: #ffffff;
---secondary: #662d91;
---secondary-foreground: #ffffff;
---accent: #20bec6;
---accent-foreground: #1a1a1a;
---highlight: #ffcb05;
---highlight-foreground: #1a1a1a;
---warning: #f7901e;
---warning-foreground: #ffffff;
---magenta: #ec008c;
---magenta-foreground: #ffffff;
---success: #20bec6;
---destructive: oklch(0.577 0.245 27.325);
-
-/* ---- FWD neutrals (oklch tinted toward 245° azul, chroma ≤ 0.01)	*/
---canvas: oklch(0.985 0.003 245);
---surface: oklch(1 0 0);
---surface-sunken: oklch(0.97 0.003 245);
---ink-strong: oklch(0.18 0.01 245);
---ink: oklch(0.3 0.01 245);
---ink-muted: oklch(0.52 0.01 245);
---ink-subtle: oklch(0.65 0.008 245);
---border: oklch(0.92 0.005 245);
---border-strong: oklch(0.85 0.005 245);
-
-/* ---- Motion	*/
---ease-out: cubic-bezier(0.23, 1, 0.32, 1);
---ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
---duration-fast: 160ms;
---duration-base: 220ms;
---duration-slow: 320ms;
-
-/* ---- Shadows (tinted toward 245°)	*/
---shadow-soft: 0 1px 2px oklch(0.55 0.16 245 / 0.04), 0 4px 12px oklch(0.55 0.16 245 /
-0.06);
---shadow-elevated: 0 4px 8px oklch(0.55 0.16 245 / 0.06), 0 16px 32px oklch(0.55 0.16
-245 / 0.1);
-
---radius: 1.25rem;
-}
-
-@theme inline {
-    --color-background: var(--canvas);
-    --color-foreground: var(--ink-strong);
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-highlight: var(--highlight);
-    --color-highlight-foreground: var(--highlight-foreground);
-    --color-warning: var(--warning);
-    --color-warning-foreground: var(--warning-foreground);
-    --color-magenta: var(--magenta);
-    --color-magenta-foreground: var(--magenta-foreground);
-    --color-success: var(--success);
-    --color-destructive: var(--destructive);
-    --color-canvas: var(--canvas);
-    --color-surface: var(--surface);
-    --color-surface-sunken: var(--surface-sunken);
-    --color-ink-strong: var(--ink-strong);
-    --color-ink: var(--ink);
-    --color-ink-muted: var(--ink-muted);
-    --color-ink-subtle: var(--ink-subtle);
-    --color-border: var(--border);
-    --color-border-strong: var(--border-strong);
-    --color-surface-alt: var(--surface-sunken);
-    --color-brand-50: oklch(0.96 0.02 245);
-    --color-brand-100: oklch(0.93 0.04 245);
-    --color-brand-700: oklch(0.4 0.1 245);
-    --color-danger: var(--destructive);
-
-    --font-sans: 'Inter', sans-serif;
-    --font-body: 'Inter', sans-serif;
-    --font-heading: 'Inter', sans-serif;
-}
 
 @layer base {
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Figtree', sans-serif;
     background: var(--color-surface);
     color: var(--color-ink-strong);
     -webkit-font-smoothing: antialiased;
@@ -237,6 +157,169 @@
 
 .animate-in {
   animation: fadeIn 0.15s ease-out;
+}
+
+/* ─── Animaciones FWD (sutiles, profesionales) ─────────────── */
+
+@keyframes fwdFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fwdFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fwdSlideRight {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fwdScaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fwdBlobFlote {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(20px, -25px) scale(1.05); }
+  66%      { transform: translate(-15px, 15px) scale(0.97); }
+}
+
+@keyframes fwdPulso {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--magenta) 60%, transparent); }
+  50%      { box-shadow: 0 0 0 8px color-mix(in srgb, var(--magenta) 0%, transparent); }
+}
+
+@keyframes fwdShimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+@keyframes fwdGradiente {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+@keyframes fwdRotacionSuave {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Utilidades aplicables a cualquier elemento */
+.fwd-animar-entrada {
+  animation: fwdFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.fwd-animar-fade {
+  animation: fwdFadeIn 0.4s ease-out both;
+}
+
+.fwd-animar-slide {
+  animation: fwdSlideRight 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.fwd-animar-pop {
+  animation: fwdScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Stagger automático: aplicar al contenedor para que sus hijos entren escalonados */
+.fwd-stagger > * {
+  animation: fwdFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.fwd-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.fwd-stagger > *:nth-child(2) { animation-delay: 0.12s; }
+.fwd-stagger > *:nth-child(3) { animation-delay: 0.19s; }
+.fwd-stagger > *:nth-child(4) { animation-delay: 0.26s; }
+.fwd-stagger > *:nth-child(5) { animation-delay: 0.33s; }
+.fwd-stagger > *:nth-child(6) { animation-delay: 0.40s; }
+.fwd-stagger > *:nth-child(7) { animation-delay: 0.47s; }
+.fwd-stagger > *:nth-child(8) { animation-delay: 0.54s; }
+
+/* Fondo decorativo con blobs FWD: aplicar al body de la página */
+.fwd-fondo-decorativo {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.fwd-fondo-decorativo::before,
+.fwd-fondo-decorativo::after {
+  content: '';
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.35;
+  animation: fwdBlobFlote 18s ease-in-out infinite;
+}
+
+.fwd-fondo-decorativo::before {
+  top: -100px;
+  left: -120px;
+  background: radial-gradient(circle, var(--primary), transparent 70%);
+}
+
+.fwd-fondo-decorativo::after {
+  bottom: -150px;
+  right: -120px;
+  background: radial-gradient(circle, var(--magenta), transparent 70%);
+  animation-delay: -9s;
+}
+
+/* Badge con pulso (notificaciones) */
+.fwd-pulso {
+  animation: fwdPulso 2.2s ease-out infinite;
+}
+
+/* Texto con gradiente animado */
+.fwd-texto-gradiente {
+  background: linear-gradient(120deg, var(--primary), var(--accent), var(--secondary), var(--primary));
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fwdGradiente 8s ease infinite;
+}
+
+/* Skeleton shimmer */
+.fwd-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-sunken) 0%,
+    var(--border) 50%,
+    var(--surface-sunken) 100%
+  );
+  background-size: 200% 100%;
+  animation: fwdShimmer 1.6s linear infinite;
+  border-radius: 8px;
+}
+
+/* Hover lift profesional para cards */
+.fwd-lift {
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+
+.fwd-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* Respetar prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ─── Premium checkbox ──────────────────────────────────────── */
