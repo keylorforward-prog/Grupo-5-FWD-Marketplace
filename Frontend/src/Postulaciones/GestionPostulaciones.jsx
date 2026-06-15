@@ -1,9 +1,17 @@
 import { useState, useMemo, useCallback } from 'react';
+Frontend/src/Postulaciones/GestionPostulaciones.jsx
 import { Filter, ChevronLeft, ChevronRight, Users, UserPlus, ClipboardCheck, Award } from 'lucide-react';
 import { mockCandidates } from '../data/mockCandidates';
 import Sidebar from '../Components/layout/Sidebar';
 import CandidateRow from '../Components/postulaciones/CandidateRow';
 import BulkActions from '../Components/postulaciones/BulkActions';
+
+import { Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { mockCandidates } from '../../../data/mockCandidates';
+import Sidebar from '../../../components/layout/Sidebar';
+import CandidateRow from '../../../components/postulaciones/CandidateRow';
+import BulkActions from '../../../components/postulaciones/BulkActions';
+Frontend/src/pages/empresa/Postulaciones/GestionPostulaciones.jsx
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 10, 15, 25];
 
@@ -233,7 +241,20 @@ export default function GestionPostulaciones() {
                 <thead>
                   <tr className="border-b border-gray-100 bg-[#F8FAFC]">
                     <th className="py-4 pl-6 pr-4 text-left text-xs font-semibold text-gray-500 w-1/4">
-                      Candidato / Junior
+                      <label className="inline-flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={allPageSelected}
+                          onChange={toggleSelectAll}
+                          aria-label={
+                            somePageSelected || allPageSelected
+                              ? 'Deseleccionar candidatos de esta página'
+                              : 'Seleccionar candidatos de esta página'
+                          }
+                          className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                        />
+                        Candidato / Junior
+                      </label>
                     </th>
                     <th className="py-4 px-4 text-left text-xs font-semibold text-gray-500 w-1/4">
                       Stack Principal
@@ -267,9 +288,26 @@ export default function GestionPostulaciones() {
 
             {/* Pagination */}
             <div className="flex items-center justify-between px-6 py-5 border-t border-gray-100 bg-white">
-              <p className="text-xs text-gray-500">
-                Mostrando {filtered.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, filtered.length)} de {filtered.length} candidatos
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-xs text-gray-500">
+                  Mostrando {filtered.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, filtered.length)} de {filtered.length} candidatos
+                </p>
+                <select
+                  value={itemsPerPage}
+                  onChange={(event) => {
+                    setItemsPerPage(Number(event.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                  aria-label="Candidatos por página"
+                >
+                  {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option} por página
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div className="flex items-center gap-1.5">
                 <button

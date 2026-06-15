@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 const { register, login, logout, me } = require('../Controllers/authController');
 const { verifyToken } = require('../Middleware/authMiddleware');
 const multer = require('multer');
@@ -130,5 +131,28 @@ router.post('/logout', logout);
  *         description: Token inválido o expirado
  */
 router.get('/me', verifyToken, me);
+router.get(
+  '/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })
+);
+
+router.get(
+  '/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/login',
+    session: false
+  }),
+  (req, res) => {
+    console.log('========== REQ.USER ==========');
+    console.log(req.user);
+
+    res.json({
+      success: true,
+      profile: req.user
+    });
+  }
+);
 
 module.exports = router;

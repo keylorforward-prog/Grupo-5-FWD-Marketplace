@@ -6,6 +6,8 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./Config/swagger');
 const sequelize = require('./Config/db');
 const config = require('./Config/config');
+const session = require('express-session');
+const passport = require('./Config/passport');
 
 // ── Rutas ──────────────────────────────────────────────────────────────────────
 const authRoutes = require('./Routes/authRoutes');
@@ -42,6 +44,24 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Configuración de session
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'fwd-marketplace-session',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// Configuración de passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+
+
+
 
 // ── Swagger docs ───────────────────────────────────────────────────────────────
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -85,8 +105,14 @@ app.use((req, res) => {
 
 // ── Error global handler ───────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
-  console.error('Error no manejado:', err);
-  res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  console.error('========== ERROR NO MANEJADO ==========');
+  console.error(err);
+  console.error(err.stack);
+
+  res.status(500).json({
+    success: false,
+    message: 'Error interno del servidor'
+  });
 });
 
 // ── Inicio ─────────────────────────────────────────────────────────────────────
