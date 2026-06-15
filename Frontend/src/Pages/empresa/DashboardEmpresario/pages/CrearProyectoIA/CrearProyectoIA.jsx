@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
 import { useAuth } from '../../../../../context/AuthContext';
 import DashboardLayout from '../../components/DashboardLayout';
 import './CrearProyectoIA.css';
@@ -210,17 +209,6 @@ export default function CrearProyectoIA() {
 
       <div className="de-panel" style={{ padding: 0, overflow: 'hidden' }}>
 
-        {/* Header del agente */}
-        <div className="cia-header">
-          <div className="cia-header-dot">
-            <Sparkles size={16} />
-          </div>
-          <div className="cia-header-info">
-            <span className="cia-header-name">Agente FWD</span>
-            <span className="cia-header-status">En línea</span>
-          </div>
-        </div>
-
         <div
           className="cia-chat-area"
           ref={chatContainerRef}
@@ -233,11 +221,6 @@ export default function CrearProyectoIA() {
               key={i}
               className={`cia-msg-row ${msg.role === 'user' ? 'cia-msg-row--user' : 'cia-msg-row--agent'}`}
             >
-              {msg.role === 'assistant' && (
-                <div className="cia-agent-avatar">
-                  <Sparkles size={13} />
-                </div>
-              )}
               <span
                 className={`cia-bubble ${msg.role === 'user' ? 'cia-bubble--user' : 'cia-bubble--agent'}`}
               >
@@ -248,9 +231,6 @@ export default function CrearProyectoIA() {
 
           {loading && (
             <div className="cia-msg-row cia-msg-row--agent">
-              <div className="cia-agent-avatar">
-                <Sparkles size={13} />
-              </div>
               <span className="cia-bubble cia-bubble--agent cia-bubble--thinking">
                 Pensando
                 <span className="cia-dots">
