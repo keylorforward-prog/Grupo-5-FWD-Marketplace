@@ -5,10 +5,11 @@ import {
   Search, Bell, MoreVertical, Clock, AlertCircle, Filter, X, CheckCircle, XCircle, Sun, Moon
 } from 'lucide-react';
 
-import SidebarItem from '../../components/SidebarItem';
-import StatCard from '../../components/StatCard';
-import StatusBadge from '../../components/StatusBadge';
-import DashboardChart from '../../components/DashboardChart';
+// Asegúrate de que los nombres coincidan exactamente con los archivos de tu carpeta
+import SidebarItem from '../../components/comun/ElementoBarraLateral';
+import StatCard from '../../components/comun/TarjetaEstadistica';
+import StatusBadge from '../../components/comun/InsigniaEstado';
+import DashboardChart from '../../components/comun/DashboardChart'; 
 import logoFwd from '../../assets/logo-fwd.png';
 
 // ============================================================================

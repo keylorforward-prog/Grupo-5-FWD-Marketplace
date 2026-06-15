@@ -10,9 +10,11 @@ import { obtenerRol, rutaDashboardDeRol, RUTAS } from './rutas';
  * Cuando el backend esté listo, cambiar `requerirSesion` a true.
  *
  * Props:
- *  - rolPermitido?: 'estudiante' | 'empresa' | 'admin' | array de roles
+ * - rolPermitido?: 'estudiante' | 'empresa' | 'admin' | array de roles
  */
-const REQUERIR_SESION = true;
+
+// CAMBIO APLICADO: false para permitir la visualización del UI en etapa de desarrollo
+const REQUERIR_SESION = false; 
 
 function RutaProtegida({ children, rolPermitido }) {
   const { isAuthenticated, loading, user } = useAuth();
