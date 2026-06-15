@@ -6,7 +6,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./Config/swagger');
 const sequelize = require('./Config/db');
 const config = require('./Config/config');
-
+const { ConversacionIA } = require('./Models');
 // ── Rutas ──────────────────────────────────────────────────────────────────────
 const authRoutes = require('./Routes/authRoutes');
 const usuarioRoutes = require('./Routes/usuarioRoutes');
@@ -30,6 +30,8 @@ const notificacionRoutes = require('./Routes/notificacionRoutes');
 const ofertaRoutes = require('./Routes/ofertaRoutes');
 const catalogoSectorRoutes = require('./Routes/catalogoSectorRoutes');
 const dashboardEmpresarioRoutes = require('./Routes/dashboardEmpresarioRoutes');
+const agentRoutes = require('./Routes/agentRoutes');
+const conversacionIARoutes = require('./Routes/conversacionIARoutes');
 const dashboardEgresadoRoutes = require('./Routes/dashboardEgresadoRoutes');
 
 const app = express();
@@ -71,6 +73,8 @@ app.use('/api/notificaciones', notificacionRoutes);
 app.use('/api/ofertas', ofertaRoutes);
 app.use('/api/catalogo-sectores', catalogoSectorRoutes);
 app.use('/api/dashboard-empresario', dashboardEmpresarioRoutes);
+app.use('/api/agent', agentRoutes);
+app.use('/api/conversaciones-ia', conversacionIARoutes);
 app.use('/api/dashboard-egresado', dashboardEgresadoRoutes);
 
 // ── Health check ───────────────────────────────────────────────────────────────
@@ -101,6 +105,19 @@ const startServer = async () => {
     // 1. Verificar conexión a la base de datos a través de Sequelize
     await sequelize.authenticate();
     console.log('✅ Conexión a la base de datos establecida correctamente con Sequelize.');
+
+    // Limpiar conversaciones en progreso de IA al inicio
+    try {
+      const [updatedRows] = await ConversacionIA.update(
+        { estado: 'abandonada' },
+        { where: { estado: 'en_progreso' } }
+      );
+      if (updatedRows > 0) {
+        console.log(`🧹 Se limpiaron ${updatedRows} conversaciones de IA interrumpidas.`);
+      }
+    } catch (e) {
+      console.error('Error limpiando conversaciones de IA al inicio:', e.message);
+    }
 
     // 2. Levantar el servidor
     app.listen(PORT, () => {
