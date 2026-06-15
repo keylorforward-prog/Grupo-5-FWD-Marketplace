@@ -7,7 +7,7 @@ import { obtenerRol, rutaDashboardDeRol, RUTAS } from './rutas';
  *  - Sin sesión → /egresado/dashboard (modo dev) o /login (modo producción)
  *  - Con sesión → dashboard según su rol
  */
-const REDIRIGIR_LOGIN_SIN_SESION = false; // ⚠️ true en producción
+const REDIRIGIR_LOGIN_SIN_SESION = true; // ⚠️ true en producción
 
 function RedirectorRaiz() {
   const { isAuthenticated, loading, user } = useAuth();

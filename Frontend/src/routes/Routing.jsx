@@ -29,6 +29,13 @@ import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulac
 
 // Egresado
 import DashboardEgresado from '../pages/egresado/DashboardEgresado/DashboardEgresado';
+import InicioEgresado from '../pages/egresado/DashboardEgresado/pages/Inicio/Inicio';
+import PostulacionesEgresado from '../pages/egresado/DashboardEgresado/pages/Postulaciones/Postulaciones';
+import MisProyectosEgresado from '../pages/egresado/DashboardEgresado/pages/Proyectos/MisProyectos';
+import HistorialEgresado from '../pages/egresado/DashboardEgresado/pages/Historial/Historial';
+import MensajesEgresado from '../pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
+import NotificacionesEgresado from '../pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
+import ExplorarProyectos from '../pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
 import PerfilEgresado from '../pages/egresado/PerfilEgresado/PerfilEgresado';
 import ConfiguracionEgresado from '../pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
 
@@ -60,7 +67,15 @@ export default function Routing() {
               <DashboardEgresado />
             </RutaProtegida>
           }
-        />
+        >
+          <Route index element={<InicioEgresado />} />
+          <Route path="explorar" element={<ExplorarProyectos />} />
+          <Route path="postulaciones" element={<PostulacionesEgresado />} />
+          <Route path="proyectos" element={<MisProyectosEgresado />} />
+          <Route path="historial" element={<HistorialEgresado />} />
+          <Route path="mensajes" element={<MensajesEgresado />} />
+          <Route path="notificaciones" element={<NotificacionesEgresado />} />
+        </Route>
         <Route
           path={RUTAS.egresadoPerfil}
           element={
