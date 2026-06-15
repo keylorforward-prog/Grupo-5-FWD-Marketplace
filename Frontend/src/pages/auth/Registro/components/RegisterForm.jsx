@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { User, Mail, CreditCard, Tag, Smartphone, GraduationCap, Building2, Factory, FileText, Lock, LockKeyhole, Eye, EyeOff, AlertCircle, Clock } from 'lucide-react';
 import { authService } from '../../../../services/authService';
 import { RUTAS } from '../../../../routes/rutas';
 import '../../AuthPages.css';
@@ -78,7 +79,7 @@ const RegisterForm = ({ onSwitchMode }) => {
         {/* Error banner */}
         {error && (
           <div className="auth-error" role="alert">
-            <span className="error-icon">⚠️</span>
+            <AlertCircle size={16} style={{flexShrink: 0}} />
             {error}
           </div>
         )}
@@ -103,7 +104,7 @@ const RegisterForm = ({ onSwitchMode }) => {
               background: 'linear-gradient(135deg, var(--highlight), var(--warning))',
               borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '1.4rem', boxShadow: '0 2px 8px color-mix(in srgb, var(--highlight) 35%, transparent)'
-            }}>⏳</div>
+            }}><Clock size={28} color="white" /></div>
             <strong style={{ fontSize: '1.05rem', display: 'block', marginBottom: '0.35rem', color: 'var(--primary)' }}>
               Cuenta creada exitosamente
             </strong>
@@ -118,7 +119,7 @@ const RegisterForm = ({ onSwitchMode }) => {
         <div className="form-group">
           <label htmlFor="reg-nombre" className="form-label">Nombre completo</label>
           <div className="input-wrapper">
-            <span className="input-icon">👤</span>
+            <User size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
             <input
               id="reg-nombre"
               type="text"
@@ -137,7 +138,7 @@ const RegisterForm = ({ onSwitchMode }) => {
         <div className="form-group">
           <label htmlFor="reg-email" className="form-label">Correo electrónico</label>
           <div className="input-wrapper">
-            <span className="input-icon">✉️</span>
+            <Mail size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
             <input
               id="reg-email"
               type="email"
@@ -156,7 +157,7 @@ const RegisterForm = ({ onSwitchMode }) => {
         <div className="form-group">
           <label htmlFor="reg-cedula" className="form-label">Cédula <span style={{ color: '#1B6CA8', fontWeight: 500 }}>(incluir guion)</span></label>
           <div className="input-wrapper">
-            <span className="input-icon">🆔</span>
+            <CreditCard size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
             <input
               id="reg-cedula"
               type="text"
@@ -172,7 +173,7 @@ const RegisterForm = ({ onSwitchMode }) => {
 
         {/* Rol */}
         <div className="form-group">
-          <label htmlFor="reg-rol" className="form-label">🏷️ Tipo de cuenta</label>
+          <label htmlFor="reg-rol" className="form-label"><Tag size={18} style={{display: 'inline-block', marginRight: '0.5em', verticalAlign: 'text-bottom'}} /> Tipo de cuenta</label>
           <div className="input-wrapper">
             <select
               id="reg-rol"
@@ -184,7 +185,6 @@ const RegisterForm = ({ onSwitchMode }) => {
             >
               <option value="ESTUDIANTE">Estudiante</option>
               <option value="EMPRESARIO">Empresario</option>
-              <option value="ADMIN">Admin</option>
             </select>
           </div>
         </div>
@@ -193,7 +193,7 @@ const RegisterForm = ({ onSwitchMode }) => {
         <div className="form-group">
           <label htmlFor="reg-telefono" className="form-label">Teléfono (WhatsApp)</label>
           <div className="input-wrapper">
-            <span className="input-icon">📱</span>
+            <Smartphone size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
             <input
               id="reg-telefono"
               type="tel"
@@ -212,7 +212,7 @@ const RegisterForm = ({ onSwitchMode }) => {
           <div className="form-group">
             <label htmlFor="reg-titulo" className="form-label">Título de FWD (PDF o Imagen)</label>
             <div className="input-wrapper">
-              <span className="input-icon">🎓</span>
+              <GraduationCap size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
               <input
                 id="reg-titulo"
                 type="file"
@@ -231,7 +231,7 @@ const RegisterForm = ({ onSwitchMode }) => {
             <div className="form-group">
               <label htmlFor="reg-tipo-empresa" className="form-label">Tipo de Empresa</label>
               <div className="input-wrapper">
-                <span className="input-icon">🏢</span>
+                <Building2 size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
                 <input
                   id="reg-tipo-empresa"
                   type="text"
@@ -247,7 +247,7 @@ const RegisterForm = ({ onSwitchMode }) => {
             <div className="form-group">
               <label htmlFor="reg-sector" className="form-label">Sector</label>
               <div className="input-wrapper">
-                <span className="input-icon">🏭</span>
+                <Factory size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
                 <input
                   id="reg-sector"
                   type="text"
@@ -265,7 +265,7 @@ const RegisterForm = ({ onSwitchMode }) => {
                 Cédula Jurídica (PDF o Imagen) <span style={{ fontSize: '0.85em', color: '#888' }}>- Opcional</span>
               </label>
               <div className="input-wrapper">
-                <span className="input-icon">📄</span>
+                <FileText size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
                 <input
                   id="reg-cedula-juridica"
                   type="file"
@@ -283,7 +283,7 @@ const RegisterForm = ({ onSwitchMode }) => {
         <div className="form-group">
           <label htmlFor="reg-password" className="form-label">Contraseña</label>
           <div className="input-wrapper">
-            <span className="input-icon">🔒</span>
+            <Lock size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
             <input
               id="reg-password"
               type={showPassword ? 'text' : 'password'}
@@ -300,8 +300,9 @@ const RegisterForm = ({ onSwitchMode }) => {
               className="toggle-password"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              style={{background: 'none', border: 'none', cursor: 'pointer', padding: 0}}
             >
-              {showPassword ? '🙈' : '👁️'}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
         </div>
@@ -310,7 +311,7 @@ const RegisterForm = ({ onSwitchMode }) => {
         <div className="form-group">
           <label htmlFor="reg-confirm" className="form-label">Confirmar contraseña</label>
           <div className="input-wrapper">
-            <span className="input-icon">🔐</span>
+            <LockKeyhole size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
             <input
               id="reg-confirm"
               type={showPassword ? 'text' : 'password'}

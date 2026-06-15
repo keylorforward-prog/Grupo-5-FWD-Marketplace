@@ -330,6 +330,14 @@
   pointer-events: none;
   z-index: 1;
   color: #D1D5DB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-icon svg {
+  stroke: currentColor;
+  fill: none;
 }
 
 /* Custom styled select arrow */
