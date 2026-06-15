@@ -26,14 +26,12 @@ const proyectosIniciales = [
 const generarId = () => Date.now() + Math.floor(Math.random() * 1000);
 
 function ProyectosAcademicos() {
-  const [proyectos, setProyectos] = useState(proyectosIniciales);
+  const [proyectos, setProyectos] = useState(() => {
+    const guardado = localStorage.getItem(CLAVE_ALMACENAMIENTO);
+    return guardado ? JSON.parse(guardado) : proyectosIniciales;
+  });
   const [editandoId, setEditandoId] = useState(null);
   const [borrador, setBorrador] = useState(null);
-
-  useEffect(() => {
-    const guardado = localStorage.getItem(CLAVE_ALMACENAMIENTO);
-    if (guardado) setProyectos(JSON.parse(guardado));
-  }, []);
 
   useEffect(() => {
     localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify(proyectos));

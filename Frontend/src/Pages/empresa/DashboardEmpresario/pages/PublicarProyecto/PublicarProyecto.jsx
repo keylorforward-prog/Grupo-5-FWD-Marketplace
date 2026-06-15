@@ -2,6 +2,24 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
+import './PublicarProyecto.css';
+
+function weeksToPlazoDias(weeks) {
+  if (weeks <= 1) return 5;
+  if (weeks <= 2) return 15;
+  return 30;
+}
+
+const EMPTY_FORM = {
+  titulo: '',
+  descripcion: '',
+  tecnologias_requeridas: '',
+  usar_ia: 'NO',
+  plazo_dias: 30,
+  presupuesto_min: '',
+  presupuesto_max: '',
+  id_conversacion_ia: null,
+};
 
 const PRESUPUESTO_MINIMO = 100000;
 
@@ -72,8 +90,11 @@ export default function PublicarProyecto() {
   return (
     <DashboardLayout activePage="proyectos">
       <div className="de-page-heading">
+        <p className="de-eyebrow">Empresa</p>
         <h1>Publicar Proyecto</h1>
+        <p className="de-page-subtitle">Revisá los datos y publicá tu propuesta.</p>
       </div>
+
       <div className="de-panel">
         <div className="de-form-grid">
           <label className="de-form-field">

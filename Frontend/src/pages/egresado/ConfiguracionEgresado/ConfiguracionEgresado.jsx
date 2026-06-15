@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { User, Briefcase, Bell, Lock } from 'lucide-react';
-import LayoutEgresado from '../LayoutEgresado';
+import DashboardLayout from '../DashboardEgresado/components/DashboardLayout';
 import InformacionCuenta from './components/InformacionCuenta';
 import PreferenciasProfesionales from './components/PreferenciasProfesionales';
 import Notificaciones from './components/Notificaciones';
@@ -25,7 +25,7 @@ function ConfiguracionEgresado() {
   };
 
   return (
-    <LayoutEgresado>
+    <DashboardLayout>
       <div className="mainConfiguracion fwd-fondo-decorativo">
         <div className="cabeceraConfiguracion fwd-animar-entrada">
           <span className="kickerConfiguracion">PANEL DE PREFERENCIAS</span>
@@ -70,7 +70,7 @@ function ConfiguracionEgresado() {
           </div>
         </div>
       </div>
-    </LayoutEgresado>
+    </DashboardLayout>
   );
 }
 

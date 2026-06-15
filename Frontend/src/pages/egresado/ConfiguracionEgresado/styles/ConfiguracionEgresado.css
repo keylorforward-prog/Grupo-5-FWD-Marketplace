@@ -5,7 +5,7 @@
 .mainConfiguracion {
   padding: 48px 48px 60px;
   background-color: var(--surface-sunken);
-  min-height: calc(100vh - 70px);
+  min-height: 100%;
 }
 
 .cabeceraConfiguracion {
