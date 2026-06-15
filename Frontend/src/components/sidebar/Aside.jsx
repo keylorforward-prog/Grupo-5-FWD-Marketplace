@@ -11,10 +11,11 @@ const usuarioPorDefecto = {
 };
 
 const itemsPorDefecto = [
-  { etiqueta: 'Explorar', icono: Compass, ruta: RUTAS.egresadoDashboard },
+  { etiqueta: 'Dashboard', icono: Compass, ruta: RUTAS.egresadoDashboard },
   { etiqueta: 'Mi Perfil', icono: User, ruta: RUTAS.egresadoPerfil },
-  { etiqueta: 'Mis Postulaciones', icono: FolderKanban, ruta: RUTAS.egresadoPerfil },
-  { etiqueta: 'Mensajes', icono: MessageCircle, ruta: RUTAS.mensajes },
+  { etiqueta: 'Mis Postulaciones', icono: FolderKanban, ruta: RUTAS.egresadoPostulaciones },
+  { etiqueta: 'Mis Proyectos', icono: FolderKanban, ruta: RUTAS.egresadoProyectos },
+  { etiqueta: 'Mensajes', icono: MessageCircle, ruta: RUTAS.egresadoMensajes },
   { etiqueta: 'Configuración', icono: Settings, ruta: RUTAS.egresadoConfiguracion },
 ];
 
