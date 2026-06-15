@@ -9,6 +9,7 @@ export const RUTAS = {
   login: '/login',
   loginAdmin: '/login/admin',
   registro: '/registro',
+  googleCallback: '/auth/callback',
 
   // Egresado
   egresado: '/egresado',

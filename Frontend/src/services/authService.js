@@ -1,4 +1,19 @@
-import apiClient from './apiClient';
+import axios from 'axios';
+
+export const api = axios.create({
+  baseURL: '/api',
+  withCredentials: true, // Envía/recibe cookies httpOnly
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// Interceptor: agrega el token JWT en cada petición
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const authService = {
   /**
@@ -39,10 +54,24 @@ export const authService = {
   /**
    * Obtener datos del usuario autenticado (valida el token)
    */
-  async getMe(token) {
-    const { data } = await apiClient.get('/auth/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  async getMe() {
+    const { data } = await apiClient.get('/auth/me');
+    return data;
+  },
+
+  /**
+   * Callback de Google - retorna user y token después de autenticarse con Google
+   */
+  async handleGoogleCallback() {
+    const { data } = await apiClient.get('/auth/me');
+    return data;
+  },
+
+  /**
+   * Actualizar contraseña
+   */
+  async updatePassword({ currentPassword, newPassword }) {
+    const { data } = await api.put('/auth/update-password', { currentPassword, newPassword });
     return data;
   },
 };

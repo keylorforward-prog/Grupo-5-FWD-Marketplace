@@ -21,6 +21,10 @@ const controller = require('../Controllers/perfilEmpresarioController');
  */
 router.get('/', controller.getAll);
 
+// Rutas personalizadas para la configuración de empresa usando id_usuario
+router.get('/perfil/:id_usuario', controller.getProfileByUserId);
+router.put('/perfil/:id_usuario', controller.updateProfileByUserId);
+
 /**
  * @swagger
  * /api/perfiles-empresario/{id}:

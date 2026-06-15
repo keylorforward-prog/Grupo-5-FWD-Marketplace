@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
       const savedToken = localStorage.getItem('token');
       if (savedToken) {
         try {
-          const data = await authService.getMe(savedToken);
+          const data = await authService.getMe();
           setUser(data.user);
           setToken(savedToken);
         } catch {

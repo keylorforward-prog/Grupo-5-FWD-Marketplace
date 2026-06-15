@@ -3,11 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import RutaProtegida from './RutaProtegida';
 import RedirectorRaiz from './RedirectorRaiz';
 import { RUTAS } from './rutas';
-
 // Autenticación
 import LoginPage from '../pages/auth/Login/LoginPage';
 import RegisterPage from '../pages/auth/Registro/RegisterPage';
 import AdminLogin from '../pages/auth/AdminLogin/AdminLogin';
+import GoogleCallback from '../pages/auth/GoogleCallback';
 
 // Empresa
 import DashboardEmpresario from '../pages/empresa/DashboardEmpresario/DashboardEmpresario';
@@ -26,6 +26,8 @@ import CrearProyectoIA from '../pages/empresa/DashboardEmpresario/pages/CrearPro
 import ConfiguracionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
 import PerfilEmpresa from '../pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
 import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
+import AdminProfile from '../pages/admin/AdminProfile';
+import SettingsEmpresa from '../pages/empresa/SettingsEmpresa/SettingsEmpresa';
 
 // Egresado
 import DashboardEgresado from '../pages/egresado/DashboardEgresado/DashboardEgresado';
@@ -39,8 +41,6 @@ import ExplorarProyectos from '../pages/egresado/DashboardEgresado/pages/Explora
 import PerfilEgresado from '../pages/egresado/PerfilEgresado/PerfilEgresado';
 import ConfiguracionEgresado from '../pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
 
-// Admin
-import AdminProfile from '../pages/admin/AdminProfile';
 
 // Comunes
 import Proximamente from '../pages/comun/Proximamente';
@@ -57,7 +57,18 @@ export default function Routing() {
         <Route path={RUTAS.login} element={<LoginPage />} />
         <Route path={RUTAS.loginAdmin} element={<AdminLogin />} />
         <Route path={RUTAS.registro} element={<RegisterPage />} />
+        <Route path={RUTAS.googleCallback} element={<GoogleCallback />} />
 
+        {/* Dashboard Empresa */}
+        <Route path="/DashboardEmpresario" element={<DashboardEmpresario />} />
+        <Route path="/postulaciones" element={<GestionPostulaciones />} />
+        <Route path="/admin" element={<AdminProfile />} />
+        <Route path="/SettingsEmpresa" element={<SettingsEmpresa />} />
+
+        {/* Dashboard Egresado */}
+        <Route path="/DashboardEgresado" element={<DashboardEgresado />} />
+        <Route path="/PerfilEgresado" element={<PerfilEgresado />} />
+        {/* Rutas Protegidas */}
         {/* ── Egresado ───────────────────────────────────────────────── */}
         <Route path={RUTAS.egresado} element={<Navigate to={RUTAS.egresadoDashboard} replace />} />
         <Route
@@ -104,7 +115,7 @@ export default function Routing() {
             </RutaProtegida>
           }
         />
-        
+
         {/* Subrutas de Empresa Dashboard */}
         <Route path="/DashboardEmpresario/perfil" element={<RutaProtegida rolPermitido="empresa"><PerfilEmpresa /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/proyectos" element={<RutaProtegida rolPermitido="empresa"><ProyectosEmpresario /></RutaProtegida>} />
@@ -120,7 +131,7 @@ export default function Routing() {
         <Route path="/DashboardEmpresario/publicar-proyecto" element={<RutaProtegida rolPermitido="empresa"><PublicarProyecto /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/crear-proyecto-ia" element={<RutaProtegida rolPermitido="empresa"><CrearProyectoIA /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/configuracion" element={<RutaProtegida rolPermitido="empresa"><ConfiguracionEmpresario /></RutaProtegida>} />
-        
+
         <Route
           path={RUTAS.empresaPostulaciones}
           element={

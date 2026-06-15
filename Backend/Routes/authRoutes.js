@@ -1,5 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
+const jwt = require('jsonwebtoken');
+const config = require('../Config/config');
 const { register, login, logout, me } = require('../Controllers/authController');
 const { verifyToken } = require('../Middleware/authMiddleware');
 const multer = require('multer');
@@ -130,5 +133,47 @@ router.post('/logout', logout);
  *         description: Token inválido o expirado
  */
 router.get('/me', verifyToken, me);
+router.get(
+  '/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })
+);
+
+router.get(
+  '/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/login',
+    session: false
+  }),
+  async (req, res) => {
+    try {
+
+      const token = jwt.sign(
+        {
+          id: req.user.id_usuario,
+          email: req.user.correo,
+          rol: req.user.rol
+        },
+        config.jwt.secret,
+        {
+          expiresIn: config.jwt.expiresIn
+        }
+      );
+
+      res.redirect(
+        `${process.env.FRONTEND_URL}/auth/callback?token=${token}`
+      );
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        success: false,
+        message: 'Error generando token'
+      });
+    }
+  }
+);
 
 module.exports = router;

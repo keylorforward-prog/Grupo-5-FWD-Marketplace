@@ -40,7 +40,7 @@ const sidebarItems = [
   { key: 'historial', label: 'Historial de Proyectos', icon: History, path: '/DashboardEmpresario/historial' },
   { key: 'evaluaciones', label: 'Evaluaciones', icon: Star, path: '/DashboardEmpresario/evaluaciones' },
   { key: 'facturacion', label: 'Facturacion', icon: Receipt, path: '/DashboardEmpresario/facturacion' },
-  { key: 'configuracion', label: 'Configuracion', icon: Settings, path: '/DashboardEmpresario/configuracion' },
+  { key: 'configuracion', label: 'Configuracion', icon: Settings, path: '/SettingsEmpresa' },
 ];
 
 export default function DashboardLayout({ activePage, children }) {
