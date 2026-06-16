@@ -1130,6 +1130,7 @@
 }
 
 .de-profile-form input,
+.de-profile-form select,
 .de-profile-form textarea {
   width: 100%;
   border: 1px solid var(--border);
@@ -1146,6 +1147,7 @@
 }
 
 .de-profile-form input:focus,
+.de-profile-form select:focus,
 .de-profile-form textarea:focus {
   outline: none;
   border-color: var(--primary);
@@ -1155,6 +1157,17 @@
 
 .de-profile-form-wide {
   grid-column: 1 / -1;
+}
+
+.de-profile-validation {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--destructive) 28%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--destructive) 8%, var(--surface));
+  color: var(--destructive);
+  font-size: 0.84rem;
+  font-weight: 700;
 }
 
 .de-profile-upload-field {
