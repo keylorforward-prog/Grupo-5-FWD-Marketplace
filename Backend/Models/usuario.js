@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
     estado_admin: { type: DataTypes.ENUM('ACTIVO','INACTIVO'), allowNull: true },
     tipo_empresa: { type: DataTypes.STRING(100),allowNull: true},
     google_id: {type: DataTypes.STRING(255),allowNull: true,unique: true},provider: {type: DataTypes.ENUM('LOCAL', 'GOOGLE'),allowNull: false,defaultValue: 'LOCAL'},
-    avatar_url: {type: DataTypes.STRING(500), allowNull: true}
+    avatar_url: {type: DataTypes.STRING(500), allowNull: true},
+    motivo_suspension: {type: DataTypes.STRING(500), allowNull: true},
+    suspendido_por: {type: DataTypes.INTEGER, allowNull: true},
+    fecha_suspension: {type: DataTypes.DATE, allowNull: true}
   }, { tableName: 'usuario', timestamps: false, underscored: true, freezeTableName: true });
 };
