@@ -6,7 +6,7 @@ import './CrearProyectoIA.css';
 
 const INITIAL_MESSAGE = {
   role: 'assistant',
-  content: '¡Hola! Voy a ayudarte a publicar tu proyecto en FWD. Para arrancar, contame: ¿qué problema querés resolver?',
+  content: '¡Hola! Soy Astro, tu asistente de FWD. Voy a ayudarte a publicar tu proyecto haciéndote unas preguntas. Para arrancar, contame: ¿qué problema querés resolver?',
 };
 
 async function apiPost(path, body) {
@@ -188,11 +188,38 @@ export default function CrearProyectoIA() {
 
   function handlePublish() {
     if (!extracted) return;
-    sessionStorage.setItem('agent_project_draft', JSON.stringify(extracted));
-    if (conversacionId) {
-      sessionStorage.setItem('agent_conversacion_id', String(conversacionId));
+
+    const plazoDias =
+      extracted.duration_weeks <= 2 ? '5'
+      : extracted.duration_weeks <= 4 ? '15'
+      : '30';
+
+    const presupuestoMin =
+      extracted.budget_min > 0
+        ? Math.max(extracted.budget_min * 520, 100000)
+        : 100000;
+
+    const presupuestoMax =
+      extracted.budget_max > 0 ? extracted.budget_max * 520 : '';
+
+    let descripcion = extracted.description;
+    if (descripcion.length < 100) {
+      descripcion = descripcion + '\n\n' + extracted.raw_requirements;
     }
-    navigate('/DashboardEmpresario/publicar-proyecto?from=agent');
+
+    const datosPrecargados = {
+      titulo: extracted.title.slice(0, 200),
+      descripcion,
+      tecnologias_requeridas: extracted.stack.join(', '),
+      presupuesto_min: String(presupuestoMin),
+      presupuesto_max: presupuestoMax ? String(presupuestoMax) : '',
+      plazo_dias: plazoDias,
+      usar_ia: 'SI',
+    };
+
+    navigate('/DashboardEmpresario/publicar-proyecto', {
+      state: { datosAgente: datosPrecargados },
+    });
   }
 
   return (
@@ -209,6 +236,21 @@ export default function CrearProyectoIA() {
 
       <div className="de-panel" style={{ padding: 0, overflow: 'hidden' }}>
 
+        {/* ── Agent header ──────────────────────────────────── */}
+        <div className="cia-agent-header">
+          <div className="cia-agent-avatar">
+            <div className="cia-agent-avatar-inner">✦</div>
+          </div>
+          <div className="cia-agent-info">
+            <span className="cia-agent-name">Astro</span>
+            <span className="cia-agent-status">
+              <span className="cia-agent-status-dot" />
+              En línea
+            </span>
+          </div>
+        </div>
+
+        {/* ── Chat messages ─────────────────────────────────── */}
         <div
           className="cia-chat-area"
           ref={chatContainerRef}
@@ -216,11 +258,46 @@ export default function CrearProyectoIA() {
           aria-live="polite"
           aria-label="Conversación con el agente"
         >
+          {/* FWD watermark */}
+          <svg
+            className="cia-fwd-watermark"
+            viewBox="0 0 800 600"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+          >
+            <g fill="none" stroke="#94a3b8" strokeWidth="5" opacity="0.7">
+              {/* F */}
+              <line x1="200" y1="160" x2="200" y2="440" />
+              <line x1="200" y1="160" x2="330" y2="160" />
+              <line x1="200" y1="300" x2="300" y2="300" />
+              {/* W */}
+              <polyline points="370,160 400,440 460,260 520,440 550,160" />
+              {/* D as arrow/chevron */}
+              <path d="M590,160 L590,440 L720,300 Z" />
+              {/* Extra chevron */}
+              <path d="M660,200 L760,300 L660,400" strokeWidth="4" />
+            </g>
+          </svg>
+
           {history.map((msg, i) => (
             <div
               key={i}
               className={`cia-msg-row ${msg.role === 'user' ? 'cia-msg-row--user' : 'cia-msg-row--agent'}`}
             >
+              {/* Avatar */}
+              {msg.role === 'assistant' ? (
+                <div className="cia-msg-avatar cia-msg-avatar--agent">
+                  <div className="cia-msg-avatar--agent-inner">✦</div>
+                </div>
+              ) : (
+                <div className="cia-msg-avatar cia-msg-avatar--user">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+              )}
+
               <span
                 className={`cia-bubble ${msg.role === 'user' ? 'cia-bubble--user' : 'cia-bubble--agent'}`}
               >
@@ -231,6 +308,9 @@ export default function CrearProyectoIA() {
 
           {loading && (
             <div className="cia-msg-row cia-msg-row--agent">
+              <div className="cia-msg-avatar cia-msg-avatar--agent">
+                <div className="cia-msg-avatar--agent-inner">✦</div>
+              </div>
               <span className="cia-bubble cia-bubble--agent cia-bubble--thinking">
                 Pensando
                 <span className="cia-dots">

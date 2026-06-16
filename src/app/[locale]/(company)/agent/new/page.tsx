@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import type { AgentMessage, InterviewState, ExtractedProject } from '@/lib/agent/types';
 import { sendInterviewMessage, extractProjectData } from '@/actions/agent';
+import { publishProjectFromAgent } from '@/lib/agent/publish';
 
 const INITIAL_MESSAGE: AgentMessage = {
   role: 'assistant',
@@ -21,6 +22,8 @@ export default function AgentNewPage() {
   const [state, setState] = useState<InterviewState>('interviewing');
   const [extracted, setExtracted] = useState<ExtractedProject | null>(null);
   const [loading, setLoading] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -71,10 +74,20 @@ export default function AgentNewPage() {
     if (e.key === 'Enter') handleSend();
   }
 
-  function handlePublish() {
-    if (!extracted) return;
-    sessionStorage.setItem('agent_project_draft', JSON.stringify(extracted));
-    router.push(`/${locale}/empresa/proyectos/nuevo?from=agent`);
+  async function handlePublish() {
+    if (!extracted || publishing) return;
+    setPublishing(true);
+    setPublishError('');
+
+    const result = await publishProjectFromAgent(extracted);
+
+    if (!result.success) {
+      setPublishError(result.error);
+      setPublishing(false);
+      return;
+    }
+
+    router.push(`/${locale}/empresa/proyectos`);
   }
 
   return (
@@ -182,11 +195,18 @@ export default function AgentNewPage() {
               </div>
             )}
 
+            {publishError && (
+              <p className="text-sm text-destructive bg-destructive/10 rounded-xl px-4 py-2.5">
+                {publishError}
+              </p>
+            )}
+
             <button
               onClick={handlePublish}
-              className="bg-primary text-primary-foreground rounded-full w-full py-2.5 font-medium text-sm transition duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:opacity-90"
+              disabled={publishing}
+              className="bg-primary text-primary-foreground rounded-full w-full py-2.5 font-medium text-sm transition duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:opacity-90 disabled:opacity-50"
             >
-              Revisar y publicar
+              {publishing ? 'Publicando...' : 'Confirmar y publicar'}
             </button>
           </div>
         )}
