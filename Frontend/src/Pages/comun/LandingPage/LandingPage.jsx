@@ -90,7 +90,7 @@ export default function Routing() {
           <Route path="mensajes" element={<MensajesEgresado />} />
           <Route path="notificaciones" element={<NotificacionesEgresado />} />
         </Route>
-        
+
         <Route
           path={RUTAS.egresadoPerfil}
           element={

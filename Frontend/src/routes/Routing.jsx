@@ -73,7 +73,7 @@ export default function Routing() {
         {/* Dashboard Egresado */}
         <Route path="/DashboardEgresado" element={<DashboardEgresado />} />
         <Route path="/PerfilEgresado" element={<PerfilEgresado />} />
-        
+
         {/* Rutas Protegidas */}
         {/* ── Egresado ───────────────────────────────────────────────── */}
         <Route path={RUTAS.egresado} element={<Navigate to={RUTAS.egresadoDashboard} replace />} />
@@ -93,7 +93,7 @@ export default function Routing() {
           <Route path="mensajes" element={<MensajesEgresado />} />
           <Route path="notificaciones" element={<NotificacionesEgresado />} />
         </Route>
-        
+
         <Route
           path={RUTAS.egresadoPerfil}
           element={
