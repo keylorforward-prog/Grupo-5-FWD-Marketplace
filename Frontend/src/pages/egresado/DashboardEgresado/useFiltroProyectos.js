@@ -12,8 +12,8 @@ export function useFiltroProyectos(proyectos, filtros) {
     busqueda = '',
     categoriaActiva = 'todas',
     tecnologia = '',
-    presupuestoMin = 0,
-    presupuestoMax = Infinity,
+    presupuestoMin = '',
+    presupuestoMax = '',
     duracion = 'cualquiera',
     modalidades = [],
     orden = 'recientes',
@@ -34,8 +34,10 @@ export function useFiltroProyectos(proyectos, filtros) {
 
       if (tecnologia && !p.tecnologias.includes(tecnologia)) return false;
 
-      if (p.presupuestoMax < presupuestoMin) return false;
-      if (p.presupuestoMin > presupuestoMax) return false;
+      const pMin = Number(presupuestoMin);
+      const pMax = presupuestoMax === '' ? Infinity : Number(presupuestoMax);
+      if (Number.isFinite(pMin) && p.presupuestoMin < pMin) return false;
+      if (Number.isFinite(pMax) && p.presupuestoMax > pMax) return false;
 
       if (duracion === 'corta' && p.diasMax >= 7) return false;
       if (duracion === 'media' && (p.diasMin < 7 || p.diasMax > 14)) return false;

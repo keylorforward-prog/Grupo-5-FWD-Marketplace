@@ -72,16 +72,22 @@ function MenuUsuario({
   const alternar = () => setAbierto((a) => !a);
   const cerrar = () => setAbierto(false);
 
+  // LÓGICA DE CIERRE DE SESIÓN CORREGIDA (Senior Approach)
   const manejarCerrarSesion = async () => {
     setCerrando(true);
     try {
-      if (typeof auth?.logout === 'function') await auth.logout();
-    } catch {
-      // ignorar fallos del backend
+      if (typeof auth?.logout === 'function') {
+        await auth.logout();
+      }
+      // Barrido manual de seguridad para evitar retención de sesión
+      localStorage.removeItem('token');
+    } catch (error) {
+      console.error("Fallo al cerrar sesión:", error);
     } finally {
       setAbierto(false);
       setCerrando(false);
-      navegar(rutaLogout, { replace: true });
+      // Forzar redirección de navegador para destruir el árbol de React y caché
+      window.location.href = rutaLogout;
     }
   };
 
@@ -185,6 +191,7 @@ function MenuUsuario({
             onClick={manejarCerrarSesion}
             disabled={cerrando}
             role="menuitem"
+            style={{ cursor: 'pointer' }}
           >
             <span className="menuUsuarioItemIcono"><LogOut size={16} /></span>
             <span className="menuUsuarioItemTexto">

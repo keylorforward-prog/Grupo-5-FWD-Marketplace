@@ -1,11 +1,30 @@
+<<<<<<< HEAD
 import apiClient from './apiClient';
+=======
+import axios from 'axios';
+import apiClient from './apiClient';
+
+export const api = axios.create({
+  baseURL: '/api',
+  withCredentials: true, // Envía/recibe cookies httpOnly
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// Interceptor: agrega el token JWT en cada petición
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+>>>>>>> 4455e98d7c34f65af05144368fdd3c087ed20d0b
 
 export const authService = {
   /**
    * Registrar un nuevo usuario
    */
   async register(payload) {
-
     const formData = new FormData();
     
     Object.keys(payload).forEach(key => {
@@ -14,7 +33,8 @@ export const authService = {
       }
     });
 
-    const { data } = await apiClient.post('/auth/register', formData, {
+    // CORRECCIÓN: Uso de 'api' en lugar de 'apiClient'
+    const { data } = await api.post('/auth/register', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data;
@@ -24,7 +44,8 @@ export const authService = {
    * Iniciar sesión
    */
   async login({ email, password }) {
-    const { data } = await apiClient.post('/auth/login', { email, password });
+    // CORRECCIÓN: Uso de 'api'
+    const { data } = await api.post('/auth/login', { email, password });
     return data;
   },
 
@@ -32,7 +53,8 @@ export const authService = {
    * Cerrar sesión
    */
   async logout() {
-    const { data } = await apiClient.post('/auth/logout');
+    // CORRECCIÓN: Uso de 'api'
+    const { data } = await api.post('/auth/logout');
     return data;
   },
 
@@ -40,7 +62,8 @@ export const authService = {
    * Obtener datos del usuario autenticado (valida el token)
    */
   async getMe() {
-    const { data } = await apiClient.get('/auth/me');
+    // CORRECCIÓN: Uso de 'api'
+    const { data } = await api.get('/auth/me');
     return data;
   },
 
@@ -48,7 +71,8 @@ export const authService = {
    * Callback de Google - retorna user y token después de autenticarse con Google
    */
   async handleGoogleCallback() {
-    const { data } = await apiClient.get('/auth/me');
+    // CORRECCIÓN: Uso de 'api'
+    const { data } = await api.get('/auth/me');
     return data;
   },
 
@@ -59,7 +83,11 @@ export const authService = {
     const { data } = await apiClient.put('/auth/update-password', { currentPassword, newPassword });
     return data;
   },
+<<<<<<< HEAD
 };
 
 // Export api as apiClient to avoid breaking other imports that relied on 'api' from authService temporarily
 export const api = apiClient;
+=======
+};
+>>>>>>> 4455e98d7c34f65af05144368fdd3c087ed20d0b

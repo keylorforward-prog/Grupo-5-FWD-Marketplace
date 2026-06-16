@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
-import { api } from '../../../../services/authService';
+import apiClient from '../../../../services/apiClient';
 
 const HeaderEmpresa = () => {
   const { t, i18n } = useTranslation();
@@ -23,7 +23,7 @@ const HeaderEmpresa = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await api.get('/notificaciones/mis-notificaciones');
+        const response = await apiClient.get('/notificaciones/mis-notificaciones');
         if (response.data.success) {
           setNotifications(response.data.data);
         }

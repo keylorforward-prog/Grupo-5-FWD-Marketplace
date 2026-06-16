@@ -12,6 +12,21 @@ const client = new OpenAI({
   baseURL: 'https://api.groq.com/openai/v1',
 });
 
+async function callWithRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> {
+  let lastError: unknown;
+  for (let intento = 0; intento <= maxRetries; intento++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastError = e;
+      if (intento < maxRetries) {
+        await new Promise((r) => setTimeout(r, 500 * (intento + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
+
 function stripMarkdown(text: string): string {
   return text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
 }
@@ -21,18 +36,20 @@ export async function sendInterviewMessage(
   userMessage: string,
 ): Promise<Result<AgentResponse>> {
   try {
-    const response = await client.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      max_tokens: 300,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        ...history.map((m) => ({
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-        })),
-        { role: 'user', content: userMessage },
-      ],
-    });
+    const response = await callWithRetry(() =>
+      client.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 300,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...history.map((m) => ({
+            role: m.role as 'user' | 'assistant',
+            content: m.content,
+          })),
+          { role: 'user', content: userMessage },
+        ],
+      }),
+    );
     const text = response.choices[0].message.content ?? '';
     const state = detectState(text);
 
@@ -64,7 +81,15 @@ export async function sendInterviewMessage(
     }
 
     return ok({ message: cleanMessage(text), state });
-  } catch {
+  } catch (e) {
+    console.error('Agent error:', e);
+    const mensaje = e instanceof Error ? e.message.toLowerCase() : '';
+    if (mensaje.includes('rate') || mensaje.includes('429')) {
+      return err('El agente está recibiendo muchas consultas. Esperá unos segundos.');
+    }
+    if (mensaje.includes('timeout') || mensaje.includes('network')) {
+      return err('Hubo un problema de conexión. Intentá de nuevo.');
+    }
     return err('Algo salió mal de nuestro lado. Intentá de nuevo.');
   }
 }
@@ -77,15 +102,25 @@ export async function extractProjectData(
       .map((m) => `${m.role === 'user' ? 'Empresario' : 'Agente'}: ${m.content}`)
       .join('\n');
 
-    const response = await client.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      max_tokens: 800,
-      messages: [{ role: 'user', content: EXTRACTION_PROMPT + '\n' + historialTexto }],
-    });
+    const response = await callWithRetry(() =>
+      client.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 800,
+        messages: [{ role: 'user', content: EXTRACTION_PROMPT + '\n' + historialTexto }],
+      }),
+    );
     const text = response.choices[0].message.content ?? '';
     const data = JSON.parse(stripMarkdown(text)) as ExtractedProject;
     return ok(data);
-  } catch {
+  } catch (e) {
+    console.error('Agent error:', e);
+    const mensaje = e instanceof Error ? e.message.toLowerCase() : '';
+    if (mensaje.includes('rate') || mensaje.includes('429')) {
+      return err('El agente está recibiendo muchas consultas. Esperá unos segundos.');
+    }
+    if (mensaje.includes('timeout') || mensaje.includes('network')) {
+      return err('Hubo un problema de conexión. Intentá de nuevo.');
+    }
     return err('No se pudo procesar la información del proyecto.');
   }
 }
@@ -95,25 +130,35 @@ export async function correctProjectData(
   correction: string,
 ): Promise<Result<ExtractedProject>> {
   try {
-    const response = await client.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      max_tokens: 600,
-      messages: [
-        {
-          role: 'user',
-          content:
-            CORRECTION_PROMPT +
-            '\n' +
-            JSON.stringify(current, null, 2) +
-            '\n\nCambios: ' +
-            correction,
-        },
-      ],
-    });
+    const response = await callWithRetry(() =>
+      client.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 600,
+        messages: [
+          {
+            role: 'user',
+            content:
+              CORRECTION_PROMPT +
+              '\n' +
+              JSON.stringify(current, null, 2) +
+              '\n\nCambios: ' +
+              correction,
+          },
+        ],
+      }),
+    );
     const text = response.choices[0].message.content ?? '';
     const data = JSON.parse(stripMarkdown(text)) as ExtractedProject;
     return ok(data);
-  } catch {
+  } catch (e) {
+    console.error('Agent error:', e);
+    const mensaje = e instanceof Error ? e.message.toLowerCase() : '';
+    if (mensaje.includes('rate') || mensaje.includes('429')) {
+      return err('El agente está recibiendo muchas consultas. Esperá unos segundos.');
+    }
+    if (mensaje.includes('timeout') || mensaje.includes('network')) {
+      return err('Hubo un problema de conexión. Intentá de nuevo.');
+    }
     return err('No se pudo procesar la información del proyecto.');
   }
 }

@@ -24,11 +24,38 @@ const PERFIL_INICIAL = {
   telefono_whatsapp: '',
 };
 
+const SECTORES_COMUNES = [
+  'Tecnologia',
+  'Comercio',
+  'Educacion',
+  'Salud',
+  'Finanzas',
+  'Marketing',
+  'Turismo',
+  'Construccion',
+  'Manufactura',
+  'Servicios profesionales',
+];
+
+const SECTOR_OTRO = 'Otro';
+
 const normalizarPerfil = (perfil, usuario) => ({
   ...PERFIL_INICIAL,
   ...perfil,
   usuario: perfil?.usuario ?? usuario ?? {},
 });
+
+const normalizarWhatsapp = (valor) => {
+  const digitos = valor.replace(/\D/g, '').slice(0, 8);
+  if (digitos.length <= 4) return digitos;
+  return `${digitos.slice(0, 4)}-${digitos.slice(4)}`;
+};
+
+const obtenerSectorInicial = (sector) => {
+  if (!sector) return { seleccionado: '', otro: '' };
+  if (SECTORES_COMUNES.includes(sector)) return { seleccionado: sector, otro: '' };
+  return { seleccionado: SECTOR_OTRO, otro: sector };
+};
 
 const formatearFecha = (fecha) => {
   if (!fecha) return 'No registrada';
@@ -48,6 +75,9 @@ export default function PerfilEmpresa() {
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [sectorSeleccionado, setSectorSeleccionado] = useState('');
+  const [sectorOtro, setSectorOtro] = useState('');
+  const [errorValidacion, setErrorValidacion] = useState('');
   const [error, setError] = useState(null);
   const inputFotoRef = useRef(null);
 
@@ -65,14 +95,17 @@ export default function PerfilEmpresa() {
 
         if (!activo) return;
         const perfilNormalizado = normalizarPerfil(perfilBackend, user);
+        const sectorInicial = obtenerSectorInicial(perfilNormalizado.sector ?? '');
         setPerfil(perfilNormalizado);
         setResumen(resumenBackend ?? {});
+        setSectorSeleccionado(sectorInicial.seleccionado);
+        setSectorOtro(sectorInicial.otro);
         setBorrador({
           sector: perfilNormalizado.sector ?? '',
           descripcion: perfilNormalizado.descripcion ?? '',
           logo: perfilNormalizado.logo ?? '',
           sitio_web: perfilNormalizado.sitio_web ?? '',
-          telefono_whatsapp: perfilNormalizado.telefono_whatsapp ?? '',
+          telefono_whatsapp: normalizarWhatsapp(perfilNormalizado.telefono_whatsapp ?? ''),
         });
       } catch (err) {
         if (activo) setError(err);
@@ -122,30 +155,78 @@ export default function PerfilEmpresa() {
     setBorrador((actual) => ({ ...actual, [campo]: valor }));
   };
 
+  const actualizarWhatsapp = (valor) => {
+    actualizarCampo('telefono_whatsapp', normalizarWhatsapp(valor));
+    setErrorValidacion('');
+  };
+
+  const actualizarSectorSeleccionado = (valor) => {
+    setSectorSeleccionado(valor);
+    setErrorValidacion('');
+    if (valor !== SECTOR_OTRO) {
+      setSectorOtro('');
+      actualizarCampo('sector', valor);
+    } else {
+      actualizarCampo('sector', sectorOtro);
+    }
+  };
+
+  const actualizarSectorOtro = (valor) => {
+    setSectorOtro(valor);
+    actualizarCampo('sector', valor);
+    setErrorValidacion('');
+  };
+
   const cancelarEdicion = () => {
+    const sectorInicial = obtenerSectorInicial(perfil.sector ?? '');
+    setSectorSeleccionado(sectorInicial.seleccionado);
+    setSectorOtro(sectorInicial.otro);
+    setErrorValidacion('');
     setBorrador({
       sector: perfil.sector ?? '',
       descripcion: perfil.descripcion ?? '',
       logo: perfil.logo ?? '',
       sitio_web: perfil.sitio_web ?? '',
-      telefono_whatsapp: perfil.telefono_whatsapp ?? '',
+      telefono_whatsapp: normalizarWhatsapp(perfil.telefono_whatsapp ?? ''),
     });
     setEditando(false);
   };
 
   const guardarPerfil = async () => {
+    const sectorFinal = sectorSeleccionado === SECTOR_OTRO ? sectorOtro.trim() : sectorSeleccionado;
+    const whatsappValido = /^\d{4}-\d{4}$/.test(borrador.telefono_whatsapp);
+
+    if (!sectorFinal) {
+      setErrorValidacion('Selecciona un sector o escribe uno en Otro.');
+      return;
+    }
+
+    if (borrador.telefono_whatsapp && !whatsappValido) {
+      setErrorValidacion('El WhatsApp debe tener 8 numeros con formato 0000-0000.');
+      return;
+    }
+
     setGuardando(true);
     setError(null);
+    setErrorValidacion('');
     try {
-      const actualizado = await dashboardEmpresarioService.actualizarPerfil(borrador);
+      const actualizado = await dashboardEmpresarioService.actualizarPerfil({
+        sector: sectorFinal,
+        descripcion: borrador.descripcion,
+        sitio_web: borrador.sitio_web,
+        telefono_whatsapp: borrador.telefono_whatsapp,
+      });
       const perfilNormalizado = normalizarPerfil(actualizado, user);
+      const sectorInicial = obtenerSectorInicial(perfilNormalizado.sector ?? '');
       setPerfil(perfilNormalizado);
+      setSectorSeleccionado(sectorInicial.seleccionado);
+      setSectorOtro(sectorInicial.otro);
       setBorrador({
         sector: perfilNormalizado.sector ?? '',
         descripcion: perfilNormalizado.descripcion ?? '',
         logo: perfilNormalizado.logo ?? '',
         sitio_web: perfilNormalizado.sitio_web ?? '',
-        telefono_whatsapp: perfilNormalizado.telefono_whatsapp ?? '',
+        telefono_whatsapp: normalizarWhatsapp(perfilNormalizado.telefono_whatsapp ?? ''),
       });
       setEditando(false);
     } catch (err) {
@@ -302,19 +383,27 @@ export default function PerfilEmpresa() {
                   <div className="de-profile-form">
                     <label>
                       <span>Sector</span>
-                      <input
-                        value={borrador.sector}
-                        onChange={(e) => actualizarCampo('sector', e.target.value)}
-                        placeholder="Sector de la empresa"
-                      />
+                      <select
+                        value={sectorSeleccionado}
+                        onChange={(e) => actualizarSectorSeleccionado(e.target.value)}
+                      >
+                        <option value="">Selecciona un sector</option>
+                        {SECTORES_COMUNES.map((sector) => (
+                          <option key={sector} value={sector}>{sector}</option>
+                        ))}
+                        <option value={SECTOR_OTRO}>Otro</option>
+                      </select>
                     </label>
-                    <div className="de-profile-upload-field">
-                      <span>Logo o foto de perfil</span>
-                      <button type="button" onClick={seleccionarFoto} disabled={subiendoFoto}>
-                        <Edit3 size={15} />
-                        {subiendoFoto ? 'Subiendo...' : 'Subir imagen'}
-                      </button>
-                    </div>
+                    {sectorSeleccionado === SECTOR_OTRO && (
+                      <label>
+                        <span>Otro sector</span>
+                        <input
+                          value={sectorOtro}
+                          onChange={(e) => actualizarSectorOtro(e.target.value)}
+                          placeholder="Escribe el sector"
+                        />
+                      </label>
+                    )}
                     <label>
                       <span>Sitio web</span>
                       <input
@@ -327,10 +416,15 @@ export default function PerfilEmpresa() {
                       <span>WhatsApp</span>
                       <input
                         value={borrador.telefono_whatsapp}
-                        onChange={(e) => actualizarCampo('telefono_whatsapp', e.target.value)}
-                        placeholder="+506 0000 0000"
+                        onChange={(e) => actualizarWhatsapp(e.target.value)}
+                        inputMode="numeric"
+                        maxLength={9}
+                        placeholder="0000-0000"
                       />
                     </label>
+                    {errorValidacion && (
+                      <p className="de-profile-validation de-profile-form-wide">{errorValidacion}</p>
+                    )}
                     <label className="de-profile-form-wide">
                       <span>Descripcion</span>
                       <textarea
