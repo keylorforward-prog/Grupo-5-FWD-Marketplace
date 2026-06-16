@@ -276,6 +276,13 @@
   margin-bottom: 6px;
 }
 
+.cia-result-meta {
+  font-size: 0.85rem;
+  color: var(--ink-strong, #1a1f36);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
 .cia-result-desc {
   font-size: 0.88rem;
   color: var(--ink-muted, #64748b);
