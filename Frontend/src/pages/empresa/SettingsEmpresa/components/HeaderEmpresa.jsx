@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import apiClient from '../../../../services/apiClient';
 
 const HeaderEmpresa = () => {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   
   const [isDark, setIsDark] = useState(() => document.body.classList.contains('dark-theme'));
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -130,6 +138,26 @@ const HeaderEmpresa = () => {
                     ))}
                   </div>
                 )}
+                <button
+                  onClick={() => {
+                    setShowNotifications(false);
+                    navigate('/DashboardEmpresario/mensajes');
+                  }}
+                  style={{
+                    width: '100%',
+                    marginTop: '12px',
+                    padding: '8px',
+                    backgroundColor: 'var(--color-surface-container)',
+                    border: '1px solid var(--color-outline-variant)',
+                    borderRadius: '4px',
+                    color: 'var(--color-on-surface)',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '12px'
+                  }}
+                >
+                  Ver Bandeja de Mensajes
+                </button>
               </div>
             )}
           </div>
@@ -171,26 +199,71 @@ const HeaderEmpresa = () => {
           </div>
         </div>
         
-        <div className="se-user-profile">
-          <div style={{ textAlign: 'right' }}>
-            <p className="se-label-bold" style={{ margin: 0, color: 'var(--color-on-surface)' }}>{userName}</p>
-            <p style={{ margin: 0, fontSize: '10px', color: 'var(--color-vibrant-blue)', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em' }}>{userRole}</p>
+        <div style={{ position: 'relative' }}>
+          <div 
+            className="se-user-profile" 
+            style={{ cursor: 'pointer' }}
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+          >
+            <div style={{ textAlign: 'right' }}>
+              <p className="se-label-bold" style={{ margin: 0, color: 'var(--color-on-surface)' }}>{userName}</p>
+              <p style={{ margin: 0, fontSize: '10px', color: 'var(--color-vibrant-blue)', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em' }}>{userRole}</p>
+            </div>
+            <div className="se-user-avatar" style={{ overflow: 'hidden' }}>
+              {user?.foto_perfil ? (
+                <img 
+                  src={avatarUrl} 
+                  alt="User profile" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <img 
+                  src={avatarUrl} 
+                  alt="User profile" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              )}
+            </div>
           </div>
-          <div className="se-user-avatar" style={{ overflow: 'hidden' }}>
-            {user?.foto_perfil ? (
-              <img 
-                src={avatarUrl} 
-                alt="User profile" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : (
-              <img 
-                src={avatarUrl} 
-                alt="User profile" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            )}
-          </div>
+          
+          {showProfileMenu && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: '0',
+              marginTop: '8px',
+              width: '200px',
+              backgroundColor: 'var(--color-surface-container-lowest)',
+              border: '1px solid var(--color-outline-variant)',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              zIndex: 50,
+              padding: '8px 0'
+            }}>
+              <button 
+                onClick={handleLogout}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--color-on-surface)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-container)'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#ff4d4f' }}>logout</span>
+                Cerrar Sesión
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
