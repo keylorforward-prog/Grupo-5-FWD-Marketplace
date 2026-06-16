@@ -22,7 +22,6 @@ const Reporte = require('./reporte')(sequelize, DataTypes);
 const Notificacion = require('./notificacion')(sequelize, DataTypes);
 const Oferta = require('./oferta')(sequelize, DataTypes);
 const CatalogoSector = require('./catalogoSector')(sequelize, DataTypes);
-const ConversacionIA = require('./conversacionIA')(sequelize, DataTypes);
 
 // ========================
 // RELACIONES
@@ -128,6 +127,5 @@ module.exports = {
   Reporte,
   Notificacion,
   Oferta,
-  CatalogoSector,
-  ConversacionIA,
+  CatalogoSector
 };

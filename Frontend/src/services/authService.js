@@ -20,9 +20,7 @@ export const authService = {
    * Registrar un nuevo usuario
    */
   async register(payload) {
-
     const formData = new FormData();
-    
     Object.keys(payload).forEach(key => {
       if (payload[key] !== null && payload[key] !== undefined) {
         formData.append(key, payload[key]);
