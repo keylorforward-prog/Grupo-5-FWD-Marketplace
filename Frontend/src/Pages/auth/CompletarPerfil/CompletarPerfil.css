@@ -1,0 +1,157 @@
+/* ── Completar Perfil Specific Styles ────────────────────────────────────────── */
+
+.completar-perfil-card {
+  max-width: 600px !important;
+  padding: 2.5rem !important;
+}
+
+/* ── Google Info Section ─────────────────────────────────────────────────── */
+.google-info-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  background: #F3F4F6;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  border: 1px solid #E5E7EB;
+}
+
+/* ── Profile Photo Selector ──────────────────────────────────────────────── */
+.profile-photo-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-photo-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: 3px solid #fff;
+  background: #fff;
+}
+
+.profile-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter var(--duration-fast) var(--ease-out);
+}
+
+.profile-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #7B2FBE, #1B6CA8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.profile-photo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.profile-photo-container:hover .profile-photo {
+  filter: brightness(0.8);
+}
+
+.profile-photo-container:hover .profile-photo-overlay {
+  opacity: 1;
+}
+
+.photo-help-text {
+  font-size: 0.75rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+/* ── Readonly Fields ─────────────────────────────────────────────────────── */
+.google-readonly-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.readonly-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.readonly-label {
+  font-size: 0.75rem;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.readonly-value {
+  font-size: 0.95rem;
+  color: #1A1A1A;
+  font-weight: 500;
+  background: #E5E7EB;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+}
+
+/* ── Form Layout Enhancements ────────────────────────────────────────────── */
+.conditional-fields-container {
+  background: rgba(27, 108, 168, 0.03);
+  border: 1px dashed rgba(27, 108, 168, 0.2);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.slide-in {
+  animation: slideDownFade 0.3s ease-out forwards;
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments for this specific card */
+@media (max-width: 600px) {
+  .google-info-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .google-readonly-fields {
+    width: 100%;
+  }
+  
+  .readonly-value {
+    text-align: center;
+  }
+}

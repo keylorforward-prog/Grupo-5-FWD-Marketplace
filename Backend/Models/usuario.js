@@ -15,7 +15,9 @@ module.exports = (sequelize, DataTypes) => {
     fecha_asignacion: { type: DataTypes.DATE, allowNull: true },
     estado_admin: { type: DataTypes.ENUM('ACTIVO','INACTIVO'), allowNull: true },
     tipo_empresa: { type: DataTypes.STRING(100),allowNull: true},
-    google_id: {type: DataTypes.STRING(255),allowNull: true,unique: true},provider: {type: DataTypes.ENUM('LOCAL', 'GOOGLE'),allowNull: false,defaultValue: 'LOCAL'},
-    avatar_url: {type: DataTypes.STRING(500), allowNull: true}
+    google_id: {type: DataTypes.STRING(255),allowNull: true,unique: true},
+    provider: {type: DataTypes.ENUM('LOCAL', 'GOOGLE'),allowNull: false,defaultValue: 'LOCAL'},
+    avatar_url: {type: DataTypes.STRING(500), allowNull: true},
+    perfil_completo: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
   }, { tableName: 'usuario', timestamps: false, underscored: true, freezeTableName: true });
 };
