@@ -52,7 +52,7 @@ export default function Routing() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ── Raíz: Apunta directamente a tu Landing Page ────────────────────────────── */}
+        {/* ── Raíz: Landing Page directa ────────────────────────────── */}
         <Route path={RUTAS.raiz} element={<LandingPage />} />
 
         {/* ── Públicas: autenticación ────────────────────────────────── */}
@@ -70,7 +70,7 @@ export default function Routing() {
         {/* Dashboard Egresado */}
         <Route path="/DashboardEgresado" element={<DashboardEgresado />} />
         <Route path="/PerfilEgresado" element={<PerfilEgresado />} />
-        
+
         {/* Rutas Protegidas */}
         {/* ── Egresado ───────────────────────────────────────────────── */}
         <Route path={RUTAS.egresado} element={<Navigate to={RUTAS.egresadoDashboard} replace />} />
