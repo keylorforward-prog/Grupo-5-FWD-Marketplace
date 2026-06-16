@@ -42,6 +42,9 @@ async function apiConv(method, path, body, token) {
   }
 }
 
+const formatearColones = (monto) =>
+  monto > 0 ? `₡${monto.toLocaleString('es-CR')}` : 'A convenir';
+
 export default function CrearProyectoIA() {
   const navigate = useNavigate();
   const { user, token } = useAuth();
@@ -196,11 +199,11 @@ export default function CrearProyectoIA() {
 
     const presupuestoMin =
       extracted.budget_min > 0
-        ? Math.max(extracted.budget_min * 520, 100000)
+        ? Math.max(extracted.budget_min, 100000)
         : 100000;
 
     const presupuestoMax =
-      extracted.budget_max > 0 ? extracted.budget_max * 520 : '';
+      extracted.budget_max > 0 ? extracted.budget_max : '';
 
     let descripcion = extracted.description;
     if (descripcion.length < 100) {
@@ -354,6 +357,13 @@ export default function CrearProyectoIA() {
             <p className="cia-result-eyebrow">Tu proyecto quedó así</p>
             <p className="cia-result-title">{extracted.title}</p>
             <p className="cia-result-desc">{extracted.description}</p>
+
+            {(extracted.budget_min > 0 || extracted.budget_max > 0) && (
+              <p className="cia-result-meta">
+                Presupuesto: {formatearColones(extracted.budget_min)}
+                {extracted.budget_max > 0 && ` – ${formatearColones(extracted.budget_max)}`}
+              </p>
+            )}
 
             {extracted.stack?.length > 0 && (
               <div className="cia-stack-pills">
