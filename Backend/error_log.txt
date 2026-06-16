@@ -1,0 +1,54 @@
+2026-06-16T15:23:53.243Z - Error al obtener el resumen del dashboard.: Error
+    at Query.run (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\postgres\query.js:50:25)
+    at C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async PostgresQueryInterface.rawSelect (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\abstract\query-interface.js:434:18)
+    at async Postulacion.aggregate (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1277:19)
+    at async Postulacion.count (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1306:20)
+    at async Promise.all (index 0)
+    at async obtenerResumen (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\Controllers\dashboardEgresadoController.js:81:9)
+2026-06-16T15:23:53.664Z - Error al obtener el resumen del dashboard.: Error
+    at Query.run (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\postgres\query.js:50:25)
+    at C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async PostgresQueryInterface.rawSelect (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\abstract\query-interface.js:434:18)
+    at async Postulacion.aggregate (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1277:19)
+    at async Postulacion.count (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1306:20)
+    at async Promise.all (index 0)
+    at async obtenerResumen (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\Controllers\dashboardEgresadoController.js:81:9)
+2026-06-16T15:25:00.190Z - Error al obtener el resumen del dashboard.: Error
+    at Query.run (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\postgres\query.js:50:25)
+    at C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async PostgresQueryInterface.rawSelect (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\abstract\query-interface.js:434:18)
+    at async Postulacion.aggregate (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1277:19)
+    at async Postulacion.count (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1306:20)
+    at async Promise.all (index 0)
+    at async obtenerResumen (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\Controllers\dashboardEgresadoController.js:81:9)
+2026-06-16T15:25:00.667Z - Error al obtener el resumen del dashboard.: Error
+    at Query.run (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\postgres\query.js:50:25)
+    at C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async PostgresQueryInterface.rawSelect (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\abstract\query-interface.js:434:18)
+    at async Postulacion.aggregate (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1277:19)
+    at async Postulacion.count (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1306:20)
+    at async Promise.all (index 0)
+    at async obtenerResumen (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\Controllers\dashboardEgresadoController.js:81:9)
+2026-06-16T15:56:12.727Z - Error al obtener el resumen del dashboard.: Error
+    at Query.run (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\postgres\query.js:50:25)
+    at C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async PostgresQueryInterface.rawSelect (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\abstract\query-interface.js:434:18)
+    at async Postulacion.aggregate (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1277:19)
+    at async Postulacion.count (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1306:20)
+    at async Promise.all (index 0)
+    at async obtenerResumen (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\Controllers\dashboardEgresadoController.js:81:9)
+2026-06-16T15:56:13.203Z - Error al obtener el resumen del dashboard.: Error
+    at Query.run (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\postgres\query.js:50:25)
+    at C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\sequelize.js:315:28
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async PostgresQueryInterface.rawSelect (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\dialects\abstract\query-interface.js:434:18)
+    at async Postulacion.aggregate (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1277:19)
+    at async Postulacion.count (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\node_modules\sequelize\lib\model.js:1306:20)
+    at async Promise.all (index 0)
+    at async obtenerResumen (C:\Users\HP8D3\OneDrive\Desktop\PROYECTO FINAL\Grupo-5-FWD-Marketplace\Backend\Controllers\dashboardEgresadoController.js:81:9)

@@ -87,7 +87,23 @@ const actualizarPerfil = async (req, res) => {
     const perfil = await obtenerPerfilEmpresario(req, res);
     if (!perfil) return;
 
-    await perfil.update(req.body);
+    const camposPermitidos = ['sector', 'descripcion', 'sitio_web', 'telefono_whatsapp'];
+    const cambios = camposPermitidos.reduce((acumulado, campo) => {
+      if (Object.prototype.hasOwnProperty.call(req.body, campo)) {
+        acumulado[campo] = req.body[campo];
+      }
+      return acumulado;
+    }, {});
+
+    if (cambios.telefono_whatsapp && !/^\d{4}-\d{4}$/.test(cambios.telefono_whatsapp)) {
+      res.status(400).json({
+        success: false,
+        message: 'El WhatsApp debe tener 8 numeros con formato 0000-0000.',
+      });
+      return;
+    }
+
+    await perfil.update(cambios);
     const actualizado = await PerfilEmpresario.findByPk(perfil.id_perfil_empresario, {
       include: [{ model: Usuario, as: 'usuario' }],
     });

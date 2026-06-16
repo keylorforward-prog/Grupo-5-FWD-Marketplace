@@ -1,14 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import RutaProtegida from './RutaProtegida';
-import RedirectorRaiz from './RedirectorRaiz';
-import { RUTAS } from './rutas.js';
+import { RUTAS } from './rutas';
+
+// VISTA PRINCIPAL
+import LandingPage from '../Pages/comun/LandingPage/LandingPage';
+
 // Autenticación
-import LoginPage from '../pages/auth/Login/LoginPage';
-import RegisterPage from '../pages/auth/Registro/RegisterPage';
-import AdminLogin from '../pages/auth/AdminLogin/AdminLogin';
-import GoogleCallback from '../pages/auth/GoogleCallback';
-import CompletarPerfil from '../pages/auth/CompletarPerfil/CompletarPerfil';
+import LoginPage from '../Pages/auth/Login/LoginPage';
+import RegisterPage from '../Pages/auth/Registro/RegisterPage';
+import AdminLogin from '../Pages/auth/AdminLogin/AdminLogin';
+import GoogleCallback from '../Pages/auth/GoogleCallback';
 
 // Empresa
 import DashboardEmpresario from '../Pages/empresa/DashboardEmpresario/DashboardEmpresario';
@@ -50,7 +52,7 @@ export default function Routing() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ── Raíz: Apunta directamente a tu Landing Page ────────────────────────────── */}
+        {/* ── Raíz: Landing Page directa ────────────────────────────── */}
         <Route path={RUTAS.raiz} element={<LandingPage />} />
 
         {/* ── Públicas: autenticación ────────────────────────────────── */}
@@ -58,11 +60,6 @@ export default function Routing() {
         <Route path={RUTAS.loginAdmin} element={<AdminLogin />} />
         <Route path={RUTAS.registro} element={<RegisterPage />} />
         <Route path={RUTAS.googleCallback} element={<GoogleCallback />} />
-        <Route path={RUTAS.completarPerfil} element={
-          <RutaProtegida>
-            <CompletarPerfil />
-          </RutaProtegida>
-        } />
 
         {/* Dashboard Empresa */}
         <Route path="/DashboardEmpresario" element={<DashboardEmpresario />} />
@@ -73,7 +70,7 @@ export default function Routing() {
         {/* Dashboard Egresado */}
         <Route path="/DashboardEgresado" element={<DashboardEgresado />} />
         <Route path="/PerfilEgresado" element={<PerfilEgresado />} />
-        
+
         {/* Rutas Protegidas */}
         {/* ── Egresado ───────────────────────────────────────────────── */}
         <Route path={RUTAS.egresado} element={<Navigate to={RUTAS.egresadoDashboard} replace />} />
