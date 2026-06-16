@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     presupuesto_min: { type: DataTypes.DECIMAL(10,2), allowNull: true },
     presupuesto_max: { type: DataTypes.DECIMAL(10,2), allowNull: true },
+    modalidad: { type: DataTypes.ENUM('remoto','hibrido','presencial'), allowNull: false, defaultValue: 'remoto' },
     estado: { type: DataTypes.ENUM('ACTIVA','PAUSADA','CERRADA','CANCELADA'), allowNull: false, defaultValue: 'ACTIVA' },
     fecha_publicacion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
     fecha_limite: { type: DataTypes.DATE, allowNull: true },

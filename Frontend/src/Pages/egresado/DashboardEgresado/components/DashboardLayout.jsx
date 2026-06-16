@@ -18,7 +18,8 @@ import {
   User,
 } from 'lucide-react';
 import { RUTAS } from '../../../../routes/rutas';
-import '../../../../pages/empresa/DashboardEmpresario/DashboardEmpresario.css';
+import '../../../../Pages/empresa/DashboardEmpresario/DashboardEmpresario.css';
+import '../styles/DashboardEgresado.css';
 
 const sidebarItems = [
   { key: 'inicio', label: 'Inicio', icon: Home, path: '/egresado/dashboard' },
@@ -50,10 +51,14 @@ export default function DashboardLayout({ children }) {
     return rutaActual.startsWith(item.path);
   })?.key || 'inicio';
 
-  const displayName = user?.nombre || 'Egresado FWD';
+  const perfilEgresadoCache = (() => {
+    try { return JSON.parse(localStorage.getItem('perfilEgresado')); }
+    catch { return null; }
+  })();
+  const displayName = user?.nombre || perfilEgresadoCache?.nombre || 'Egresado FWD';
   const tituloFwd = user?.titulo_fwd || user?.rol || 'ESTUDIANTE';
   const email = user?.correo || user?.email || 'egresado@fwd.com';
-  const avatar = user?.foto_perfil || '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
+  const avatar = user?.foto_perfil || perfilEgresadoCache?.avatar || '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
 
   const profileItems = [
     { key: 'perfil', label: 'Mi Perfil', icon: User, path: RUTAS.egresadoPerfil },
@@ -240,6 +245,13 @@ export default function DashboardLayout({ children }) {
 
       <div className="de-body">
         <aside className="de-sidebar">
+          <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
+            <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
+            <div className="de-sidebar-profile-info">
+              <span className="de-sidebar-name">{displayName}</span>
+              <span className="de-sidebar-role">{tituloFwd}</span>
+            </div>
+          </div>
           <div>
             <nav className="de-sidebar-nav">
               {sidebarItems.map((item) => {

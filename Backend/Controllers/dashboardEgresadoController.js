@@ -81,7 +81,7 @@ const obtenerResumen = async (req, res) => {
       Postulacion.count({
         where: {
           id_perfil_estudiante: perfil.id_perfil_estudiante,
-          estado: { [Op.in]: ['ENVIADA', 'EN_REVISION', 'PRESELECCIONADA'] },
+          estado: { [Op.in]: ['ENVIADA', 'EN_REVISION', 'PRESSELECCIONADA'] },
         },
       }),
       Postulacion.count({ where: { id_perfil_estudiante: perfil.id_perfil_estudiante } }),

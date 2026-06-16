@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { Bookmark, Send, Clock, DollarSign } from 'lucide-react';
+import { Bookmark, Send, Clock, DollarSign, Tag, Globe } from 'lucide-react';
+import { categoriasProyecto } from '../../../../data/proyectosEgresado';
+
+const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
+const etiquetaCategoria = Object.fromEntries(
+  categoriasProyecto.filter((c) => c.valor !== 'todas').map((c) => [c.valor, c.etiqueta])
+);
 
 const formatoMoneda = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -43,6 +49,17 @@ function TarjetaProyecto({ proyecto }) {
         >
           <Bookmark size={18} fill={guardado ? 'currentColor' : 'none'} />
         </button>
+      </div>
+
+      <div className="metasProyecto">
+        <span className="metaBadge metaCategoria">
+          <Tag size={12} />
+          {etiquetaCategoria[proyecto.categoria] ?? proyecto.categoria}
+        </span>
+        <span className="metaBadge metaModalidad">
+          <Globe size={12} />
+          {etiquetaModalidad[proyecto.modalidad] ?? proyecto.modalidad}
+        </span>
       </div>
 
       <p className="descripcionProyecto">{proyecto.descripcion}</p>
