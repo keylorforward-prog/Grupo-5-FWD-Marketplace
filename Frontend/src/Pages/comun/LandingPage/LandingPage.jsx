@@ -1,183 +1,116 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
+import Navbar from '../../../components/comun/Navbar.jsx';
+import Button from '../../../components/comun/Button.jsx';
 
-import RutaProtegida from './RutaProtegida';
-import { RUTAS } from './rutas';
+// IMPORTACIÓN DE IMÁGENES
+import SoftwareImg from '../../../assets/Software.png';
+import EnglishImg from '../../../assets/English-Teach.png';
+import WorkingImg from '../../../assets/Working.png';
 
-// VISTA PRINCIPAL
-import LandingPage from '../Pages/comun/LandingPage/LandingPage';
+export default function LandingPage() {
+  const scrollToNext = (sectionId) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-// Autenticación
-import LoginPage from '../Pages/auth/Login/LoginPage';
-import RegisterPage from '../Pages/auth/Registro/RegisterPage';
-import AdminLogin from '../Pages/auth/AdminLogin/AdminLogin';
-import GoogleCallback from '../Pages/auth/GoogleCallback';
-
-// Empresa
-import DashboardEmpresario from '../Pages/empresa/DashboardEmpresario/DashboardEmpresario';
-import ProyectosEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Proyectos/Proyectos';
-import OfertasEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Ofertas/Ofertas';
-import EntregablesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Entregables/Entregables';
-import MensajesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Mensajes/Mensajes';
-import TalentoEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Talento/Talento';
-import HistorialEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Historial/Historial';
-import EvaluacionesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Evaluaciones/Evaluaciones';
-import FacturacionEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Facturacion/Facturacion';
-import NotificacionesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Notificaciones/Notificaciones';
-import AyudaEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Ayuda/Ayuda';
-import PublicarProyecto from '../Pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
-import CrearProyectoIA from '../Pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
-import ConfiguracionEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
-import PerfilEmpresa from '../Pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
-import GestionPostulaciones from '../Pages/empresa/Postulaciones/GestionPostulaciones';
-import AdminProfile from '../Pages/admin/AdminProfile';
-import SettingsEmpresa from '../Pages/empresa/SettingsEmpresa/SettingsEmpresa';
-
-// Egresado
-import DashboardEgresado from '../Pages/egresado/DashboardEgresado/DashboardEgresado';
-import InicioEgresado from '../Pages/egresado/DashboardEgresado/pages/Inicio/Inicio';
-import PostulacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Postulaciones/Postulaciones';
-import MisProyectosEgresado from '../Pages/egresado/DashboardEgresado/pages/Proyectos/MisProyectos';
-import HistorialEgresado from '../Pages/egresado/DashboardEgresado/pages/Historial/Historial';
-import MensajesEgresado from '../Pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
-import NotificacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
-import ExplorarProyectos from '../Pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
-import PerfilEgresado from '../Pages/egresado/PerfilEgresado/PerfilEgresado';
-import ConfiguracionEgresado from '../Pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
-
-// Comunes
-import Proximamente from '../Pages/comun/Proximamente';
-import PaginaNoEncontrada from '../Pages/comun/PaginaNoEncontrada';
-
-export default function Routing() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* ── Raíz: Landing Page directa ────────────────────────────── */}
-        <Route path={RUTAS.raiz} element={<LandingPage />} />
-
-        {/* ── Públicas: autenticación ────────────────────────────────── */}
-        <Route path={RUTAS.login} element={<LoginPage />} />
-        <Route path={RUTAS.loginAdmin} element={<AdminLogin />} />
-        <Route path={RUTAS.registro} element={<RegisterPage />} />
-        <Route path={RUTAS.googleCallback} element={<GoogleCallback />} />
-
-        {/* Dashboard Empresa */}
-        <Route path="/DashboardEmpresario" element={<DashboardEmpresario />} />
-        <Route path="/postulaciones" element={<GestionPostulaciones />} />
-        <Route path="/admin" element={<AdminProfile />} />
-        <Route path="/SettingsEmpresa" element={<SettingsEmpresa />} />
-
-        {/* Dashboard Egresado */}
-        <Route path="/DashboardEgresado" element={<DashboardEgresado />} />
-        <Route path="/PerfilEgresado" element={<PerfilEgresado />} />
-
-        {/* Rutas Protegidas */}
-        {/* ── Egresado ───────────────────────────────────────────────── */}
-        <Route path={RUTAS.egresado} element={<Navigate to={RUTAS.egresadoDashboard} replace />} />
-        <Route
-          path={RUTAS.egresadoDashboard}
-          element={
-            <RutaProtegida rolPermitido="estudiante">
-              <DashboardEgresado />
-            </RutaProtegida>
-          }
-        >
-          <Route index element={<InicioEgresado />} />
-          <Route path="explorar" element={<ExplorarProyectos />} />
-          <Route path="postulaciones" element={<PostulacionesEgresado />} />
-          <Route path="proyectos" element={<MisProyectosEgresado />} />
-          <Route path="historial" element={<HistorialEgresado />} />
-          <Route path="mensajes" element={<MensajesEgresado />} />
-          <Route path="notificaciones" element={<NotificacionesEgresado />} />
-        </Route>
+    <div className="w-full bg-[#111827] min-h-screen pt-[68px] selection:bg-[#a78bfa]/20 font-body">
+      
+      <Navbar />
+      
+      {/* SECCIÓN 1: CAPACITACIÓN TÉCNICA */}
+      <section id="software" className="relative h-[calc(100vh-68px)] w-full flex items-center justify-start px-6 md:px-20 overflow-hidden border-b border-white/5">
+        <img 
+          src={SoftwareImg} 
+          alt="Entorno de Capacitación en Desarrollo FWD" 
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.4] scale-105 animate-subtle-zoom"
+        />
         
-        <Route
-          path={RUTAS.egresadoPerfil}
-          element={
-            <RutaProtegida rolPermitido="estudiante">
-              <PerfilEgresado />
-            </RutaProtegida>
-          }
-        />
-        <Route
-          path={RUTAS.egresadoConfiguracion}
-          element={
-            <RutaProtegida rolPermitido="estudiante">
-              <ConfiguracionEgresado />
-            </RutaProtegida>
-          }
-        />
+        <div className="relative z-10 p-8 md:p-12 backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl max-w-2xl shadow-2xl animate-fade-in-up">
+          <h1 className="text-4xl md:text-6xl font-black text-white font-heading leading-tight tracking-tighter">
+            El código <span className="text-[#a78bfa]">transforma</span> el futuro
+          </h1>
+          <p className="mt-6 text-lg md:text-xl text-white/80 leading-relaxed">
+            Domina el desarrollo Full Stack desde la raíz. En FWD te brindamos capacitación técnica de estándar global para convertirte en el talento que las empresas transnacionales necesitan.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <Button variant="primary" to="/registro" className="group">
+              Iniciar mi viaje <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button variant="secondary" onClick={() => scrollToNext('idiomas')}>
+              Saber más
+            </Button>
+          </div>
+        </div>
 
-        {/* ── Empresa ────────────────────────────────────────────────── */}
-        <Route path={RUTAS.empresa} element={<Navigate to={RUTAS.empresaDashboard} replace />} />
-        <Route path="/empresa/dashboard" element={<Navigate to={RUTAS.empresaDashboard} replace />} />
-        <Route
-          path={RUTAS.empresaDashboard}
-          element={
-            <RutaProtegida rolPermitido="empresa">
-              <DashboardEmpresario />
-            </RutaProtegida>
-          }
-        />
+        <button 
+          onClick={() => scrollToNext('idiomas')}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[#a78bfa]/40 hover:text-[#a78bfa] transition-colors animate-bounce hidden md:block z-20 focus:outline-none cursor-pointer"
+          aria-label="Ir a sección de idiomas"
+        >
+          <ChevronDown size={36} strokeWidth={1.5} />
+        </button>
+      </section>
 
-        {/* Subrutas de Empresa Dashboard */}
-        <Route path="/DashboardEmpresario/perfil" element={<RutaProtegida rolPermitido="empresa"><PerfilEmpresa /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/proyectos" element={<RutaProtegida rolPermitido="empresa"><ProyectosEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/ofertas" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/entregables" element={<RutaProtegida rolPermitido="empresa"><EntregablesEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/mensajes" element={<RutaProtegida rolPermitido="empresa"><MensajesEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/talento" element={<RutaProtegida rolPermitido="empresa"><TalentoEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/historial" element={<RutaProtegida rolPermitido="empresa"><HistorialEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/evaluaciones" element={<RutaProtegida rolPermitido="empresa"><EvaluacionesEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/facturacion" element={<RutaProtegida rolPermitido="empresa"><FacturacionEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/notificaciones" element={<RutaProtegida rolPermitido="empresa"><NotificacionesEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/ayuda" element={<RutaProtegida rolPermitido="empresa"><AyudaEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/publicar-proyecto" element={<RutaProtegida rolPermitido="empresa"><PublicarProyecto /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/crear-proyecto-ia" element={<RutaProtegida rolPermitido="empresa"><CrearProyectoIA /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/configuracion" element={<RutaProtegida rolPermitido="empresa"><ConfiguracionEmpresario /></RutaProtegida>} />
-
-        <Route
-          path={RUTAS.empresaPostulaciones}
-          element={
-            <RutaProtegida rolPermitido="empresa">
-              <GestionPostulaciones />
-            </RutaProtegida>
-          }
+      {/* SECCIÓN 2: IDIOMAS */}
+      <section id="idiomas" className="relative h-screen w-full flex items-center justify-end px-6 md:px-20 overflow-hidden border-b border-white/5">
+        <img 
+          src={EnglishImg} 
+          alt="Clases de Inglés Técnico FWD" 
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.35]"
         />
+        
+        <div className="relative z-10 p-8 md:p-12 backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl max-w-2xl shadow-2xl text-right animate-fade-in">
+          <h2 className="text-4xl md:text-5xl font-black text-white font-heading leading-tight tracking-tight">
+            Sin fronteras <br /> <span className="text-[#a78bfa]">idiomáticas</span>
+          </h2>
+          <p className="mt-6 text-lg md:text-xl text-white/80 leading-relaxed">
+            Tu talento no tiene límites. Potenciamos tu inglés técnico y habilidades de comunicación corporativa para que las puertas del mercado laboral global se abran de par en par para ti.
+          </p>
+        </div>
 
-        {/* ── Admin ──────────────────────────────────────────────────── */}
-        <Route
-          path={RUTAS.admin}
-          element={
-            <RutaProtegida rolPermitido="admin">
-              <AdminProfile />
-            </RutaProtegida>
-          }
-        />
+        <button 
+          onClick={() => scrollToNext('empleo')}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[#a78bfa]/30 hover:text-[#a78bfa] transition-colors animate-bounce hidden md:block z-20 cursor-pointer"
+        >
+          <ChevronDown size={36} strokeWidth={1.5} />
+        </button>
+      </section>
 
-        {/* ── Compartidas ────────────────────────────────────────────── */}
-        <Route
-          path={RUTAS.soporte}
-          element={
-            <Proximamente
-              titulo="Centro de Soporte"
-              descripcion="Pronto encontrarás aquí guías, FAQs y contacto directo con el equipo de FWD."
-            />
-          }
+      {/* SECCIÓN 3: INSERCIÓN LABORAL */}
+      <section id="empleo" className="relative h-screen w-full flex items-center justify-center px-6 overflow-hidden">
+        <img 
+          src={WorkingImg} 
+          alt="Equipo transnacional colaborando" 
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.4]"
         />
-        <Route
-          path={RUTAS.mensajes}
-          element={
-            <Proximamente
-              titulo="Mensajes"
-              descripcion="Estamos preparando el chat para que puedas hablar con empresas y mentores."
-            />
-          }
-        />
+        
+        <div className="relative z-10 text-center text-white max-w-3xl backdrop-blur-md bg-[#111827]/60 p-10 md:p-16 rounded-3xl border border-white/10 shadow-2xl animate-fade-in-up">
+          <h2 className="text-4xl md:text-5xl font-black font-heading tracking-tighter leading-tight">
+            Tu primer empleo <br className="sm:hidden" /> de alto impacto
+          </h2>
+          <p className="mt-8 text-xl md:text-2xl text-white/90 leading-relaxed max-w-2xl mx-auto">
+            Conectamos directamente tu perfil calificado con corporaciones globales y empresas tecnológicas que buscan activamente tu talento para roles de entrada.
+          </p>
+          <div className="mt-12 flex flex-col sm:flex-row gap-5 justify-center items-center">
+            <Button variant="primary" to="/registro" className="group">
+              Postularme al Programa <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button variant="secondary" to="/login">
+              Tengo una cuenta
+            </Button>
+          </div>
+        </div>
+      </section>
 
-        {/* ── 404 ────────────────────────────────────────────────────── */}
-        <Route path="*" element={<PaginaNoEncontrada />} />
-      </Routes>
-    </BrowserRouter>
+      {/* FOOTER CORPORATIVO */}
+      <footer className="py-12 text-center text-white/40 border-t border-white/10 bg-[#0f172a]">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="font-heading text-lg font-bold text-white/60 mb-2">FWD<span className="text-[#a78bfa]">.</span> Marketplace</p>
+          <p className="text-sm font-medium">&copy; {new Date().getFullYear()} FWD Costa Rica - Todos los derechos reservados.</p>
+          <p className="text-xs mt-4 text-white/20 max-w-md mx-auto">Impulsando el ecosistema tecnológico de Costa Rica conectando talento junior calificado con oportunidades globales.</p>
+        </div>
+      </footer>
+    </div>
   );
 }
