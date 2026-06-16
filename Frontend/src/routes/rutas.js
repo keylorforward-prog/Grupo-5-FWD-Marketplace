@@ -10,6 +10,7 @@ export const RUTAS = {
   loginAdmin: '/login/admin',
   registro: '/registro',
   googleCallback: '/auth/callback',
+  completarPerfil: '/completar-perfil',
 
   // Egresado
   egresado: '/egresado',
@@ -66,3 +67,11 @@ export function rutaDashboardDeRol(rol) {
     default: return RUTAS.login;
   }
 }
+
+
+// Definición de Colores de Marca FWD (Senior Approach)
+export const COLORES_FWD = {
+  moradoLogin: '#a78bfa', // violet-400 (el que usas en el login)
+  cyanFwd: '#1ad1c8',    // cyan
+  fondoDark: '#111827',   // gray-900
+};
