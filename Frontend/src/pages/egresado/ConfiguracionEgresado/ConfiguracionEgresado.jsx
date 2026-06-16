@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { User, Briefcase, Bell, Lock } from 'lucide-react';
-import LayoutEgresado from '../LayoutEgresado';
+import DashboardLayout from '../DashboardEgresado/components/DashboardLayout';
 import InformacionCuenta from './components/InformacionCuenta';
 import PreferenciasProfesionales from './components/PreferenciasProfesionales';
 import Notificaciones from './components/Notificaciones';
@@ -25,7 +25,7 @@ function ConfiguracionEgresado() {
   };
 
   return (
-    <LayoutEgresado>
+    <DashboardLayout>
       <div className="mainConfiguracion fwd-fondo-decorativo">
         <div className="cabeceraConfiguracion fwd-animar-entrada">
           <span className="kickerConfiguracion">PANEL DE PREFERENCIAS</span>
@@ -41,7 +41,7 @@ function ConfiguracionEgresado() {
           <aside className="tarjetaNavegacionConfiguracion fwd-animar-slide">
             <div className="resumenPerfilConfiguracion">
               <div className="anilloAvatarConfig">
-                <img src="/Imgs/ProfileDefaultImage.png" alt="Avatar" />
+                <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="Avatar" />
               </div>
               <h3>Alex Rivera</h3>
               <p>Junior Frontend Developer</p>
@@ -70,7 +70,7 @@ function ConfiguracionEgresado() {
           </div>
         </div>
       </div>
-    </LayoutEgresado>
+    </DashboardLayout>
   );
 }
 

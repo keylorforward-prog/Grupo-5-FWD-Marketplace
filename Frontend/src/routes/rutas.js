@@ -13,12 +13,18 @@ export const RUTAS = {
   // Egresado
   egresado: '/egresado',
   egresadoDashboard: '/egresado/dashboard',
+  egresadoPostulaciones: '/egresado/dashboard/postulaciones',
+  egresadoProyectos: '/egresado/dashboard/proyectos',
+  egresadoHistorial: '/egresado/dashboard/historial',
+  egresadoMensajes: '/egresado/dashboard/mensajes',
+  egresadoExplorar: '/egresado/dashboard/explorar',
+  egresadoNotificaciones: '/egresado/dashboard/notificaciones',
   egresadoPerfil: '/egresado/perfil',
   egresadoConfiguracion: '/egresado/configuracion',
 
   // Empresa
   empresa: '/empresa',
-  empresaDashboard: '/empresa/dashboard',
+  empresaDashboard: '/DashboardEmpresario',
   empresaPostulaciones: '/empresa/postulaciones',
 
   // Admin
