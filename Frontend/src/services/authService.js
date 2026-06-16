@@ -20,7 +20,6 @@ export const authService = {
    * Registrar un nuevo usuario
    */
   async register(payload) {
-
     const formData = new FormData();
     
     Object.keys(payload).forEach(key => {
@@ -29,7 +28,8 @@ export const authService = {
       }
     });
 
-    const { data } = await apiClient.post('/auth/register', formData, {
+    // CORRECCIÓN: Uso de 'api' en lugar de 'apiClient'
+    const { data } = await api.post('/auth/register', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data;
@@ -39,7 +39,8 @@ export const authService = {
    * Iniciar sesión
    */
   async login({ email, password }) {
-    const { data } = await apiClient.post('/auth/login', { email, password });
+    // CORRECCIÓN: Uso de 'api'
+    const { data } = await api.post('/auth/login', { email, password });
     return data;
   },
 
@@ -47,7 +48,8 @@ export const authService = {
    * Cerrar sesión
    */
   async logout() {
-    const { data } = await apiClient.post('/auth/logout');
+    // CORRECCIÓN: Uso de 'api'
+    const { data } = await api.post('/auth/logout');
     return data;
   },
 
@@ -55,7 +57,8 @@ export const authService = {
    * Obtener datos del usuario autenticado (valida el token)
    */
   async getMe() {
-    const { data } = await apiClient.get('/auth/me');
+    // CORRECCIÓN: Uso de 'api'
+    const { data } = await api.get('/auth/me');
     return data;
   },
 
@@ -63,7 +66,8 @@ export const authService = {
    * Callback de Google - retorna user y token después de autenticarse con Google
    */
   async handleGoogleCallback() {
-    const { data } = await apiClient.get('/auth/me');
+    // CORRECCIÓN: Uso de 'api'
+    const { data } = await api.get('/auth/me');
     return data;
   },
 
