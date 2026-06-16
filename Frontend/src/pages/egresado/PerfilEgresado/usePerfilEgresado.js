@@ -1,23 +1,5 @@
-import { useEffect, useState } from 'react';
-
-const CLAVE = 'perfilEgresado';
-
-export const perfilInicial = {
-  nombre: 'Alex Rivera',
-  rol: 'Estudiante de Desarrollo de Software',
-  avatar: '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png',
-  portfolio: 'https://alex-rivera.dev',
-  linkedin: 'https://linkedin.com/in/alexrivera',
-  bio: 'Soy un estudiante apasionado por la tecnología y la creación de productos digitales, actualmente cursando mis estudios en Desarrollo de Software. Disfruto aprendiendo nuevas tecnologías como React y Node.js en mi tiempo libre. Estoy buscando mi primera oportunidad como practicante o desarrollador Junior para aportar mi energía y seguir creciendo profesionalmente en un entorno colaborativo.',
-  tecnologias: [
-    { nombre: 'React.js', fondo: 'fondoAzulClaro' },
-    { nombre: 'Node.js', fondo: 'fondoAzulMedio' },
-    { nombre: 'HTML & CSS', fondo: 'fondoAzulOscuro' },
-    { nombre: 'JavaScript', fondo: 'fondoMorado' },
-    { nombre: 'PostgreSQL', fondo: 'fondoNaranja' },
-    { nombre: 'Git', fondo: 'fondoMoradoClaro' },
-  ],
-};
+import { useEffect, useState, useCallback } from 'react';
+import { egresadoDashboardService } from '../../../services/egresadoDashboardService';
 
 const fondos = [
   'fondoAzulClaro', 'fondoAzulMedio', 'fondoAzulOscuro',
@@ -26,41 +8,86 @@ const fondos = [
 
 export const elegirFondoRotativo = (indice) => fondos[indice % fondos.length];
 
+const perfilVacio = {
+  nombre: '',
+  rol: '',
+  avatar: '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png',
+  portfolio: '',
+  linkedin: '',
+  bio: '',
+  tecnologias: [],
+};
+
 export function usePerfilEgresado() {
-  const [perfil, setPerfil] = useState(() => {
-    const guardado = localStorage.getItem(CLAVE);
-    return guardado ? { ...perfilInicial, ...JSON.parse(guardado) } : perfilInicial;
-  });
+  const [perfil, setPerfil] = useState(perfilVacio);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem(CLAVE, JSON.stringify(perfil));
-  }, [perfil]);
+    let activo = true;
+    egresadoDashboardService.obtenerPerfil()
+      .then((data) => {
+        if (!activo) return;
+        setPerfil({
+          nombre: data.nombre || data.usuario?.nombre || '',
+          rol: data.rol || 'Estudiante de Desarrollo de Software',
+          avatar: data.foto_perfil || data.usuario?.foto_perfil || perfilVacio.avatar,
+          portfolio: data.portfolio || '',
+          linkedin: data.linkedin || '',
+          bio: data.bio || '',
+          tecnologias: Array.isArray(data.tecnologias)
+            ? data.tecnologias.map((t, i) => ({
+                nombre: typeof t === 'string' ? t : t.nombre,
+                fondo: elegirFondoRotativo(i),
+              }))
+            : [],
+        });
+      })
+      .catch(() => {
+        if (activo) setPerfil(perfilVacio);
+      })
+      .finally(() => {
+        if (activo) setCargando(false);
+      });
+    return () => { activo = false; };
+  }, []);
 
-  const actualizar = (cambios) => setPerfil((prev) => ({ ...prev, ...cambios }));
+  const actualizar = useCallback((cambios) => {
+    setPerfil((prev) => {
+      const siguiente = { ...prev, ...cambios };
+      egresadoDashboardService.actualizarPerfil(siguiente).catch(() => {});
+      return siguiente;
+    });
+  }, []);
 
-  const agregarTecnologia = (nombre) => {
+  const agregarTecnologia = useCallback((nombre) => {
     const limpio = nombre.trim();
     if (!limpio) return;
     setPerfil((prev) => {
       if (prev.tecnologias.some((t) => t.nombre.toLowerCase() === limpio.toLowerCase())) {
         return prev;
       }
-      return {
+      const siguiente = {
         ...prev,
         tecnologias: [
           ...prev.tecnologias,
           { nombre: limpio, fondo: elegirFondoRotativo(prev.tecnologias.length) },
         ],
       };
+      egresadoDashboardService.actualizarPerfil(siguiente).catch(() => {});
+      return siguiente;
     });
-  };
+  }, []);
 
-  const quitarTecnologia = (nombre) => {
-    setPerfil((prev) => ({
-      ...prev,
-      tecnologias: prev.tecnologias.filter((t) => t.nombre !== nombre),
-    }));
-  };
+  const quitarTecnologia = useCallback((nombre) => {
+    setPerfil((prev) => {
+      const siguiente = {
+        ...prev,
+        tecnologias: prev.tecnologias.filter((t) => t.nombre !== nombre),
+      };
+      egresadoDashboardService.actualizarPerfil(siguiente).catch(() => {});
+      return siguiente;
+    });
+  }, []);
 
-  return { perfil, actualizar, agregarTecnologia, quitarTecnologia };
+  return { perfil, actualizar, agregarTecnologia, quitarTecnologia, cargando };
 }

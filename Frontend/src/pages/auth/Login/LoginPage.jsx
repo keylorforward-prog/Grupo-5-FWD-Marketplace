@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import LoginForm from './components/LoginForm';
 import RegisterForm from '../Registro/components/RegisterForm';
 import '../AuthPages.css';
@@ -72,7 +72,7 @@ const LoginPage = () => {
             <div className="auth-brand-panel inner-panel">
               <div className="brand-logo-row">
                 <div className="brand-logo-circle">
-                  <img src="/Imgs/IconoFWD.png" alt="FWD Logo" />
+                  <img src="/Imgs/FWD - Sintesis-01.png" alt="FWD Logo" />
                 </div>
                 <span className="brand-logo-text">FWD Junior</span>
               </div>
@@ -104,7 +104,7 @@ const LoginPage = () => {
             <div className="auth-brand-panel inner-panel">
               <div className="brand-logo-row">
                 <div className="brand-logo-circle">
-                  <img src="/Imgs/IconoFWD.png" alt="FWD Logo" />
+                  <img src="/Imgs/FWD - Sintesis-01.png" alt="FWD Logo" />
                 </div>
                 <span className="brand-logo-text">FWD Junior</span>
               </div>

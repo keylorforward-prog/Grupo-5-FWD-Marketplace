@@ -1,4 +1,5 @@
 import axios from 'axios';
+import apiClient from './apiClient';
 
 export const api = axios.create({
   baseURL: '/api',
@@ -75,7 +76,7 @@ export const authService = {
    * Actualizar contraseña
    */
   async updatePassword({ currentPassword, newPassword }) {
-    const { data } = await api.put('/auth/update-password', { currentPassword, newPassword });
+    const { data } = await apiClient.put('/auth/update-password', { currentPassword, newPassword });
     return data;
   },
 };

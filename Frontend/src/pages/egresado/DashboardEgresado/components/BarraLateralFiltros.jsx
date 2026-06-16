@@ -70,22 +70,23 @@ function BarraLateralFiltros({ filtros, onCambio, onLimpiar }) {
             <input
               type="number"
               min={0}
-              max={filtros.presupuestoMax}
+              max={filtros.presupuestoMax || 99999}
               step={50}
               className="inputRango"
               value={filtros.presupuestoMin}
-              onChange={(e) => onCambio({ presupuestoMin: Number(e.target.value) || 0 })}
+              onChange={(e) => onCambio({ presupuestoMin: e.target.value })}
             />
           </div>
           <div className="campoRango">
             <span className="prefijoRango">Máx</span>
             <input
               type="number"
-              min={filtros.presupuestoMin}
+              min={filtros.presupuestoMin || 0}
+              max={99999}
               step={50}
               className="inputRango"
               value={filtros.presupuestoMax}
-              onChange={(e) => onCambio({ presupuestoMax: Number(e.target.value) || 0 })}
+              onChange={(e) => onCambio({ presupuestoMax: e.target.value })}
             />
           </div>
         </div>
