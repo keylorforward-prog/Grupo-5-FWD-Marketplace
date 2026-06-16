@@ -1,11 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-import { dashboardEmpresarioService } from '../../../services/dashboardEmpresarioService';
+import { candidatosPrueba } from '../../../data/candidatosPrueba';
 import Aside from '../../../components/sidebar/Aside';
 import FilaCandidato from '../../../components/postulaciones/FilaCandidato';
 import AccionesMasivas from '../../../components/postulaciones/AccionesMasivas';
-import { useDashboardEmpresarioRequest } from '../DashboardEmpresario/hooks/useDashboardEmpresarioRequest';
-import { formatearPostulacion } from '../DashboardEmpresario/utils/dashboardEmpresarioFormatters';
 
 const OPCIONES_POR_PAGINA = [3, 10, 15, 25];
 
@@ -56,28 +54,18 @@ const ETIQUETAS_ESTADO = {
 };
 
 export default function GestionPostulaciones() {
-  const { data, loading, error } = useDashboardEmpresarioRequest(
-    () => dashboardEmpresarioService.obtenerPostulaciones(),
-    [],
-    []
-  );
-  const [cambiosLocales, setCambiosLocales] = useState({});
+  const [candidatos, setCandidatos] = useState(candidatosPrueba);
   const [idsSeleccionados, setIdsSeleccionados] = useState(new Set());
   const [paginaActual, setPaginaActual] = useState(1);
   const [itemsPorPagina, setItemsPorPagina] = useState(3);
   const [filtroEstado, setFiltroEstado] = useState(null);
-  const candidatos = useMemo(
-    () => data.map(formatearPostulacion).map((c) => ({ ...c, ...cambiosLocales[c.id] })),
-    [data, cambiosLocales]
-  );
-  const nombreProyecto = candidatos.find((c) => c.proyecto)?.proyecto || 'proyecto seleccionado';
 
   const filtrados = useMemo(
     () => (!filtroEstado ? candidatos : candidatos.filter((c) => c.estado === filtroEstado)),
     [candidatos, filtroEstado]
   );
 
-  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / itemsPorPagina));
+  const totalPaginas = Math.ceil(filtrados.length / itemsPorPagina);
   const paginados = useMemo(
     () => filtrados.slice((paginaActual - 1) * itemsPorPagina, paginaActual * itemsPorPagina),
     [filtrados, paginaActual, itemsPorPagina]
@@ -110,37 +98,35 @@ export default function GestionPostulaciones() {
     });
   }, [paginados, idsSeleccionados]);
 
-  const manejarInvitacion = useCallback((id) => {
-    setCambiosLocales((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] ?? {}), estaInvitado: true, status: 'entrevistado' },
-    }));
+  const manejarInvitacion = useCallback((id, date, time, message) => {
+    setCandidatos((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, estaInvitado: true, status: 'entrevistado' } : c))
+    );
   }, []);
 
   const manejarRechazo = useCallback((id) => {
-    setCambiosLocales((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] ?? {}), status: 'rechazado' },
-    }));
+    setCandidatos((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, status: 'rechazado' } : c))
+    );
   }, []);
 
   const manejarAgregarNota = useCallback((id, note) => {
-    setCambiosLocales((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] ?? {}), notes: [...(prev[id]?.notes ?? []), note] },
-    }));
+    setCandidatos((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, notes: [...c.notas, note] } : c))
+    );
   }, []);
 
   const manejarEliminarNota = useCallback((id, index) => {
-    setCambiosLocales((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] ?? {}), notes: (prev[id]?.notes ?? []).filter((_, i) => i !== index) },
-    }));
+    setCandidatos((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, notes: c.notas.filter((_, i) => i !== index) } : c
+      )
+    );
   }, []);
 
   const manejarExportacion = useCallback((formato, soloSeleccionados) => {
     const data = soloSeleccionados ? candidatos.filter((c) => idsSeleccionados.has(c.id)) : candidatos;
-    alert(`Exportando ${data.length} candidatos en formato ${formato.toUpperCase()}`);
+    alert(`Exportando ${data.length} candidatos en formato ${format.toUpperCase()}`);
   }, [candidatos, idsSeleccionados]);
 
   const todaPaginaSeleccionada = paginados.length > 0 && paginados.every((c) => idsSeleccionados.has(c.id));
@@ -167,7 +153,7 @@ export default function GestionPostulaciones() {
                   Gestión de Postulaciones
                 </h1>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  Revisa los perfiles de los juniors que han aplicado a <strong className="text-[#1868D5] font-semibold">"{nombreProyecto}"</strong>.
+                  Revisa los perfiles de los juniors que han aplicado a <strong className="text-[#1868D5] font-semibold">"E-commerce Refactor (React/Node)"</strong>.
                   <br />Evalúa sus stacks y cartas de presentación para coordinar entrevistas.
                 </p>
               </div>
@@ -188,16 +174,6 @@ export default function GestionPostulaciones() {
         </header>
 
         <div className="px-8 py-7">
-          {loading && (
-            <div className="mb-6 rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm text-gray-500">
-              Cargando postulaciones...
-            </div>
-          )}
-          {error && (
-            <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-600">
-              {error}
-            </div>
-          )}
           {/* ── Stat Cards (Staggered Fade-in) ── */}
           <div className="grid grid-cols-4 gap-4 mb-8">
             {tarjetasEstadistica.map((card, i) => {
@@ -284,12 +260,12 @@ export default function GestionPostulaciones() {
                   </tr>
                 </thead>
                 <tbody>
-                  {!loading && !error && paginados.map((candidate, i) => (
+                  {paginados.map((candidate, i) => (
                     <FilaCandidato
-                      key={candidate.id}
-                      candidate={candidate}
+                      key={candidato.id}
+                      candidato={candidate}
                       index={i}
-                      estaSeleccionado={idsSeleccionados.has(candidate.id)}
+                      estaSeleccionado={idsSeleccionados.has(candidato.id)}
                       alSeleccionar={alternarSeleccion}
                       alVer={(id) => console.log('View:', id)}
                       alInvitar={manejarInvitacion}
@@ -298,13 +274,6 @@ export default function GestionPostulaciones() {
                       alEliminarNota={manejarEliminarNota}
                     />
                   ))}
-                  {!loading && !error && paginados.length === 0 && (
-                    <tr>
-                      <td className="px-6 py-8 text-sm text-gray-500" colSpan="4">
-                        No hay postulaciones para mostrar.
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </table>
             </div>

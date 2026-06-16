@@ -14,7 +14,7 @@ export default function AccionesMasivas({ cantidadSeleccionada, cantidadTotal, a
   }, []);
 
   const manejarExportacion = (format) => {
-    alExportar(format, cantidadSeleccionada > 0);
+    alExportar(formato, cantidadSeleccionada > 0);
     setOpen(false);
   };
 
@@ -90,7 +90,7 @@ export default function AccionesMasivas({ cantidadSeleccionada, cantidadTotal, a
                   label: 'PDF con Cartas',
                   desc: 'Perfiles + cartas de presentación',
                 },
-              ].map(({ format, icon: Icon, iconColor, label, desc }) => (
+              ].map(({ formato, icon: Icon, iconColor, label, desc }) => (
                 <button
                   key={format}
                   onClick={() => manejarExportacion(format)}

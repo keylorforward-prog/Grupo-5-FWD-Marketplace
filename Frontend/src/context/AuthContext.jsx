@@ -35,10 +35,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', userToken);
   };
 
-  const actualizarUsuario = (cambios) => {
-    setUser((usuarioActual) => (usuarioActual ? { ...usuarioActual, ...cambios } : usuarioActual));
-  };
-
   const logout = async () => {
     try {
       await authService.logout();
@@ -53,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = !!token && !!user;
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, actualizarUsuario, isAuthenticated, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, loading }}>
       {children}
     </AuthContext.Provider>
   );

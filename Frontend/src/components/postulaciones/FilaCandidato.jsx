@@ -40,6 +40,8 @@ export default function FilaCandidato({
   alVer,
   alInvitar,
   alRechazar,
+  alAgregarNota,
+  alEliminarNota,
 }) {
   const { id, name, location, stacks, coverLetter, status, estaInvitado, avatar } = candidate;
   const infoEstado = configEstado[status] ?? configEstado.nuevo;

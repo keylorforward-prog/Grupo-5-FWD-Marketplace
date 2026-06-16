@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ESTADO_INICIAL = {
   nombre: 'Alex Rivera',
@@ -9,11 +9,13 @@ const ESTADO_INICIAL = {
 const CLAVE_ALMACENAMIENTO = 'informacionCuenta';
 
 function InformacionCuenta() {
-  const [datosFormulario, setDatosFormulario] = useState(() => {
-    const datosGuardados = localStorage.getItem(CLAVE_ALMACENAMIENTO);
-    return datosGuardados ? JSON.parse(datosGuardados) : ESTADO_INICIAL;
-  });
+  const [datosFormulario, setDatosFormulario] = useState(ESTADO_INICIAL);
   const [mensajeExito, setMensajeExito] = useState(false);
+
+  useEffect(() => {
+    const datosGuardados = localStorage.getItem(CLAVE_ALMACENAMIENTO);
+    if (datosGuardados) setDatosFormulario(JSON.parse(datosGuardados));
+  }, []);
 
   const manejarCambio = (e) => {
     const { name, value } = e.target;

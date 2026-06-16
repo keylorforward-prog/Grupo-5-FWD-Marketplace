@@ -1,4 +1,4 @@
-import DashboardLayout from '../DashboardEgresado/components/DashboardLayout';
+import LayoutEgresado from '../LayoutEgresado';
 import TarjetaUsuario from './components/TarjetaUsuario';
 import TarjetaStack from './components/TarjetaStack';
 import TarjetaBio from './components/TarjetaBio';
@@ -11,7 +11,7 @@ function PerfilEgresado() {
   const perfilApi = usePerfilEgresado();
 
   return (
-    <DashboardLayout>
+    <LayoutEgresado>
       <div className="contenedorPerfil">
         <div className="bannerSuperior fwd-animar-fade">
           <div className="contenidoBanner">
@@ -48,7 +48,7 @@ function PerfilEgresado() {
           </section>
         </main>
       </div>
-    </DashboardLayout>
+    </LayoutEgresado>
   );
 }
 

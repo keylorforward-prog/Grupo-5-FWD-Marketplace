@@ -1,25 +1,19 @@
-import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
-import EstadoDatos from '../../components/EstadoDatos';
-import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
-import { formatearPago } from '../../utils/dashboardEmpresarioFormatters';
+
+const invoices = [
+  { id: 1, concept: 'Proyecto Sistema de Inventario', amount: '$450', status: 'Pagado' },
+  { id: 2, concept: 'Dashboard de Ventas', amount: '$700', status: 'Pendiente' },
+  { id: 3, concept: 'Landing Page Marketing', amount: '$320', status: 'Pagado' },
+];
 
 export default function Facturacion() {
-  const { data, loading, error } = useDashboardEmpresarioRequest(
-    () => dashboardEmpresarioService.obtenerPagos(),
-    [],
-    []
-  );
-  const pagos = data.map(formatearPago);
-
   return (
     <DashboardLayout activePage="facturacion">
       <div className="de-page-heading">
         <h1>Facturacion</h1>
       </div>
       <div className="de-panel">
-        <EstadoDatos loading={loading} error={error} empty={!pagos.length} emptyText="No hay pagos registrados." />
-        {!loading && !error && pagos.map((invoice) => (
+        {invoices.map((invoice) => (
           <div key={invoice.id} className="de-deliverable-item">
             <div className="de-deliverable-info">
               <p className="de-deliverable-name">{invoice.concept}</p>
