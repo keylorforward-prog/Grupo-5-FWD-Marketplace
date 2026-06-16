@@ -1,5 +1,5 @@
-import React from 'react';
-import DashboardLayout from '../DashboardEmpresario/components/DashboardLayout';
+import SidebarEmpresa from './components/SidebarEmpresa';
+import HeaderEmpresa from './components/HeaderEmpresa';
 import CompanyProfile from './components/CompanyProfile';
 import RecruitmentTeam from './components/RecruitmentTeam';
 import NotificationPreferences from './components/NotificationPreferences';

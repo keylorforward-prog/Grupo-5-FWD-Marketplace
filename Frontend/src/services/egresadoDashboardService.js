@@ -78,4 +78,9 @@ export const egresadoDashboardService = {
   obtenerMensajesRecientes(params) {
     return get('/dashboard-egresado/mensajes-recientes', params);
   },
+
+  obtenerConversacion(idPostulacion) {
+    return apiClient.get(`/dashboard-egresado/conversacion/${idPostulacion}`)
+      .then((r) => r.data?.data ?? r.data);
+  },
 };

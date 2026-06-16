@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { egresadoDashboardService } from '../../../services/egresadoDashboardService';
+import { egresadoDashboardService } from '../../../../services/egresadoDashboardService';
 
 const fondos = [
   'fondoAzulClaro', 'fondoAzulMedio', 'fondoAzulOscuro',

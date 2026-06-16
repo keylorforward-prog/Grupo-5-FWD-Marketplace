@@ -11,7 +11,14 @@ exports.getAll = async (req, res) => {
 
 exports.getById = async (req, res) => {
   try {
-    const data = await Propuesta.findByPk(req.params.id);
+    const { Propuesta, PerfilEmpresario, Usuario } = require('../Models');
+    const data = await Propuesta.findByPk(req.params.id, {
+      include: [{
+        model: PerfilEmpresario,
+        as: 'perfilEmpresario',
+        include: [{ model: Usuario, as: 'usuario', attributes: { exclude: ['contrasena_hash'] } }]
+      }]
+    });
     if (!data) return res.status(404).json({ success: false, message: 'No encontrado' });
     res.status(200).json({ success: true, data });
   } catch (error) {

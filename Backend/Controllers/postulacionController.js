@@ -1,4 +1,4 @@
-const { Postulacion } = require('../Models');
+const { Postulacion, PerfilEstudiante } = require('../Models');
 
 exports.getAll = async (req, res) => {
   try {
@@ -21,9 +21,21 @@ exports.getById = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const data = await Postulacion.create(req.body);
+    const perfil = await PerfilEstudiante.findOne({ where: { id_usuario: req.user.id_usuario } });
+    if (!perfil) return res.status(400).json({ success: false, message: 'Perfil de estudiante no encontrado.' });
+
+    const data = await Postulacion.create({
+      id_propuesta: req.body.id_propuesta,
+      id_perfil_estudiante: perfil.id_perfil_estudiante,
+      mensaje_presentacion: req.body.mensaje_presentacion || null,
+      presupuesto_max: req.body.presupuesto_max || null,
+    });
+
     res.status(201).json({ success: true, data });
   } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({ success: false, message: 'Ya te postulaste a este proyecto.' });
+    }
     res.status(400).json({ success: false, message: error.message });
   }
 };
