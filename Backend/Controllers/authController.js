@@ -58,7 +58,8 @@ const register = async (req, res) => {
       cedula, 
       rol,
       telefono_whatsapp,
-      tipo_empresa: rol === 'EMPRESARIO' ? tipo_empresa : null
+      tipo_empresa: rol === 'EMPRESARIO' ? tipo_empresa : null,
+      perfil_completo: true
     });
 
     let finalTituloFwd = titulo_fwd || 'Estudiante FWD';
@@ -191,6 +192,9 @@ const me = async (req, res) => {
       email: req.user.correo,
       rol: req.user.rol,
       foto_perfil: req.user.foto_perfil,
+      perfil_completo: req.user.perfil_completo,
+      provider: req.user.provider,
+      avatar_url: req.user.avatar_url
     },
   });
 };
@@ -249,4 +253,96 @@ const updatePassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, logout, me, updatePassword };
+const completarPerfil = async (req, res) => {
+  try {
+    const { rol, cedula, telefono_whatsapp, tipo_empresa, sector } = req.body;
+    const userId = req.user.id_usuario;
+
+    if (!rol || !cedula) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rol y cédula son requeridos',
+      });
+    }
+
+    const user = await Usuario.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado',
+      });
+    }
+
+    // Actualizar datos del usuario
+    await user.update({
+      rol,
+      cedula,
+      telefono_whatsapp,
+      tipo_empresa: rol === 'EMPRESARIO' ? tipo_empresa : null,
+      perfil_completo: true
+    });
+
+    let finalTituloFwd = 'Estudiante FWD';
+    let finalCedulaJuridicaUrl = null;
+    let fotoUrl = user.foto_perfil;
+    
+    if (req.files) {
+      if (rol === 'ESTUDIANTE' && req.files['titulo_fwd_file'] && req.files['titulo_fwd_file'][0]) {
+        finalTituloFwd = await uploadFileToS3(req.files['titulo_fwd_file'][0], 'titulos_fwd');
+      }
+      if (rol === 'EMPRESARIO' && req.files['cedula_juridica_file'] && req.files['cedula_juridica_file'][0]) {
+        finalCedulaJuridicaUrl = await uploadFileToS3(req.files['cedula_juridica_file'][0], 'cedulas_juridicas');
+      }
+      if (req.files['foto_perfil_file'] && req.files['foto_perfil_file'][0]) {
+        fotoUrl = await uploadFileToS3(req.files['foto_perfil_file'][0], 'fotos_perfil');
+        await user.update({ foto_perfil: fotoUrl });
+      }
+    }
+
+    // Crear perfil correspondiente
+    if (rol === 'ESTUDIANTE') {
+      await PerfilEstudiante.create({
+        id_usuario: user.id_usuario,
+        titulo_fwd: finalTituloFwd,
+        telefono_whatsapp
+      });
+    } else if (rol === 'EMPRESARIO') {
+      await PerfilEmpresario.create({
+        id_usuario: user.id_usuario,
+        sector: sector || 'No especificado',
+        telefono_whatsapp,
+        cedula_juridica_archivo: finalCedulaJuridicaUrl
+      });
+    }
+    
+    // Generar nuevo token con los datos actualizados
+    const token = generateToken(user);
+    res.cookie('token', token, cookieOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Perfil completado exitosamente',
+      token,
+      user: {
+        id: user.id_usuario,
+        id_usuario: user.id_usuario,
+        nombre: user.nombre,
+        email: user.correo,
+        rol: user.rol,
+        foto_perfil: user.foto_perfil,
+        perfil_completo: user.perfil_completo,
+        provider: user.provider,
+        avatar_url: user.avatar_url
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en completarPerfil:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+    });
+  }
+};
+
+module.exports = { register, login, logout, me, updatePassword, completarPerfil };

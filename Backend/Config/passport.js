@@ -38,7 +38,9 @@ passport.use(
 
         rol: 'ESTUDIANTE',
 
-        estado_cuenta: 'ACTIVA'
+        estado_cuenta: 'ACTIVA',
+        
+        perfil_completo: false
       });
 
       console.log('✅ Usuario Google creado');

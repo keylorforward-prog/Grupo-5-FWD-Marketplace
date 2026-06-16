@@ -30,8 +30,16 @@ function RutaProtegida({ children, rolPermitido }) {
     return <Navigate to={RUTAS.login} state={{ desde: ubicacion.pathname }} replace />;
   }
 
+  // Verificar si el perfil está incompleto
+  const isPerfilIncompleto = user?.perfil_completo === false;
+  const isRutaCompletarPerfil = ubicacion.pathname === RUTAS.completarPerfil;
+
+  if (isPerfilIncompleto && !isRutaCompletarPerfil) {
+    return <Navigate to={RUTAS.completarPerfil} replace />;
+  }
+
   // Si hay sesión, validar rol; si no hay sesión, dejar pasar (dev).
-  if (rolPermitido && isAuthenticated) {
+  if (rolPermitido && isAuthenticated && !isRutaCompletarPerfil) {
     const rol = obtenerRol(user);
     const permitidos = Array.isArray(rolPermitido) ? rolPermitido : [rolPermitido];
     if (rol && !permitidos.includes(rol)) {
