@@ -1,4 +1,3 @@
-import React from 'react';
 import SidebarEmpresa from './components/SidebarEmpresa';
 import HeaderEmpresa from './components/HeaderEmpresa';
 import CompanyProfile from './components/CompanyProfile';

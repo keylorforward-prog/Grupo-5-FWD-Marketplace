@@ -38,6 +38,7 @@ import HistorialEgresado from '../Pages/egresado/DashboardEgresado/pages/Histori
 import MensajesEgresado from '../Pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
 import NotificacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
 import ExplorarProyectos from '../Pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
+import ProyectoDetalle from '../Pages/egresado/DashboardEgresado/pages/ProyectoDetalle/ProyectoDetalle';
 import PerfilEgresado from '../Pages/egresado/PerfilEgresado/PerfilEgresado';
 import ConfiguracionEgresado from '../Pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
 
@@ -81,6 +82,7 @@ export default function Routing() {
         >
           <Route index element={<InicioEgresado />} />
           <Route path="explorar" element={<ExplorarProyectos />} />
+          <Route path="proyecto/:id" element={<ProyectoDetalle />} />
           <Route path="postulaciones" element={<PostulacionesEgresado />} />
           <Route path="proyectos" element={<MisProyectosEgresado />} />
           <Route path="historial" element={<HistorialEgresado />} />

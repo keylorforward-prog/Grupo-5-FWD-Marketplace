@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../../context/AuthContext';
 import apiClient from '../../../../services/apiClient';
@@ -177,19 +177,11 @@ const HeaderEmpresa = () => {
             <p style={{ margin: 0, fontSize: '10px', color: 'var(--color-vibrant-blue)', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em' }}>{userRole}</p>
           </div>
           <div className="se-user-avatar" style={{ overflow: 'hidden' }}>
-            {user?.foto_perfil ? (
-              <img 
-                src={avatarUrl} 
-                alt="User profile" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : (
-              <img 
-                src={avatarUrl} 
-                alt="User profile" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            )}
+            <img 
+              src={avatarUrl} 
+              alt="User profile" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </div>
         </div>
       </div>

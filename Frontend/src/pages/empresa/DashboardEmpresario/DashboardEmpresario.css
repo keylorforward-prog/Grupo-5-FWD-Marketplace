@@ -617,8 +617,18 @@
 /* ── Main Content ──────────────────────────────────────────────────────── */
 .de-main {
   flex: 1;
-  padding: 2.25rem 2rem 3.5rem;
   min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.de-main-content {
+  flex: 1;
+  min-height: 0;
+  padding: 2.25rem 2rem;
+  overflow-y: auto;
 }
 
 .de-page-heading {
@@ -2207,15 +2217,13 @@
 /* ── Footer ────────────────────────────────────────────────────────────── */
 .de-footer {
   border-top: 1px solid var(--border);
-  padding: 1rem 2rem;
+  padding: 0 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 1rem;
-  max-width: 1480px;
-  margin: 0 auto;
-  width: 100%;
+  flex-shrink: 0;
+  height: 52px;
 }
 
 .de-footer-copy {
@@ -2264,7 +2272,7 @@
   .de-sidebar {
     display: none;
   }
-  .de-main {
+  .de-main-content {
     padding: 1rem;
   }
   .de-company-profile {

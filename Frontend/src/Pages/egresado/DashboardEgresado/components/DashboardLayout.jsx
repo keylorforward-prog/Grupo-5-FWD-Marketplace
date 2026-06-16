@@ -244,56 +244,59 @@ export default function DashboardLayout({ children }) {
       </header>
 
       <div className="de-body">
-        <aside className="de-sidebar">
-          <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
-            <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
-            <div className="de-sidebar-profile-info">
-              <span className="de-sidebar-name">{displayName}</span>
-              <span className="de-sidebar-role">{tituloFwd}</span>
+        {!rutaActual.startsWith('/egresado/dashboard/proyecto/') && (
+          <aside className="de-sidebar">
+            <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
+              <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
+              <div className="de-sidebar-profile-info">
+                <span className="de-sidebar-name">{displayName}</span>
+                <span className="de-sidebar-role">{tituloFwd}</span>
+              </div>
             </div>
-          </div>
-          <div>
-            <nav className="de-sidebar-nav">
-              {sidebarItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.key}
-                    className={`de-sidebar-link ${activePage === item.key ? 'active' : ''}`}
-                    type="button"
-                    onClick={() => navigate(item.path)}
-                  >
-                    <Icon size={18} className="de-sidebar-icon" />
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+            <div>
+              <nav className="de-sidebar-nav">
+                {sidebarItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.key}
+                      className={`de-sidebar-link ${activePage === item.key ? 'active' : ''}`}
+                      type="button"
+                      onClick={() => navigate(item.path)}
+                    >
+                      <Icon size={18} className="de-sidebar-icon" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
 
-          <div className="de-sidebar-help">
-            <p className="de-sidebar-help-title">¿Necesitas ayuda?</p>
-            <p className="de-sidebar-help-text">Nuestro centro de ayuda está disponible 24/7 para ti.</p>
-            <button className="de-sidebar-help-btn" type="button" onClick={() => navigate(RUTAS.soporte)}>
-              <HelpCircle size={14} />
-              Ir al Centro de Ayuda
-            </button>
-          </div>
-        </aside>
+            <div className="de-sidebar-help">
+              <p className="de-sidebar-help-title">¿Necesitas ayuda?</p>
+              <p className="de-sidebar-help-text">Nuestro centro de ayuda está disponible 24/7 para ti.</p>
+              <button className="de-sidebar-help-btn" type="button" onClick={() => navigate(RUTAS.soporte)}>
+                <HelpCircle size={14} />
+                Ir al Centro de Ayuda
+              </button>
+            </div>
+          </aside>
+        )}
 
-        <main className="de-main fwd-fondo-decorativo">{children}</main>
+        <main className={`de-main fwd-fondo-decorativo${rutaActual.startsWith('/egresado/dashboard/proyecto/') ? ' de-main--full' : ''}`}>
+          <div className="de-main-content">{children}</div>
+          <footer className="de-footer">
+            <span className="de-footer-copy">
+              © {new Date().getFullYear()} FWD Costa Rica. Todos los derechos reservados.
+            </span>
+            <div className="de-footer-links">
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate(RUTAS.soporte)}>Términos y Condiciones</button>
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate(RUTAS.soporte)}>Política de Privacidad</button>
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate(RUTAS.soporte)}>Contacto</button>
+            </div>
+          </footer>
+        </main>
       </div>
-
-      <footer className="de-footer">
-        <span className="de-footer-copy">
-          © {new Date().getFullYear()} FWD Costa Rica. Todos los derechos reservados.
-        </span>
-        <div className="de-footer-links">
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate(RUTAS.soporte)}>Términos y Condiciones</button>
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate(RUTAS.soporte)}>Política de Privacidad</button>
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate(RUTAS.soporte)}>Contacto</button>
-        </div>
-      </footer>
     </div>
   );
 }

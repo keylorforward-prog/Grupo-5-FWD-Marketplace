@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import LoginForm from './components/LoginForm';
 import RegisterForm from '../Registro/components/RegisterForm';
