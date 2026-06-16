@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Search, Compass, TrendingUp, Users, Briefcase } from 'lucide-react';
-import { proyectosSimulados, opcionesOrden } from '../../../../../data/proyectosEgresado';
+import { opcionesOrden } from '../../../../../data/proyectosEgresado';
+import { egresadoService } from '../../../../../services/egresadoService';
 import { useFiltroProyectos } from '../../useFiltroProyectos';
 import BarraLateralFiltros from '../../components/BarraLateralFiltros';
 import CuadriculaProyectos from '../../components/CuadriculaProyectos';
@@ -10,8 +11,8 @@ const FILTROS_INICIALES = {
   busqueda: '',
   categoriaActiva: 'todas',
   tecnologia: '',
-  presupuestoMin: 0,
-  presupuestoMax: Infinity,
+  presupuestoMin: '',
+  presupuestoMax: '',
   duracion: 'cualquiera',
   modalidades: [],
   orden: 'recientes',
@@ -22,8 +23,19 @@ const ITEMS_POR_PAGINA = 8;
 export default function ExplorarProyectos() {
   const [filtros, setFiltros] = useState(FILTROS_INICIALES);
   const [paginaActual, setPaginaActual] = useState(1);
+  const [proyectos, setProyectos] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
-  const proyectosFiltrados = useFiltroProyectos(proyectosSimulados, filtros);
+  useEffect(() => {
+    let activo = true;
+    egresadoService.listarPropuestas()
+      .then((data) => { if (activo) setProyectos(data); })
+      .catch(() => { if (activo) setProyectos([]); })
+      .finally(() => { if (activo) setCargando(false); });
+    return () => { activo = false; };
+  }, []);
+
+  const proyectosFiltrados = useFiltroProyectos(proyectos, filtros);
 
   const totalPaginas = Math.max(1, Math.ceil(proyectosFiltrados.length / ITEMS_POR_PAGINA));
   const proyectosPagina = useMemo(
@@ -122,16 +134,22 @@ export default function ExplorarProyectos() {
           onLimpiar={limpiarFiltros}
         />
         <div className="columnaResultadosEgresado">
-          <CuadriculaProyectos
-            proyectos={proyectosPagina}
-            total={proyectosFiltrados.length}
-            orden={filtros.orden}
-            onOrdenCambio={(nuevoOrden) => manejarCambioFiltros({ orden: nuevoOrden })}
-            opcionesOrden={opcionesOrden}
-            paginaActual={paginaActual}
-            totalPaginas={totalPaginas}
-            onPaginaCambio={setPaginaActual}
-          />
+          {cargando ? (
+            <div className="estadoVacio">
+              <p>Cargando proyectos...</p>
+            </div>
+          ) : (
+            <CuadriculaProyectos
+              proyectos={proyectosPagina}
+              total={proyectosFiltrados.length}
+              orden={filtros.orden}
+              onOrdenCambio={(nuevoOrden) => manejarCambioFiltros({ orden: nuevoOrden })}
+              opcionesOrden={opcionesOrden}
+              paginaActual={paginaActual}
+              totalPaginas={totalPaginas}
+              onPaginaCambio={setPaginaActual}
+            />
+          )}
         </div>
       </div>
     </div>

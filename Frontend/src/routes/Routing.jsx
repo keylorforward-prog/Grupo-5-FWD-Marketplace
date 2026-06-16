@@ -4,47 +4,47 @@ import RutaProtegida from './RutaProtegida';
 import RedirectorRaiz from './RedirectorRaiz';
 import { RUTAS } from './rutas';
 // Autenticación
-import LoginPage from '../pages/auth/Login/LoginPage';
-import RegisterPage from '../pages/auth/Registro/RegisterPage';
-import AdminLogin from '../pages/auth/AdminLogin/AdminLogin';
-import GoogleCallback from '../pages/auth/GoogleCallback';
+import LoginPage from '../Pages/auth/Login/LoginPage';
+import RegisterPage from '../Pages/auth/Registro/RegisterPage';
+import AdminLogin from '../Pages/auth/AdminLogin/AdminLogin';
+import GoogleCallback from '../Pages/auth/GoogleCallback';
 
 // Empresa
-import DashboardEmpresario from '../pages/empresa/DashboardEmpresario/DashboardEmpresario';
-import ProyectosEmpresario from '../pages/empresa/DashboardEmpresario/pages/Proyectos/Proyectos';
-import OfertasEmpresario from '../pages/empresa/DashboardEmpresario/pages/Ofertas/Ofertas';
-import EntregablesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Entregables/Entregables';
-import MensajesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Mensajes/Mensajes';
-import TalentoEmpresario from '../pages/empresa/DashboardEmpresario/pages/Talento/Talento';
-import HistorialEmpresario from '../pages/empresa/DashboardEmpresario/pages/Historial/Historial';
-import EvaluacionesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Evaluaciones/Evaluaciones';
-import FacturacionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Facturacion/Facturacion';
-import NotificacionesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Notificaciones/Notificaciones';
-import AyudaEmpresario from '../pages/empresa/DashboardEmpresario/pages/Ayuda/Ayuda';
-import PublicarProyecto from '../pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
-import CrearProyectoIA from '../pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
-import ConfiguracionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
-import PerfilEmpresa from '../pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
-import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
-import AdminProfile from '../pages/admin/AdminProfile';
-import SettingsEmpresa from '../pages/empresa/SettingsEmpresa/SettingsEmpresa';
+import DashboardEmpresario from '../Pages/empresa/DashboardEmpresario/DashboardEmpresario';
+import ProyectosEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Proyectos/Proyectos';
+import OfertasEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Ofertas/Ofertas';
+import EntregablesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Entregables/Entregables';
+import MensajesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Mensajes/Mensajes';
+import TalentoEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Talento/Talento';
+import HistorialEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Historial/Historial';
+import EvaluacionesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Evaluaciones/Evaluaciones';
+import FacturacionEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Facturacion/Facturacion';
+import NotificacionesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Notificaciones/Notificaciones';
+import AyudaEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Ayuda/Ayuda';
+import PublicarProyecto from '../Pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
+import CrearProyectoIA from '../Pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
+import ConfiguracionEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
+import PerfilEmpresa from '../Pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
+import GestionPostulaciones from '../Pages/empresa/Postulaciones/GestionPostulaciones';
+import AdminProfile from '../Pages/admin/AdminProfile';
+import SettingsEmpresa from '../Pages/empresa/SettingsEmpresa/SettingsEmpresa';
 
 // Egresado
-import DashboardEgresado from '../pages/egresado/DashboardEgresado/DashboardEgresado';
-import InicioEgresado from '../pages/egresado/DashboardEgresado/pages/Inicio/Inicio';
-import PostulacionesEgresado from '../pages/egresado/DashboardEgresado/pages/Postulaciones/Postulaciones';
-import MisProyectosEgresado from '../pages/egresado/DashboardEgresado/pages/Proyectos/MisProyectos';
-import HistorialEgresado from '../pages/egresado/DashboardEgresado/pages/Historial/Historial';
-import MensajesEgresado from '../pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
-import NotificacionesEgresado from '../pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
-import ExplorarProyectos from '../pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
-import PerfilEgresado from '../pages/egresado/PerfilEgresado/PerfilEgresado';
-import ConfiguracionEgresado from '../pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
+import DashboardEgresado from '../Pages/egresado/DashboardEgresado/DashboardEgresado';
+import InicioEgresado from '../Pages/egresado/DashboardEgresado/pages/Inicio/Inicio';
+import PostulacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Postulaciones/Postulaciones';
+import MisProyectosEgresado from '../Pages/egresado/DashboardEgresado/pages/Proyectos/MisProyectos';
+import HistorialEgresado from '../Pages/egresado/DashboardEgresado/pages/Historial/Historial';
+import MensajesEgresado from '../Pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
+import NotificacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
+import ExplorarProyectos from '../Pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
+import PerfilEgresado from '../Pages/egresado/PerfilEgresado/PerfilEgresado';
+import ConfiguracionEgresado from '../Pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
 
 
 // Comunes
-import Proximamente from '../pages/comun/Proximamente';
-import PaginaNoEncontrada from '../pages/comun/PaginaNoEncontrada';
+import Proximamente from '../Pages/comun/Proximamente';
+import PaginaNoEncontrada from '../Pages/comun/PaginaNoEncontrada';
 
 export default function Routing() {
   return (

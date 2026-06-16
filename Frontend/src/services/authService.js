@@ -64,7 +64,7 @@ export const authService = {
    * Callback de Google - retorna user y token después de autenticarse con Google
    */
   async handleGoogleCallback() {
-    const { data } = await apiClient.get('/auth/me');
+    const { data } = await apiClient.get('/auth/google/callback');
     return data;
   },
 
@@ -72,7 +72,7 @@ export const authService = {
    * Actualizar contraseña
    */
   async updatePassword({ currentPassword, newPassword }) {
-    const { data } = await api.put('/auth/update-password', { currentPassword, newPassword });
+    const { data } = await apiClient.put('/auth/update-password', { currentPassword, newPassword });
     return data;
   },
 };

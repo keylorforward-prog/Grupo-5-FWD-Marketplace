@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FileText, MoreVertical } from 'lucide-react';
-import { postulacionesSimuladas } from '../../../../data/postulacionesEgresado';
+import { egresadoDashboardService } from '../../../../services/egresadoDashboardService';
+import { formatearPostulacion } from '../../DashboardEgresado/utils/dashboardEgresadoFormatters';
 
 const filtros = [
   { valor: 'todas', etiqueta: 'Todas' },
@@ -9,12 +10,49 @@ const filtros = [
   { valor: 'enviada', etiqueta: 'Enviadas' },
 ];
 
+const coloresAvatar = [
+  { fondo: '#e0f2fe', texto: '#0284c7' },
+  { fondo: '#f3e8ff', texto: '#7e22ce' },
+  { fondo: '#f1f5f9', texto: '#475569' },
+  { fondo: '#ffedd5', texto: '#c2410c' },
+  { fondo: '#cffafe', texto: '#0e7490' },
+];
+
+const inferirIniciales = (texto) =>
+  (texto || '??').split(' ').map((p) => p[0]).join('').toUpperCase().slice(0, 2);
+
 function TarjetaPostulaciones() {
+  const [postulaciones, setPostulaciones] = useState([]);
+  const [cargando, setCargando] = useState(true);
   const [filtroActivo, setFiltroActivo] = useState('todas');
   const [verTodas, setVerTodas] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(null);
 
-  const listaFiltrada = postulacionesSimuladas.filter((p) =>
+  useEffect(() => {
+    let activo = true;
+    egresadoDashboardService.obtenerPostulaciones({ limit: 10 })
+      .then((data) => {
+        if (!activo) return;
+        const normalizadas = (data || []).map(formatearPostulacion).map((p, i) => {
+          const c = coloresAvatar[i % coloresAvatar.length];
+          return {
+            ...p,
+            rol: p.titulo,
+            empresa: p.empresa || 'Empresa',
+            tiempo: p.fecha,
+            iniciales: inferirIniciales(p.titulo),
+            colorFondo: c.fondo,
+            colorTexto: c.texto,
+          };
+        });
+        setPostulaciones(normalizadas);
+      })
+      .catch(() => { if (activo) setPostulaciones([]); })
+      .finally(() => { if (activo) setCargando(false); });
+    return () => { activo = false; };
+  }, []);
+
+  const listaFiltrada = postulaciones.filter((p) =>
     filtroActivo === 'todas' ? true : p.tipoEstado === filtroActivo
   );
 
@@ -46,7 +84,9 @@ function TarjetaPostulaciones() {
       </div>
 
       <div className="listaPostulaciones">
-        {lista.length === 0 ? (
+        {cargando ? (
+          <div className="vacioPostulaciones">Cargando postulaciones...</div>
+        ) : lista.length === 0 ? (
           <div className="vacioPostulaciones">
             Sin postulaciones en este estado.
           </div>
