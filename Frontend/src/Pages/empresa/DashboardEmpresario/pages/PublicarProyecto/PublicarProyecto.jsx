@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
 import './PublicarProyecto.css';
@@ -25,6 +25,7 @@ const PRESUPUESTO_MINIMO = 100000;
 
 export default function PublicarProyecto() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formulario, setFormulario] = useState({
     titulo: '',
     descripcion: '',
@@ -33,6 +34,19 @@ export default function PublicarProyecto() {
     presupuesto_max: '',
     plazo_dias: '15',
   });
+  useEffect(() => {
+    const datosAgente = location.state?.datosAgente;
+    if (!datosAgente) return;
+    setFormulario({
+      titulo: datosAgente.titulo || '',
+      descripcion: datosAgente.descripcion || '',
+      tecnologias_requeridas: datosAgente.tecnologias_requeridas || '',
+      presupuesto_min: datosAgente.presupuesto_min || '',
+      presupuesto_max: datosAgente.presupuesto_max || '',
+      plazo_dias: datosAgente.plazo_dias || '15',
+    });
+  }, [location.state]);
+
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
   const [mostrarGuiaPrecios, setMostrarGuiaPrecios] = useState(false);
@@ -77,7 +91,8 @@ export default function PublicarProyecto() {
         plazo_dias: Number(formulario.plazo_dias),
         presupuesto_min: presupuestoMin,
         presupuesto_max: presupuestoMax,
-        usar_ia: 'NO',
+        usar_ia: location.state?.datosAgente?.usar_ia || 'NO',
+        id_conversacion_ia: location.state?.datosAgente?.id_conversacion_ia || null,
       });
       navigate('/DashboardEmpresario/proyectos');
     } catch (err) {
