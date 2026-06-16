@@ -160,7 +160,6 @@ const login = async (req, res) => {
         nombre: user.nombre,
         email: user.correo,
         rol: user.rol,
-        foto_perfil: user.foto_perfil,
       },
     });
   } catch (error) {
@@ -187,8 +186,7 @@ const me = async (req, res) => {
       id: req.user.id_usuario,
       nombre: req.user.nombre,
       email: req.user.correo,
-      rol: req.user.rol,
-      foto_perfil: req.user.foto_perfil,
+      rol: req.user.rol
     },
   });
 };

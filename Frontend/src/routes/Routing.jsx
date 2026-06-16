@@ -24,18 +24,10 @@ import AyudaEmpresario from '../pages/empresa/DashboardEmpresario/pages/Ayuda/Ay
 import PublicarProyecto from '../pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
 import CrearProyectoIA from '../pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
 import ConfiguracionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
-import PerfilEmpresa from '../pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
 import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
 
 // Egresado
 import DashboardEgresado from '../pages/egresado/DashboardEgresado/DashboardEgresado';
-import InicioEgresado from '../pages/egresado/DashboardEgresado/pages/Inicio/Inicio';
-import PostulacionesEgresado from '../pages/egresado/DashboardEgresado/pages/Postulaciones/Postulaciones';
-import MisProyectosEgresado from '../pages/egresado/DashboardEgresado/pages/Proyectos/MisProyectos';
-import HistorialEgresado from '../pages/egresado/DashboardEgresado/pages/Historial/Historial';
-import MensajesEgresado from '../pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
-import NotificacionesEgresado from '../pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
-import ExplorarProyectos from '../pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
 import PerfilEgresado from '../pages/egresado/PerfilEgresado/PerfilEgresado';
 import ConfiguracionEgresado from '../pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
 
@@ -67,15 +59,7 @@ export default function Routing() {
               <DashboardEgresado />
             </RutaProtegida>
           }
-        >
-          <Route index element={<InicioEgresado />} />
-          <Route path="explorar" element={<ExplorarProyectos />} />
-          <Route path="postulaciones" element={<PostulacionesEgresado />} />
-          <Route path="proyectos" element={<MisProyectosEgresado />} />
-          <Route path="historial" element={<HistorialEgresado />} />
-          <Route path="mensajes" element={<MensajesEgresado />} />
-          <Route path="notificaciones" element={<NotificacionesEgresado />} />
-        </Route>
+        />
         <Route
           path={RUTAS.egresadoPerfil}
           element={
@@ -95,7 +79,6 @@ export default function Routing() {
 
         {/* ── Empresa ────────────────────────────────────────────────── */}
         <Route path={RUTAS.empresa} element={<Navigate to={RUTAS.empresaDashboard} replace />} />
-        <Route path="/empresa/dashboard" element={<Navigate to={RUTAS.empresaDashboard} replace />} />
         <Route
           path={RUTAS.empresaDashboard}
           element={
@@ -106,7 +89,6 @@ export default function Routing() {
         />
         
         {/* Subrutas de Empresa Dashboard */}
-        <Route path="/DashboardEmpresario/perfil" element={<RutaProtegida rolPermitido="empresa"><PerfilEmpresa /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/proyectos" element={<RutaProtegida rolPermitido="empresa"><ProyectosEmpresario /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/ofertas" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpresario /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/entregables" element={<RutaProtegida rolPermitido="empresa"><EntregablesEmpresario /></RutaProtegida>} />

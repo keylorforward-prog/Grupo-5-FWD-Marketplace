@@ -12,7 +12,7 @@ const usuarioInvitado = {
   nombre: 'Alex Rivera',
   rol: 'Junior Developer',
   correo: 'alex.rivera@fwd.dev',
-  avatar: '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png',
+  avatar: '/Imgs/ProfileDefaultImage.png',
 };
 
 const itemsPorDefecto = [
@@ -34,12 +34,18 @@ function MenuUsuario({
   variante = 'completo',
 }) {
   const navegar = useNavigate();
-  const auth = useAuth();
+
+  let auth = null;
+  try {
+    auth = useAuth();
+  } catch {
+    auth = null;
+  }
   const usuario = auth?.user ?? usuarioInvitado;
   const usuarioNombre = usuario?.nombre || usuario?.name || usuarioInvitado.nombre;
   const usuarioCorreo = usuario?.correo || usuario?.email || usuarioInvitado.correo;
   const usuarioRol = usuario?.rol || usuario?.role || usuarioInvitado.rol;
-  const usuarioAvatar = usuario?.foto_perfil || usuario?.avatar || usuarioInvitado.avatar;
+  const usuarioAvatar = usuario?.avatar || usuarioInvitado.avatar;
 
   const [abierto, setAbierto] = useState(false);
   const [cerrando, setCerrando] = useState(false);

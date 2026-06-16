@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Mail, MessageSquare, Briefcase } from 'lucide-react';
 
 const CLAVE_ALMACENAMIENTO = 'preferenciasNotificacion';
@@ -30,10 +30,12 @@ const opcionesNotificacion = [
 const valoresPorDefecto = { postulaciones: true, mensajes: true, proyectos: false };
 
 function Notificaciones() {
-  const [preferencias, setPreferencias] = useState(() => {
+  const [preferencias, setPreferencias] = useState(valoresPorDefecto);
+
+  useEffect(() => {
     const guardado = localStorage.getItem(CLAVE_ALMACENAMIENTO);
-    return guardado ? { ...valoresPorDefecto, ...JSON.parse(guardado) } : valoresPorDefecto;
-  });
+    if (guardado) setPreferencias({ ...valoresPorDefecto, ...JSON.parse(guardado) });
+  }, []);
 
   const alternar = (id) => {
     setPreferencias((prev) => {
