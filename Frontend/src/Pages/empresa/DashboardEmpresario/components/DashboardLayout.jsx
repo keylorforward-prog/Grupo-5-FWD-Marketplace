@@ -61,7 +61,7 @@ export default function DashboardLayout({ activePage, children }) {
   const profileItems = [
     { key: 'perfil', label: 'Mi Perfil', icon: User, path: '/DashboardEmpresario/perfil' },
     { key: 'proyectos', label: 'Mis proyectos', icon: FolderOpen, path: '/DashboardEmpresario/proyectos' },
-    { key: 'configuracion', label: 'Configuración', icon: Settings, path: '/DashboardEmpresario/configuracion' },
+    { key: 'configuracion', label: 'Configuración', icon: Settings, path: '/SettingsEmpresa' },
   ];
 
   useEffect(() => {
