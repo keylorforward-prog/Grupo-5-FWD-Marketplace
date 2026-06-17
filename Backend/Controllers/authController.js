@@ -395,4 +395,4 @@ const completarPerfil = async (req, res) => {
   }
 };
 
-module.exports = { register, login, logout, me, updatePassword, completarPerfil };
+module.exports = { register, login, adminLogin, logout, me, updatePassword, completarPerfil };
