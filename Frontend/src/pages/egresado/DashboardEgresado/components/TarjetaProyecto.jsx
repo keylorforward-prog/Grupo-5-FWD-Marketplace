@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Bookmark, Send, Clock, DollarSign, Tag, Globe } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bookmark, Send, Clock, DollarSign, Tag, Globe, CheckCircle } from 'lucide-react';
 import { categoriasProyecto } from '../../../../data/proyectosEgresado';
 
 const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
@@ -18,17 +19,23 @@ const formatearPresupuesto = (min, max) =>
 
 const formatearEntrega = (min, max) => `${min} – ${max} días`;
 
-function TarjetaProyecto({ proyecto }) {
+function TarjetaProyecto({ proyecto, postulado }) {
+  const navigate = useNavigate();
   const [guardado, setGuardado] = useState(false);
-  const [postulado, setPostulado] = useState(false);
 
-  const manejarPostularse = () => {
-    setPostulado(true);
-    window.alert(`✅ Te has postulado a "${proyecto.titulo}" exitosamente.`);
+  const irAlDetalle = () => {
+    if (!postulado) navigate(`/egresado/dashboard/proyecto/${proyecto.id}`);
   };
 
   return (
-    <article className={`tarjetaProyecto acento-${proyecto.colorAcento}`}>
+    <article
+      className={`tarjetaProyecto acento-${proyecto.colorAcento}${postulado ? ' postulado' : ''}`}
+      onClick={irAlDetalle}
+      role="button"
+      tabIndex={postulado ? -1 : 0}
+      onKeyDown={(e) => { if (e.key === 'Enter') irAlDetalle(); }}
+      style={postulado ? { cursor: 'default' } : undefined}
+    >
       <div className="encabezadoTarjeta">
         <div className={`iconoProyectoContenedor acento-${proyecto.colorAcento}`}>
           <span className="iconoProyectoLetra">
@@ -91,15 +98,21 @@ function TarjetaProyecto({ proyecto }) {
             </span>
           </div>
         </div>
-        <button
-          type="button"
-          className={`botonDetalle ${postulado ? 'postulado' : ''}`}
-          onClick={manejarPostularse}
-          disabled={postulado}
-        >
-          <Send size={14} />
-          {postulado ? 'Postulado ✓' : 'Postularme'}
-        </button>
+        {postulado ? (
+          <span className="botonPostulado">
+            <CheckCircle size={14} />
+            Postulado
+          </span>
+        ) : (
+          <button
+            type="button"
+            className="botonDetalle"
+            onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}
+          >
+            <Send size={14} />
+            Ver detalle
+          </button>
+        )}
       </div>
     </article>
   );

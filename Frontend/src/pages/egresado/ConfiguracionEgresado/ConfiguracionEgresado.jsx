@@ -5,7 +5,7 @@ import InformacionCuenta from './components/InformacionCuenta';
 import PreferenciasProfesionales from './components/PreferenciasProfesionales';
 import Notificaciones from './components/Notificaciones';
 import Seguridad from './components/Seguridad';
-import { useScrollSpy } from './useScrollSpy';
+import { useScrollSpy } from './hooks/useScrollSpy';
 import './styles/ConfiguracionEgresado.css';
 
 const seccionesConfiguracion = [

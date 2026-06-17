@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
@@ -199,31 +199,17 @@ const HeaderEmpresa = () => {
           </div>
         </div>
         
-        <div style={{ position: 'relative' }}>
-          <div 
-            className="se-user-profile" 
-            style={{ cursor: 'pointer' }}
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
-          >
-            <div style={{ textAlign: 'right' }}>
-              <p className="se-label-bold" style={{ margin: 0, color: 'var(--color-on-surface)' }}>{userName}</p>
-              <p style={{ margin: 0, fontSize: '10px', color: 'var(--color-vibrant-blue)', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em' }}>{userRole}</p>
-            </div>
-            <div className="se-user-avatar" style={{ overflow: 'hidden' }}>
-              {user?.foto_perfil ? (
-                <img 
-                  src={avatarUrl} 
-                  alt="User profile" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <img 
-                  src={avatarUrl} 
-                  alt="User profile" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              )}
-            </div>
+        <div className="se-user-profile">
+          <div style={{ textAlign: 'right' }}>
+            <p className="se-label-bold" style={{ margin: 0, color: 'var(--color-on-surface)' }}>{userName}</p>
+            <p style={{ margin: 0, fontSize: '10px', color: 'var(--color-vibrant-blue)', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em' }}>{userRole}</p>
+          </div>
+          <div className="se-user-avatar" style={{ overflow: 'hidden' }}>
+            <img 
+              src={avatarUrl} 
+              alt="User profile" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </div>
           
           {showProfileMenu && (

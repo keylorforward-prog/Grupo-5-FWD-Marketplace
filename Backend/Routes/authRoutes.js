@@ -105,6 +105,7 @@ router.post('/register', upload.fields([
  *         description: Error del servidor
  */
 router.post('/login', login);
+router.post('/admin-login', adminLogin);
 
 /**
  * @swagger

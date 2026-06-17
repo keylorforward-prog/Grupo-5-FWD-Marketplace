@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
     reputacion_total: { type: DataTypes.DECIMAL(4,2), allowNull: true },
     descripcion: { type: DataTypes.TEXT, allowNull: true },
     fecha_verificacion: { type: DataTypes.DATE, allowNull: true },
-    telefono_whatsapp: { type: DataTypes.STRING(30), allowNull: true }
+    telefono_whatsapp: { type: DataTypes.STRING(30), allowNull: true },
+    verificado_por: { type: DataTypes.INTEGER, allowNull: true },
+    motivo_rechazo: { type: DataTypes.STRING(500), allowNull: true },
+    metodo_verificacion: { type: DataTypes.ENUM('API', 'MANUAL', 'DOCUMENTO'), allowNull: true },
+    match_automatico: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }
   }, { tableName: 'perfil_estudiante', timestamps: false, underscored: true, freezeTableName: true });
 };

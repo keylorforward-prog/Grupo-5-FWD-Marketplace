@@ -4,7 +4,7 @@ import TarjetaStack from './components/TarjetaStack';
 import TarjetaBio from './components/TarjetaBio';
 import TarjetaPostulaciones from './components/TarjetaPostulaciones';
 import ProyectosAcademicos from './components/ProyectosAcademicos';
-import { usePerfilEgresado } from './usePerfilEgresado';
+import { usePerfilEgresado } from './hooks/usePerfilEgresado';
 import './styles/PerfilEgresado.css';
 
 function PerfilEgresado() {

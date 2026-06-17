@@ -124,20 +124,6 @@ export default function GestionPostulaciones() {
     }));
   }, []);
 
-  const manejarAgregarNota = useCallback((id, note) => {
-    setCambiosLocales((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] ?? {}), notes: [...(prev[id]?.notes ?? []), note] },
-    }));
-  }, []);
-
-  const manejarEliminarNota = useCallback((id, index) => {
-    setCambiosLocales((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] ?? {}), notes: (prev[id]?.notes ?? []).filter((_, i) => i !== index) },
-    }));
-  }, []);
-
   const manejarExportacion = useCallback((formato, soloSeleccionados) => {
     const data = soloSeleccionados ? candidatos.filter((c) => idsSeleccionados.has(c.id)) : candidatos;
     alert(`Exportando ${data.length} candidatos en formato ${formato.toUpperCase()}`);
@@ -294,8 +280,6 @@ export default function GestionPostulaciones() {
                       alVer={(id) => console.log('View:', id)}
                       alInvitar={manejarInvitacion}
                       alRechazar={manejarRechazo}
-                      alAgregarNota={manejarAgregarNota}
-                      alEliminarNota={manejarEliminarNota}
                     />
                   ))}
                   {!loading && !error && paginados.length === 0 && (

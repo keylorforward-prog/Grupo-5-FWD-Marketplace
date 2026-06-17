@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) => {
     estado: { type: DataTypes.ENUM('ABIERTO','EN_PROGRESO','EN_REVISION','COMPLETADO','CANCELADO'), allowNull: false, defaultValue: 'ABIERTO' },
     fecha_inicio: { type: DataTypes.DATE, allowNull: true },
     fecha_fin_estimada: { type: DataTypes.DATE, allowNull: true },
-    fecha_creacion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW }
+    fecha_creacion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
+    fecha_adjudicado: { type: DataTypes.DATE, allowNull: true },
+    fecha_completado: { type: DataTypes.DATE, allowNull: true },
+    eliminado_por: { type: DataTypes.INTEGER, allowNull: true },
+    motivo_eliminacion: { type: DataTypes.STRING(500), allowNull: true }
   }, { tableName: 'proyecto_plataforma', timestamps: false, underscored: true, freezeTableName: true });
 };

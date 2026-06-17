@@ -3,24 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
 import './PublicarProyecto.css';
-
-function weeksToPlazoDias(weeks) {
-  if (weeks <= 1) return 5;
-  if (weeks <= 2) return 15;
-  return 30;
-}
-
-const EMPTY_FORM = {
-  titulo: '',
-  descripcion: '',
-  tecnologias_requeridas: '',
-  usar_ia: 'NO',
-  plazo_dias: 30,
-  presupuesto_min: '',
-  presupuesto_max: '',
-  id_conversacion_ia: null,
-};
-
 const PRESUPUESTO_MINIMO = 100000;
 
 export default function PublicarProyecto() {

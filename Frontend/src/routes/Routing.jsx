@@ -37,16 +37,18 @@ import AdminProfile from '../pages/admin/AdminProfile';
 import SettingsEmpresa from '../pages/empresa/SettingsEmpresa/SettingsEmpresa';
 
 // Egresado
-import DashboardEgresado from '../pages/egresado/DashboardEgresado/DashboardEgresado';
-import InicioEgresado from '../pages/egresado/DashboardEgresado/pages/Inicio/Inicio';
-import PostulacionesEgresado from '../pages/egresado/DashboardEgresado/pages/Postulaciones/Postulaciones';
-import MisProyectosEgresado from '../pages/egresado/DashboardEgresado/pages/Proyectos/MisProyectos';
-import HistorialEgresado from '../pages/egresado/DashboardEgresado/pages/Historial/Historial';
-import MensajesEgresado from '../pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
-import NotificacionesEgresado from '../pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
-import ExplorarProyectos from '../pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
-import PerfilEgresado from '../pages/egresado/PerfilEgresado/PerfilEgresado';
-import ConfiguracionEgresado from '../pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
+import DashboardEgresado from '../Pages/egresado/DashboardEgresado/DashboardEgresado';
+import InicioEgresado from '../Pages/egresado/DashboardEgresado/pages/Inicio/Inicio';
+import PostulacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Postulaciones/Postulaciones';
+import MisProyectosEgresado from '../Pages/egresado/DashboardEgresado/pages/Proyectos/MisProyectos';
+import HistorialEgresado from '../Pages/egresado/DashboardEgresado/pages/Historial/Historial';
+import MensajesEgresado from '../Pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
+import NotificacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
+import ExplorarProyectos from '../Pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
+import ProyectoDetalle from '../Pages/egresado/DashboardEgresado/pages/ProyectoDetalle/ProyectoDetalle';
+import PerfilEgresado from '../Pages/egresado/PerfilEgresado/PerfilEgresado';
+import ConfiguracionEgresado from '../Pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
+
 
 // Comunes
 import Proximamente from '../pages/comun/Proximamente';
@@ -60,8 +62,8 @@ export default function Routing() {
         <Route path={RUTAS.raiz} element={<LandingPage />} />
 
         {/* ── Públicas: autenticación ────────────────────────────────── */}
-        <Route path={RUTAS.login} element={<LoginPage />} />
         <Route path={RUTAS.loginAdmin} element={<AdminLogin />} />
+        <Route path={RUTAS.login} element={<LoginPage />} />
         <Route path={RUTAS.registro} element={<RegisterPage />} />
         <Route path={RUTAS.googleCallback} element={<GoogleCallback />} />
         <Route path={RUTAS.completarPerfil} element={
@@ -73,7 +75,6 @@ export default function Routing() {
         {/* Dashboard Empresa */}
         <Route path="/DashboardEmpresario" element={<DashboardEmpresario />} />
         <Route path="/postulaciones" element={<GestionPostulaciones />} />
-        <Route path="/admin" element={<AdminProfile />} />
         <Route path="/SettingsEmpresa" element={<SettingsEmpresa />} />
 
         {/* Dashboard Egresado */}
@@ -93,6 +94,7 @@ export default function Routing() {
         >
           <Route index element={<InicioEgresado />} />
           <Route path="explorar" element={<ExplorarProyectos />} />
+          <Route path="proyecto/:id" element={<ProyectoDetalle />} />
           <Route path="postulaciones" element={<PostulacionesEgresado />} />
           <Route path="proyectos" element={<MisProyectosEgresado />} />
           <Route path="historial" element={<HistorialEgresado />} />
