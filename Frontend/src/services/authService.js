@@ -1,5 +1,4 @@
 import axios from 'axios';
-import apiClient from './apiClient';
 
 export const api = axios.create({
   baseURL: '/api',
@@ -40,6 +39,14 @@ export const authService = {
    */
   async login({ email, password }) {
     const { data } = await api.post('/auth/login', { email, password });
+    return data;
+  },
+
+  /**
+   * Iniciar sesión como administrador
+   */
+  async adminLogin({ email, password }) {
+    const { data } = await apiClient.post('/auth/admin-login', { email, password });
     return data;
   },
 
@@ -89,7 +96,7 @@ export const authService = {
    * Actualizar contraseña
    */
   async updatePassword({ currentPassword, newPassword }) {
-    const { data } = await apiClient.put('/auth/update-password', { currentPassword, newPassword });
+    const { data } = await api.put('/auth/update-password', { currentPassword, newPassword });
     return data;
   },
 };

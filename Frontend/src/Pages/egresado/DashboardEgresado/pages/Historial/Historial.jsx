@@ -1,9 +1,14 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, History as HistoryIcon, SearchX } from 'lucide-react';
+import { ArrowLeft, ExternalLink, GitBranch, BookOpen, Calendar, User, Link as LinkIcon, Code, Clock, SearchX, Layers } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
 import { formatearHistorial } from '../../utils/dashboardEgresadoFormatters';
+
+const TIPO_CONFIG = {
+  GITHUB: { icon: GitBranch, label: 'GitHub', color: '#0969da', bg: '#e8f0fe' },
+  PLATAFORMA: { icon: BookOpen, label: 'Plataforma', color: '#7c3aed', bg: '#f3e8ff' },
+};
 
 export default function Historial() {
   const navigate = useNavigate();
@@ -15,6 +20,13 @@ export default function Historial() {
 
   const historiales = useMemo(() => (data || []).map(formatearHistorial), [data]);
 
+  const stats = useMemo(() => {
+    const total = historiales.length;
+    const github = historiales.filter((h) => h.tipo === 'GITHUB').length;
+    const plataforma = historiales.filter((h) => h.tipo === 'PLATAFORMA').length;
+    return { total, github, plataforma };
+  }, [historiales]);
+
   return (
     <>
       <div className="de-page-heading">
@@ -24,10 +36,45 @@ export default function Historial() {
           </button>
           <h1>Historial de Proyectos</h1>
         </div>
-        <span className="conteoProyectos">{historiales.length} registros</span>
+        {!loading && !error && (
+          <span className="conteoProyectos">{historiales.length} registro{historiales.length !== 1 ? 's' : ''}</span>
+        )}
       </div>
 
-      {loading && <p className="de-data-state">Cargando historial...</p>}
+      {!loading && !error && historiales.length > 0 && (
+        <div className="historial-stats">
+          <div className="historial-stat-card" data-type="total">
+            <Layers size={22} />
+            <div>
+              <span className="historial-stat-value">{stats.total}</span>
+              <span className="historial-stat-label">Total proyectos</span>
+            </div>
+          </div>
+          <div className="historial-stat-card" data-type="github">
+            <GitBranch size={22} />
+            <div>
+              <span className="historial-stat-value">{stats.github}</span>
+              <span className="historial-stat-label">GitHub</span>
+            </div>
+          </div>
+          <div className="historial-stat-card" data-type="plataforma">
+            <BookOpen size={22} />
+            <div>
+              <span className="historial-stat-value">{stats.plataforma}</span>
+              <span className="historial-stat-label">Plataforma</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loading && (
+        <div className="historial-loading">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="historial-skeleton" />
+          ))}
+        </div>
+      )}
+
       {error && <p className="de-data-state error">{error}</p>}
 
       {!loading && !error && historiales.length === 0 && (
@@ -39,44 +86,66 @@ export default function Historial() {
       )}
 
       {!loading && !error && historiales.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {historiales.map((h) => (
-            <div key={h.id} className="de-panel" style={{ cursor: 'default' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                <div className="de-offer-icon-wrap"><HistoryIcon size={20} /></div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>{h.titulo}</h3>
-                    <span className={`de-badge ${h.tipo === 'GITHUB' ? 'recepcion' : 'finalizado'}`}>{h.tipo}</span>
+        <div className="historial-timeline">
+          {historiales.map((h, idx) => {
+            const tipoCfg = TIPO_CONFIG[h.tipo] || TIPO_CONFIG.PLATAFORMA;
+            const TipoIcon = tipoCfg.icon;
+            return (
+              <div key={h.id} className="historial-card" style={{ '--accent-color': tipoCfg.color, '--accent-bg': tipoCfg.bg }}>
+                <div className="historial-card-dot" style={{ backgroundColor: tipoCfg.color }}>
+                  <TipoIcon size={14} color="#fff" />
+                </div>
+                <div className="historial-card-body">
+                  <div className="historial-card-header">
+                    <h3 className="historial-card-title">{h.titulo}</h3>
+                    <span className="historial-card-badge" style={{ backgroundColor: tipoCfg.bg, color: tipoCfg.color }}>
+                      <TipoIcon size={12} />
+                      {tipoCfg.label}
+                    </span>
                   </div>
+
                   {h.descripcion && (
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.85rem', color: 'var(--ink-muted)' }}>{h.descripcion}</p>
+                    <p className="historial-card-desc">{h.descripcion}</p>
                   )}
-                  <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem', fontSize: '0.78rem', color: 'var(--ink-subtle)' }}>
-                    {h.rol && <span>Rol: {h.rol}</span>}
-                    <span>{h.fechaInicio} → {h.fechaFin}</span>
+
+                  <div className="historial-card-meta">
+                    {h.rol && (
+                      <span className="historial-card-meta-item">
+                        <User size={13} />
+                        {h.rol}
+                      </span>
+                    )}
+                    <span className="historial-card-meta-item">
+                      <Calendar size={13} />
+                      {h.fechaInicio} → {h.fechaFin}
+                    </span>
                   </div>
+
                   {h.tecnologias.length > 0 && (
-                    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                    <div className="historial-card-techs">
+                      <Code size={13} />
                       {h.tecnologias.map((tech) => (
-                        <span key={tech} className="etiquetaTecnologia" style={{ fontSize: '0.72rem' }}>{tech}</span>
+                        <span key={tech} className="historial-tech-tag">{tech}</span>
                       ))}
                     </div>
                   )}
+
                   {h.enlace && (
                     <a
                       href={h.enlace}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
+                      className="historial-card-link"
                     >
-                      <ExternalLink size={14} /> Ver proyecto
+                      <LinkIcon size={13} />
+                      Ver repositorio
+                      <ExternalLink size={12} />
                     </a>
                   )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </>

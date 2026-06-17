@@ -1,0 +1,30 @@
+const express = require('express');
+const router = express.Router();
+const adminController = require('../Controllers/adminController');
+const { verifyToken } = require('../Middleware/authMiddleware');
+
+// Middleware manual para verificar si el rol es ADMIN
+const isAdmin = (req, res, next) => {
+  if (req.user && req.user.rol === 'ADMIN') {
+    return next();
+  }
+  return res.status(403).json({ success: false, message: 'Acceso denegado: solo administradores' });
+};
+
+// Aplicar middleware de autenticación y rol a todas las rutas
+router.use(verifyToken, isAdmin);
+
+// Endpoints
+router.get('/overview', adminController.getOverview);
+router.get('/configuracion', adminController.getConfiguracion);
+router.put('/configuracion', adminController.updateConfiguracion);
+router.get('/usuarios', adminController.getUsuarios);
+router.post('/usuarios/:id_usuario/suspender', adminController.suspendUsuario);
+
+router.get('/empresas', adminController.getEmpresas);
+router.post('/empresas/:id_usuario/estado', adminController.updateEstadoEmpresa);
+
+router.get('/egresados/pendientes', adminController.getEgresadosPendientes);
+router.post('/egresados/:id_usuario/verificar', adminController.verifyEstudiante);
+
+module.exports = router;

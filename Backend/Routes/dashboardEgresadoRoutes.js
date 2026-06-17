@@ -13,5 +13,6 @@ router.get('/proyectos', controller.listarProyectos);
 router.get('/historial', controller.listarHistorial);
 router.get('/notificaciones', controller.listarNotificaciones);
 router.get('/mensajes-recientes', controller.listarMensajesRecientes);
+router.get('/conversacion/:idPostulacion', controller.obtenerConversacion);
 
 module.exports = router;

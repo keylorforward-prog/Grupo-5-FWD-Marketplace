@@ -63,8 +63,18 @@ export const egresadoService = {
     return extraerData(respuesta).map(normalizarPropuestaEgresado);
   },
 
+  async obtenerPropuestaPorId(id) {
+    const respuesta = await apiClient.get(`/propuestas/${id}`);
+    return extraerData(respuesta);
+  },
+
   async obtenerPropuesta(id) {
     const respuesta = await apiClient.get(`/propuestas/${id}`);
     return normalizarPropuestaEgresado(respuesta.data?.data ?? respuesta.data);
+  },
+
+  async postularse(idPropuesta) {
+    const respuesta = await apiClient.post('/postulaciones', { id_propuesta: idPropuesta });
+    return respuesta.data;
   },
 };

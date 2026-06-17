@@ -1,26 +1,40 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, ArrowRight } from 'lucide-react';
+import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 import { RUTAS } from '../../../routes/rutas';
+import { useAuth } from '../../../context/AuthContext';
+import { authService } from '../../../services/authService';
 
 /**
  * Vista de Autenticación Administrativa (Login)
  * Implementa control de estado local para los inputs y navegación imperativa
  * mediante react-router-dom para simular la transición al Dashboard.
  */
-export default function Login() {
+export default function AdminLogin() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Simulación operativa del flujo de autenticación del Frontend
-    console.log('Autenticando credenciales de administrador...', { email });
-    
-    // Transición de ruta imperativa hacia el Panel de Administración
-    navigate(RUTAS.admin);
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const res = await authService.adminLogin({ email, password });
+      if (res.success && res.token) {
+        login(res.user, res.token);
+        navigate(RUTAS.admin);
+      }
+    } catch (err) {
+      console.error('Error de autenticación:', err);
+      setError(err.response?.data?.message || 'Error de conexión. Intente de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -42,6 +56,13 @@ export default function Login() {
 
         {/* Formulario Controlado */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg p-3 flex items-start gap-2">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
           
           {/* Input de Correo Electrónico */}
           <div className="space-y-2">
@@ -88,13 +109,16 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Botón de Acción de Envío (Acceso Clicleable) */}
+          {/* Botón de Acción de Envío */}
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-primary text-white font-bold text-sm rounded-xl shadow-soft hover:bg-primary-foreground hover:text-ink-strong active:scale-[0.98] transition-all cursor-pointer group mt-2"
+            disabled={isLoading}
+            className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-primary text-white font-bold text-sm rounded-xl shadow-soft transition-all ${
+              isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-primary-foreground hover:text-ink-strong active:scale-[0.98] cursor-pointer group'
+            } mt-2`}
           >
-            <span>Ingresar al Panel</span>
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            <span>{isLoading ? 'Verificando...' : 'Ingresar al Panel'}</span>
+            {!isLoading && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
           </button>
           
         </form>

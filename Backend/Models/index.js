@@ -23,13 +23,20 @@ const Notificacion = require('./notificacion')(sequelize, DataTypes);
 const Oferta = require('./oferta')(sequelize, DataTypes);
 const CatalogoSector = require('./catalogoSector')(sequelize, DataTypes);
 const ConversacionIA = require('./conversacionIA')(sequelize, DataTypes);
-
+const Auditoria = require('./auditoria')(sequelize, DataTypes);
+const Configuracion = require('./configuracion')(sequelize, DataTypes);
 // ========================
 // RELACIONES
 // ========================
 
 Usuario.hasOne(PerfilEstudiante, { foreignKey: 'id_usuario', as: 'perfilEstudiante' });
 PerfilEstudiante.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
+
+Usuario.hasMany(Auditoria, { foreignKey: 'actor_id', as: 'auditorias_realizadas' });
+Auditoria.belongsTo(Usuario, { foreignKey: 'actor_id', as: 'actor' });
+
+Usuario.hasMany(Configuracion, { foreignKey: 'modificado_por', as: 'configuraciones_modificadas' });
+Configuracion.belongsTo(Usuario, { foreignKey: 'modificado_por', as: 'modificador' });
 
 Usuario.hasOne(PerfilEmpresario, { foreignKey: 'id_usuario', as: 'perfilEmpresario' });
 PerfilEmpresario.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
@@ -130,4 +137,6 @@ module.exports = {
   Oferta,
   CatalogoSector,
   ConversacionIA,
+  Auditoria,
+  Configuracion
 };
