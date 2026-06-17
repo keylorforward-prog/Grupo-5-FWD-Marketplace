@@ -62,8 +62,8 @@ export default function Routing() {
         <Route path={RUTAS.raiz} element={<LandingPage />} />
 
         {/* ── Públicas: autenticación ────────────────────────────────── */}
-        <Route path={RUTAS.login} element={<LoginPage />} />
         <Route path={RUTAS.loginAdmin} element={<AdminLogin />} />
+        <Route path={RUTAS.login} element={<LoginPage />} />
         <Route path={RUTAS.registro} element={<RegisterPage />} />
         <Route path={RUTAS.googleCallback} element={<GoogleCallback />} />
         <Route path={RUTAS.completarPerfil} element={
@@ -75,7 +75,6 @@ export default function Routing() {
         {/* Dashboard Empresa */}
         <Route path="/DashboardEmpresario" element={<DashboardEmpresario />} />
         <Route path="/postulaciones" element={<GestionPostulaciones />} />
-        <Route path="/admin" element={<AdminProfile />} />
         <Route path="/SettingsEmpresa" element={<SettingsEmpresa />} />
 
         {/* Dashboard Egresado */}

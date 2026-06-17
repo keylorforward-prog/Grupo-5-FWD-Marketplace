@@ -1,4 +1,12 @@
-import { useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { adminService } from '../../services/adminService';
+import AdminUsuarios from './AdminUsuarios';
+import AdminEgresados from './AdminEgresados';
+import AdminConfiguracion from './AdminConfiguracion';
+import AdminEmpresas from './AdminEmpresas';
+import './AdminProfile.css';
 import {
   LayoutDashboard,
   Users,
@@ -6,10 +14,11 @@ import {
   GraduationCap,
   Settings,
   LogOut,
-  Search,
   Bell,
   MoreVertical,
-  Clock
+  Clock,
+  HelpCircle,
+  RefreshCw
 } from 'lucide-react';
 
 // Importación de módulos aislados (Corregido para coincidir con la carpeta "components" en minúscula)
@@ -18,135 +27,296 @@ import TarjetaEstadistica from '../../components/comun/TarjetaEstadistica';
 import InsigniaEstado from '../../components/comun/InsigniaEstado';
 
 export default function AdminProfile() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [cerrandoSesion, setCerrandoSesion] = useState(false);
+  const [overviewData, setOverviewData] = useState({
+    totalUsuarios: 0,
+    totalEstudiantes: 0,
+    totalEmpresarios: 0,
+    verifiPendientes: 0,
+    empresasPendientes: 0,
+    proyectosActivos: 0,
+    reportesAbiertos: 0,
+    actividadReciente: []
+  });
+  const [overviewLoading, setOverviewLoading] = useState(true);
+  const [overviewError, setOverviewError] = useState(null);
+
+  const cargarOverview = useCallback(async ({ mostrarCarga = false } = {}) => {
+    if (mostrarCarga) setOverviewLoading(true);
+    setOverviewError(null);
+
+    try {
+      const response = await adminService.getOverview();
+      if (response.success) {
+        setOverviewData((actual) => ({ ...actual, ...response.data }));
+      }
+    } catch (error) {
+      console.error('Error fetching admin overview:', error);
+      setOverviewError('No se pudo actualizar el resumen administrativo.');
+    } finally {
+      if (mostrarCarga) setOverviewLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelado = false;
+
+    adminService.getOverview()
+      .then((response) => {
+        if (!cancelado && response.success) {
+          setOverviewData((actual) => ({ ...actual, ...response.data }));
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching admin overview:', error);
+        if (!cancelado) setOverviewError('No se pudo cargar el resumen administrativo.');
+      })
+      .finally(() => {
+        if (!cancelado) setOverviewLoading(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
+  const menuTitles = {
+    dashboard: {
+      title: 'Panel de Administracion',
+      subtitle: 'Resumen operativo de usuarios, proyectos y verificaciones.'
+    },
+    empresas: {
+      title: 'Empresas',
+      subtitle: 'Gestiona organizaciones, perfiles y accesos empresariales.'
+    },
+    egresados: {
+      title: 'Verificacion de Egresados',
+      subtitle: 'Revisa solicitudes pendientes y valida credenciales FWD.'
+    },
+    usuarios: {
+      title: 'Gestion de Usuarios',
+      subtitle: 'Busca, revisa y administra cuentas de la plataforma.'
+    },
+    config: {
+      title: 'Configuracion',
+      subtitle: 'Ajustes generales del espacio administrativo.'
+    }
+  };
+
+  const manejarCerrarSesion = async () => {
+    setCerrandoSesion(true);
+    try {
+      await logout();
+    } finally {
+      setCerrandoSesion(false);
+      navigate('/login/admin', { replace: true });
+    }
+  };
+
+  const encabezado = menuTitles[activeMenu] || menuTitles.dashboard;
+  const totalAlertas = overviewData.verifiPendientes + overviewData.empresasPendientes + overviewData.reportesAbiertos;
+
+  const irAAlertas = () => {
+    if (overviewData.verifiPendientes > 0) {
+      setActiveMenu('egresados');
+      return;
+    }
+
+    if (overviewData.empresasPendientes > 0) {
+      setActiveMenu('empresas');
+      return;
+    }
+
+    setActiveMenu('dashboard');
+  };
 
   return (
-    <div className="flex h-screen w-full bg-ink-strong text-canvas font-body overflow-hidden">
-      
-      {/* 1. PANEL LATERAL (Sidebar) */}
-      <aside className="w-64 bg-[#0f172a] border-r border-border/10 flex flex-col justify-between shrink-0 h-full z-10">
-        <div className="p-6">
-          <div className="mb-10 space-y-1">
-            <div className="flex items-center cursor-pointer">
-              <img src="/Imgs/Logotipo/Digital/FWD - Logotipo.svg" alt="FWD Logotipo" className="h-8 w-auto filter invert brightness-0" />
+    <div className="admin-shell">
+      <header className="admin-topbar">
+        <div className="admin-topbar-inner">
+          <button className="admin-brand" type="button" onClick={() => setActiveMenu('dashboard')}>
+            <img
+              className="admin-brand-logo"
+              src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"
+              alt="FWD"
+              width="104"
+              height="53"
+              decoding="async"
+            />
+          </button>
+
+          <nav className="admin-nav" aria-label="Navegacion principal de administracion">
+            <button className={`admin-nav-link ${activeMenu === 'dashboard' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('dashboard')}>
+              <LayoutDashboard size={16} />
+              Dashboard
+            </button>
+            <button className={`admin-nav-link ${activeMenu === 'usuarios' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('usuarios')}>
+              <Users size={16} />
+              Usuarios
+            </button>
+            <button className={`admin-nav-link ${activeMenu === 'egresados' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('egresados')}>
+              <GraduationCap size={16} />
+              Egresados
+            </button>
+            <button className={`admin-nav-link ${activeMenu === 'empresas' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('empresas')}>
+              <Building size={16} />
+              Empresas
+            </button>
+            <button className={`admin-nav-link ${activeMenu === 'config' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('config')}>
+              <Settings size={16} />
+              Configuracion
+            </button>
+          </nav>
+
+          <div className="admin-topbar-actions">
+            <button className="admin-icon-button" type="button" aria-label="Notificaciones" title="Notificaciones">
+              <Bell size={20} />
+              <span className="admin-notification-dot" aria-hidden="true" />
+            </button>
+            <button className="admin-profile-pill" type="button" onClick={() => setActiveMenu('config')}>
+              <span className="admin-profile-avatar">AD</span>
+              <span className="admin-profile-copy">
+                <span className="admin-profile-name">Administrador</span>
+                <span className="admin-profile-role">FWD Workspace</span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="admin-body">
+        <aside className="admin-sidebar">
+          <div>
+            <div className="admin-sidebar-heading">
+              <p>Admin Workspace</p>
+              <span>Centro de control FWD</span>
             </div>
-            <p className="text-xs text-ink-muted font-bold tracking-widest uppercase">Admin Workspace</p>
+
+            <nav className="admin-sidebar-nav" aria-label="Secciones de administracion">
+              <ElementoBarraLateral icon={LayoutDashboard} label="Dashboard" isActive={activeMenu === 'dashboard'} onClick={() => setActiveMenu('dashboard')} />
+              <ElementoBarraLateral icon={Building} label="Empresas" isActive={activeMenu === 'empresas'} onClick={() => setActiveMenu('empresas')} />
+              <ElementoBarraLateral icon={GraduationCap} label="Egresados" isActive={activeMenu === 'egresados'} onClick={() => setActiveMenu('egresados')} />
+              <ElementoBarraLateral icon={Users} label="Usuarios" isActive={activeMenu === 'usuarios'} onClick={() => setActiveMenu('usuarios')} />
+            </nav>
           </div>
 
-          <nav className="space-y-2">
-            <ElementoBarraLateral icon={LayoutDashboard} label="Dashboard" isActive={activeMenu === 'dashboard'} onClick={() => setActiveMenu('dashboard')} />
-            <ElementoBarraLateral icon={Building} label="Empresas" isActive={activeMenu === 'empresas'} onClick={() => setActiveMenu('empresas')} />
-            <ElementoBarraLateral icon={GraduationCap} label="Egresados" isActive={activeMenu === 'egresados'} onClick={() => setActiveMenu('egresados')} />
-            <ElementoBarraLateral icon={Users} label="Usuarios" isActive={activeMenu === 'usuarios'} onClick={() => setActiveMenu('usuarios')} />
-          </nav>
-        </div>
-
-        <div className="p-6 border-t border-border/10 space-y-2">
+          <div className="admin-sidebar-footer">
+            <div className="admin-help-card">
+              <p className="admin-help-title">Necesitas ayuda?</p>
+              <p className="admin-help-text">Consulta lineamientos internos o reporta una incidencia de plataforma.</p>
+              <button className="admin-help-link" type="button">
+                <HelpCircle size={14} />
+                Soporte
+              </button>
+            </div>
           <ElementoBarraLateral icon={Settings} label="Configuración" isActive={activeMenu === 'config'} onClick={() => setActiveMenu('config')} />
           <button 
-            onClick={() => console.log('Ejecutando Logout...')}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
+            onClick={manejarCerrarSesion}
+            className="admin-logout-button"
+            type="button"
+            disabled={cerrandoSesion}
           >
-            <LogOut size={20} /> Cerrar Sesión
+            <LogOut size={20} /> {cerrandoSesion ? 'Cerrando...' : 'Cerrar Sesion'}
           </button>
         </div>
       </aside>
 
-      {/* 2. ÁREA DE CONTENIDO (Main Content) */}
-      <main className="flex-1 flex flex-col h-full relative overflow-y-auto">
-        
-        {/* Barra Superior (Header) */}
-        <header className="flex items-center justify-between px-10 py-6 bg-[#0f172a]/50 backdrop-blur-md sticky top-0 z-20 border-b border-border/5">
-          <div>
-            <h2 className="text-2xl font-extrabold text-canvas">Panel de Administración</h2>
-            <p className="text-ink-muted text-sm mt-1">Bienvenido, administrador. Resumen del día.</p>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted group-focus-within:text-accent transition-colors" size={18} />
-              <input
-                type="text"
-                placeholder="Buscar registros..."
-                className="pl-10 pr-4 py-2 bg-[#1e293b] border border-border/20 rounded-full text-sm text-canvas focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent w-64 transition-all"
-              />
+        <main className="admin-main fwd-fondo-decorativo">
+          <div className="admin-page-heading">
+            <div>
+              <span className="admin-eyebrow">Administracion</span>
+              <h1>{encabezado.title}</h1>
+              <p>{encabezado.subtitle}</p>
             </div>
-            
-            <button className="relative text-ink-muted hover:text-canvas transition-colors">
-              <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-magenta rounded-full border-2 border-[#0f172a]"></span>
-            </button>
 
-            <button className="h-10 w-10 bg-secondary text-canvas rounded-full flex items-center justify-center font-bold text-sm shadow-soft hover:scale-105 transition-transform border border-secondary/50">
-              AD
-            </button>
+            <div className="admin-heading-actions">
+              <button className="admin-secondary-button" type="button" onClick={irAAlertas}>
+                <Bell size={16} />
+                {totalAlertas} alertas
+              </button>
+            </div>
           </div>
-        </header>
 
-        {/* Cuerpo del Dashboard */}
-        <div className="p-10 flex flex-col gap-8">
+          <div className="admin-content">
+          {activeMenu === 'dashboard' && (
+            <>
+              {overviewError && (
+                <div className="admin-config-message error">
+                  {overviewError}
+                </div>
+              )}
+
+              <section className="admin-stats-grid">
+                <TarjetaEstadistica title="Total Usuarios" value={overviewLoading ? '...' : overviewData.totalUsuarios} icon={Users} trend="Global" isPositive={true} colorClass="text-accent" />
+                <TarjetaEstadistica title="Empresas Pendientes" value={overviewLoading ? '...' : overviewData.empresasPendientes} icon={Building} trend="Revision" isPositive={overviewData.empresasPendientes === 0} colorClass="text-magenta" />
+                <TarjetaEstadistica title="Verificaciones Pendientes" value={overviewLoading ? '...' : overviewData.verifiPendientes} icon={Clock} trend="Pendientes" isPositive={overviewData.verifiPendientes === 0} colorClass="text-warning" />
+              </section>
+
+              <section className="admin-panel">
+                <div className="admin-panel-header">
+                  <h3>Actividad Reciente</h3>
+                  <button className="admin-text-button" type="button" onClick={() => cargarOverview({ mostrarCarga: true })} disabled={overviewLoading}>
+                    <RefreshCw size={15} />
+                    Actualizar
+                  </button>
+                </div>
+                
+                <div className="admin-table-wrap">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Entidad / Usuario</th>
+                        <th>Accion</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th className="admin-table-actions">Detalles</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {overviewLoading ? (
+                        <tr><td colSpan="5" className="admin-muted-cell">Cargando actividad...</td></tr>
+                      ) : overviewData.actividadReciente.length === 0 ? (
+                        <tr><td colSpan="5" className="admin-muted-cell">Aun no hay actividad administrativa registrada.</td></tr>
+                      ) : (
+                        overviewData.actividadReciente.map((evento) => (
+                          <tr key={evento.id_auditoria}>
+                            <td>
+                              <div className="admin-entity-cell">
+                                <span className="admin-entity-icon accent">
+                                  {evento.entidad === 'PerfilEstudiante' ? <GraduationCap size={14} /> : <Building size={14} />}
+                                </span>
+                                <span>{evento.actor}</span>
+                              </div>
+                            </td>
+                            <td>{evento.accion}</td>
+                            <td>{new Date(evento.fecha).toLocaleString('es-CR', { dateStyle: 'medium', timeStyle: 'short' })}</td>
+                            <td><InsigniaEstado status="Completado" /></td>
+                            <td className="admin-table-actions">
+                              <button className="admin-row-action" type="button" aria-label="Ver detalles" title={evento.entidad}>
+                                <MoreVertical size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </>
+          )}
+
+          {activeMenu === 'usuarios' && <AdminUsuarios onAdminChange={cargarOverview} />}
+          {activeMenu === 'egresados' && <AdminEgresados onAdminChange={cargarOverview} />}
+          {activeMenu === 'empresas' && <AdminEmpresas onAdminChange={cargarOverview} />}
+          {activeMenu === 'config' && <AdminConfiguracion onAdminChange={cargarOverview} />}
           
-          {/* Métricas (StatCards) */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <TarjetaEstadistica title="Total Usuarios" value="1,248" icon={Users} trend="+12% mensual" isPositive={true} colorClass="text-accent" />
-            <TarjetaEstadistica title="Empresas Activas" value="342" icon={Building} trend="+5% mensual" isPositive={true} colorClass="text-magenta" />
-            <TarjetaEstadistica title="Procesos Pendientes" value="89" icon={Clock} trend="-2% mensual" isPositive={false} colorClass="text-warning" />
-          </section>
-
-          {/* Tabla de Actividad Reciente */}
-          <section className="bg-[#1e293b] border border-border/10 rounded-2xl shadow-elevated overflow-hidden flex flex-col">
-            <div className="px-6 py-5 border-b border-border/10 flex justify-between items-center bg-[#0f172a]/50">
-              <h3 className="font-bold text-canvas">Actividad Reciente</h3>
-              <button className="text-sm font-medium text-accent hover:text-canvas transition-colors">Ver historial completo</button>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left text-canvas">
-                <thead className="text-xs text-ink-muted uppercase bg-[#0f172a]/80">
-                  <tr>
-                    <th className="px-6 py-4 font-bold tracking-wider">Entidad / Usuario</th>
-                    <th className="px-6 py-4 font-bold tracking-wider">Acción</th>
-                    <th className="px-6 py-4 font-bold tracking-wider">Fecha</th>
-                    <th className="px-6 py-4 font-bold tracking-wider">Estado</th>
-                    <th className="px-6 py-4 text-right font-bold tracking-wider">Detalles</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/10">
-                  <tr className="hover:bg-[#0f172a]/40 transition-colors group cursor-pointer">
-                    <td className="px-6 py-4 font-medium flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
-                        <Building size={14} />
-                      </div>
-                      TechNova Costa Rica
-                    </td>
-                    <td className="px-6 py-4 text-ink-muted group-hover:text-canvas transition-colors">Registro de Empresa</td>
-                    <td className="px-6 py-4 text-ink-muted">Hoy, 10:23 AM</td>
-                    <td className="px-6 py-4"><InsigniaEstado status="Pendiente" /></td>
-                    <td className="px-6 py-4 flex justify-end">
-                      <button className="text-ink-muted hover:text-accent transition-colors p-2 rounded-full hover:bg-accent/10"><MoreVertical size={18} /></button>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-[#0f172a]/40 transition-colors group cursor-pointer">
-                    <td className="px-6 py-4 font-medium flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-magenta/20 flex items-center justify-center text-magenta">
-                        <GraduationCap size={14} />
-                      </div>
-                      Carlos Mendoza
-                    </td>
-                    <td className="px-6 py-4 text-ink-muted group-hover:text-canvas transition-colors">Actualización de Perfil</td>
-                    <td className="px-6 py-4 text-ink-muted">Ayer, 04:15 PM</td>
-                    <td className="px-6 py-4"><InsigniaEstado status="Completado" /></td>
-                    <td className="px-6 py-4 flex justify-end">
-                      <button className="text-ink-muted hover:text-accent transition-colors p-2 rounded-full hover:bg-accent/10"><MoreVertical size={18} /></button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
         </div>
       </main>
+      </div>
     </div>
   );
 }

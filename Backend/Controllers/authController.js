@@ -174,6 +174,56 @@ const login = async (req, res) => {
   }
 };
 
+const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email y contraseña son requeridos' });
+    }
+
+    const user = await Usuario.findOne({ where: { correo: email } });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
+    }
+
+    // Verificar explícitamente el rol
+    if (user.rol !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'Acceso denegado: rol de administrador requerido' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.contrasena_hash);
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
+    }
+
+    if (user.estado_cuenta === 'SUSPENDIDA') {
+      return res.status(403).json({ success: false, message: 'Cuenta suspendida' });
+    }
+
+    await user.update({ ultimo_acceso: new Date() });
+    const token = generateToken(user);
+    res.cookie('token', token, cookieOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: '¡Bienvenido al panel de administración!',
+      token,
+      user: {
+        id: user.id_usuario,
+        id_usuario: user.id_usuario,
+        nombre: user.nombre,
+        email: user.correo,
+        rol: user.rol,
+        foto_perfil: user.foto_perfil,
+      },
+    });
+  } catch (error) {
+    console.error('Error en adminLogin:', error);
+    return res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
+};
+
 const logout = async (req, res) => {
   res.clearCookie('token', cookieOptions);
   return res.status(200).json({
