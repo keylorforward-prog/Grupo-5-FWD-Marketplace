@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
+import CampanaNotificaciones from '../../../../components/notificaciones/CampanaNotificaciones';
 import {
   Bell,
   ChevronDown,
@@ -145,16 +146,7 @@ export default function DashboardLayout({ activePage, children }) {
           </div>
 
           <div className="de-header-right">
-            <button
-              className="de-header-bell de-link-button"
-              type="button"
-              onClick={() => navigate('/DashboardEmpresario/notificaciones')}
-              aria-label="Notificaciones"
-              title="Notificaciones"
-            >
-              <Bell size={20} />
-              <span className="de-header-bell-dot" aria-hidden="true" />
-            </button>
+            <CampanaNotificaciones rutaNotificaciones="/DashboardEmpresario/notificaciones" />
 
             <div className="de-header-profile-wrapper" ref={menuPerfilRef}>
               <button

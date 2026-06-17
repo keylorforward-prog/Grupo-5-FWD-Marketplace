@@ -21,6 +21,23 @@ const cookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días en ms
 };
 
+const TIPOS_EVIDENCIA_FWD = new Set([
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/webp'
+]);
+
+const obtenerArchivo = (req, campo) => req.files?.[campo]?.[0] || null;
+
+const validarEvidenciaFwd = (archivo) => {
+  if (!archivo) return 'Debes adjuntar tu titulo o certificado FWD en PDF o imagen.';
+  if (!TIPOS_EVIDENCIA_FWD.has(archivo.mimetype)) {
+    return 'La evidencia FWD debe ser PDF, PNG, JPG o WEBP.';
+  }
+  return null;
+};
+
 // ── Controladores ─────────────────────────────────────────────────────────────
 
 const register = async (req, res) => {
@@ -49,6 +66,14 @@ const register = async (req, res) => {
       });
     }
 
+    const archivoTituloFwd = obtenerArchivo(req, 'titulo_fwd_file');
+    if (rol === 'ESTUDIANTE') {
+      const errorEvidencia = validarEvidenciaFwd(archivoTituloFwd);
+      if (errorEvidencia) {
+        return res.status(400).json({ success: false, message: errorEvidencia });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await Usuario.create({ 
@@ -62,12 +87,12 @@ const register = async (req, res) => {
       perfil_completo: true
     });
 
-    let finalTituloFwd = titulo_fwd || 'Estudiante FWD';
+    let finalTituloFwd = titulo_fwd || '';
     let finalCedulaJuridicaUrl = null;
     
     if (req.files) {
-      if (rol === 'ESTUDIANTE' && req.files['titulo_fwd_file'] && req.files['titulo_fwd_file'][0]) {
-        finalTituloFwd = await uploadFileToS3(req.files['titulo_fwd_file'][0], 'titulos_fwd');
+      if (rol === 'ESTUDIANTE' && archivoTituloFwd) {
+        finalTituloFwd = await uploadFileToS3(archivoTituloFwd, 'titulos_fwd');
       }
       if (rol === 'EMPRESARIO' && req.files['cedula_juridica_file'] && req.files['cedula_juridica_file'][0]) {
         finalCedulaJuridicaUrl = await uploadFileToS3(req.files['cedula_juridica_file'][0], 'cedulas_juridicas');
@@ -323,6 +348,14 @@ const completarPerfil = async (req, res) => {
       });
     }
 
+    const archivoTituloFwd = obtenerArchivo(req, 'titulo_fwd_file');
+    if (rol === 'ESTUDIANTE') {
+      const errorEvidencia = validarEvidenciaFwd(archivoTituloFwd);
+      if (errorEvidencia) {
+        return res.status(400).json({ success: false, message: errorEvidencia });
+      }
+    }
+
     // Actualizar datos del usuario
     await user.update({
       rol,
@@ -332,13 +365,13 @@ const completarPerfil = async (req, res) => {
       perfil_completo: true
     });
 
-    let finalTituloFwd = 'Estudiante FWD';
+    let finalTituloFwd = '';
     let finalCedulaJuridicaUrl = null;
     let fotoUrl = user.foto_perfil;
     
     if (req.files) {
-      if (rol === 'ESTUDIANTE' && req.files['titulo_fwd_file'] && req.files['titulo_fwd_file'][0]) {
-        finalTituloFwd = await uploadFileToS3(req.files['titulo_fwd_file'][0], 'titulos_fwd');
+      if (rol === 'ESTUDIANTE' && archivoTituloFwd) {
+        finalTituloFwd = await uploadFileToS3(archivoTituloFwd, 'titulos_fwd');
       }
       if (rol === 'EMPRESARIO' && req.files['cedula_juridica_file'] && req.files['cedula_juridica_file'][0]) {
         finalCedulaJuridicaUrl = await uploadFileToS3(req.files['cedula_juridica_file'][0], 'cedulas_juridicas');

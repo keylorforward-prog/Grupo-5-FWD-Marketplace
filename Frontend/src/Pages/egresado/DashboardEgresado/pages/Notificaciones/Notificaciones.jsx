@@ -1,17 +1,12 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Bell, CheckCircle2, SearchX } from 'lucide-react';
-import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
-import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
+import { useNotificaciones } from '../../../../../hooks/useNotificaciones';
 import { formatearNotificacion } from '../../utils/dashboardEgresadoFormatters';
 
 export default function Notificaciones() {
   const navigate = useNavigate();
-  const { data, loading, error } = useDashboardEgresadoRequest(
-    () => egresadoDashboardService.obtenerNotificaciones(),
-    [],
-    []
-  );
+  const { notificaciones: data, loading } = useNotificaciones({ marcarAlCargar: true, limit: 50 });
 
   const notificaciones = useMemo(() => (data || []).map(formatearNotificacion), [data]);
 
@@ -27,9 +22,8 @@ export default function Notificaciones() {
       </div>
 
       {loading && <p className="de-data-state">Cargando notificaciones...</p>}
-      {error && <p className="de-data-state error">{error}</p>}
 
-      {!loading && !error && notificaciones.length === 0 && (
+      {!loading && notificaciones.length === 0 && (
         <div className="estadoVacio" style={{ padding: '3rem', textAlign: 'center' }}>
           <SearchX size={48} />
           <h4>Sin notificaciones</h4>
@@ -37,7 +31,7 @@ export default function Notificaciones() {
         </div>
       )}
 
-      {!loading && !error && notificaciones.length > 0 && (
+      {!loading && notificaciones.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
           {notificaciones.map((n) => (
             <div key={n.id} className="de-notif-item" style={{ padding: '1rem 0' }}>
