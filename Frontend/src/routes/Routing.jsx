@@ -169,6 +169,7 @@ export default function Routing() {
             </RutaProtegida>
           }
         />
+        <Route path="/Admin" element={<Navigate to={RUTAS.admin} replace />} />
 
         {/* ── Compartidas: placeholders ──────────────────────────────── */}
         <Route

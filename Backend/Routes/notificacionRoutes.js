@@ -20,7 +20,7 @@ const { verifyToken } = require('../Middleware/authMiddleware');
  *       200:
  *         description: Lista de Notificacion
  */
-router.get('/', controller.getAll);
+router.get('/', verifyToken, controller.getAll);
 
 /**
  * @swagger
@@ -35,6 +35,7 @@ router.get('/', controller.getAll);
  *         description: Lista de notificaciones del usuario
  */
 router.get('/mis-notificaciones', verifyToken, controller.getMisNotificaciones);
+router.put('/mis-notificaciones/leidas', verifyToken, controller.markMineAsRead);
 
 /**
  * @swagger
@@ -52,7 +53,7 @@ router.get('/mis-notificaciones', verifyToken, controller.getMisNotificaciones);
  *       200:
  *         description: Detalle de Notificacion
  */
-router.get('/:id', controller.getById);
+router.get('/:id', verifyToken, controller.getById);
 
 /**
  * @swagger
@@ -70,7 +71,7 @@ router.get('/:id', controller.getById);
  *       201:
  *         description: Registro creado
  */
-router.post('/', controller.create);
+router.post('/', verifyToken, controller.create);
 
 /**
  * @swagger
@@ -94,7 +95,7 @@ router.post('/', controller.create);
  *       200:
  *         description: Registro actualizado
  */
-router.put('/:id', controller.update);
+router.put('/:id', verifyToken, controller.update);
 
 /**
  * @swagger
@@ -112,6 +113,6 @@ router.put('/:id', controller.update);
  *       200:
  *         description: Registro eliminado
  */
-router.delete('/:id', controller.delete);
+router.delete('/:id', verifyToken, controller.delete);
 
 module.exports = router;

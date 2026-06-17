@@ -30,11 +30,12 @@ if (require.main === module) {
 const uploadFileToS3 = async (file, folder = 'uploads') => {
   if (!file) throw new Error('No se proporcionó archivo');
 
+  const bucket = process.env.S3_BUCKET_NAME || 'marketplacefwd';
   const fileExt = path.extname(file.originalname);
   const fileName = `${folder}/${uuidv4()}${fileExt}`;
   
   const command = new PutObjectCommand({
-    Bucket: 'marketplacefwd',
+    Bucket: bucket,
     Key: fileName,
     Body: file.buffer,
     ContentType: file.mimetype,
@@ -43,7 +44,7 @@ const uploadFileToS3 = async (file, folder = 'uploads') => {
   await s3Client.send(command);
 
   const region = process.env.AWS_REGION || 'us-east-2';
-  return `https://marketplacefwd.s3.${region}.amazonaws.com/${fileName}`;
+  return `https://${bucket}.s3.${region}.amazonaws.com/${fileName}`;
 };
 
 module.exports = {

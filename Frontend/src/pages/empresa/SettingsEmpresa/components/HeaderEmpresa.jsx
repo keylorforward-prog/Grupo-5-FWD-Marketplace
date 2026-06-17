@@ -141,7 +141,7 @@ const HeaderEmpresa = () => {
                 <button
                   onClick={() => {
                     setShowNotifications(false);
-                    navigate('/DashboardEmpresario/mensajes');
+                    navigate('/DashboardEmpresario/notificaciones');
                   }}
                   style={{
                     width: '100%',
@@ -156,7 +156,7 @@ const HeaderEmpresa = () => {
                     fontSize: '12px'
                   }}
                 >
-                  Ver Bandeja de Mensajes
+                  Ver todas
                 </button>
               </div>
             )}
