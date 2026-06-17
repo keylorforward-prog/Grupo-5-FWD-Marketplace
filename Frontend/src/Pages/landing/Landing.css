@@ -42,11 +42,11 @@ main {
 }
 
 .landing-btn-purple {
-  background: #4c1d95;
+  background: #6d28d9;
   color: white;
   padding: 14px 26px;
   border-radius: 12px;
-  box-shadow: 0 10px 20px rgba(76,29,149,.2);
+  box-shadow: 0 10px 20px rgba(109, 40, 217, 0.2);
 }
 
 .landing-btn-white {
@@ -100,7 +100,7 @@ main {
 .landing-navbar-logo span {
   font-size: 1.7rem;
   font-weight: 800;
-  color: #4c1d95;
+  color: #6d28d9;
 }
 
 /* =========================
@@ -119,9 +119,10 @@ main {
   background:
   linear-gradient(
       135deg,
-      #f5b6d7 0%,
-      #f2eef8 35%,
-      #d7f3ff 100%
+      #f5a3d4 0%,
+      #f0d5f5 30%,
+      #b3e5f5 70%,
+      #80deea 100%
   );
 }
 
@@ -156,7 +157,7 @@ main {
 }
 
 .pink {
-  color: #ec4899;
+  color: #d946a6;
 }
 
 .cyan {
@@ -200,19 +201,19 @@ main {
 }
 
 .hero-card-blue {
-  background: rgba(186,230,253,.65);
+  background: rgba(129, 230, 217, 0.7);
 }
 
 .hero-card-purple {
-  background: rgba(221,214,254,.7);
+  background: rgba(196, 181, 253, 0.75);
 }
 
 .hero-card-lavender {
-  background: rgba(233,213,255,.65);
+  background: rgba(219, 176, 240, 0.7);
 }
 
 .hero-card-yellow {
-  background: rgba(254,240,138,.55);
+  background: rgba(255, 229, 100, 0.65);
 }
 
 /* =========================
@@ -252,7 +253,7 @@ main {
 }
 
 .feature-large {
-  background: #eef8fb;
+  background: linear-gradient(135deg, #e0f7ff 0%, #e8f4f8 100%);
 
   display: flex;
   align-items: center;
@@ -270,8 +271,8 @@ main {
 .pink-card {
   background: linear-gradient(
       180deg,
-      #ff2ca0,
-      #db2777
+      #ec407a,
+      #d81e63
   );
 
   color: white;
@@ -280,8 +281,8 @@ main {
 .purple-card {
   background: linear-gradient(
       180deg,
-      #7c3aed,
-      #5b21b6
+      #8c5cde,
+      #6d28d9
   );
 
   color: white;
@@ -301,7 +302,7 @@ main {
 ========================= */
 
 .stats-section {
-  background: #4c1d95;
+  background: #6d28d9;
 
   display: flex;
   justify-content: center;
@@ -340,8 +341,8 @@ main {
   background:
   linear-gradient(
       135deg,
-      #6d28d9,
-      #4c1d95
+      #7c3aed,
+      #5b21b6
   );
 
   border-radius: 36px;
@@ -386,7 +387,7 @@ main {
 }
 
 .footer-grid h3 {
-  color: #4c1d95;
+  color: #6d28d9;
   margin-bottom: 1rem;
 }
 
