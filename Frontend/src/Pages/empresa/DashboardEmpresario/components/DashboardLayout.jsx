@@ -22,30 +22,33 @@ import {
   User,
   Users,
 } from 'lucide-react';
-
-const navLinks = [
-  { label: 'Inicio', icon: Home, path: '/DashboardEmpresario', key: 'inicio' },
-  { label: 'Mis Proyectos', icon: FolderOpen, path: '/DashboardEmpresario/proyectos', key: 'proyectos' },
-  { label: 'Buscar Talento', icon: Search, path: '/DashboardEmpresario/talento', key: 'talento' },
-  { label: 'Mensajes', icon: MessageSquare, path: '/DashboardEmpresario/mensajes', key: 'mensajes' },
-  { label: 'Notificaciones', icon: Bell, path: '/DashboardEmpresario/notificaciones', key: 'notificaciones' },
-];
-
-const sidebarItems = [
-  { key: 'inicio', label: 'Inicio', icon: Home, path: '/DashboardEmpresario' },
-  { key: 'proyectos', label: 'Mis Proyectos',    icon: FolderOpen,  path: '/DashboardEmpresario/proyectos' },
-  { key: 'empleos',   label: 'Ofertas de Empleo', icon: Briefcase,   path: '/DashboardEmpresario/empleos' },
-  { key: 'ofertas',   label: 'Ofertas Recibidas', icon: FileText,    path: '/DashboardEmpresario/ofertas' },
-  { key: 'entregables', label: 'Entregables', icon: Package, path: '/DashboardEmpresario/entregables' },
-  { key: 'mensajes', label: 'Mensajes', icon: MessageSquare, path: '/DashboardEmpresario/mensajes' },
-  { key: 'talento', label: 'Talento Recomendado', icon: Users, path: '/DashboardEmpresario/talento' },
-  { key: 'historial', label: 'Historial de Proyectos', icon: History, path: '/DashboardEmpresario/historial' },
-  { key: 'evaluaciones', label: 'Evaluaciones', icon: Star, path: '/DashboardEmpresario/evaluaciones' },
-  { key: 'facturacion', label: 'Facturacion', icon: Receipt, path: '/DashboardEmpresario/facturacion' },
-  { key: 'configuracion', label: 'Configuracion', icon: Settings, path: '/SettingsEmpresa' },
-];
+import LanguageSwitcher from '../../../../components/comun/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardLayout({ activePage, children }) {
+  const { t } = useTranslation();
+  const navLinks = [
+    { label: t('empresaLayout.nav.inicio'), icon: Home, path: '/DashboardEmpresario', key: 'inicio' },
+    { label: t('empresaLayout.nav.proyectos'), icon: FolderOpen, path: '/DashboardEmpresario/proyectos', key: 'proyectos' },
+    { label: t('empresaLayout.nav.talento'), icon: Search, path: '/DashboardEmpresario/talento', key: 'talento' },
+    { label: t('empresaLayout.nav.mensajes'), icon: MessageSquare, path: '/DashboardEmpresario/mensajes', key: 'mensajes' },
+    { label: t('empresaLayout.nav.notificaciones'), icon: Bell, path: '/DashboardEmpresario/notificaciones', key: 'notificaciones' },
+  ];
+
+  const sidebarItems = [
+    { key: 'inicio', label: t('empresaLayout.sidebar.inicio'), icon: Home, path: '/DashboardEmpresario' },
+    { key: 'proyectos', label: t('empresaLayout.sidebar.proyectos'),    icon: FolderOpen,  path: '/DashboardEmpresario/proyectos' },
+    { key: 'empleos',   label: t('empresaLayout.sidebar.empleos'), icon: Briefcase,   path: '/DashboardEmpresario/empleos' },
+    { key: 'ofertas',   label: t('empresaLayout.sidebar.ofertas'), icon: FileText,    path: '/DashboardEmpresario/ofertas' },
+    { key: 'entregables', label: t('empresaLayout.sidebar.entregables'), icon: Package, path: '/DashboardEmpresario/entregables' },
+    { key: 'mensajes', label: t('empresaLayout.sidebar.mensajes'), icon: MessageSquare, path: '/DashboardEmpresario/mensajes' },
+    { key: 'talento', label: t('empresaLayout.sidebar.talento'), icon: Users, path: '/DashboardEmpresario/talento' },
+    { key: 'historial', label: t('empresaLayout.sidebar.historial'), icon: History, path: '/DashboardEmpresario/historial' },
+    { key: 'evaluaciones', label: t('empresaLayout.sidebar.evaluaciones'), icon: Star, path: '/DashboardEmpresario/evaluaciones' },
+    { key: 'facturacion', label: t('empresaLayout.sidebar.facturacion'), icon: Receipt, path: '/DashboardEmpresario/facturacion' },
+    { key: 'configuracion', label: t('empresaLayout.sidebar.configuracion'), icon: Settings, path: '/SettingsEmpresa' },
+  ];
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
@@ -61,9 +64,9 @@ export default function DashboardLayout({ activePage, children }) {
   const avatar = user?.foto_perfil || '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
 
   const profileItems = [
-    { key: 'perfil', label: 'Mi Perfil', icon: User, path: '/DashboardEmpresario/perfil' },
-    { key: 'proyectos', label: 'Mis proyectos', icon: FolderOpen, path: '/DashboardEmpresario/proyectos' },
-    { key: 'configuracion', label: 'Configuración', icon: Settings, path: '/SettingsEmpresa' },
+    { key: 'perfil', label: t('empresaLayout.profile.perfil'), icon: User, path: '/DashboardEmpresario/perfil' },
+    { key: 'proyectos', label: t('empresaLayout.profile.proyectos'), icon: FolderOpen, path: '/DashboardEmpresario/proyectos' },
+    { key: 'configuracion', label: t('empresaLayout.profile.configuracion'), icon: Settings, path: '/SettingsEmpresa' },
   ];
 
   useEffect(() => {
@@ -147,6 +150,8 @@ export default function DashboardLayout({ activePage, children }) {
           </div>
 
           <div className="de-header-right">
+            <LanguageSwitcher />
+            
             <button
               className="de-header-bell de-link-button"
               type="button"
@@ -179,12 +184,12 @@ export default function DashboardLayout({ activePage, children }) {
                   <div className="de-profile-menu-header">
                     <div className="de-profile-menu-avatar-wrap">
                       <img src={avatar} alt={displayName} className="de-profile-menu-avatar" />
-                      <span className="de-profile-menu-status" aria-label="En línea" />
+                      <span className="de-profile-menu-status" aria-label={t('empresaLayout.profile.online')} />
                     </div>
                     <div className="de-profile-menu-user">
                       <p className="de-profile-menu-name">{displayName}</p>
                       <p className="de-profile-menu-email">{email}</p>
-                      <span className="de-profile-menu-role">Empresa</span>
+                      <span className="de-profile-menu-role">{t('empresaLayout.profile.role')}</span>
                     </div>
                   </div>
 
@@ -194,7 +199,7 @@ export default function DashboardLayout({ activePage, children }) {
                     onClick={() => navegarDesdeMenuPerfil('/DashboardEmpresario/perfil')}
                     role="menuitem"
                   >
-                    Ver perfil completo
+                    {t('empresaLayout.profile.fullProfile')}
                   </button>
 
                   <div className="de-profile-menu-separator" />
@@ -226,7 +231,7 @@ export default function DashboardLayout({ activePage, children }) {
                     <span className="de-profile-menu-icon">
                       {tema === 'light' ? <Moon size={18} /> : <Sun size={18} />}
                     </span>
-                    <span>Tema {tema === 'light' ? 'oscuro' : 'claro'}</span>
+                    <span>{tema === 'light' ? t('empresaLayout.profile.themeDark') : t('empresaLayout.profile.themeLight')}</span>
                     <span className="de-profile-menu-switch" data-active={tema === 'dark'}>
                       <span className="de-profile-menu-switch-dot" />
                     </span>
@@ -235,11 +240,11 @@ export default function DashboardLayout({ activePage, children }) {
                   <button
                     className="de-profile-menu-item"
                     type="button"
-                    onClick={() => navegarDesdeMenuPerfil('/DashboardEmpresario/ayuda')}
+                    onClick={() => navegarDesdeMenuPerfil('/soporte')}
                     role="menuitem"
                   >
                     <span className="de-profile-menu-icon"><HelpCircle size={18} /></span>
-                    <span>Soporte y ayuda</span>
+                    <span>{t('empresaLayout.profile.support')}</span>
                   </button>
 
                   <div className="de-profile-menu-separator" />
@@ -252,7 +257,7 @@ export default function DashboardLayout({ activePage, children }) {
                     role="menuitem"
                   >
                     <span className="de-profile-menu-icon"><LogOut size={18} /></span>
-                    <span>{cerrandoSesion ? 'Cerrando sesión...' : 'Cerrar sesión'}</span>
+                    <span>{cerrandoSesion ? t('empresaLayout.profile.loggingOut') : t('empresaLayout.profile.logout')}</span>
                   </button>
                 </div>
               )}
@@ -283,11 +288,11 @@ export default function DashboardLayout({ activePage, children }) {
           </div>
 
           <div className="de-sidebar-help">
-            <p className="de-sidebar-help-title">Necesitas ayuda?</p>
-            <p className="de-sidebar-help-text">Nuestro centro de ayuda esta disponible 24/7 para ti.</p>
-            <button className="de-sidebar-help-btn" type="button" onClick={() => navigate('/DashboardEmpresario/ayuda')}>
+            <p className="de-sidebar-help-title">{t('empresaLayout.help.title')}</p>
+            <p className="de-sidebar-help-text">{t('empresaLayout.help.text')}</p>
+            <button className="de-sidebar-help-btn" type="button" onClick={() => navigate('/soporte')}>
               <HelpCircle size={14} />
-              Ir al Centro de Ayuda
+              {t('empresaLayout.help.button')}
             </button>
           </div>
         </aside>
@@ -297,12 +302,12 @@ export default function DashboardLayout({ activePage, children }) {
 
       <footer className="de-footer">
         <span className="de-footer-copy">
-          © {new Date().getFullYear()} FWD Costa Rica. Todos los derechos reservados.
+          {t('empresaLayout.footer.copy').replace('{{year}}', new Date().getFullYear())}
         </span>
         <div className="de-footer-links">
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/DashboardEmpresario/ayuda')}>Terminos y Condiciones</button>
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/DashboardEmpresario/ayuda')}>Politica de Privacidad</button>
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/DashboardEmpresario/ayuda')}>Contacto</button>
+          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/terminos')}>{t('empresaLayout.footer.terms')}</button>
+          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/privacidad')}>{t('empresaLayout.footer.privacy')}</button>
+          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/contacto')}>{t('empresaLayout.footer.contact')}</button>
         </div>
       </footer>
     </div>

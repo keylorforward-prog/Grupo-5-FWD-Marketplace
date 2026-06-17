@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import LoginForm from './components/LoginForm';
 import RegisterForm from '../Registro/components/RegisterForm';
+import LanguageSwitcher from '../../../components/comun/LanguageSwitcher';
 import '../AuthPages.css';
 
 const LoginPage = () => {
+  const { t } = useTranslation();
   const [isRightPanelActive, setIsRightPanelActive] = useState(false);
 
   const handleSignIn = () => setIsRightPanelActive(false);
@@ -15,6 +18,9 @@ const LoginPage = () => {
 
   return (
     <div className="fwd-auth-wrapper">
+      <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 1000 }}>
+        <LanguageSwitcher />
+      </div>
       {/* Sign In Panel (Left side by default) */}
       <motion.div
         className="form-container sign-in-container"
@@ -78,16 +84,16 @@ const LoginPage = () => {
               </div>
               <div className="brand-heading">
                 <h1>
-                  ¡Bienvenido de nuevo!
+                  {t('auth.overlayLeft.titleStart')}
                   <br />
-                  <span className="text-highlight">Sigue creciendo.</span>
+                  <span className="text-highlight">{t('auth.overlayLeft.titleHighlight')}</span>
                 </h1>
               </div>
               <p className="brand-description">
-                Para mantenerte conectado con nosotros, por favor inicia sesión con tu información personal y descubre nuevos proyectos.
+                {t('auth.overlayLeft.desc')}
               </p>
               <button className="auth-btn ghost" onClick={handleSignIn}>
-                Iniciar Sesión
+                {t('auth.overlayLeft.btn')}
               </button>
             </div>
           </motion.div>
@@ -110,16 +116,16 @@ const LoginPage = () => {
               </div>
               <div className="brand-heading">
                 <h1>
-                  El futuro no espera,
+                  {t('auth.overlayRight.titleStart')}
                   <br />
-                  <span className="text-highlight">impulsa tu talento.</span>
+                  <span className="text-highlight">{t('auth.overlayRight.titleHighlight')}</span>
                 </h1>
               </div>
               <p className="brand-description">
-                Únete a la plataforma líder para desarrolladores junior. Encuentra proyectos de alto impacto y conecta con las empresas más innovadoras.
+                {t('auth.overlayRight.desc')}
               </p>
               <button className="auth-btn ghost" onClick={handleSignUp}>
-                Regístrate
+                {t('auth.overlayRight.btn')}
               </button>
             </div>
           </motion.div>

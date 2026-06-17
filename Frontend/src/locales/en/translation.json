@@ -55,5 +55,364 @@
     "minLen": "Password must be at least 6 characters",
     "success": "Password updated successfully",
     "error": "An error occurred"
+  },
+  "admin": {
+    "profile": {
+      "menu": {
+        "dashboard": {
+          "title": "Admin Dashboard",
+          "subtitle": "Operational overview of users, projects, and verifications."
+        },
+        "empresas": {
+          "title": "Companies",
+          "subtitle": "Manage organizations, profiles, and enterprise access."
+        },
+        "egresados": {
+          "title": "Alumni Verification",
+          "subtitle": "Review pending requests and validate FWD credentials."
+        },
+        "usuarios": {
+          "title": "User Management",
+          "subtitle": "Search, review, and manage platform accounts."
+        },
+        "config": {
+          "title": "Configuration",
+          "subtitle": "General settings for the administrative space."
+        }
+      },
+      "nav": {
+        "dashboard": "Dashboard",
+        "usuarios": "Users",
+        "egresados": "Alumni",
+        "empresas": "Companies",
+        "config": "Configuration"
+      },
+      "sidebar": {
+        "workspace": "Admin Workspace",
+        "controlCenter": "FWD Control Center",
+        "helpTitle": "Need help?",
+        "helpText": "Consult internal guidelines or report a platform incident.",
+        "support": "Support",
+        "logout": "Log Out",
+        "loggingOut": "Logging out..."
+      },
+      "dashboard": {
+        "alerts": "alerts",
+        "errorLoading": "Could not load the administrative overview.",
+        "totalUsers": "Total Users",
+        "pendingCompanies": "Pending Companies",
+        "pendingVerifications": "Pending Verifications",
+        "trendGlobal": "Global",
+        "trendRevision": "Revision",
+        "trendPending": "Pending",
+        "recentActivity": "Recent Activity",
+        "refresh": "Refresh",
+        "table": {
+          "entity": "Entity / User",
+          "action": "Action",
+          "date": "Date",
+          "status": "Status",
+          "details": "Details"
+        },
+        "loadingActivity": "Loading activity...",
+        "noActivity": "No administrative activity recorded yet.",
+        "statusCompleted": "Completed"
+      },
+      "topbar": {
+        "administrator": "Administrator",
+        "workspace": "FWD Workspace"
+      }
+    }
+  },
+  "empresaLayout": {
+    "nav": {
+      "inicio": "Home",
+      "proyectos": "My Projects",
+      "talento": "Find Talent",
+      "mensajes": "Messages",
+      "notificaciones": "Notifications"
+    },
+    "sidebar": {
+      "inicio": "Home",
+      "proyectos": "My Projects",
+      "empleos": "Job Offers",
+      "ofertas": "Received Offers",
+      "entregables": "Deliverables",
+      "mensajes": "Messages",
+      "talento": "Recommended Talent",
+      "historial": "Project History",
+      "evaluaciones": "Reviews",
+      "facturacion": "Billing",
+      "configuracion": "Configuration"
+    },
+    "profile": {
+      "perfil": "My Profile",
+      "proyectos": "My Projects",
+      "configuracion": "Configuration",
+      "online": "Online",
+      "fullProfile": "View full profile",
+      "themeLight": "Dark theme",
+      "themeDark": "Light theme",
+      "support": "Support & Help",
+      "logout": "Log Out",
+      "loggingOut": "Logging out..."
+    },
+    "help": {
+      "title": "Need help?",
+      "text": "Our help center is available 24/7 for you.",
+      "button": "Go to Help Center"
+    },
+    "footer": {
+      "rights": "All rights reserved.",
+      "terms": "Terms and Conditions",
+      "privacy": "Privacy Policy",
+      "contact": "Contact"
+    }
+  },
+  "egresadoLayout": {
+    "sidebar": {
+      "inicio": "Home",
+      "explorar": "Explore Projects",
+      "postulaciones": "My Applications",
+      "proyectos": "My Projects",
+      "historial": "History",
+      "mensajes": "Messages",
+      "notificaciones": "Notifications",
+      "perfil": "My Profile",
+      "configuracion": "Configuration"
+    },
+    "profile": {
+      "perfil": "My Profile",
+      "configuracion": "Configuration",
+      "role": "FWD Alumni"
+    }
+  },
+  "empresaDashboardInicio": {
+    "hero": {
+      "kicker": "FWD Marketplace",
+      "title_start": "Welcome,",
+      "title_fallback": "Company",
+      "subtitle": "Publish your project and connect with verified FWD talent.",
+      "btnPublish": "Publish Project",
+      "btnAIPublish": "Create Project with AI"
+    },
+    "activity": {
+      "title": "Activity Summary",
+      "projectsPublished": "Published Projects",
+      "projectsActive": "Active Projects",
+      "offersReceived": "Offers Received",
+      "projectsFinished": "Completed Projects",
+      "studentsHired": "Hired Students"
+    },
+    "projects": {
+      "title": "My Recent Projects",
+      "viewAll": "View all",
+      "empty": "You have no published projects yet."
+    },
+    "talent": {
+      "title": "AI Recommended Talent",
+      "viewMore": "View more",
+      "empty": "No recommended talent available.",
+      "rating": "Rating {{rating}} ({{projects}} projects)",
+      "match": "Match",
+      "viewMoreBtn": "View more candidates"
+    },
+    "offers": {
+      "title": "Pending Offers",
+      "viewAll": "View all",
+      "empty": "No pending offers.",
+      "new": "New",
+      "reviewAllBtn": "Review all offers"
+    },
+    "deliverables": {
+      "title": "Pending Deliverables",
+      "viewAll": "View all",
+      "empty": "No pending deliverables."
+    },
+    "messages": {
+      "title": "Recent Messages",
+      "viewAll": "View all",
+      "empty": "No recent messages."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "viewAll": "View all",
+      "empty": "No notifications."
+    }
+  },
+  "egresadoDashboardInicio": {
+    "hero": {
+      "kicker": "FWD Marketplace",
+      "title_start": "Welcome,",
+      "title_fallback": "Graduate",
+      "subtitle": "Explore projects, apply, and build your professional portfolio.",
+      "btnExplore": "Explore Projects"
+    },
+    "activity": {
+      "title": "Activity Summary",
+      "reputation": "Reputation",
+      "activeApplications": "Active Applications",
+      "projectsInProgress": "Projects in Progress",
+      "completedProjects": "Completed Projects",
+      "offersReceived": "Offers Received"
+    },
+    "applications": {
+      "title": "Recent Applications",
+      "viewAll": "View all",
+      "loading": "Loading applications...",
+      "empty": "You have not applied to any project yet.",
+      "viewAllBtn": "View all applications"
+    },
+    "projects": {
+      "title": "Active Projects",
+      "viewAll": "View all",
+      "loading": "Loading projects...",
+      "empty": "You have no active projects.",
+      "statusInDev": "In development",
+      "statusInRev": "Under review",
+      "deliveryEst": "Estimated delivery: {{date}}",
+      "noEstDate": "No estimated date"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "viewAll": "View all",
+      "loading": "Loading notifications...",
+      "empty": "No notifications."
+    }
+  },
+  "empresaProyectos": {
+    "title": "My Projects",
+    "btnPublish": "Publish Project",
+    "empty": "You have no published projects yet.",
+    "msgUpdateSuccess": "Project updated successfully.",
+    "msgUpdateError": "Could not update the project.",
+    "msgStatusError": "Could not change the project status.",
+    "msgDeleteConfirm": "Do you want to delete this project? This action cannot be undone.",
+    "msgDeleteSuccess": "Project deleted successfully.",
+    "msgDeleteError": "Could not delete the project.",
+    "form": {
+      "title": "Title",
+      "tech": "Technologies",
+      "days5": "5 days",
+      "days15": "15 days",
+      "days30": "30 days",
+      "budgetMin": "Min budget",
+      "budgetMax": "Max budget",
+      "desc": "Description",
+      "saving": "Saving...",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "aria": {
+      "edit": "Edit project",
+      "activate": "Activate project",
+      "pause": "Pause project",
+      "close": "Close project",
+      "delete": "Delete project"
+    }
+  },
+  "egresadoExplorar": {
+    "hero": {
+      "kicker": "Explore Projects",
+      "titleStart": "Find your ",
+      "titleHighlight": "next challenge",
+      "subtitle": "Connect with companies looking for talent like yours. Explore, apply, and build your portfolio.",
+      "searchPlaceholder": "Search projects by title, technology or description...",
+      "clearSearch": "Clear search"
+    },
+    "categories": {
+      "todas": {
+        "label": "All projects",
+        "desc": "View full catalog"
+      },
+      "web": {
+        "label": "Web Development",
+        "desc": "React, Next.js, HTML/CSS"
+      },
+      "backend": {
+        "label": "Backend / API",
+        "desc": "Node.js, Express, APIs"
+      },
+      "movil": {
+        "label": "Mobile Development",
+        "desc": "React Native, apps"
+      },
+      "data": {
+        "label": "Data & Analytics",
+        "desc": "Dashboards, SQL,Chart.js"
+      },
+      "diseno": {
+        "label": "UI/UX Design",
+        "desc": "Figma, prototyping"
+      }
+    },
+    "loading": "Loading projects..."
+  },
+  "auth": {
+    "overlayLeft": {
+      "titleStart": "Welcome back!",
+      "titleHighlight": "Keep growing.",
+      "desc": "To keep connected with us please login with your personal info and discover new projects.",
+      "btn": "Sign In"
+    },
+    "overlayRight": {
+      "titleStart": "The future does not wait,",
+      "titleHighlight": "boost your talent.",
+      "desc": "Join the leading platform for junior developers. Find high-impact projects and connect with the most innovative companies.",
+      "btn": "Sign Up"
+    },
+    "login": {
+      "titleStart": "Access your career",
+      "subtitle": "Welcome back. Enter your credentials to continue.",
+      "btnGoogle": "Continue with Google",
+      "orEmail": "OR WITH EMAIL",
+      "email": "Email Address",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "passwordPlaceholder": "••••••••",
+      "rememberMe": "Keep me logged in",
+      "loading": "Signing in...",
+      "submit": "Sign In",
+      "noAccount": "Do not have an account?",
+      "registerNow": "Sign up now",
+      "errFields": "Please complete all fields.",
+      "errDefault": "Error signing in. Please try again."
+    },
+    "register": {
+      "titleStart": "Create your account",
+      "subtitle": "Fill in your details to join the platform.",
+      "successMsg": "Account created successfully",
+      "redirecting": "Redirecting to login...",
+      "name": "Full name",
+      "namePlaceholder": "John Doe",
+      "cedula": "ID Card ",
+      "cedulaHint": "(include hyphen)",
+      "cedulaPlaceholder": "1-2342",
+      "role": "Account type",
+      "roleStudent": "Student",
+      "roleCompany": "Company",
+      "phone": "Phone (WhatsApp)",
+      "phonePlaceholder": "8888-8888",
+      "fileStudent": "FWD Degree (PDF or Image)",
+      "companyType": "Company Type",
+      "companyTypePlaceholder": "E.g. Startup, SME, etc.",
+      "sector": "Sector",
+      "sectorPlaceholder": "Technology, Finance, Health",
+      "fileCompany": "Corporate ID (PDF or Image) ",
+      "optional": "- Optional",
+      "passwordPlaceholder": "Minimum 6 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Repeat your password",
+      "loading": "Creating account...",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "loginNow": "Sign in",
+      "errFields": "Please complete all fields.",
+      "errCedula": "The ID must include the hyphen (-). Example: 1-2342",
+      "errPasswordLen": "The password must have at least 6 characters.",
+      "errPasswordMatch": "The passwords do not match.",
+      "errDefault": "Error signing up. Please try again."
+    }
   }
 }

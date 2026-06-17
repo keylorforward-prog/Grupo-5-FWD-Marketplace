@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Compass, TrendingUp, Users, Briefcase } from 'lucide-react';
 import { opcionesOrden } from '../../../../../data/proyectosEgresado';
 import { egresadoService } from '../../../../../services/egresadoService';
@@ -22,6 +23,7 @@ const FILTROS_INICIALES = {
 const ITEMS_POR_PAGINA = 4;
 
 export default function ExplorarProyectos() {
+  const { t } = useTranslation();
   const [filtros, setFiltros] = useState(FILTROS_INICIALES);
   const [paginaActual, setPaginaActual] = useState(1);
   const [proyectos, setProyectos] = useState([]);
@@ -68,12 +70,12 @@ export default function ExplorarProyectos() {
     <div className="contenidoPrincipal">
       <section className="seccionHero">
         <div className="textoHero">
-          <span className="kickerHero">Explorar Proyectos</span>
+          <span className="kickerHero">{t('egresadoExplorar.hero.kicker')}</span>
           <h1 className="tituloHero">
-            Encuentra tu <span className="textoResaltado">próximo desafío</span>
+            {t('egresadoExplorar.hero.titleStart')} <span className="textoResaltado">{t('egresadoExplorar.hero.titleHighlight')}</span>
           </h1>
           <p className="subtituloHero">
-            Conecta con empresas que buscan talento como el tuyo. Explora, postúlate y construye tu portafolio.
+            {t('egresadoExplorar.hero.subtitle')}
           </p>
           <div className="contenedorBusqueda">
             <div className="barraBusqueda">
@@ -81,7 +83,7 @@ export default function ExplorarProyectos() {
               <input
                 type="text"
                 className="entradaBusqueda"
-                placeholder="Buscar proyectos por título, tecnología o descripción..."
+                placeholder={t('egresadoExplorar.hero.searchPlaceholder')}
                 value={filtros.busqueda}
                 onChange={(e) => manejarCambioFiltros({ busqueda: e.target.value })}
               />
@@ -90,7 +92,7 @@ export default function ExplorarProyectos() {
                   type="button"
                   className="botonLimpiarBusqueda"
                   onClick={() => manejarCambioFiltros({ busqueda: '' })}
-                  aria-label="Limpiar búsqueda"
+                  aria-label={t('egresadoExplorar.hero.clearSearch')}
                 >
                   ✕
                 </button>
@@ -114,12 +116,12 @@ export default function ExplorarProyectos() {
 
       <div className="categoriasRapidas">
         {[
-          { key: 'todas', label: 'Todos los proyectos', icon: Compass, desc: 'Ver todo el catálogo', color: 'azul' },
-          { key: 'web', label: 'Desarrollo Web', icon: Briefcase, desc: 'React, Next.js, HTML/CSS', color: 'naranja' },
-          { key: 'backend', label: 'Backend / API', icon: TrendingUp, desc: 'Node.js, Express, APIs', color: 'aqua' },
-          { key: 'movil', label: 'Desarrollo Móvil', icon: Users, desc: 'React Native, apps', color: 'morado' },
-          { key: 'data', label: 'Datos & Analítica', icon: TrendingUp, desc: 'Dashboards, SQL,Chart.js', color: 'magenta' },
-          { key: 'diseno', label: 'Diseño UI/UX', icon: Compass, desc: 'Figma, prototipado', color: 'amarillo' },
+          { key: 'todas', label: t('egresadoExplorar.categories.todas.label'), icon: Compass, desc: t('egresadoExplorar.categories.todas.desc'), color: 'azul' },
+          { key: 'web', label: t('egresadoExplorar.categories.web.label'), icon: Briefcase, desc: t('egresadoExplorar.categories.web.desc'), color: 'naranja' },
+          { key: 'backend', label: t('egresadoExplorar.categories.backend.label'), icon: TrendingUp, desc: t('egresadoExplorar.categories.backend.desc'), color: 'aqua' },
+          { key: 'movil', label: t('egresadoExplorar.categories.movil.label'), icon: Users, desc: t('egresadoExplorar.categories.movil.desc'), color: 'morado' },
+          { key: 'data', label: t('egresadoExplorar.categories.data.label'), icon: TrendingUp, desc: t('egresadoExplorar.categories.data.desc'), color: 'magenta' },
+          { key: 'diseno', label: t('egresadoExplorar.categories.diseno.label'), icon: Compass, desc: t('egresadoExplorar.categories.diseno.desc'), color: 'amarillo' },
         ].map(({ key, label, icon: Icon, desc, color }) => (
           <button
             key={key}
@@ -147,7 +149,7 @@ export default function ExplorarProyectos() {
         <div className="columnaResultadosEgresado">
           {cargando ? (
             <div className="estadoVacio">
-              <p>Cargando proyectos...</p>
+              <p>{t('egresadoExplorar.loading')}</p>
             </div>
           ) : (
             <CuadriculaProyectos

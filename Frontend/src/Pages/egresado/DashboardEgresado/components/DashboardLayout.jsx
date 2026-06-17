@@ -17,23 +17,27 @@ import {
   Sun,
   User,
 } from 'lucide-react';
+import LanguageSwitcher from '../../../../components/comun/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 import { RUTAS } from '../../../../routes/rutas';
 import '../../../../Pages/empresa/DashboardEmpresario/DashboardEmpresario.css';
 import '../styles/DashboardEgresado.css';
 
-const sidebarItems = [
-  { key: 'inicio', label: 'Inicio', icon: Home, path: '/egresado/dashboard' },
-  { key: 'explorar', label: 'Explorar Proyectos', icon: Compass, path: '/egresado/dashboard/explorar' },
-  { key: 'postulaciones', label: 'Mis Postulaciones', icon: FileText, path: '/egresado/dashboard/postulaciones' },
-  { key: 'proyectos', label: 'Mis Proyectos', icon: FolderOpen, path: '/egresado/dashboard/proyectos' },
-  { key: 'historial', label: 'Historial', icon: History, path: '/egresado/dashboard/historial' },
-  { key: 'mensajes', label: 'Mensajes', icon: MessageSquare, path: '/egresado/dashboard/mensajes' },
-  { key: 'notificaciones', label: 'Notificaciones', icon: Bell, path: '/egresado/dashboard/notificaciones' },
-  { key: 'perfil', label: 'Mi Perfil', icon: User, path: RUTAS.egresadoPerfil },
-  { key: 'configuracion', label: 'Configuración', icon: Settings, path: RUTAS.egresadoConfiguracion },
-];
-
 export default function DashboardLayout({ children }) {
+  const { t } = useTranslation();
+
+  const sidebarItems = [
+    { key: 'inicio', label: t('egresadoLayout.sidebar.inicio'), icon: Home, path: '/egresado/dashboard' },
+    { key: 'explorar', label: t('egresadoLayout.sidebar.explorar'), icon: Compass, path: '/egresado/dashboard/explorar' },
+    { key: 'postulaciones', label: t('egresadoLayout.sidebar.postulaciones'), icon: FileText, path: '/egresado/dashboard/postulaciones' },
+    { key: 'proyectos', label: t('egresadoLayout.sidebar.proyectos'), icon: FolderOpen, path: '/egresado/dashboard/proyectos' },
+    { key: 'historial', label: t('egresadoLayout.sidebar.historial'), icon: History, path: '/egresado/dashboard/historial' },
+    { key: 'mensajes', label: t('egresadoLayout.sidebar.mensajes'), icon: MessageSquare, path: '/egresado/dashboard/mensajes' },
+    { key: 'notificaciones', label: t('egresadoLayout.sidebar.notificaciones'), icon: Bell, path: '/egresado/dashboard/notificaciones' },
+    { key: 'perfil', label: t('egresadoLayout.sidebar.perfil'), icon: User, path: RUTAS.egresadoPerfil },
+    { key: 'configuracion', label: t('egresadoLayout.sidebar.configuracion'), icon: Settings, path: RUTAS.egresadoConfiguracion },
+  ];
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,14 +59,14 @@ export default function DashboardLayout({ children }) {
     try { return JSON.parse(localStorage.getItem('perfilEgresado')); }
     catch { return null; }
   })();
-  const displayName = user?.nombre || perfilEgresadoCache?.nombre || 'Egresado FWD';
+  const displayName = user?.nombre || perfilEgresadoCache?.nombre || t('egresadoLayout.profile.role');
   const tituloFwd = user?.titulo_fwd || user?.rol || 'ESTUDIANTE';
   const email = user?.correo || user?.email || 'egresado@fwd.com';
   const avatar = user?.foto_perfil || perfilEgresadoCache?.avatar || '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
 
   const profileItems = [
-    { key: 'perfil', label: 'Mi Perfil', icon: User, path: RUTAS.egresadoPerfil },
-    { key: 'configuracion', label: 'Configuración', icon: Settings, path: RUTAS.egresadoConfiguracion },
+    { key: 'perfil', label: t('egresadoLayout.profile.perfil'), icon: User, path: RUTAS.egresadoPerfil },
+    { key: 'configuracion', label: t('egresadoLayout.profile.configuracion'), icon: Settings, path: RUTAS.egresadoConfiguracion },
   ];
 
   useEffect(() => {
@@ -129,6 +133,8 @@ export default function DashboardLayout({ children }) {
           </div>
 
           <div className="de-header-right">
+            <LanguageSwitcher />
+
             <button
               className="de-header-bell de-link-button"
               type="button"
@@ -161,12 +167,12 @@ export default function DashboardLayout({ children }) {
                   <div className="de-profile-menu-header">
                     <div className="de-profile-menu-avatar-wrap">
                       <img src={avatar} alt={displayName} className="de-profile-menu-avatar" />
-                      <span className="de-profile-menu-status" aria-label="En línea" />
+                      <span className="de-profile-menu-status" aria-label={t('empresaLayout.profile.online')} />
                     </div>
                     <div className="de-profile-menu-user">
                       <p className="de-profile-menu-name">{displayName}</p>
                       <p className="de-profile-menu-email">{email}</p>
-                      <span className="de-profile-menu-role">Egresado FWD</span>
+                      <span className="de-profile-menu-role">{t('egresadoLayout.profile.role')}</span>
                     </div>
                   </div>
 
@@ -176,7 +182,7 @@ export default function DashboardLayout({ children }) {
                     onClick={() => navegarDesdeMenuPerfil(RUTAS.egresadoPerfil)}
                     role="menuitem"
                   >
-                    Ver perfil completo
+                    {t('empresaLayout.profile.fullProfile')}
                   </button>
 
                   <div className="de-profile-menu-separator" />
@@ -208,7 +214,7 @@ export default function DashboardLayout({ children }) {
                     <span className="de-profile-menu-icon">
                       {tema === 'light' ? <Moon size={18} /> : <Sun size={18} />}
                     </span>
-                    <span>Tema {tema === 'light' ? 'oscuro' : 'claro'}</span>
+                    <span>{tema === 'light' ? t('empresaLayout.profile.themeDark') : t('empresaLayout.profile.themeLight')}</span>
                     <span className="de-profile-menu-switch" data-active={tema === 'dark'}>
                       <span className="de-profile-menu-switch-dot" />
                     </span>
@@ -217,11 +223,11 @@ export default function DashboardLayout({ children }) {
                   <button
                     className="de-profile-menu-item"
                     type="button"
-                    onClick={() => navegarDesdeMenuPerfil(RUTAS.soporte)}
+                    onClick={() => navegarDesdeMenuPerfil('/soporte')}
                     role="menuitem"
                   >
                     <span className="de-profile-menu-icon"><HelpCircle size={18} /></span>
-                    <span>Soporte y ayuda</span>
+                    <span>{t('empresaLayout.profile.support')}</span>
                   </button>
 
                   <div className="de-profile-menu-separator" />
@@ -234,7 +240,7 @@ export default function DashboardLayout({ children }) {
                     role="menuitem"
                   >
                     <span className="de-profile-menu-icon"><LogOut size={18} /></span>
-                    <span>{cerrandoSesion ? 'Cerrando sesión...' : 'Cerrar sesión'}</span>
+                    <span>{cerrandoSesion ? t('empresaLayout.profile.loggingOut') : t('empresaLayout.profile.logout')}</span>
                   </button>
                 </div>
               )}
@@ -273,11 +279,11 @@ export default function DashboardLayout({ children }) {
             </div>
 
             <div className="de-sidebar-help">
-              <p className="de-sidebar-help-title">¿Necesitas ayuda?</p>
-              <p className="de-sidebar-help-text">Nuestro centro de ayuda está disponible 24/7 para ti.</p>
-              <button className="de-sidebar-help-btn" type="button" onClick={() => navigate(RUTAS.soporte)}>
+              <p className="de-sidebar-help-title">{t('empresaLayout.help.title')}</p>
+              <p className="de-sidebar-help-text">{t('empresaLayout.help.text')}</p>
+              <button className="de-sidebar-help-btn" type="button" onClick={() => navigate('/soporte')}>
                 <HelpCircle size={14} />
-                Ir al Centro de Ayuda
+                {t('empresaLayout.help.button')}
               </button>
             </div>
           </aside>
@@ -287,12 +293,12 @@ export default function DashboardLayout({ children }) {
           <div className="de-main-content">{children}</div>
           <footer className="de-footer">
             <span className="de-footer-copy">
-              © {new Date().getFullYear()} FWD Costa Rica. Todos los derechos reservados.
+              {t('empresaLayout.footer.copy').replace('{{year}}', new Date().getFullYear())}
             </span>
             <div className="de-footer-links">
-              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate(RUTAS.soporte)}>Términos y Condiciones</button>
-              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate(RUTAS.soporte)}>Política de Privacidad</button>
-              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate(RUTAS.soporte)}>Contacto</button>
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/terminos')}>{t('empresaLayout.footer.terms')}</button>
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/privacidad')}>{t('empresaLayout.footer.privacy')}</button>
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/contacto')}>{t('empresaLayout.footer.contact')}</button>
             </div>
           </footer>
         </main>
