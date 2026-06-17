@@ -558,11 +558,108 @@ const obtenerResumen = async (req, res) => {
   }
 };
 
+const obtenerConversacion = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+    const userId = req.user.id_usuario;
+    const { idPostulacion } = req.params;
+
+    const postulacion = await Postulacion.findByPk(idPostulacion, {
+      include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
+    });
+    if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+
+    const [mensajes, perfilEst] = await Promise.all([
+      Conversacion.findAll({
+        where: { id_postulacion: idPostulacion },
+        include: [
+          { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] },
+        ],
+        order: [['fecha_envio', 'ASC']],
+      }),
+      PerfilEstudiante.findByPk(postulacion.id_perfil_estudiante, {
+        include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] }],
+      }),
+    ]);
+
+    const contacto = perfilEst?.usuario || null;
+    if (contacto) contacto.rol = 'estudiante';
+
+    res.json({ success: true, data: { mensajes, contacto } });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener la conversación.');
+  }
+};
+
+const enviarMensaje = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+    const userId = req.user.id_usuario;
+
+    const { id_postulacion, mensaje } = req.body;
+    if (!id_postulacion || !mensaje?.trim()) {
+      return res.status(400).json({ success: false, message: 'id_postulacion y mensaje son requeridos.' });
+    }
+
+    const postulacion = await Postulacion.findByPk(id_postulacion, {
+      include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
+    });
+    if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+
+    const nuevo = await Conversacion.create({
+      id_postulacion,
+      id_usuario_emisor: userId,
+      mensaje: mensaje.trim(),
+      leido: false,
+    });
+
+    const creado = await Conversacion.findByPk(nuevo.id_conversacion, {
+      include: [{ model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] }],
+    });
+
+    res.status(201).json({ success: true, data: creado });
+  } catch (error) {
+    responderError(res, error, 'Error al enviar el mensaje.');
+  }
+};
+
+const marcarLeidos = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+    const userId = req.user.id_usuario;
+    const { idPostulacion } = req.params;
+
+    const postulacion = await Postulacion.findByPk(idPostulacion, {
+      include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
+    });
+    if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+
+    await Conversacion.update(
+      { leido: true },
+      {
+        where: {
+          id_postulacion: idPostulacion,
+          id_usuario_emisor: { [Op.ne]: userId },
+          leido: false,
+        },
+      }
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    responderError(res, error, 'Error al marcar mensajes como leídos.');
+  }
+};
+
 module.exports = {
   actualizarPerfil,
   actualizarPropuesta,
   crearPropuesta,
   eliminarPropuesta,
+  enviarMensaje,
   listarEntregables,
   listarEvaluaciones,
   listarHistorial,
@@ -574,6 +671,8 @@ module.exports = {
   listarPostulaciones,
   listarPropuestas,
   listarTalento,
+  marcarLeidos,
+  obtenerConversacion,
   obtenerResumen,
   subirFotoPerfil,
 };

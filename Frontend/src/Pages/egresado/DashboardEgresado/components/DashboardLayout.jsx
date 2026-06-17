@@ -3,7 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import {
   Bell,
+  Briefcase,
   ChevronDown,
+  ChevronRight,
   Compass,
   FileText,
   FolderOpen,
@@ -24,7 +26,14 @@ import '../styles/DashboardEgresado.css';
 const sidebarItems = [
   { key: 'inicio', label: 'Inicio', icon: Home, path: '/egresado/dashboard' },
   { key: 'explorar', label: 'Explorar Proyectos', icon: Compass, path: '/egresado/dashboard/explorar' },
-  { key: 'postulaciones', label: 'Mis Postulaciones', icon: FileText, path: '/egresado/dashboard/postulaciones' },
+  { key: 'explorar-empleos', label: 'Explorar Empleos', icon: Briefcase, path: '/egresado/dashboard/explorar-empleos' },
+  {
+    key: 'postulaciones', label: 'Mis Postulaciones', icon: FileText,
+    children: [
+      { key: 'postulaciones-proyectos', label: 'Proyectos', path: '/egresado/dashboard/postulaciones/proyectos' },
+      { key: 'postulaciones-empleos', label: 'Empleos', path: '/egresado/dashboard/postulaciones/empleos' },
+    ],
+  },
   { key: 'proyectos', label: 'Mis Proyectos', icon: FolderOpen, path: '/egresado/dashboard/proyectos' },
   { key: 'historial', label: 'Historial', icon: History, path: '/egresado/dashboard/historial' },
   { key: 'mensajes', label: 'Mensajes', icon: MessageSquare, path: '/egresado/dashboard/mensajes' },
@@ -43,13 +52,31 @@ export default function DashboardLayout({ children }) {
     if (typeof document === 'undefined') return 'light';
     return document.documentElement.dataset.theme || localStorage.getItem('tema') || 'light';
   });
+  const [postulacionesExpandido, setPostulacionesExpandido] = useState(false);
   const menuPerfilRef = useRef(null);
 
   const rutaActual = location.pathname;
-  const activePage = sidebarItems.find((item) => {
-    if (item.path === '/egresado/dashboard') return rutaActual === '/egresado/dashboard';
-    return rutaActual.startsWith(item.path);
-  })?.key || 'inicio';
+
+  const empiezaCon = (path, prefix) =>
+    path === prefix || path.startsWith(prefix + '/') || path.startsWith(prefix + '?');
+
+  const encontrarActivo = (items) => {
+    for (const item of items) {
+      if (item.children) {
+        const hijoActivo = item.children.find((h) => rutaActual === h.path || empiezaCon(rutaActual, h.path));
+        if (hijoActivo) return hijoActivo.key;
+      } else {
+        if (item.path === '/egresado/dashboard') {
+          if (rutaActual === '/egresado/dashboard') return item.key;
+        } else if (empiezaCon(rutaActual, item.path)) {
+          return item.key;
+        }
+      }
+    }
+    return 'inicio';
+  };
+
+  const activePage = encontrarActivo(sidebarItems);
 
   const perfilEgresadoCache = (() => {
     try { return JSON.parse(localStorage.getItem('perfilEgresado')); }
@@ -257,6 +284,42 @@ export default function DashboardLayout({ children }) {
               <nav className="de-sidebar-nav">
                 {sidebarItems.map((item) => {
                   const Icon = item.icon;
+                  if (item.children) {
+                    const algunaActiva = item.children.some((h) => h.key === activePage);
+                    return (
+                      <div key={item.key} className="de-sidebar-group">
+                        <button
+                          className={`de-sidebar-link de-sidebar-group-btn ${algunaActiva ? 'active' : ''}`}
+                          type="button"
+                          onClick={() => setPostulacionesExpandido((v) => !v)}
+                        >
+                          <Icon size={18} className="de-sidebar-icon" />
+                          {item.label}
+                          <span className={`de-sidebar-chevron ${postulacionesExpandido ? 'open' : ''}`}>
+                            <ChevronRight size={14} />
+                          </span>
+                        </button>
+                        {postulacionesExpandido && (
+                          <div className="de-sidebar-sublist">
+                            {item.children.map((hijo) => {
+                              const ChildIcon = hijo.icon || FileText;
+                              return (
+                                <button
+                                  key={hijo.key}
+                                  className={`de-sidebar-link de-sidebar-sublink ${activePage === hijo.key ? 'active' : ''}`}
+                                  type="button"
+                                  onClick={() => navigate(hijo.path)}
+                                >
+                                  <ChildIcon size={16} className="de-sidebar-icon" />
+                                  {hijo.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
                   return (
                     <button
                       key={item.key}

@@ -1,8 +1,14 @@
-const { Propuesta } = require('../Models');
+const { Propuesta, PerfilEmpresario, Usuario } = require('../Models');
 
 exports.getAll = async (req, res) => {
   try {
-    const data = await Propuesta.findAll();
+    const data = await Propuesta.findAll({
+      include: [{
+        model: PerfilEmpresario,
+        as: 'perfilEmpresario',
+        include: [{ model: Usuario, as: 'usuario', attributes: { exclude: ['contrasena_hash'] } }]
+      }]
+    });
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

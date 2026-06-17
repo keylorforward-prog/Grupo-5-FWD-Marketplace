@@ -66,7 +66,7 @@ export default function ExplorarProyectos() {
 
   return (
     <div className="contenidoPrincipal">
-      <section className="seccionHero">
+      <section className="seccionHero fwd-animar-entrada">
         <div className="textoHero">
           <span className="kickerHero">Explorar Proyectos</span>
           <h1 className="tituloHero">
@@ -112,7 +112,7 @@ export default function ExplorarProyectos() {
         </div>
       </section>
 
-      <div className="categoriasRapidas">
+      <div className="categoriasRapidas fwd-animar-entrada" style={{ animationDelay: '0.15s' }}>
         {[
           { key: 'todas', label: 'Todos los proyectos', icon: Compass, desc: 'Ver todo el catálogo', color: 'azul' },
           { key: 'web', label: 'Desarrollo Web', icon: Briefcase, desc: 'React, Next.js, HTML/CSS', color: 'naranja' },
@@ -138,7 +138,7 @@ export default function ExplorarProyectos() {
         ))}
       </div>
 
-      <div className="seccionListado">
+      <div className="seccionListado fwd-animar-entrada" style={{ animationDelay: '0.3s' }}>
         <BarraLateralFiltros
           filtros={filtros}
           onCambio={manejarCambioFiltros}
