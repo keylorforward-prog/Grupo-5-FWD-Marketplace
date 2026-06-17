@@ -37,9 +37,14 @@ const GoogleCallback = () => {
           // Guarda el usuario en el contexto
           login(userData.data.user, token);
 
-          // Redirige al dashboard según el rol
-          const rol = obtenerRol(userData.data.user);
-          navigate(rutaDashboardDeRol(rol), { replace: true });
+          // Verifica si el perfil está completo
+          if (userData.data.user.perfil_completo === false) {
+            navigate('/completar-perfil', { replace: true });
+          } else {
+            // Redirige al dashboard según el rol
+            const rol = obtenerRol(userData.data.user);
+            navigate(rutaDashboardDeRol(rol), { replace: true });
+          }
         }
       } catch (err) {
         console.error('Error en callback de Google:', err);

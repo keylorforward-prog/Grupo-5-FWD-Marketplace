@@ -138,7 +138,6 @@ export default function DashboardLayout({ activePage, children }) {
                   >
                     <Icon size={16} />
                     {item.label}
-                    {item.badge && <span className="de-nav-badge">{item.badge}</span>}
                   </button>
                 );
               })}

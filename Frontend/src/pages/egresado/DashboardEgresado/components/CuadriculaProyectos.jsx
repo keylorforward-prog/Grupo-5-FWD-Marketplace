@@ -17,6 +17,7 @@ function CuadriculaProyectos({
   paginaActual,
   totalPaginas,
   onPaginaCambio,
+  idsPostulados,
 }) {
   const rangoPaginas = generarRangoPaginas(paginaActual, totalPaginas);
 
@@ -50,7 +51,7 @@ function CuadriculaProyectos({
       ) : (
         <div className="cuadriculaProyectos">
           {proyectos.map((proyecto) => (
-            <TarjetaProyecto key={proyecto.id} proyecto={proyecto} />
+            <TarjetaProyecto key={proyecto.id} proyecto={proyecto} postulado={idsPostulados?.has(proyecto.id)} />
           ))}
         </div>
       )}

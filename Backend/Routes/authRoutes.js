@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const config = require('../Config/config');
-const { register, login, adminLogin, logout, me } = require('../Controllers/authController');
+const { register, login, logout, me, completarPerfil } = require('../Controllers/authController');
 const { verifyToken } = require('../Middleware/authMiddleware');
 const multer = require('multer');
 
@@ -134,6 +134,21 @@ router.post('/logout', logout);
  *         description: Token inválido o expirado
  */
 router.get('/me', verifyToken, me);
+
+/**
+ * @swagger
+ * /api/auth/completar-perfil:
+ *   put:
+ *     summary: Completar perfil de usuario (Google OAuth)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put('/completar-perfil', verifyToken, upload.fields([
+  { name: 'titulo_fwd_file', maxCount: 1 },
+  { name: 'cedula_juridica_file', maxCount: 1 },
+  { name: 'foto_perfil_file', maxCount: 1 }
+]), completarPerfil);
 router.get(
   '/google',
   passport.authenticate('google', {

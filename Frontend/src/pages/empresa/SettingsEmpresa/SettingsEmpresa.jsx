@@ -1,4 +1,3 @@
-import React from 'react';
 import SidebarEmpresa from './components/SidebarEmpresa';
 import HeaderEmpresa from './components/HeaderEmpresa';
 import CompanyProfile from './components/CompanyProfile';
@@ -9,13 +8,9 @@ import './Styles/SettingsEmpresa.css';
 
 const SettingsEmpresa = () => {
   return (
-    <div className="settings-empresa-wrapper">
-      <SidebarEmpresa />
-
-      <main className="se-main-content">
-        <HeaderEmpresa />
-
-        <div className="se-canvas">
+    <DashboardLayout activePage="configuracion">
+      <div className="settings-empresa-wrapper">
+        <div className="se-canvas" style={{ width: '100%' }}>
           <CompanyProfile />
 
           <div className="se-grid-2">
@@ -25,8 +20,8 @@ const SettingsEmpresa = () => {
 
           <SecuritySettings />
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
