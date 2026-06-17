@@ -2362,3 +2362,47 @@
     width: 100%;
   }
 }
+
+/* ── Chip multi-select ───────────────────────────────────────────────────── */
+.de-form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-strong, #1a1f36);
+  margin-bottom: 4px;
+}
+
+.de-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.de-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 13px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1.5px solid var(--border, #e5e7eb);
+  background: var(--surface, #fff);
+  color: var(--ink-muted, #64748b);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1;
+}
+
+.de-chip:hover {
+  border-color: var(--primary, #008fd4);
+  color: var(--primary, #008fd4);
+  background: color-mix(in srgb, var(--primary, #008fd4) 6%, transparent);
+}
+
+.de-chip--active {
+  background: color-mix(in srgb, var(--primary, #008fd4) 12%, transparent);
+  border-color: var(--primary, #008fd4);
+  color: var(--primary, #008fd4);
+}
