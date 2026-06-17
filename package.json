@@ -1,7 +1,8 @@
 {
   "scripts": {
     "dev": "npx concurrently \"cd Backend && npm run dev\" \"cd Frontend && npm run dev\"",
-    "start": "npx concurrently \"cd Backend && npm start\" \"cd Frontend && npm run dev\""
+    "start": "npx concurrently \"cd Backend && npm start\" \"cd Frontend && npm run dev\"",
+    "install-all": "npm install && cd Backend && npm install && cd ../Frontend && npm install"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

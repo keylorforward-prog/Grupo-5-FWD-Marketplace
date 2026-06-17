@@ -19,6 +19,8 @@ router.get('/propuestas', dashboardEmpresarioController.listarPropuestas);
 router.post('/propuestas', dashboardEmpresarioController.crearPropuesta);
 router.put('/propuestas/:id', dashboardEmpresarioController.actualizarPropuesta);
 router.delete('/propuestas/:id', dashboardEmpresarioController.eliminarPropuesta);
+router.get('/ofertas-empleo',  dashboardEmpresarioController.listarOfertasEmpleo);
+router.post('/ofertas-empleo', dashboardEmpresarioController.crearOfertaEmpleo);
 router.get('/ofertas', dashboardEmpresarioController.listarOfertas);
 router.get('/postulaciones', dashboardEmpresarioController.listarPostulaciones);
 router.get('/talento-recomendado', dashboardEmpresarioController.listarTalento);

@@ -7,6 +7,7 @@ const {
   HistorialProyectoEmpresa,
   Notificacion,
   Oferta,
+  OfertaEmpleo,
   Pago,
   PerfilEmpresario,
   PerfilEstudiante,
@@ -558,9 +559,56 @@ const obtenerResumen = async (req, res) => {
   }
 };
 
+const listarOfertasEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+    const ofertas = await OfertaEmpleo.findAll({
+      where: { id_perfil_empresario: perfil.id_perfil_empresario },
+      order: ORDEN_DESC,
+      limit: obtenerLimite(req.query.limit),
+    });
+    res.json({ success: true, data: ofertas });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener las ofertas de empleo.');
+  }
+};
+
+const crearOfertaEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { titulo, descripcion, requisitos, tecnologias_requeridas,
+            tipo_jornada, modalidad, salario_min, salario_max, ubicacion } = req.body;
+
+    if (!titulo || !descripcion) {
+      return res.status(400).json({ success: false, message: 'Título y descripción son obligatorios.' });
+    }
+    if (salario_min && salario_max && Number(salario_min) > Number(salario_max)) {
+      return res.status(400).json({ success: false, message: 'El salario mínimo no puede ser mayor al máximo.' });
+    }
+
+    const oferta = await OfertaEmpleo.create({
+      id_perfil_empresario: perfil.id_perfil_empresario,
+      titulo, descripcion, requisitos, tecnologias_requeridas,
+      tipo_jornada: tipo_jornada || 'tiempo_completo',
+      modalidad: modalidad || 'remoto',
+      salario_min: salario_min || null,
+      salario_max: salario_max || null,
+      ubicacion: ubicacion || null,
+      estado: 'ACTIVA',
+    });
+    res.status(201).json({ success: true, data: oferta });
+  } catch (error) {
+    responderError(res, error, 'Error al crear la oferta de empleo.');
+  }
+};
+
 module.exports = {
   actualizarPerfil,
   actualizarPropuesta,
+  crearOfertaEmpleo,
   crearPropuesta,
   eliminarPropuesta,
   listarEntregables,
@@ -569,6 +617,7 @@ module.exports = {
   listarMensajesRecientes,
   listarNotificaciones,
   listarOfertas,
+  listarOfertasEmpleo,
   listarPagos,
   listarPerfil,
   listarPostulaciones,
