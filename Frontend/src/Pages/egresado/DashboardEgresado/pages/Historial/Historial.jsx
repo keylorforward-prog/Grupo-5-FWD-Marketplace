@@ -28,7 +28,7 @@ export default function Historial() {
   }, [historiales]);
 
   return (
-    <>
+    <div className="fwd-animar-entrada">
       <div className="de-page-heading">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button className="de-project-icon-button" type="button" onClick={() => navigate('/egresado/dashboard')}>
@@ -148,6 +148,6 @@ export default function Historial() {
           })}
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -1,26 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, DollarSign, Clock, Tag, Globe, Building2,
-  Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, AlertTriangle,
+  ArrowLeft, Briefcase, DollarSign, Clock, Tag, Globe, Building2,
+  Send, ExternalLink, Calendar, CheckCircle, X, AlertTriangle,
 } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
-import { categoriasProyecto } from '../../../../../data/proyectosEgresado';
 
 const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
-const etiquetaCategoria = Object.fromEntries(
-  categoriasProyecto.filter((c) => c.valor !== 'todas').map((c) => [c.valor, c.etiqueta])
-);
 
-const formatoMoneda = new Intl.NumberFormat('en-US', {
-  style: 'currency', currency: 'USD', maximumFractionDigits: 0,
+const formatoSalario = new Intl.NumberFormat('es-CR', {
+  style: 'currency', currency: 'CRC', maximumFractionDigits: 0,
 });
 
-export default function ProyectoDetalle() {
+export default function DetalleEmpleo() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [proyecto, setProyecto] = useState(null);
+  const [empleo, setEmpleo] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [postulado, setPostulado] = useState(false);
@@ -30,7 +26,7 @@ export default function ProyectoDetalle() {
   useEffect(() => {
     let activo = true;
     egresadoService.obtenerPropuestaPorId(id)
-      .then((data) => { if (activo) setProyecto(data); })
+      .then((data) => { if (activo) setEmpleo(data); })
       .catch((err) => { if (activo) setError(err.message); })
       .finally(() => { if (activo) setCargando(false); });
     egresadoDashboardService.obtenerPostulaciones()
@@ -61,33 +57,33 @@ export default function ProyectoDetalle() {
   if (cargando) {
     return (
       <div className="detalle-container">
-        <div className="de-data-state">Cargando proyecto...</div>
+        <div className="de-data-state">Cargando empleo...</div>
       </div>
     );
   }
 
-  if (error && !proyecto) {
+  if (error && !empleo) {
     return (
       <div className="detalle-container">
         <div className="de-data-state error">{error}</div>
-        <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar')}>
-          <ArrowLeft size={16} /> Volver a explorar
+        <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar-empleos')}>
+          <ArrowLeft size={16} /> Volver a empleos
         </button>
       </div>
     );
   }
-  if (!proyecto) return null;
+  if (!empleo) return null;
 
-  const empresa = proyecto.perfil_empresario ?? {};
+  const empresa = empleo.perfilEmpresario ?? {};
   const usuarioEmpresa = empresa.usuario ?? {};
-  const tecnologias = (proyecto.tecnologias_requeridas || '').split(',').map((t) => t.trim()).filter(Boolean);
-  const presupuestoMin = Number(proyecto.presupuesto_min) || 0;
-  const presupuestoMax = Number(proyecto.presupuesto_max) || presupuestoMin;
+  const tecnologias = (typeof empleo.tecnologias_requeridas === 'string' ? empleo.tecnologias_requeridas : '').split(',').map((t) => t.trim()).filter(Boolean);
+  const salarioMin = Number(empleo.presupuesto_min) || 0;
+  const salarioMax = Number(empleo.presupuesto_max) || salarioMin;
 
   return (
-    <div className="detalle-container">
-      <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar')}>
-        <ArrowLeft size={16} /> Volver a proyectos
+    <div className="detalle-container fwd-animar-entrada">
+      <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar-empleos')}>
+        <ArrowLeft size={16} /> Volver a empleos
       </button>
 
       {error && postulado === false && (
@@ -98,21 +94,21 @@ export default function ProyectoDetalle() {
         <div className="detalle-main">
           <div className="detalle-header">
             <div className="detalle-icono">
-              <span className="detalle-iconoLetra">{proyecto.titulo?.charAt(0)}</span>
+              <span className="detalle-iconoLetra">{empleo.titulo?.charAt(0)}</span>
             </div>
             <div className="detalle-headerInfo">
-              <h1 className="detalle-titulo">{proyecto.titulo}</h1>
+              <h1 className="detalle-titulo">{empleo.titulo}</h1>
+              <p className="de-empresa-nombre">
+                <Building2 size={14} />
+                {usuarioEmpresa.nombre || 'Empresa'}
+              </p>
               <div className="detalle-badges">
-                <span className="detalle-badge detalle-badgeCategoria">
-                  <Tag size={13} />
-                  {etiquetaCategoria[proyecto.categoria] ?? proyecto.categoria}
-                </span>
                 <span className="detalle-badge detalle-badgeModalidad">
                   <Globe size={13} />
-                  {etiquetaModalidad[proyecto.modalidad] ?? proyecto.modalidad}
+                  {etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad}
                 </span>
-                <span className={`detalle-badge detalle-badgeEstado ${(proyecto.estado || '').toLowerCase()}`}>
-                  {proyecto.estado}
+                <span className={`detalle-badge detalle-badgeEstado ${(empleo.estado || '').toLowerCase()}`}>
+                  {empleo.estado}
                 </span>
               </div>
             </div>
@@ -122,17 +118,17 @@ export default function ProyectoDetalle() {
             <div className="detalle-metaItem">
               <DollarSign size={16} />
               <div>
-                <span className="detalle-metaLabel">Presupuesto</span>
+                <span className="detalle-metaLabel">Salario mensual</span>
                 <span className="detalle-metaValor">
-                  {formatoMoneda.format(presupuestoMin)} – {formatoMoneda.format(presupuestoMax)}
+                  {formatoSalario.format(salarioMin)} – {formatoSalario.format(salarioMax)}
                 </span>
               </div>
             </div>
             <div className="detalle-metaItem">
-              <Clock size={16} />
+              <Globe size={16} />
               <div>
-                <span className="detalle-metaLabel">Plazo de entrega</span>
-                <span className="detalle-metaValor">{proyecto.plazo_dias} días</span>
+                <span className="detalle-metaLabel">Modalidad</span>
+                <span className="detalle-metaValor">{etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad}</span>
               </div>
             </div>
             <div className="detalle-metaItem">
@@ -140,8 +136,8 @@ export default function ProyectoDetalle() {
               <div>
                 <span className="detalle-metaLabel">Publicado</span>
                 <span className="detalle-metaValor">
-                  {proyecto.fecha_publicacion
-                    ? new Date(proyecto.fecha_publicacion).toLocaleDateString()
+                  {empleo.fecha_publicacion
+                    ? new Date(empleo.fecha_publicacion).toLocaleDateString('es-CR')
                     : '—'}
                 </span>
               </div>
@@ -149,8 +145,8 @@ export default function ProyectoDetalle() {
           </div>
 
           <div className="detalle-seccion">
-            <h2 className="detalle-seccionTitulo">Descripción del proyecto</h2>
-            <p className="detalle-descripcion">{proyecto.descripcion}</p>
+            <h2 className="detalle-seccionTitulo">Descripción del empleo</h2>
+            <p className="detalle-descripcion">{empleo.descripcion}</p>
           </div>
 
           {tecnologias.length > 0 && (
@@ -167,7 +163,7 @@ export default function ProyectoDetalle() {
           {postulado ? (
             <div className="detalle-exito">
               <CheckCircle size={20} />
-              <span>Ya te has postulado a este proyecto. La empresa revisará tu solicitud.</span>
+              <span>Ya te has postulado a este empleo. La empresa revisará tu solicitud.</span>
             </div>
           ) : (
             <button
@@ -176,7 +172,7 @@ export default function ProyectoDetalle() {
               onClick={() => setMostrarModal(true)}
             >
               <Send size={16} />
-              Postularme a este proyecto
+              Postularme a este empleo
             </button>
           )}
         </div>
@@ -195,6 +191,9 @@ export default function ProyectoDetalle() {
                 <h4 className="detalle-empresaNombre">{usuarioEmpresa.nombre || 'Empresa'}</h4>
                 {empresa.sector && (
                   <p className="detalle-empresaSector">{empresa.sector}</p>
+                )}
+                {usuarioEmpresa.correo && (
+                  <p className="detalle-empresaSector">{usuarioEmpresa.correo}</p>
                 )}
               </div>
             </div>
@@ -216,19 +215,19 @@ export default function ProyectoDetalle() {
           <div className="detalle-sideCard">
             <div className="detalle-sideHeader">
               <Briefcase size={18} />
-              <h3>Detalles</h3>
+              <h3>Detalles del empleo</h3>
             </div>
             <dl className="detalle-dl">
               <dt>Modalidad</dt>
-              <dd>{etiquetaModalidad[proyecto.modalidad] ?? proyecto.modalidad}</dd>
-              <dt>Plazo</dt>
-              <dd>{proyecto.plazo_dias} días</dd>
-              <dt>Presupuesto min.</dt>
-              <dd>{formatoMoneda.format(presupuestoMin)}</dd>
-              <dt>Presupuesto máx.</dt>
-              <dd>{formatoMoneda.format(presupuestoMax)}</dd>
+              <dd>{etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad}</dd>
+              <dt>Salario min.</dt>
+              <dd>{formatoSalario.format(salarioMin)}</dd>
+              <dt>Salario máx.</dt>
+              <dd>{formatoSalario.format(salarioMax)}</dd>
+              <dt>Plazo entrega</dt>
+              <dd>{empleo.plazo_dias} días</dd>
               <dt>Publicado</dt>
-              <dd>{proyecto.fecha_publicacion ? new Date(proyecto.fecha_publicacion).toLocaleDateString() : '—'}</dd>
+              <dd>{empleo.fecha_publicacion ? new Date(empleo.fecha_publicacion).toLocaleDateString('es-CR') : '—'}</dd>
             </dl>
           </div>
         </aside>
@@ -245,24 +244,24 @@ export default function ProyectoDetalle() {
             </div>
             <h2 className="modal-titulo">Confirmar postulación</h2>
             <p className="modal-desc">
-              ¿Estás seguro de que deseas postularte a este proyecto?
+              ¿Estás seguro de que deseas postularte a este empleo?
             </p>
             <div className="modal-resumen">
               <div className="modal-resumenItem">
-                <span className="modal-resumenLabel">Proyecto</span>
-                <span className="modal-resumenValor">{proyecto.titulo}</span>
+                <span className="modal-resumenLabel">Empleo</span>
+                <span className="modal-resumenValor">{empleo.titulo}</span>
               </div>
               <div className="modal-resumenItem">
                 <span className="modal-resumenLabel">Empresa</span>
                 <span className="modal-resumenValor">{usuarioEmpresa.nombre || '—'}</span>
               </div>
               <div className="modal-resumenItem">
-                <span className="modal-resumenLabel">Presupuesto</span>
-                <span className="modal-resumenValor">{formatoMoneda.format(presupuestoMin)} – {formatoMoneda.format(presupuestoMax)}</span>
+                <span className="modal-resumenLabel">Salario</span>
+                <span className="modal-resumenValor">{formatoSalario.format(salarioMin)} – {formatoSalario.format(salarioMax)}</span>
               </div>
               <div className="modal-resumenItem">
-                <span className="modal-resumenLabel">Plazo</span>
-                <span className="modal-resumenValor">{proyecto.plazo_dias} días</span>
+                <span className="modal-resumenLabel">Modalidad</span>
+                <span className="modal-resumenValor">{etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad}</span>
               </div>
             </div>
             <div className="modal-acciones">
