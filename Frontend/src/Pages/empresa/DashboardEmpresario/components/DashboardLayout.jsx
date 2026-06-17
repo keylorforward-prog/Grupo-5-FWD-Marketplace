@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import {
   Bell,
+  Briefcase,
   ChevronDown,
   FileText,
   FolderOpen,
@@ -32,8 +33,9 @@ const navLinks = [
 
 const sidebarItems = [
   { key: 'inicio', label: 'Inicio', icon: Home, path: '/DashboardEmpresario' },
-  { key: 'proyectos', label: 'Mis Proyectos', icon: FolderOpen, path: '/DashboardEmpresario/proyectos' },
-  { key: 'ofertas', label: 'Ofertas Recibidas', icon: FileText, path: '/DashboardEmpresario/ofertas' },
+  { key: 'proyectos', label: 'Mis Proyectos',    icon: FolderOpen,  path: '/DashboardEmpresario/proyectos' },
+  { key: 'empleos',   label: 'Ofertas de Empleo', icon: Briefcase,   path: '/DashboardEmpresario/empleos' },
+  { key: 'ofertas',   label: 'Ofertas Recibidas', icon: FileText,    path: '/DashboardEmpresario/ofertas' },
   { key: 'entregables', label: 'Entregables', icon: Package, path: '/DashboardEmpresario/entregables' },
   { key: 'mensajes', label: 'Mensajes', icon: MessageSquare, path: '/DashboardEmpresario/mensajes' },
   { key: 'talento', label: 'Talento Recomendado', icon: Users, path: '/DashboardEmpresario/talento' },

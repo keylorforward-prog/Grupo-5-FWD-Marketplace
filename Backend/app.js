@@ -51,6 +51,35 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// ── Logger de requests ────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  const start = Date.now();
+  const originalJson = res.json.bind(res);
+
+  res.json = (body) => {
+    const duration = Date.now() - start;
+    const status = res.statusCode;
+
+    let color;
+    if (status >= 500) color = '\x1b[31m';      // rojo
+    else if (status >= 400) color = '\x1b[33m';  // amarillo
+    else if (status >= 300) color = '\x1b[36m';  // cyan
+    else if (status >= 200) color = '\x1b[32m';  // verde
+    else color = '\x1b[0m';
+
+    const reset = '\x1b[0m';
+    const mensaje = body?.message || '';
+
+    console.log(
+      `${color}${status}${reset} | ${req.method.padEnd(7)} ${req.originalUrl} | ${duration}ms | ${mensaje}`
+    );
+
+    return originalJson(body);
+  };
+
+  next();
+});
+
 // Configuración de session
 app.use(
   session({
