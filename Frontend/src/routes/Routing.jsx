@@ -7,8 +7,7 @@ import { RUTAS } from './rutas';
 // ==========================================
 // VISTA PRINCIPAL (NUEVA LANDING PAGE)
 // ==========================================
-import LandingPage from '../pages/comun/LandingPage/LandingPage.jsx';
-
+import LandingPage from '../pages/landing/Landing.jsx';
 // Autenticación
 import LoginPage from '../pages/auth/Login/LoginPage';
 import RegisterPage from '../pages/auth/Registro/RegisterPage';
