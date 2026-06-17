@@ -1,11 +1,15 @@
 import { useCallback, useState, useEffect } from 'react';
 import { adminService } from '../../services/adminService';
 import { Search, AlertTriangle, CheckCircle } from 'lucide-react';
+import AdminMotivoModal from './components/AdminMotivoModal';
 
-export default function AdminUsuarios() {
+export default function AdminUsuarios({ onAdminChange }) {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [mensaje, setMensaje] = useState(null);
+  const [modalSuspension, setModalSuspension] = useState({ open: false, usuario: null });
+  const [procesandoAccion, setProcesandoAccion] = useState(false);
 
   const fetchUsuarios = useCallback(async () => {
     try {
@@ -16,6 +20,7 @@ export default function AdminUsuarios() {
       }
     } catch (error) {
       console.error('Error cargando usuarios', error);
+      setMensaje({ tipo: 'error', texto: 'No se pudo cargar la lista de usuarios.' });
     } finally {
       setLoading(false);
     }
@@ -32,6 +37,9 @@ export default function AdminUsuarios() {
       })
       .catch((error) => {
         console.error('Error cargando usuarios', error);
+        if (!cancelado) {
+          setMensaje({ tipo: 'error', texto: 'No se pudo cargar la lista de usuarios.' });
+        }
       })
       .finally(() => {
         if (!cancelado) {
@@ -44,25 +52,55 @@ export default function AdminUsuarios() {
     };
   }, []);
 
-  const handleSuspension = async (id, estadoActual) => {
+  const handleSuspension = async (id, estadoActual, motivo = null) => {
     const accion = estadoActual === 'SUSPENDIDA' ? 'REACTIVAR' : 'SUSPENDER';
-    const motivo = accion === 'SUSPENDER' ? prompt('Ingrese el motivo de la suspensión:') : null;
-    if (accion === 'SUSPENDER' && !motivo) return;
 
     try {
       const res = await adminService.suspendUsuario(id, accion, motivo);
       if (res.success) {
-        fetchUsuarios(); // Recargar lista
+        setMensaje({ tipo: 'success', texto: res.message || 'Estado actualizado correctamente.' });
+        await fetchUsuarios();
+        onAdminChange?.();
       }
     } catch (error) {
       console.error('Error cambiando estado del usuario', error);
-      alert('Error cambiando estado');
+      setMensaje({ tipo: 'error', texto: error.response?.data?.message || 'Error cambiando estado.' });
     }
   };
 
-  const filteredUsuarios = usuarios.filter(u => 
-    u.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    u.correo.toLowerCase().includes(searchTerm.toLowerCase())
+  const abrirSuspension = (usuario) => {
+    if (usuario.estado_cuenta === 'SUSPENDIDA') {
+      handleSuspension(usuario.id_usuario, usuario.estado_cuenta);
+      return;
+    }
+
+    setModalSuspension({ open: true, usuario });
+  };
+
+  const confirmarSuspension = async (motivo) => {
+    if (!modalSuspension.usuario) return;
+    setProcesandoAccion(true);
+
+    try {
+      const res = await adminService.suspendUsuario(modalSuspension.usuario.id_usuario, 'SUSPENDER', motivo);
+      if (res.success) {
+        setMensaje({ tipo: 'success', texto: res.message || 'Usuario suspendido correctamente.' });
+        setModalSuspension({ open: false, usuario: null });
+        await fetchUsuarios();
+        onAdminChange?.();
+      }
+    } catch (error) {
+      console.error('Error cambiando estado del usuario', error);
+      setMensaje({ tipo: 'error', texto: error.response?.data?.message || 'Error cambiando estado.' });
+    } finally {
+      setProcesandoAccion(false);
+    }
+  };
+
+  const filteredUsuarios = usuarios.filter(u =>
+    u.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.rol?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -79,6 +117,13 @@ export default function AdminUsuarios() {
           />
         </div>
       </div>
+
+      {mensaje && (
+        <div className={`admin-config-message ${mensaje.tipo}`}>
+          {mensaje.tipo === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
+          {mensaje.texto}
+        </div>
+      )}
 
       <section className="admin-panel">
         <div className="admin-table-wrap">
@@ -122,7 +167,7 @@ export default function AdminUsuarios() {
                     </td>
                     <td className="admin-table-actions">
                       <button 
-                        onClick={() => handleSuspension(u.id_usuario, u.estado_cuenta)}
+                        onClick={() => abrirSuspension(u)}
                         className={`admin-action-button ${u.estado_cuenta === 'SUSPENDIDA' ? 'success' : 'danger'}`}
                         type="button"
                       >
@@ -137,6 +182,18 @@ export default function AdminUsuarios() {
           </table>
         </div>
       </section>
+
+      <AdminMotivoModal
+        open={modalSuspension.open}
+        title="Suspender usuario"
+        description={`Estas por suspender a ${modalSuspension.usuario?.nombre || 'este usuario'}. Indica el motivo para que quede trazado en auditoria.`}
+        label="Motivo de suspension"
+        placeholder="Ej. Incumplimiento de politicas, actividad sospechosa, informacion falsa..."
+        confirmLabel="Suspender usuario"
+        loading={procesandoAccion}
+        onCancel={() => setModalSuspension({ open: false, usuario: null })}
+        onConfirm={confirmarSuspension}
+      />
     </div>
   );
 }

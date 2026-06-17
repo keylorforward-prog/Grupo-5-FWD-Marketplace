@@ -16,8 +16,28 @@ export const adminService = {
     return response.data;
   },
 
+  getConfiguracion: async () => {
+    const response = await axios.get(`${API_URL}/configuracion`, getAuthHeaders());
+    return response.data;
+  },
+
+  updateConfiguracion: async (configuracion) => {
+    const response = await axios.put(`${API_URL}/configuracion`, { configuracion }, getAuthHeaders());
+    return response.data;
+  },
+
   getUsuarios: async () => {
     const response = await axios.get(`${API_URL}/usuarios`, getAuthHeaders());
+    return response.data;
+  },
+
+  getEmpresas: async () => {
+    const response = await axios.get(`${API_URL}/empresas`, getAuthHeaders());
+    return response.data;
+  },
+
+  updateEstadoEmpresa: async (id_usuario, accion, motivo = null) => {
+    const response = await axios.post(`${API_URL}/empresas/${id_usuario}/estado`, { accion, motivo }, getAuthHeaders());
     return response.data;
   },
 

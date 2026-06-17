@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { adminService } from '../../services/adminService';
 import AdminUsuarios from './AdminUsuarios';
 import AdminEgresados from './AdminEgresados';
+import AdminConfiguracion from './AdminConfiguracion';
+import AdminEmpresas from './AdminEmpresas';
 import './AdminProfile.css';
 import {
   LayoutDashboard,
@@ -12,11 +14,11 @@ import {
   GraduationCap,
   Settings,
   LogOut,
-  Search,
   Bell,
   MoreVertical,
   Clock,
-  HelpCircle
+  HelpCircle,
+  RefreshCw
 } from 'lucide-react';
 
 // Importación de módulos aislados (Corregido para coincidir con la carpeta "components" en minúscula)
@@ -34,22 +36,51 @@ export default function AdminProfile() {
     totalEstudiantes: 0,
     totalEmpresarios: 0,
     verifiPendientes: 0,
+    empresasPendientes: 0,
     proyectosActivos: 0,
-    reportesAbiertos: 0
+    reportesAbiertos: 0,
+    actividadReciente: []
   });
+  const [overviewLoading, setOverviewLoading] = useState(true);
+  const [overviewError, setOverviewError] = useState(null);
+
+  const cargarOverview = useCallback(async ({ mostrarCarga = false } = {}) => {
+    if (mostrarCarga) setOverviewLoading(true);
+    setOverviewError(null);
+
+    try {
+      const response = await adminService.getOverview();
+      if (response.success) {
+        setOverviewData((actual) => ({ ...actual, ...response.data }));
+      }
+    } catch (error) {
+      console.error('Error fetching admin overview:', error);
+      setOverviewError('No se pudo actualizar el resumen administrativo.');
+    } finally {
+      if (mostrarCarga) setOverviewLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchOverview = async () => {
-      try {
-        const response = await adminService.getOverview();
-        if (response.success) {
-          setOverviewData(response.data);
+    let cancelado = false;
+
+    adminService.getOverview()
+      .then((response) => {
+        if (!cancelado && response.success) {
+          setOverviewData((actual) => ({ ...actual, ...response.data }));
         }
-      } catch (error) {
+      })
+      .catch((error) => {
         console.error('Error fetching admin overview:', error);
-      }
+        if (!cancelado) setOverviewError('No se pudo cargar el resumen administrativo.');
+      })
+      .finally(() => {
+        if (!cancelado) setOverviewLoading(false);
+      });
+
+    return () => {
+      cancelado = true;
     };
-    fetchOverview();
   }, []);
 
   const menuTitles = {
@@ -86,6 +117,21 @@ export default function AdminProfile() {
   };
 
   const encabezado = menuTitles[activeMenu] || menuTitles.dashboard;
+  const totalAlertas = overviewData.verifiPendientes + overviewData.empresasPendientes + overviewData.reportesAbiertos;
+
+  const irAAlertas = () => {
+    if (overviewData.verifiPendientes > 0) {
+      setActiveMenu('egresados');
+      return;
+    }
+
+    if (overviewData.empresasPendientes > 0) {
+      setActiveMenu('empresas');
+      return;
+    }
+
+    setActiveMenu('dashboard');
+  };
 
   return (
     <div className="admin-shell">
@@ -118,6 +164,10 @@ export default function AdminProfile() {
             <button className={`admin-nav-link ${activeMenu === 'empresas' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('empresas')}>
               <Building size={16} />
               Empresas
+            </button>
+            <button className={`admin-nav-link ${activeMenu === 'config' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('config')}>
+              <Settings size={16} />
+              Configuracion
             </button>
           </nav>
 
@@ -183,13 +233,9 @@ export default function AdminProfile() {
             </div>
 
             <div className="admin-heading-actions">
-              <div className="admin-search">
-                <Search size={18} />
-                <input type="text" placeholder="Buscar registros..." aria-label="Buscar registros" />
-              </div>
-              <button className="admin-secondary-button" type="button">
+              <button className="admin-secondary-button" type="button" onClick={irAAlertas}>
                 <Bell size={16} />
-                Alertas
+                {totalAlertas} alertas
               </button>
             </div>
           </div>
@@ -197,16 +243,25 @@ export default function AdminProfile() {
           <div className="admin-content">
           {activeMenu === 'dashboard' && (
             <>
+              {overviewError && (
+                <div className="admin-config-message error">
+                  {overviewError}
+                </div>
+              )}
+
               <section className="admin-stats-grid">
-                <TarjetaEstadistica title="Total Usuarios" value={overviewData.totalUsuarios} icon={Users} trend="Global" isPositive={true} colorClass="text-accent" />
-                <TarjetaEstadistica title="Proyectos Activos" value={overviewData.proyectosActivos} icon={Building} trend="En Progreso" isPositive={true} colorClass="text-magenta" />
-                <TarjetaEstadistica title="Verificaciones Pendientes" value={overviewData.verifiPendientes} icon={Clock} trend="Pendientes" isPositive={false} colorClass="text-warning" />
+                <TarjetaEstadistica title="Total Usuarios" value={overviewLoading ? '...' : overviewData.totalUsuarios} icon={Users} trend="Global" isPositive={true} colorClass="text-accent" />
+                <TarjetaEstadistica title="Empresas Pendientes" value={overviewLoading ? '...' : overviewData.empresasPendientes} icon={Building} trend="Revision" isPositive={overviewData.empresasPendientes === 0} colorClass="text-magenta" />
+                <TarjetaEstadistica title="Verificaciones Pendientes" value={overviewLoading ? '...' : overviewData.verifiPendientes} icon={Clock} trend="Pendientes" isPositive={overviewData.verifiPendientes === 0} colorClass="text-warning" />
               </section>
 
               <section className="admin-panel">
                 <div className="admin-panel-header">
                   <h3>Actividad Reciente</h3>
-                  <button className="admin-text-button" type="button">Ver historial completo</button>
+                  <button className="admin-text-button" type="button" onClick={() => cargarOverview({ mostrarCarga: true })} disabled={overviewLoading}>
+                    <RefreshCw size={15} />
+                    Actualizar
+                  </button>
                 </div>
                 
                 <div className="admin-table-wrap">
@@ -221,38 +276,32 @@ export default function AdminProfile() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>
-                          <div className="admin-entity-cell">
-                          <span className="admin-entity-icon accent">
-                            <Building size={14} />
-                          </span>
-                          <span>TechNova Costa Rica</span>
-                          </div>
-                        </td>
-                        <td>Registro de Empresa</td>
-                        <td>Hoy, 10:23 AM</td>
-                        <td><InsigniaEstado status="Pendiente" /></td>
-                        <td className="admin-table-actions">
-                          <button className="admin-row-action" type="button" aria-label="Ver detalles"><MoreVertical size={18} /></button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <div className="admin-entity-cell">
-                          <span className="admin-entity-icon magenta">
-                            <GraduationCap size={14} />
-                          </span>
-                          <span>Carlos Mendoza</span>
-                          </div>
-                        </td>
-                        <td>Actualizacion de Perfil</td>
-                        <td>Ayer, 04:15 PM</td>
-                        <td><InsigniaEstado status="Completado" /></td>
-                        <td className="admin-table-actions">
-                          <button className="admin-row-action" type="button" aria-label="Ver detalles"><MoreVertical size={18} /></button>
-                        </td>
-                      </tr>
+                      {overviewLoading ? (
+                        <tr><td colSpan="5" className="admin-muted-cell">Cargando actividad...</td></tr>
+                      ) : overviewData.actividadReciente.length === 0 ? (
+                        <tr><td colSpan="5" className="admin-muted-cell">Aun no hay actividad administrativa registrada.</td></tr>
+                      ) : (
+                        overviewData.actividadReciente.map((evento) => (
+                          <tr key={evento.id_auditoria}>
+                            <td>
+                              <div className="admin-entity-cell">
+                                <span className="admin-entity-icon accent">
+                                  {evento.entidad === 'PerfilEstudiante' ? <GraduationCap size={14} /> : <Building size={14} />}
+                                </span>
+                                <span>{evento.actor}</span>
+                              </div>
+                            </td>
+                            <td>{evento.accion}</td>
+                            <td>{new Date(evento.fecha).toLocaleString('es-CR', { dateStyle: 'medium', timeStyle: 'short' })}</td>
+                            <td><InsigniaEstado status="Completado" /></td>
+                            <td className="admin-table-actions">
+                              <button className="admin-row-action" type="button" aria-label="Ver detalles" title={evento.entidad}>
+                                <MoreVertical size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -260,10 +309,10 @@ export default function AdminProfile() {
             </>
           )}
 
-          {activeMenu === 'usuarios' && <AdminUsuarios />}
-          {activeMenu === 'egresados' && <AdminEgresados />}
-          {activeMenu === 'empresas' && <div className="admin-empty-state">Modulo de empresas proximamente</div>}
-          {activeMenu === 'config' && <div className="admin-empty-state">Modulo de configuracion proximamente</div>}
+          {activeMenu === 'usuarios' && <AdminUsuarios onAdminChange={cargarOverview} />}
+          {activeMenu === 'egresados' && <AdminEgresados onAdminChange={cargarOverview} />}
+          {activeMenu === 'empresas' && <AdminEmpresas onAdminChange={cargarOverview} />}
+          {activeMenu === 'config' && <AdminConfiguracion onAdminChange={cargarOverview} />}
           
         </div>
       </main>

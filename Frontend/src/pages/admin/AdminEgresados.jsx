@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { adminService } from '../../services/adminService';
-import { Check, X, FileText, Clock, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Check, CheckCircle, X, FileText, Clock, ShieldCheck } from 'lucide-react';
+import AdminMotivoModal from './components/AdminMotivoModal';
 
 const esUrlDocumento = (valor) => typeof valor === 'string' && /^https?:\/\//i.test(valor);
 
@@ -21,9 +22,12 @@ const calcularAntiguedad = (fecha) => {
   return `${dias} dias`;
 };
 
-export default function AdminEgresados() {
+export default function AdminEgresados({ onAdminChange }) {
   const [pendientes, setPendientes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mensaje, setMensaje] = useState(null);
+  const [modalRechazo, setModalRechazo] = useState({ open: false, egresado: null });
+  const [procesandoAccion, setProcesandoAccion] = useState(false);
 
   const fetchPendientes = useCallback(async () => {
     try {
@@ -34,6 +38,7 @@ export default function AdminEgresados() {
       }
     } catch (error) {
       console.error('Error cargando egresados pendientes', error);
+      setMensaje({ tipo: 'error', texto: 'No se pudo cargar la cola de verificaciones.' });
     } finally {
       setLoading(false);
     }
@@ -50,6 +55,9 @@ export default function AdminEgresados() {
       })
       .catch((error) => {
         console.error('Error cargando egresados pendientes', error);
+        if (!cancelado) {
+          setMensaje({ tipo: 'error', texto: 'No se pudo cargar la cola de verificaciones.' });
+        }
       })
       .finally(() => {
         if (!cancelado) {
@@ -62,21 +70,33 @@ export default function AdminEgresados() {
     };
   }, []);
 
-  const handleVerify = async (id_usuario, accion) => {
-    let motivo = null;
-    if (accion === 'RECHAZAR') {
-      motivo = prompt('Motivo de rechazo:');
-      if (!motivo) return;
-    }
-
+  const handleVerify = async (id_usuario, accion, motivo = null) => {
     try {
       const res = await adminService.verifyEstudiante(id_usuario, accion, motivo);
       if (res.success) {
-        fetchPendientes();
+        setMensaje({ tipo: 'success', texto: res.message || 'Verificacion actualizada correctamente.' });
+        await fetchPendientes();
+        onAdminChange?.();
       }
     } catch (error) {
       console.error('Error verificando estudiante', error);
-      alert('Error en la verificación');
+      setMensaje({ tipo: 'error', texto: error.response?.data?.message || 'Error en la verificacion.' });
+    }
+  };
+
+  const abrirRechazo = (egresado) => {
+    setModalRechazo({ open: true, egresado });
+  };
+
+  const confirmarRechazo = async (motivo) => {
+    if (!modalRechazo.egresado) return;
+    setProcesandoAccion(true);
+
+    try {
+      await handleVerify(modalRechazo.egresado.id_usuario, 'RECHAZAR', motivo);
+      setModalRechazo({ open: false, egresado: null });
+    } finally {
+      setProcesandoAccion(false);
     }
   };
 
@@ -94,6 +114,13 @@ export default function AdminEgresados() {
           {pendientes.length} pendientes
         </span>
       </div>
+
+      {mensaje && (
+        <div className={`admin-config-message ${mensaje.tipo}`}>
+          {mensaje.tipo === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
+          {mensaje.texto}
+        </div>
+      )}
 
       <section className="admin-panel">
         <div className="admin-panel-header">
@@ -164,7 +191,7 @@ export default function AdminEgresados() {
                           <Check size={14} /> Aprobar
                         </button>
                         <button 
-                          onClick={() => handleVerify(p.id_usuario, 'RECHAZAR')}
+                          onClick={() => abrirRechazo(p)}
                           className="admin-action-button danger"
                           type="button"
                         >
@@ -179,6 +206,18 @@ export default function AdminEgresados() {
           </table>
         </div>
       </section>
+
+      <AdminMotivoModal
+        open={modalRechazo.open}
+        title="Rechazar verificacion"
+        description={`Estas por rechazar la verificacion de ${modalRechazo.egresado?.usuario?.nombre || 'este egresado'}. Explica el motivo para que el usuario pueda corregirlo.`}
+        label="Motivo de rechazo"
+        placeholder="Ej. Documento ilegible, evidencia no corresponde a FWD, datos no coinciden..."
+        confirmLabel="Rechazar verificacion"
+        loading={procesandoAccion}
+        onCancel={() => setModalRechazo({ open: false, egresado: null })}
+        onConfirm={confirmarRechazo}
+      />
     </div>
   );
 }
