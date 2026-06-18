@@ -5,6 +5,7 @@ const {
   Entregable,
   Evaluacion,
   HistorialProyectoEmpresa,
+  HistorialProyectoEstudiante,
   Notificacion,
   Oferta,
   OfertaEmpleo,
@@ -25,6 +26,43 @@ const obtenerLimite = (valor, defecto = 20) => {
   const numero = Number.parseInt(valor, 10);
   if (Number.isNaN(numero) || numero <= 0) return defecto;
   return Math.min(numero, 100);
+};
+
+const obtenerPagina = (valor) => {
+  const numero = Number.parseInt(valor, 10);
+  if (Number.isNaN(numero) || numero <= 0) return 1;
+  return numero;
+};
+
+const construirFiltroTalento = (search) => {
+  const terminos = String(search || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 5);
+
+  if (!terminos.length) return {};
+
+  return {
+    [Op.and]: terminos.map((termino) => ({
+      [Op.or]: [
+        { titulo_fwd: { [Op.iLike]: `%${termino}%` } },
+        { sede_graduacion: { [Op.iLike]: `%${termino}%` } },
+        { descripcion: { [Op.iLike]: `%${termino}%` } },
+        { '$usuario.nombre$': { [Op.iLike]: `%${termino}%` } },
+        { '$usuario.correo$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.habilidades$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.resumen_profesional$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.experiencia_laboral$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.educacion$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.certificaciones$': { [Op.iLike]: `%${termino}%` } },
+        { '$historialProyectos.titulo_proyecto$': { [Op.iLike]: `%${termino}%` } },
+        { '$historialProyectos.descripcion$': { [Op.iLike]: `%${termino}%` } },
+        { '$historialProyectos.tecnologias$': { [Op.iLike]: `%${termino}%` } },
+        { '$historialProyectos.rol_desempenado$': { [Op.iLike]: `%${termino}%` } },
+      ],
+    })),
+  };
 };
 
 const obtenerPerfilEmpresario = async (req, res) => {
@@ -332,6 +370,7 @@ const listarOfertas = async (req, res) => {
           include: [
             { model: Usuario, as: 'usuario' },
             { model: Curriculum, as: 'curriculum' },
+            { model: HistorialProyectoEstudiante, as: 'historialProyectos' },
           ],
         },
       ],
@@ -606,14 +645,52 @@ const listarNotificaciones = async (req, res) => {
 
 const listarTalento = async (req, res) => {
   try {
+    const search = String(req.query.search || req.query.q || '').trim();
+    const searchWhere = construirFiltroTalento(search);
+    const include = [
+      { model: Usuario, as: 'usuario', required: false },
+      { model: Curriculum, as: 'curriculum', required: false },
+      { model: Postulacion, as: 'postulaciones', required: false },
+      { model: HistorialProyectoEstudiante, as: 'historialProyectos', required: false },
+    ];
+    const order = [['reputacion_total', 'DESC'], ['fecha_verificacion', 'DESC']];
+    const limit = obtenerLimite(req.query.limit, 10);
+
+    if (req.query.page) {
+      const page = obtenerPagina(req.query.page);
+      const offset = (page - 1) * limit;
+      const talento = await PerfilEstudiante.findAndCountAll({
+        where: searchWhere,
+        include,
+        order,
+        limit,
+        offset,
+        distinct: true,
+        subQuery: false,
+      });
+
+      res.json({
+        success: true,
+        data: {
+          items: talento.rows,
+          meta: {
+            page,
+            limit,
+            total: talento.count,
+            totalPages: Math.max(1, Math.ceil(talento.count / limit)),
+            hasMore: offset + talento.rows.length < talento.count,
+          },
+        },
+      });
+      return;
+    }
+
     const talento = await PerfilEstudiante.findAll({
-      include: [
-        { model: Usuario, as: 'usuario' },
-        { model: Curriculum, as: 'curriculum' },
-        { model: Postulacion, as: 'postulaciones' },
-      ],
-      order: [['reputacion_total', 'DESC'], ['fecha_verificacion', 'DESC']],
-      limit: obtenerLimite(req.query.limit),
+      where: searchWhere,
+      include,
+      order,
+      limit,
+      subQuery: false,
     });
 
     res.json({ success: true, data: talento });
@@ -641,6 +718,7 @@ const listarPostulaciones = async (req, res) => {
           include: [
             { model: Usuario, as: 'usuario' },
             { model: Curriculum, as: 'curriculum' },
+            { model: HistorialProyectoEstudiante, as: 'historialProyectos' },
           ],
         },
       ],

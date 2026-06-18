@@ -4,6 +4,7 @@ import { dashboardEmpresarioService } from '../../../services/dashboardEmpresari
 import Aside from '../../../components/sidebar/Aside';
 import FilaCandidato from '../../../components/postulaciones/FilaCandidato';
 import AccionesMasivas from '../../../components/postulaciones/AccionesMasivas';
+import PerfilEgresadoModal from '../DashboardEmpresario/components/PerfilEgresadoModal';
 import { useDashboardEmpresarioRequest } from '../DashboardEmpresario/hooks/useDashboardEmpresarioRequest';
 import { formatearPostulacion } from '../DashboardEmpresario/utils/dashboardEmpresarioFormatters';
 
@@ -66,6 +67,7 @@ export default function GestionPostulaciones() {
   const [paginaActual, setPaginaActual] = useState(1);
   const [itemsPorPagina, setItemsPorPagina] = useState(3);
   const [filtroEstado, setFiltroEstado] = useState(null);
+  const [perfilSeleccionado, setPerfilSeleccionado] = useState(null);
   const candidatos = useMemo(
     () => data.map(formatearPostulacion).map((c) => ({ ...c, ...cambiosLocales[c.id] })),
     [data, cambiosLocales]
@@ -277,7 +279,7 @@ export default function GestionPostulaciones() {
                       index={i}
                       estaSeleccionado={idsSeleccionados.has(candidate.id)}
                       alSeleccionar={alternarSeleccion}
-                      alVer={(id) => console.log('View:', id)}
+                      alVer={() => setPerfilSeleccionado(candidate.perfil)}
                       alInvitar={manejarInvitacion}
                       alRechazar={manejarRechazo}
                     />
@@ -373,6 +375,7 @@ export default function GestionPostulaciones() {
           </footer>
         </div>
       </main>
+      <PerfilEgresadoModal perfil={perfilSeleccionado} onClose={() => setPerfilSeleccionado(null)} />
     </div>
   );
 }
