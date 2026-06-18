@@ -414,5 +414,60 @@
       "errPasswordMatch": "Las contraseñas no coinciden.",
       "errDefault": "Error al registrarse. Intenta de nuevo."
     }
+  },
+  "landing": {
+    "projects": "Proyectos",
+    "juniors": "Juniors",
+    "empresas": "Empresas",
+    "acceder": "Acceder",
+    "hero": {
+      "badge": "ECOSISTEMA FORWARD MOMENTUM",
+      "title1": "Construye el",
+      "titlePink": "Futuro",
+      "title2": "de tu Carrera",
+      "titleCyan": "Hoy.",
+      "description": "Conectamos el talento emergente más brillante con proyectos reales de la industria.",
+      "btnExplore": "Explorar Proyectos",
+      "btnCompanies": "Para Empresas"
+    },
+    "cta": {
+      "title": "¿Listo para dar el siguiente paso?",
+      "subtitle": "Únete a la mayor red de talento tech en Costa Rica.",
+      "btnRegister": "Registrarse Gratis",
+      "btnProjects": "Ver Proyectos"
+    },
+    "features": {
+      "badge": "CÓMO FUNCIONA",
+      "title": "Un ecosistema diseñado para crecer",
+      "subtitle": "Facilitamos la conexión entre talento emergente y empresas innovadoras.",
+      "f1_title": "Proyectos Reales",
+      "f1_desc": "Gana experiencia trabajando en proyectos verificados por empresas reales.",
+      "f2_title": "Feedback Directo",
+      "f2_desc": "Recibe retroalimentación valiosa de profesionales de la industria.",
+      "f3_title": "Portafolio Verificado",
+      "f3_desc": "Construye un historial de trabajo validado por la plataforma FWD.",
+      "f4_title": "Networking",
+      "f4_desc": "Conecta con otros juniors y empresas líderes en tecnología."
+    },
+    "footer": {
+      "rights": "Fundación Forward Costa Rica.",
+      "platform": "PLATAFORMA",
+      "legal": "LEGAL",
+      "contact": "CONTACTO",
+      "privacy": "Privacidad",
+      "terms": "Términos"
+    },
+    "stats": {
+      "juniors": "Juniors Activos",
+      "companies": "Empresas",
+      "projects": "Proyectos Completados",
+      "hired": "Tasa de Contratación"
+    },
+    "carousel": {
+      "badge": "PROYECTOS DESTACADOS",
+      "title": "Explora oportunidades reales",
+      "subtitle": "Descubre los últimos proyectos publicados por empresas de nuestra red.",
+      "viewAll": "Ver todos los proyectos"
+    }
   }
 }

@@ -414,5 +414,60 @@
       "errPasswordMatch": "The passwords do not match.",
       "errDefault": "Error signing up. Please try again."
     }
+  },
+  "landing": {
+    "projects": "Projects",
+    "juniors": "Juniors",
+    "empresas": "Companies",
+    "acceder": "Sign In",
+    "hero": {
+      "badge": "FORWARD MOMENTUM ECOSYSTEM",
+      "title1": "Build the",
+      "titlePink": "Future",
+      "title2": "of your Career",
+      "titleCyan": "Today.",
+      "description": "We connect the brightest emerging talent with real industry projects.",
+      "btnExplore": "Explore Projects",
+      "btnCompanies": "For Companies"
+    },
+    "cta": {
+      "title": "Ready to take the next step?",
+      "subtitle": "Join the largest tech talent network in Costa Rica.",
+      "btnRegister": "Sign Up Free",
+      "btnProjects": "View Projects"
+    },
+    "features": {
+      "badge": "HOW IT WORKS",
+      "title": "An ecosystem designed to grow",
+      "subtitle": "We facilitate the connection between emerging talent and innovative companies.",
+      "f1_title": "Real Projects",
+      "f1_desc": "Gain experience working on verified projects by real companies.",
+      "f2_title": "Direct Feedback",
+      "f2_desc": "Receive valuable feedback from industry professionals.",
+      "f3_title": "Verified Portfolio",
+      "f3_desc": "Build a track record validated by the FWD platform.",
+      "f4_title": "Networking",
+      "f4_desc": "Connect with other juniors and leading tech companies."
+    },
+    "footer": {
+      "rights": "Forward Foundation Costa Rica.",
+      "platform": "PLATFORM",
+      "legal": "LEGAL",
+      "contact": "CONTACT",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    },
+    "stats": {
+      "juniors": "Active Juniors",
+      "companies": "Companies",
+      "projects": "Completed Projects",
+      "hired": "Hiring Rate"
+    },
+    "carousel": {
+      "badge": "FEATURED PROJECTS",
+      "title": "Explore real opportunities",
+      "subtitle": "Discover the latest projects published by companies in our network.",
+      "viewAll": "View all projects"
+    }
   }
 }
