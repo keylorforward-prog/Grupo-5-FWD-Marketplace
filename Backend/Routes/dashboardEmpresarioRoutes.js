@@ -22,6 +22,8 @@ router.delete('/propuestas/:id', dashboardEmpresarioController.eliminarPropuesta
 router.get('/ofertas-empleo',  dashboardEmpresarioController.listarOfertasEmpleo);
 router.post('/ofertas-empleo', dashboardEmpresarioController.crearOfertaEmpleo);
 router.get('/ofertas', dashboardEmpresarioController.listarOfertas);
+router.post('/ofertas/:id_oferta/aceptar', dashboardEmpresarioController.aceptarOferta);
+router.post('/ofertas/:id_oferta/rechazar', dashboardEmpresarioController.rechazarOferta);
 router.get('/postulaciones', dashboardEmpresarioController.listarPostulaciones);
 router.get('/talento-recomendado', dashboardEmpresarioController.listarTalento);
 router.get('/entregables', dashboardEmpresarioController.listarEntregables);

@@ -161,7 +161,7 @@ export default function Proyectos() {
                 )}
               </div>
               <div className="de-project-action de-project-action-managed">
-                <button className="de-project-btn" type="button" onClick={() => navigate('/DashboardEmpresario/ofertas')}>
+                <button className="de-project-btn" type="button" onClick={() => navigate(`/DashboardEmpresario/ofertas?id_propuesta=${propuesta.id_propuesta}`)}>
                   <Eye size={14} />
                   {p.action}
                 </button>

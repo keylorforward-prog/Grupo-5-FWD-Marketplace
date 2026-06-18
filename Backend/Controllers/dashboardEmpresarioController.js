@@ -14,6 +14,7 @@ const {
   Postulacion,
   Propuesta,
   ProyectoPlataforma,
+  sequelize,
   Usuario,
 } = require('../Models');
 
@@ -304,19 +305,27 @@ const listarOfertas = async (req, res) => {
     const perfil = await obtenerPerfilEmpresario(req, res);
     if (!perfil) return;
 
-    const idsPropuestas = await obtenerIdsPropuestas(perfil.id_perfil_empresario);
-    if (!idsPropuestas.length) {
-      res.json({ success: true, data: [] });
+    const idPropuesta = Number.parseInt(req.query.id_propuesta ?? req.query.propuesta, 10);
+    if ((req.query.id_propuesta || req.query.propuesta) && Number.isNaN(idPropuesta)) {
+      res.status(400).json({ success: false, message: 'El proyecto solicitado no es valido.' });
       return;
     }
 
-    const where = { id_proyecto: { [Op.in]: idsPropuestas } };
+    const wherePropuesta = { id_perfil_empresario: perfil.id_perfil_empresario };
+    if (!Number.isNaN(idPropuesta)) wherePropuesta.id_propuesta = idPropuesta;
+
+    const where = {};
     if (req.query.estado === 'pendientes') where.estado = null;
 
     const ofertas = await Oferta.findAll({
       where,
       include: [
-        { model: Propuesta, as: 'propuestaRef' },
+        {
+          model: Propuesta,
+          as: 'propuestaRef',
+          required: true,
+          where: wherePropuesta,
+        },
         {
           model: PerfilEstudiante,
           as: 'perfilEstudiante',
@@ -333,6 +342,223 @@ const listarOfertas = async (req, res) => {
     res.json({ success: true, data: ofertas });
   } catch (error) {
     responderError(res, error, 'Error al obtener las ofertas del dashboard.');
+  }
+};
+
+const rechazarOferta = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { id_oferta } = req.params;
+    const oferta = await Oferta.findByPk(id_oferta, {
+      include: [
+        {
+          model: Propuesta,
+          as: 'propuestaRef',
+          required: true,
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'perfilEstudiante',
+          include: [{ model: Usuario, as: 'usuario' }],
+        },
+      ],
+    });
+
+    if (!oferta) {
+      return res.status(404).json({ success: false, message: 'Oferta no encontrada.' });
+    }
+
+    const propuesta = oferta.propuestaRef;
+    if (!propuesta || propuesta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      return res.status(403).json({ success: false, message: 'No puedes rechazar una oferta de otro empresario.' });
+    }
+
+    if (oferta.estado === 'ACEPTADA') {
+      return res.status(400).json({ success: false, message: 'No puedes rechazar una oferta aceptada.' });
+    }
+
+    if (oferta.estado === 'RECHAZADA') {
+      return res.status(400).json({ success: false, message: 'Esta oferta ya fue rechazada.' });
+    }
+
+    await oferta.update({ estado: 'RECHAZADA' });
+
+    const usuario = oferta.perfilEstudiante?.usuario;
+    if (usuario) {
+      await Notificacion.create({
+        id_usuario: usuario.id_usuario,
+        tipo: 'OFERTA_RECHAZADA',
+        mensaje: `Tu oferta para "${propuesta.titulo}" fue rechazada.`,
+        leido: false,
+        fecha: new Date(),
+      });
+    }
+
+    res.json({ success: true, message: 'Oferta rechazada correctamente.', data: oferta });
+  } catch (error) {
+    responderError(res, error, 'Error al rechazar la oferta.');
+  }
+};
+
+const aceptarOferta = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) {
+      await t.rollback();
+      return;
+    }
+
+    const { id_oferta } = req.params;
+    const oferta = await Oferta.findByPk(id_oferta, {
+      include: [
+        {
+          model: Propuesta,
+          as: 'propuestaRef',
+          required: true,
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'perfilEstudiante',
+          include: [{ model: Usuario, as: 'usuario' }],
+        },
+      ],
+      transaction: t,
+    });
+
+    if (!oferta) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Oferta no encontrada.' });
+    }
+
+    const propuesta = oferta.propuestaRef;
+    if (!propuesta || propuesta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      await t.rollback();
+      return res.status(403).json({ success: false, message: 'No puedes aceptar una oferta de otro empresario.' });
+    }
+
+    if (propuesta.estado !== 'ACTIVA') {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'Esta propuesta ya no esta abierta para adjudicacion.' });
+    }
+
+    if (oferta.estado === 'ACEPTADA') {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'Esta oferta ya fue aceptada.' });
+    }
+
+    if (oferta.estado && oferta.estado !== 'ACEPTADA') {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'Solo puedes aceptar ofertas pendientes.' });
+    }
+
+    const fechaInicio = new Date();
+    const fechaFinEstimada = new Date(fechaInicio);
+    fechaFinEstimada.setDate(fechaFinEstimada.getDate() + Number(propuesta.plazo_dias || 15));
+
+    await oferta.update({ estado: 'ACEPTADA' }, { transaction: t });
+    await Oferta.update(
+      { estado: 'RECHAZADA' },
+      {
+        where: {
+          id_proyecto: propuesta.id_propuesta,
+          id_oferta: { [Op.ne]: oferta.id_oferta },
+          estado: null,
+        },
+        transaction: t,
+      }
+    );
+
+    await propuesta.update({ estado: 'CERRADA' }, { transaction: t });
+
+    const [proyecto] = await ProyectoPlataforma.findOrCreate({
+      where: { id_propuesta: propuesta.id_propuesta },
+      defaults: {
+        id_propuesta: propuesta.id_propuesta,
+        titulo: propuesta.titulo,
+        descripcion: propuesta.descripcion,
+        estado: 'EN_PROGRESO',
+        fecha_inicio: fechaInicio,
+        fecha_fin_estimada: fechaFinEstimada,
+        fecha_adjudicado: fechaInicio,
+      },
+      transaction: t,
+    });
+
+    await proyecto.update({
+      estado: 'EN_PROGRESO',
+      fecha_inicio: proyecto.fecha_inicio || fechaInicio,
+      fecha_fin_estimada: proyecto.fecha_fin_estimada || fechaFinEstimada,
+      fecha_adjudicado: proyecto.fecha_adjudicado || fechaInicio,
+    }, { transaction: t });
+
+    await Postulacion.update(
+      { estado: 'CONTRATADO' },
+      {
+        where: {
+          id_propuesta: propuesta.id_propuesta,
+          id_perfil_estudiante: oferta.id_perfil_estudiante,
+        },
+        transaction: t,
+      }
+    );
+
+    await Postulacion.update(
+      { estado: 'RECHAZADA' },
+      {
+        where: {
+          id_propuesta: propuesta.id_propuesta,
+          id_perfil_estudiante: { [Op.ne]: oferta.id_perfil_estudiante },
+          estado: { [Op.ne]: 'CONTRATADO' },
+        },
+        transaction: t,
+      }
+    );
+
+    const usuarioAceptado = oferta.perfilEstudiante?.usuario;
+    if (usuarioAceptado) {
+      await Notificacion.create({
+        id_usuario: usuarioAceptado.id_usuario,
+        tipo: 'OFERTA_ACEPTADA',
+        mensaje: `Tu oferta para "${propuesta.titulo}" fue aceptada. El proyecto ya esta en progreso.`,
+        leido: false,
+        fecha: new Date(),
+      }, { transaction: t });
+    }
+
+    const otrasOfertas = await Oferta.findAll({
+      where: {
+        id_proyecto: propuesta.id_propuesta,
+        id_oferta: { [Op.ne]: oferta.id_oferta },
+      },
+      include: [{ model: PerfilEstudiante, as: 'perfilEstudiante', include: [{ model: Usuario, as: 'usuario' }] }],
+      transaction: t,
+    });
+
+    await Promise.all(otrasOfertas.map((otraOferta) => {
+      const usuario = otraOferta.perfilEstudiante?.usuario;
+      if (!usuario) return Promise.resolve();
+      return Notificacion.create({
+        id_usuario: usuario.id_usuario,
+        tipo: 'OFERTA_NO_SELECCIONADA',
+        mensaje: `La empresa selecciono otra oferta para "${propuesta.titulo}".`,
+        leido: false,
+        fecha: new Date(),
+      }, { transaction: t });
+    }));
+
+    await t.commit();
+
+    res.json({
+      success: true,
+      message: 'Oferta aceptada y proyecto adjudicado correctamente.',
+      data: { oferta, proyecto },
+    });
+  } catch (error) {
+    await t.rollback();
+    responderError(res, error, 'Error al aceptar la oferta.');
   }
 };
 
@@ -625,4 +851,6 @@ module.exports = {
   listarTalento,
   obtenerResumen,
   subirFotoPerfil,
+  aceptarOferta,
+  rechazarOferta,
 };
