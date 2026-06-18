@@ -873,6 +873,82 @@
   font-weight: 700;
 }
 
+.de-offers-project-filter {
+  display: grid;
+  gap: 0.35rem;
+  min-width: min(100%, 320px);
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.de-offers-project-filter .de-form-control {
+  min-height: 42px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.95rem;
+}
+
+.de-offers-heading-actions {
+  display: flex;
+  align-items: end;
+  gap: 0.8rem;
+}
+
+.de-offers-project-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.de-offers-project-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.de-offers-project-card:last-child {
+  border-bottom: 0;
+}
+
+.de-offers-project-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.de-offers-project-info {
+  min-width: 0;
+}
+
+.de-offers-project-info h2 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 1rem;
+}
+
+.de-offers-project-info p {
+  display: -webkit-box;
+  margin: 0.25rem 0;
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.de-offers-project-info span {
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
 .de-form-grid {
   display: grid;
   gap: 1rem;
@@ -3052,6 +3128,24 @@
 }
 
 @media (max-width: 600px) {
+  .de-page-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .de-offers-project-filter {
+    min-width: 0;
+  }
+  .de-offers-heading-actions,
+  .de-offers-project-card {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+  .de-offers-heading-actions {
+    display: grid;
+  }
+  .de-offers-project-card .de-panel-action {
+    justify-content: center;
+  }
   .de-modal-backdrop {
     align-items: flex-start;
     padding: 0.75rem;
