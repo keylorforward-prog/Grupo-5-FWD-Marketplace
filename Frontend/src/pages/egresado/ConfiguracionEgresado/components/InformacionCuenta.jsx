@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useAuth } from '../../../../context/AuthContext';
 
 const ESTADO_INICIAL = {
   nombre: 'Alex Rivera',
@@ -9,11 +10,16 @@ const ESTADO_INICIAL = {
 const CLAVE_ALMACENAMIENTO = 'informacionCuenta';
 
 function InformacionCuenta() {
+  const { user, actualizarUsuario } = useAuth();
   const [datosFormulario, setDatosFormulario] = useState(() => {
     const datosGuardados = localStorage.getItem(CLAVE_ALMACENAMIENTO);
     return datosGuardados ? JSON.parse(datosGuardados) : ESTADO_INICIAL;
   });
   const [mensajeExito, setMensajeExito] = useState(false);
+  const [subiendo, setSubiendo] = useState(false);
+  const refArchivo = useRef(null);
+
+  const fotoPerfil = user?.foto_perfil || user?.avatar_url || '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
 
   const manejarCambio = (e) => {
     const { name, value } = e.target;
@@ -24,6 +30,30 @@ function InformacionCuenta() {
     localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify(datosFormulario));
     setMensajeExito(true);
     setTimeout(() => setMensajeExito(false), 3000);
+  };
+
+  const manejarFoto = async (e) => {
+    const archivo = e.target.files?.[0];
+    if (!archivo) return;
+    const userId = user?.id || user?.id_usuario;
+    if (!userId) return;
+    setSubiendo(true);
+    try {
+      const formData = new FormData();
+      formData.append('foto', archivo);
+      const res = await fetch(`/api/usuarios/${userId}/foto-perfil`, {
+        method: 'PUT',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        actualizarUsuario({ foto_perfil: data.url });
+      }
+    } catch (error) {
+      console.error('Error al subir foto', error);
+    } finally {
+      setSubiendo(false);
+    }
   };
 
   return (
@@ -37,6 +67,30 @@ function InformacionCuenta() {
           <button className="botonPrimario" onClick={manejarGuardar}>
             Guardar Cambios
           </button>
+        </div>
+      </div>
+
+      <div className="filaFormulario filaAvatarFormulario">
+        <div className="grupoFormulario grupoAvatar">
+          <label>Foto de Perfil</label>
+          <div className="contenedorAvatarFormulario">
+            <img src={fotoPerfil} alt="Foto de perfil" className="avatarFormulario" />
+            <button
+              type="button"
+              className="botonCambiarAvatar"
+              onClick={() => refArchivo.current?.click()}
+              disabled={subiendo}
+            >
+              {subiendo ? 'Subiendo...' : 'Cambiar foto'}
+            </button>
+            <input
+              ref={refArchivo}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={manejarFoto}
+            />
+          </div>
         </div>
       </div>
 

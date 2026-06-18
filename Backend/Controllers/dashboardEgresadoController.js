@@ -234,6 +234,15 @@ const listarPostulaciones = async (req, res) => {
         {
           model: Propuesta,
           as: 'propuesta',
+          include: [{
+            model: PerfilEmpresario,
+            as: 'perfilEmpresario',
+            include: [{
+              model: Usuario,
+              as: 'usuario',
+              attributes: ['nombre'],
+            }],
+          }],
         },
       ],
       order: [['fecha_postulacion', 'DESC']],
