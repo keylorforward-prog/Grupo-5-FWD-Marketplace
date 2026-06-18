@@ -112,18 +112,36 @@ export default function GestionPostulaciones() {
     });
   }, [paginados, idsSeleccionados]);
 
-  const manejarInvitacion = useCallback((id) => {
-    setCambiosLocales((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] ?? {}), estaInvitado: true, status: 'entrevistado' },
-    }));
+  const [accionCargando, setAccionCargando] = useState(null);
+
+  const manejarInvitacion = useCallback(async (id) => {
+    setAccionCargando(id);
+    try {
+      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'PRESSELECCIONADA');
+      setCambiosLocales((prev) => ({
+        ...prev,
+        [id]: { ...(prev[id] ?? {}), estaInvitado: true, status: 'entrevistado' },
+      }));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al actualizar la postulacion.');
+    } finally {
+      setAccionCargando(null);
+    }
   }, []);
 
-  const manejarRechazo = useCallback((id) => {
-    setCambiosLocales((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] ?? {}), status: 'rechazado' },
-    }));
+  const manejarRechazo = useCallback(async (id) => {
+    setAccionCargando(id);
+    try {
+      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'RECHAZADA');
+      setCambiosLocales((prev) => ({
+        ...prev,
+        [id]: { ...(prev[id] ?? {}), status: 'rechazado' },
+      }));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al rechazar la postulacion.');
+    } finally {
+      setAccionCargando(null);
+    }
   }, []);
 
   const manejarExportacion = useCallback((formato, soloSeleccionados) => {
