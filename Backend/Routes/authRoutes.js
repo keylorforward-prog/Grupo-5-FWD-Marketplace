@@ -3,9 +3,10 @@ const router = express.Router();
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const config = require('../Config/config');
-const { register, login, adminLogin, logout, me, completarPerfil } = require('../Controllers/authController');
+const { register, login, adminLogin, logout, me, completarPerfil, forgotPassword } = require('../Controllers/authController');
 const { verifyToken } = require('../Middleware/authMiddleware');
 const multer = require('multer');
+
 
 // Usamos memory storage para tener el archivo en buffer y mandarlo a S3
 const upload = multer({ storage: multer.memoryStorage() });
@@ -105,6 +106,7 @@ router.post('/register', upload.fields([
  *         description: Error del servidor
  */
 router.post('/login', login);
+router.post('/forgot-password', forgotPassword);
 router.post('/admin-login', adminLogin);
 
 /**

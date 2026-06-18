@@ -25,6 +25,7 @@ const CatalogoSector = require('./catalogoSector')(sequelize, DataTypes);
 const ConversacionIA = require('./conversacionIA')(sequelize, DataTypes);
 const Auditoria = require('./auditoria')(sequelize, DataTypes);
 const Configuracion = require('./configuracion')(sequelize, DataTypes);
+const CodigoRecuperacion = require('./codigoRecuperacion')(sequelize, DataTypes);
 // ========================
 // RELACIONES
 // ========================
@@ -33,6 +34,7 @@ Usuario.hasOne(PerfilEstudiante, { foreignKey: 'id_usuario', as: 'perfilEstudian
 PerfilEstudiante.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 
 Usuario.hasMany(Auditoria, { foreignKey: 'actor_id', as: 'auditorias_realizadas' });
+
 Auditoria.belongsTo(Usuario, { foreignKey: 'actor_id', as: 'actor' });
 
 Usuario.hasMany(Configuracion, { foreignKey: 'modificado_por', as: 'configuraciones_modificadas' });
@@ -107,6 +109,9 @@ Reporte.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 
 Usuario.hasMany(Notificacion, { foreignKey: 'id_usuario', as: 'notificaciones' });
 Notificacion.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
+Usuario.hasMany(CodigoRecuperacion, {foreignKey: 'id_usuario',as: 'codigosRecuperacion'});
+
+CodigoRecuperacion.belongsTo(Usuario, {foreignKey: 'id_usuario',as: 'usuario'});
 
 PerfilEstudiante.hasMany(Oferta, { foreignKey: 'id_perfil_estudiante', as: 'ofertas' });
 Oferta.belongsTo(PerfilEstudiante, { foreignKey: 'id_perfil_estudiante', as: 'perfilEstudiante' });
@@ -117,6 +122,7 @@ Oferta.belongsTo(Propuesta, { foreignKey: 'id_proyecto', as: 'propuestaRef' });
 module.exports = {
   sequelize,
   Usuario,
+  CodigoRecuperacion,
   PerfilEstudiante,
   Curriculum,
   HistorialProyectoEstudiante,
