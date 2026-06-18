@@ -51,7 +51,14 @@ export default function DashboardLayout({ children }) {
   const sidebarItems = [
     { key: 'inicio', label: t('egresadoLayout.sidebar.inicio'), icon: Home, path: '/egresado/dashboard' },
     { key: 'explorar', label: t('egresadoLayout.sidebar.explorar'), icon: Compass, path: '/egresado/dashboard/explorar' },
-    { key: 'postulaciones', label: t('egresadoLayout.sidebar.postulaciones'), icon: FileText, path: '/egresado/dashboard/postulaciones' },
+    { key: 'explorar-empleos', label: 'Explorar Empleos', icon: Briefcase, path: '/egresado/dashboard/explorar-empleos' },
+    {
+      key: 'postulaciones', label: t('egresadoLayout.sidebar.postulaciones'), icon: FileText,
+      children: [
+        { key: 'postulaciones-proyectos', label: 'Proyectos', path: '/egresado/dashboard/postulaciones/proyectos' },
+        { key: 'postulaciones-empleos', label: 'Empleos', path: '/egresado/dashboard/postulaciones/empleos' },
+      ],
+    },
     { key: 'proyectos', label: t('egresadoLayout.sidebar.proyectos'), icon: FolderOpen, path: '/egresado/dashboard/proyectos' },
     { key: 'historial', label: t('egresadoLayout.sidebar.historial'), icon: History, path: '/egresado/dashboard/historial' },
     { key: 'mensajes', label: t('egresadoLayout.sidebar.mensajes'), icon: MessageSquare, path: '/egresado/dashboard/mensajes' },
