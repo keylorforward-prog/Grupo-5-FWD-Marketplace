@@ -1,0 +1,24 @@
+.theme-switcher-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-texto, #333);
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+[data-theme='dark'] .theme-switcher-btn {
+  color: var(--color-texto-oscuro, #f5f5f5);
+}
+
+.theme-switcher-btn:hover {
+  background-color: var(--color-hover, rgba(0, 0, 0, 0.05));
+}
+
+[data-theme='dark'] .theme-switcher-btn:hover {
+  background-color: var(--color-hover-oscuro, rgba(255, 255, 255, 0.1));
+}

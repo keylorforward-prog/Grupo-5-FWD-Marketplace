@@ -24,6 +24,12 @@
   --bg:           #FBF8FF;
   --surface:      #FFFFFF;
   --border:       #E2BDC7;
+  --nav-bg:       rgba(251, 248, 255, 0.82);
+  --card-bg:      rgba(255, 255, 255, 0.55);
+  --card-solid:   #FFFFFF;
+  --badge-bg:     rgba(255, 255, 255, 0.85);
+  --hero-glow1:   rgba(251, 248, 255, 1);
+  --hero-glow0:   rgba(251, 248, 255, 0);
 
   /* Text */
   --text:         #1B1B20;
@@ -50,6 +56,38 @@
   /* Spacing */
   --section-pad: 120px 8%;
   --navbar-h:    72px;
+}
+
+[data-theme="dark"] {
+  /* Brand Palette (slightly adjusted for dark mode visibility) */
+  --pink:         #e2358f;
+  --pink-light:   #3d0f28;
+  --purple:       #b175e1;
+  --purple-light: #c288f0;
+  --cyan:         #4CD8EF;
+  --cyan-dark:    #4CD8EF;
+
+  /* Surfaces */
+  --bg:           #0f172a; /* Slate 900 */
+  --surface:      #1e293b; /* Slate 800 */
+  --border:       #334155; /* Slate 700 */
+  --nav-bg:       rgba(15, 23, 42, 0.82);
+  --card-bg:      rgba(30, 41, 59, 0.55);
+  --card-solid:   #1e293b;
+  --badge-bg:     rgba(30, 41, 59, 0.85);
+  --hero-glow1:   rgba(15, 23, 42, 1);
+  --hero-glow0:   rgba(15, 23, 42, 0);
+
+  /* Text */
+  --text:         #f8fafc;
+  --text-secondary: #cbd5e1;
+
+  /* Shadows */
+  --shadow-sm:    0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-md:    0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg:    0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-pink:  0 10px 30px rgba(226, 53, 143, 0.15);
+  --shadow-purple:0 10px 30px rgba(177, 117, 225, 0.15);
 }
 
 /* -------------------------------------------------------------
@@ -247,7 +285,7 @@ main {
 
   padding: 0 8%;
 
-  background: rgba(251, 248, 255, 0.82);
+  background: var(--nav-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(226, 189, 199, 0.55);
@@ -343,7 +381,7 @@ main {
   background:
     radial-gradient(ellipse 70% 60% at 80% 30%, rgba(76, 216, 239, 0.12) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 15% 70%, rgba(255, 217, 226, 0.45) 0%, transparent 55%),
-    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(251, 248, 255, 1) 0%, rgba(251, 248, 255, 0) 100%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, var(--hero-glow1) 0%, var(--hero-glow0) 100%),
     var(--bg);
 }
 
@@ -388,7 +426,7 @@ main {
   gap: 0.5rem;
   padding: 8px 18px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--badge-bg);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
@@ -514,7 +552,7 @@ main {
   height: 48px;
   border-radius: 50%;
   border: 1px solid var(--border);
-  background: white;
+  background: var(--card-solid);
   cursor: pointer;
   transition: var(--transition);
 }
@@ -538,7 +576,7 @@ main {
 .project-card {
   flex: 0 0 450px;
 
-  background: rgba(255,255,255,0.55);
+  background: var(--card-bg);
 
   backdrop-filter: blur(20px);
 
@@ -771,7 +809,7 @@ main {
 /* Large card */
 .feature-large {
   background:
-    linear-gradient(135deg, rgba(76, 216, 239, 0.12) 0%, rgba(251, 248, 255, 0.95) 60%),
+    linear-gradient(135deg, rgba(76, 216, 239, 0.12) 0%, var(--surface) 60%),
     var(--surface);
   border: 1.5px solid var(--border);
   box-shadow: var(--shadow-md);

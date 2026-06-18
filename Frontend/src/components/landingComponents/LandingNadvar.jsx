@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../comun/LanguageSwitcher';
+import ThemeSwitcher from '../comun/ThemeSwitcher';
 
 export default function LandingNavbar() {
   const { t } = useTranslation();
@@ -19,6 +20,7 @@ export default function LandingNavbar() {
       <div className="landing-navbar-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <Link to="/empresas">{t('landing.empresas', 'Empresas')}</Link>
 
+        <ThemeSwitcher />
         <LanguageSwitcher />
         
         <Link to="/login" className="landing-btn landing-btn-yellow">
