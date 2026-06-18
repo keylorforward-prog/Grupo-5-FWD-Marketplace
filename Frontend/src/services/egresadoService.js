@@ -59,7 +59,38 @@ export const normalizarPropuestaEgresado = (propuesta, indice = 0) => {
 
 const extraerData = (respuesta) => respuesta.data?.data ?? respuesta.data ?? [];
 
+const normalizarOfertaEmpleo = (oferta) => {
+  const tecnologias = normalizarTecnologias(oferta.tecnologias_requeridas);
+  const estado = oferta.estado ?? 'ACTIVA';
+  return {
+    id:           oferta.id_oferta_empleo,
+    titulo:       oferta.titulo,
+    descripcion:  oferta.descripcion,
+    empresa:      oferta.perfilEmpresario?.usuario?.nombre || null,
+    tecnologias,
+    modalidad:    oferta.modalidad    ?? 'remoto',
+    tipo_jornada: oferta.tipo_jornada ?? null,
+    salario_min:  oferta.salario_min  != null ? Number(oferta.salario_min)  : null,
+    salario_max:  oferta.salario_max  != null ? Number(oferta.salario_max)  : null,
+    ubicacion:    oferta.ubicacion    ?? null,
+    publicado:    (oferta.fecha_publicacion ?? '').toString().slice(0, 10),
+    estado,
+    tipoEstado:   estado === 'ACTIVA' ? 'activo' : 'pendiente',
+    ya_postulado: oferta.ya_postulado ?? false,
+  };
+};
+
 export const egresadoService = {
+  async listarOfertasEmpleo() {
+    const respuesta = await apiClient.get('/dashboard-egresado/ofertas-empleo');
+    return extraerData(respuesta).map(normalizarOfertaEmpleo);
+  },
+
+  async postularOfertaEmpleo(datos) {
+    const respuesta = await apiClient.post('/dashboard-egresado/ofertas-empleo/postular', datos);
+    return respuesta.data;
+  },
+
   async listarPropuestas() {
     const respuesta = await apiClient.get('/propuestas');
     return extraerData(respuesta).map(normalizarPropuestaEgresado);
