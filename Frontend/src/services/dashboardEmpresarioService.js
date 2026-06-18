@@ -76,6 +76,14 @@ export const dashboardEmpresarioService = {
     return get('/dashboard-empresario/ofertas', params);
   },
 
+  aceptarOferta(idOferta) {
+    return apiClient.post(`/dashboard-empresario/ofertas/${idOferta}/aceptar`).then(extraerData);
+  },
+
+  rechazarOferta(idOferta) {
+    return apiClient.post(`/dashboard-empresario/ofertas/${idOferta}/rechazar`).then(extraerData);
+  },
+
   obtenerPostulaciones(params) {
     return get('/dashboard-empresario/postulaciones', params);
   },

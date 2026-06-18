@@ -85,12 +85,17 @@ export const formatearTalento = (perfil) => {
 
 export const formatearOferta = (oferta) => {
   const estudiante = oferta.perfilEstudiante?.usuario;
+  const estado = oferta.estado || 'PENDIENTE';
   return {
     id: oferta.id_oferta,
     title: oferta.propuestaRef?.titulo || 'Oferta recibida',
     sender: estudiante?.nombre || 'Estudiante FWD',
+    email: estudiante?.correo,
+    amount: Number(oferta.cantidad || 0),
+    description: oferta.propuesta,
     time: formatearFechaRelativa(oferta.fecha_oferta),
-    status: oferta.estado || 'PENDIENTE',
+    status: estado,
+    pending: estado === 'PENDIENTE',
   };
 };
 
