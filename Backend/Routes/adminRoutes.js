@@ -16,9 +16,19 @@ router.use(verifyToken, isAdmin);
 
 // Endpoints
 router.get('/overview', adminController.getOverview);
+router.get('/busqueda', adminController.busquedaGlobal);
+router.get('/notificaciones', adminController.getAdminNotificaciones);
+router.get('/auditoria', adminController.getAuditoria);
+router.get('/reportes', adminController.getReportesAdmin);
+router.post('/reportes/:id_reporte/resolver', adminController.resolverReporte);
+router.post('/acciones-masivas', adminController.accionesMasivas);
+router.get('/export/:tipo.csv', adminController.exportCsv);
+router.get('/system/health', adminController.healthSistema);
 router.get('/configuracion', adminController.getConfiguracion);
 router.put('/configuracion', adminController.updateConfiguracion);
 router.get('/usuarios', adminController.getUsuarios);
+router.get('/usuarios/:id_usuario/detalle', adminController.getUsuarioDetalle);
+router.put('/usuarios/:id_usuario', adminController.updateUsuario);
 router.post('/usuarios/:id_usuario/suspender', adminController.suspendUsuario);
 
 router.get('/empresas', adminController.getEmpresas);

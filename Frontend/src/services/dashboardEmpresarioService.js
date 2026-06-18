@@ -76,6 +76,14 @@ export const dashboardEmpresarioService = {
     return get('/dashboard-empresario/ofertas', params);
   },
 
+  aceptarOferta(idOferta) {
+    return apiClient.post(`/dashboard-empresario/ofertas/${idOferta}/aceptar`).then(extraerData);
+  },
+
+  rechazarOferta(idOferta) {
+    return apiClient.post(`/dashboard-empresario/ofertas/${idOferta}/rechazar`).then(extraerData);
+  },
+
   obtenerPostulaciones(params) {
     return get('/dashboard-empresario/postulaciones', params);
   },
@@ -94,6 +102,20 @@ export const dashboardEmpresarioService = {
 
   obtenerNotificaciones(params) {
     return get('/dashboard-empresario/notificaciones', params);
+  },
+
+  obtenerConversacion(idPostulacion) {
+    return apiClient.get(`/dashboard-empresario/conversacion/${idPostulacion}`)
+      .then((r) => r.data?.data ?? r.data);
+  },
+
+  enviarMensaje(idPostulacion, mensaje) {
+    return apiClient.post('/dashboard-empresario/enviar-mensaje', { id_postulacion: idPostulacion, mensaje })
+      .then((r) => r.data?.data ?? r.data);
+  },
+
+  marcarLeidos(idPostulacion) {
+    return apiClient.put(`/dashboard-empresario/marcar-leido/${idPostulacion}`).then((r) => r.data);
   },
 
   obtenerHistorial(params) {

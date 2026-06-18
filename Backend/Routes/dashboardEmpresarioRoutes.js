@@ -22,10 +22,15 @@ router.delete('/propuestas/:id', dashboardEmpresarioController.eliminarPropuesta
 router.get('/ofertas-empleo',  dashboardEmpresarioController.listarOfertasEmpleo);
 router.post('/ofertas-empleo', dashboardEmpresarioController.crearOfertaEmpleo);
 router.get('/ofertas', dashboardEmpresarioController.listarOfertas);
+router.post('/ofertas/:id_oferta/aceptar', dashboardEmpresarioController.aceptarOferta);
+router.post('/ofertas/:id_oferta/rechazar', dashboardEmpresarioController.rechazarOferta);
 router.get('/postulaciones', dashboardEmpresarioController.listarPostulaciones);
 router.get('/talento-recomendado', dashboardEmpresarioController.listarTalento);
 router.get('/entregables', dashboardEmpresarioController.listarEntregables);
 router.get('/mensajes-recientes', dashboardEmpresarioController.listarMensajesRecientes);
+router.get('/conversacion/:idPostulacion', dashboardEmpresarioController.obtenerConversacion);
+router.post('/enviar-mensaje', dashboardEmpresarioController.enviarMensaje);
+router.put('/marcar-leido/:idPostulacion', dashboardEmpresarioController.marcarLeidos);
 router.get('/notificaciones', dashboardEmpresarioController.listarNotificaciones);
 router.get('/historial', dashboardEmpresarioController.listarHistorial);
 router.get('/evaluaciones', dashboardEmpresarioController.listarEvaluaciones);

@@ -6,7 +6,7 @@ import { authService } from '../../../../services/authService';
 import { RUTAS } from '../../../../routes/rutas';
 import '../../AuthPages.css';
 
-const RegisterForm = ({ onSwitchMode }) => {
+const RegisterForm = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -15,6 +15,13 @@ const RegisterForm = ({ onSwitchMode }) => {
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const validarArchivoFwd = (archivo) => {
+    if (!archivo) return 'Debes adjuntar tu título o certificado FWD.';
+    const tiposPermitidos = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'];
+    if (!tiposPermitidos.includes(archivo.type)) return 'La evidencia FWD debe ser PDF, PNG, JPG o WEBP.';
+    return '';
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -48,6 +55,13 @@ const RegisterForm = ({ onSwitchMode }) => {
     if (password !== confirmPassword) {
       setError(t('auth.register.errPasswordMatch'));
       return;
+    }
+    if (rol === 'ESTUDIANTE') {
+      const errorArchivo = validarArchivoFwd(titulo_fwd_file);
+      if (errorArchivo) {
+        setError(errorArchivo);
+        return;
+      }
     }
 
     setLoading(true);
@@ -220,8 +234,9 @@ const RegisterForm = ({ onSwitchMode }) => {
                 type="file"
                 name="titulo_fwd_file"
                 onChange={handleFileChange}
-                accept=".pdf, image/*"
+                accept=".pdf, image/png, image/jpeg, image/jpg, image/webp"
                 className="form-input file-input has-icon"
+                required
               />
             </div>
           </div>

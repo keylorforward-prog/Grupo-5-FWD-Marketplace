@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function AdminMotivoModal({
   open,
@@ -13,6 +15,17 @@ export default function AdminMotivoModal({
   onCancel,
   onConfirm,
 }) {
+  const { t } = useTranslation();
+  const defaultLabel = t('admin.modal.reason');
+  const defaultPlaceholder = t('admin.modal.placeholder');
+  const defaultConfirmLabel = t('admin.modal.confirm');
+  const defaultCancelLabel = t('admin.modal.cancel');
+
+  const finalLabel = label === 'Motivo' ? defaultLabel : label;
+  const finalPlaceholder = placeholder === 'Describe brevemente el motivo...' ? defaultPlaceholder : placeholder;
+  const finalConfirmLabel = confirmLabel === 'Confirmar' ? defaultConfirmLabel : confirmLabel;
+  const finalCancelLabel = cancelLabel === 'Cancelar' ? defaultCancelLabel : cancelLabel;
+
   const [motivo, setMotivo] = useState('');
   const textareaRef = useRef(null);
 
@@ -31,8 +44,6 @@ export default function AdminMotivoModal({
     };
   }, [loading, onCancel, open]);
 
-  if (!open) return null;
-
   const motivoLimpio = motivo.trim();
   const cancelar = () => {
     setMotivo('');
@@ -44,19 +55,33 @@ export default function AdminMotivoModal({
   };
 
   return (
-    <div className="admin-modal-backdrop" role="presentation" onMouseDown={cancelar}>
-      <div
-        className="admin-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="admin-motivo-title"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
+    <AnimatePresence>
+      {open && (
+        <motion.div 
+          className="admin-modal-backdrop" 
+          role="presentation" 
+          onMouseDown={cancelar}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          <motion.div
+            className="admin-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-motivo-title"
+            onMouseDown={(event) => event.stopPropagation()}
+            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          >
         <div className="admin-modal-header">
           <span className="admin-modal-icon danger">
             <AlertTriangle size={20} />
           </span>
-          <button className="admin-modal-close" type="button" onClick={cancelar} aria-label="Cerrar">
+          <button className="admin-modal-close" type="button" onClick={cancelar} aria-label={t('admin.modal.close')}>
             <X size={18} />
           </button>
         </div>
@@ -67,25 +92,25 @@ export default function AdminMotivoModal({
         </div>
 
         <label className="admin-modal-field">
-          <span>{label}</span>
+          <span>{finalLabel}</span>
           <textarea
             ref={textareaRef}
             value={motivo}
             onChange={(event) => setMotivo(event.target.value)}
-            placeholder={placeholder}
+            placeholder={finalPlaceholder}
             rows={4}
             maxLength={500}
           />
         </label>
 
         <div className="admin-modal-meta">
-          <span>Este motivo quedara registrado en auditoria.</span>
+          <span>{t('admin.modal.auditNote')}</span>
           <span>{motivo.length}/500</span>
         </div>
 
         <div className="admin-modal-actions">
           <button className="admin-action-button neutral" type="button" onClick={cancelar} disabled={loading}>
-            {cancelLabel}
+            {finalCancelLabel}
           </button>
           <button
             className="admin-action-button danger"
@@ -93,10 +118,12 @@ export default function AdminMotivoModal({
             onClick={confirmar}
             disabled={loading || !motivoLimpio}
           >
-            {loading ? 'Procesando...' : confirmLabel}
+            {loading ? t('admin.modal.processing') : finalConfirmLabel}
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

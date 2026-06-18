@@ -5,6 +5,7 @@ import {
   Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, AlertTriangle,
 } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
+import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { categoriasProyecto } from '../../../../../data/proyectosEgresado';
 
 const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
@@ -32,6 +33,15 @@ export default function ProyectoDetalle() {
       .then((data) => { if (activo) setProyecto(data); })
       .catch((err) => { if (activo) setError(err.message); })
       .finally(() => { if (activo) setCargando(false); });
+    egresadoDashboardService.obtenerPostulaciones()
+      .then((data) => {
+        if (!activo) return;
+        const yaPostulado = (data || []).some(
+          (p) => p.id_propuesta === Number(id) || p.propuesta?.id_propuesta === Number(id)
+        );
+        setPostulado(yaPostulado);
+      })
+      .catch(() => {});
     return () => { activo = false; };
   }, [id]);
 
@@ -157,7 +167,7 @@ export default function ProyectoDetalle() {
           {postulado ? (
             <div className="detalle-exito">
               <CheckCircle size={20} />
-              <span>Te has postulado exitosamente. La empresa revisará tu solicitud.</span>
+              <span>Ya te has postulado a este proyecto. La empresa revisará tu solicitud.</span>
             </div>
           ) : (
             <button

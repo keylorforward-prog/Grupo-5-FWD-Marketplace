@@ -61,7 +61,10 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
   const [mensajes, setMensajes] = useState([]);
   const [contacto, setContacto] = useState(contactoProp);
   const [cargando, setCargando] = useState(true);
+  const [enviando, setEnviando] = useState(false);
+  const [nuevoMensaje, setNuevoMensaje] = useState('');
   const chatEndRef = useRef(null);
+  const chatMessagesRef = useRef(null);
 
   useEffect(() => {
     let activo = true;
@@ -71,6 +74,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
         if (!activo) return;
         setMensajes(data?.mensajes || data || []);
         if (data?.contacto) setContacto(data.contacto);
+        egresadoDashboardService.marcarLeidos(idPostulacion).catch(() => {});
       })
       .catch(() => {})
       .finally(() => { if (activo) setCargando(false); });
@@ -78,10 +82,34 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
   }, [idPostulacion]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatMessagesRef.current && chatEndRef.current) {
+      chatMessagesRef.current.scrollTop = chatEndRef.current.offsetTop - chatMessagesRef.current.offsetTop;
+    }
   }, [mensajes]);
 
   const userId = user?.id_usuario;
+
+  const handleEnviar = async () => {
+    const texto = nuevoMensaje.trim();
+    if (!texto || enviando) return;
+    setEnviando(true);
+    try {
+      const creado = await egresadoDashboardService.enviarMensaje(idPostulacion, texto);
+      setMensajes((prev) => [...prev, creado]);
+      setNuevoMensaje('');
+    } catch {
+      alert('Error al enviar el mensaje.');
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleEnviar();
+    }
+  };
 
   const agruparPorFecha = useMemo(() => {
     const grupos = {};
@@ -94,7 +122,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
   }, [mensajes]);
 
   return (
-    <div className="chat-view">
+    <div className="chat-view fwd-animar-entrada">
       <div className="chat-header">
         <button className="chat-back-btn" type="button" onClick={onBack}>
           <ChevronLeft size={20} />
@@ -112,7 +140,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
         </div>
       </div>
 
-      <div className="chat-messages">
+      <div className="chat-messages" ref={chatMessagesRef}>
         {cargando && (
           <div className="chat-loading">
             {[1, 2, 3].map((i) => <div key={i} className="chat-skeleton" />)}
@@ -159,9 +187,12 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
           className="chat-input"
           type="text"
           placeholder="Escribe un mensaje..."
-          disabled
+          value={nuevoMensaje}
+          onChange={(e) => setNuevoMensaje(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={enviando}
         />
-        <button className="chat-send-btn" type="button" disabled>
+        <button className="chat-send-btn" type="button" onClick={handleEnviar} disabled={enviando || !nuevoMensaje.trim()}>
           <Send size={18} />
         </button>
       </div>
@@ -169,10 +200,23 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
   );
 }
 
+const STORAGE_KEY = 'fwd_leidos_local';
+
+const cargarLeidos = () => {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+  } catch { return new Set(); }
+};
+
+const guardarLeidos = (set) => {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...set])); } catch {}
+};
+
 export default function Mensajes() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [conversacionActiva, setConversacionActiva] = useState(null);
+  const [leidosLocal, setLeidosLocal] = useState(() => cargarLeidos());
   const userId = user?.id_usuario;
 
   const { data, loading, error } = useDashboardEgresadoRequest(
@@ -181,18 +225,30 @@ export default function Mensajes() {
     []
   );
 
-  const conversaciones = useMemo(() => (data || []).map((c) => formatearConversacion(c, userId)), [data, userId]);
+  const conversaciones = useMemo(
+    () => (data || []).map((c) => formatearConversacion(c, userId)),
+    [data, userId]
+  );
 
   const stats = useMemo(() => {
     const total = conversaciones.length;
-    const noLeidos = conversaciones.filter((c) => !c.leido && !c.esPropio).length;
+    const noLeidos = conversaciones.filter((c) => !c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion)).length;
     const leidos = total - noLeidos;
     return { total, noLeidos, leidos };
-  }, [conversaciones]);
+  }, [conversaciones, leidosLocal]);
 
   const conversationActivaData = conversaciones.find(
     (c) => c.idPostulacion === conversacionActiva
   );
+
+  const abrirChat = (id) => {
+    setConversacionActiva(id);
+    setLeidosLocal((prev) => {
+      const nuevo = new Set(prev).add(id);
+      guardarLeidos(nuevo);
+      return nuevo;
+    });
+  };
 
   return (
     <div className="mensajes-page">
@@ -252,10 +308,10 @@ export default function Mensajes() {
                 return (
                   <div
                     key={c.idPostulacion}
-                    className={`mensajes-item${!c.leido && !c.esPropio ? ' unread' : ''}${activa ? ' active' : ''}`}
-                    onClick={() => setConversacionActiva(c.idPostulacion)}
+                    className={`mensajes-item${!c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion) ? ' unread' : ''}${activa ? ' active' : ''}`}
+                    onClick={() => abrirChat(c.idPostulacion)}
                   >
-                    <div className={`mensajes-item-avatar${!c.leido && !c.esPropio ? ' unread' : ''}`}>
+                    <div className={`mensajes-item-avatar${!c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion) ? ' unread' : ''}`}>
                       {c.contacto?.foto_perfil ? (
                         <img src={c.contacto.foto_perfil} alt="" className="mensajes-avatar-img" />
                       ) : (
@@ -281,7 +337,7 @@ export default function Mensajes() {
                         <p className="mensajes-item-preview">{c.ultimoMensaje}</p>
                       </div>
                     </div>
-                    {!c.leido && !c.esPropio && <span className="mensajes-item-dot" />}
+                    {!c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion) && <span className="mensajes-item-dot" />}
                   </div>
                 );
               })}

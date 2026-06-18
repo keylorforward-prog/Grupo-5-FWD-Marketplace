@@ -13,7 +13,7 @@ const estadoPostulacion = (estado) => {
   const mapa = {
     ENVIADA: ['Enviada', 'nueva'],
     EN_REVISION: ['En Revisión', 'revision'],
-    PRESELECCIONADA: ['Preseleccionada', 'recepcion'],
+    PRESSELECCIONADA: ['Preseleccionada', 'recepcion'],
     RECHAZADA: ['Rechazada', 'rechazado'],
     CONTRATADO: ['Contratado', 'finalizado'],
   };
@@ -37,11 +37,13 @@ export const formatearPostulacion = (postulacion) => {
 
   return {
     id: postulacion.id_postulacion,
+    idPropuesta: propuesta.id_propuesta || postulacion.id_propuesta,
     titulo: propuesta.titulo || 'Propuesta',
     descripcion: propuesta.descripcion || '',
     tecnologias: (propuesta.tecnologias_requeridas || '').split(',').map((t) => t.trim()).filter(Boolean),
     presupuesto: propuesta.presupuesto_max || propuesta.presupuesto_min || null,
     estado: status,
+    estadoRaw: postulacion.estado,
     tipoEstado: statusType,
     fecha: formatearFechaRelativa(postulacion.fecha_postulacion),
     mensaje: postulacion.mensaje_presentacion,
@@ -66,12 +68,22 @@ export const formatearProyecto = (proyecto) => {
   };
 };
 
+const TIPO_ICONO = {
+  postulacion: 'blue',
+  proyecto: 'purple',
+  mensaje: 'green',
+  sistema: 'orange',
+  oferta: 'green',
+};
+
 export const formatearNotificacion = (notificacion) => ({
   id: notificacion.id_notificacion,
+  tipo: notificacion.tipo || 'sistema',
   texto: notificacion.mensaje,
   tiempo: formatearFechaRelativa(notificacion.fecha),
+  fecha: notificacion.fecha,
   leido: notificacion.leido,
-  tipoIcono: notificacion.leido ? 'green' : 'blue',
+  tipoIcono: notificacion.leido ? 'green' : (TIPO_ICONO[notificacion.tipo] || 'blue'),
 });
 
 export const formatearMensaje = (conversacion) => {

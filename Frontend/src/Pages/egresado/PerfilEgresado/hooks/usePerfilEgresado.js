@@ -29,11 +29,11 @@ export function usePerfilEgresado() {
         if (!activo) return;
         setPerfil({
           nombre: data.nombre || data.usuario?.nombre || '',
-          rol: data.rol || 'Estudiante de Desarrollo de Software',
+          rol: data.titulo_fwd || data.rol || 'Estudiante de Desarrollo de Software',
           avatar: data.foto_perfil || data.usuario?.foto_perfil || perfilVacio.avatar,
           portfolio: data.portfolio || '',
           linkedin: data.linkedin || '',
-          bio: data.bio || '',
+          bio: data.descripcion || data.bio || '',
           tecnologias: Array.isArray(data.tecnologias)
             ? data.tecnologias.map((t, i) => ({
                 nombre: typeof t === 'string' ? t : t.nombre,

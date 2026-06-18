@@ -75,12 +75,43 @@ export const egresadoDashboardService = {
     return get('/dashboard-egresado/notificaciones', params);
   },
 
+  async marcarNotificacionLeida(id) {
+    try {
+      await apiClient.put(`/dashboard-egresado/notificaciones/${id}/leer`);
+    } catch (error) {
+      if (esErrorDeRed(error)) return;
+      throw error;
+    }
+  },
+
+  async marcarTodasNotificacionesLeidas() {
+    try {
+      await apiClient.put('/dashboard-egresado/notificaciones/leer-todas');
+    } catch (error) {
+      if (esErrorDeRed(error)) return;
+      throw error;
+    }
+  },
+
   obtenerMensajesRecientes(params) {
     return get('/dashboard-egresado/mensajes-recientes', params);
+  },
+
+  obtenerOfertas(params) {
+    return get('/dashboard-egresado/ofertas', params);
   },
 
   obtenerConversacion(idPostulacion) {
     return apiClient.get(`/dashboard-egresado/conversacion/${idPostulacion}`)
       .then((r) => r.data?.data ?? r.data);
+  },
+
+  enviarMensaje(idPostulacion, mensaje) {
+    return apiClient.post('/dashboard-egresado/enviar-mensaje', { id_postulacion: idPostulacion, mensaje })
+      .then((r) => r.data?.data ?? r.data);
+  },
+
+  marcarLeidos(idPostulacion) {
+    return apiClient.put(`/dashboard-egresado/marcar-leido/${idPostulacion}`).then((r) => r.data);
   },
 };

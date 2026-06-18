@@ -1,5 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, memo } from 'react';
 import { adminService } from '../../services/adminService';
+import { useTranslation } from 'react-i18next';
 import {
   AlertCircle,
   CheckCircle2,
@@ -113,7 +114,8 @@ const agruparConfiguracion = (items) => items.reduce((grupos, item) => {
   return grupos;
 }, {});
 
-export default function AdminConfiguracion({ onAdminChange }) {
+const AdminConfiguracion = memo(function AdminConfiguracion({ onAdminChange }) {
+  const { t } = useTranslation();
   const [configuracion, setConfiguracion] = useState(DEFAULT_CONFIG);
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -131,7 +133,7 @@ export default function AdminConfiguracion({ onAdminChange }) {
       .catch((error) => {
         console.error('Error cargando configuracion', error);
         if (!cancelado) {
-          setMensaje({ tipo: 'error', texto: 'No se pudo cargar la configuracion. Se muestran valores por defecto.' });
+          setMensaje({ tipo: 'error', texto: t('admin.messages.loadConfigError') });
         }
       })
       .finally(() => {
@@ -141,7 +143,7 @@ export default function AdminConfiguracion({ onAdminChange }) {
     return () => {
       cancelado = true;
     };
-  }, []);
+  }, [t]);
 
   const grupos = useMemo(() => agruparConfiguracion(configuracion), [configuracion]);
 
@@ -154,7 +156,7 @@ export default function AdminConfiguracion({ onAdminChange }) {
 
   const restaurarDefaults = () => {
     setConfiguracion(DEFAULT_CONFIG);
-    setMensaje({ tipo: 'info', texto: 'Valores FWD restaurados localmente. Guarda para aplicarlos.' });
+    setMensaje({ tipo: 'info', texto: t('admin.messages.defaultsRestored') });
   };
 
   const guardarConfiguracion = async () => {
@@ -167,12 +169,12 @@ export default function AdminConfiguracion({ onAdminChange }) {
 
       if (response.success) {
         setConfiguracion(normalizarConfiguracion(response.data));
-        setMensaje({ tipo: 'success', texto: response.message || 'Configuracion guardada correctamente.' });
+        setMensaje({ tipo: 'success', texto: response.message || t('admin.messages.configSaved') });
         onAdminChange?.();
       }
     } catch (error) {
       console.error('Error guardando configuracion', error);
-      setMensaje({ tipo: 'error', texto: error.response?.data?.message || 'No se pudo guardar la configuracion.' });
+      setMensaje({ tipo: 'error', texto: error.response?.data?.message || t('admin.messages.configSaveError') });
     } finally {
       setGuardando(false);
     }
@@ -188,7 +190,7 @@ export default function AdminConfiguracion({ onAdminChange }) {
           aria-pressed={item.valor}
         >
           <span className="admin-config-toggle-dot" />
-          {item.valor ? 'Activo' : 'Inactivo'}
+          {item.valor ? t('admin.config.active') : t('admin.config.inactive')}
         </button>
       );
     }
@@ -220,22 +222,17 @@ export default function AdminConfiguracion({ onAdminChange }) {
 
   return (
     <div className="admin-content animate-in">
-      <div className="admin-module-heading">
-        <div>
-          <h3>Configuracion de plataforma</h3>
-          <p className="admin-module-subtitle">
-            Controla reglas operativas, limites y mensajes compartidos del marketplace.
-          </p>
-        </div>
+      <div className="admin-module-heading" style={{ justifyContent: 'flex-end' }}>
+
 
         <div className="admin-action-group">
           <button className="admin-action-button neutral" type="button" onClick={restaurarDefaults} disabled={guardando}>
             <RotateCcw size={14} />
-            Restaurar
+            {t('admin.config.restore')}
           </button>
           <button className="admin-action-button primary" type="button" onClick={guardarConfiguracion} disabled={guardando || loading}>
             <Save size={14} />
-            {guardando ? 'Guardando...' : 'Guardar cambios'}
+            {guardando ? t('admin.config.saving') : t('admin.config.saveChanges')}
           </button>
         </div>
       </div>
@@ -249,7 +246,7 @@ export default function AdminConfiguracion({ onAdminChange }) {
 
       {loading ? (
         <section className="admin-panel">
-          <div className="admin-empty-inline">Cargando configuracion...</div>
+          <div className="admin-empty-inline">{t('admin.config.loadingConfig')}</div>
         </section>
       ) : (
         Object.entries(grupos).map(([grupo, items]) => {
@@ -262,7 +259,7 @@ export default function AdminConfiguracion({ onAdminChange }) {
                   <span className="admin-config-group-icon"><Icon size={17} /></span>
                   {grupo}
                 </h3>
-                <span className="admin-review-note">{items.length} ajustes</span>
+                <span className="admin-review-note">{t('admin.config.settingsCount', { count: items.length })}</span>
               </div>
 
               <div className="admin-config-list">
@@ -284,4 +281,6 @@ export default function AdminConfiguracion({ onAdminChange }) {
       )}
     </div>
   );
-}
+});
+
+export default AdminConfiguracion;
