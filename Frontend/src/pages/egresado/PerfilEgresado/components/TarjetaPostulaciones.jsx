@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, MoreVertical } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../services/egresadoDashboardService';
 import { formatearPostulacion } from '../../DashboardEgresado/utils/dashboardEgresadoFormatters';
 
 const filtros = [
   { valor: 'todas', etiqueta: 'Todas' },
-  { valor: 'aceptada', etiqueta: 'Aceptadas' },
-  { valor: 'vista', etiqueta: 'Vistas' },
-  { valor: 'enviada', etiqueta: 'Enviadas' },
+  { valor: 'nueva', etiqueta: 'Enviadas' },
+  { valor: 'revision', etiqueta: 'En revisión' },
+  { valor: 'recepcion', etiqueta: 'Preseleccionadas' },
+  { valor: 'rechazado', etiqueta: 'Rechazadas' },
 ];
 
 const coloresAvatar = [
@@ -22,6 +24,7 @@ const inferirIniciales = (texto) =>
   (texto || '??').split(' ').map((p) => p[0]).join('').toUpperCase().slice(0, 2);
 
 function TarjetaPostulaciones() {
+  const navigate = useNavigate();
   const [postulaciones, setPostulaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [filtroActivo, setFiltroActivo] = useState('todas');
@@ -40,7 +43,7 @@ function TarjetaPostulaciones() {
             rol: p.titulo,
             empresa: p.empresa || 'Empresa',
             tiempo: p.fecha,
-            iniciales: inferirIniciales(p.titulo),
+            iniciales: inferirIniciales(p.empresa),
             colorFondo: c.fondo,
             colorTexto: c.texto,
           };
@@ -58,6 +61,10 @@ function TarjetaPostulaciones() {
 
   const lista = verTodas ? listaFiltrada : listaFiltrada.slice(0, 3);
 
+  const totalActivas = postulaciones.filter((p) =>
+    ['nueva', 'revision', 'recepcion'].includes(p.tipoEstado)
+  ).length;
+
   return (
     <div className="tarjetaPostulaciones">
       <div className="encabezadoPostulaciones">
@@ -67,7 +74,7 @@ function TarjetaPostulaciones() {
           </div>
           <h3 className="tituloTarjetaSeccion">Mis Postulaciones a Prácticas</h3>
         </div>
-        <span className="conteoPostulaciones">{listaFiltrada.length} Activas</span>
+        <span className="conteoPostulaciones">{totalActivas} Activas</span>
       </div>
 
       <div className="filtrosPostulaciones">
@@ -128,8 +135,14 @@ function TarjetaPostulaciones() {
                   </button>
                   {menuAbierto === postulacion.id && (
                     <div className="menuPostulacion" onMouseLeave={() => setMenuAbierto(null)}>
-                      <button type="button">Ver detalle</button>
-                      <button type="button">Contactar empresa</button>
+                      <button type="button" onClick={() => {
+                        setMenuAbierto(null);
+                        navigate(`/egresado/dashboard/proyecto/${postulacion.idPropuesta}`);
+                      }}>Ver detalle</button>
+                      <button type="button" onClick={() => {
+                        setMenuAbierto(null);
+                        navigate(`/egresado/dashboard/mensajes?postulacion=${postulacion.id}`);
+                      }}>Contactar empresa</button>
                       <button type="button" className="peligro">Retirar postulación</button>
                     </div>
                   )}
