@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Book, Plus, X } from 'lucide-react';
 
 function TarjetaStack({ perfilApi }) {
-  const { perfil, agregarTecnologia, quitarTecnologia } = perfilApi;
+  const { perfil, agregarTecnologia, quitarTecnologia, catalogoTecnologias } = perfilApi;
   const [agregando, setAgregando] = useState(false);
   const [valor, setValor] = useState('');
   const refInput = useRef(null);
@@ -51,16 +51,26 @@ function TarjetaStack({ perfilApi }) {
         ))}
 
         {agregando ? (
-          <input
-            ref={refInput}
-            type="text"
-            value={valor}
-            onChange={(e) => setValor(e.target.value)}
-            onBlur={confirmar}
-            onKeyDown={manejarTecla}
-            className="entradaNuevaStack"
-            placeholder="Nueva tech..."
-          />
+          <>
+            <input
+              ref={refInput}
+              type="text"
+              value={valor}
+              onChange={(e) => setValor(e.target.value)}
+              onBlur={confirmar}
+              onKeyDown={manejarTecla}
+              className="entradaNuevaStack"
+              placeholder="Buscar o escribir tecnología..."
+              list="sugerenciasStack"
+            />
+            <datalist id="sugerenciasStack">
+              {catalogoTecnologias
+                .filter((t) => !perfil.tecnologias.some((p) => p.nombre.toLowerCase() === t.toLowerCase()))
+                .map((t) => (
+                  <option key={t} value={t} />
+                ))}
+            </datalist>
+          </>
         ) : (
           <button type="button" className="botonAgregarStack" onClick={iniciarAgregar}>
             <Plus size={14} /> Agregar

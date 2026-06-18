@@ -44,7 +44,7 @@ function PerfilEgresado() {
           <section className="columnaContenidoPerfil fwd-stagger">
             <TarjetaBio perfilApi={perfilApi} />
             <TarjetaPostulaciones />
-            <ProyectosAcademicos />
+            <ProyectosAcademicos perfilApi={perfilApi} />
           </section>
         </main>
       </div>

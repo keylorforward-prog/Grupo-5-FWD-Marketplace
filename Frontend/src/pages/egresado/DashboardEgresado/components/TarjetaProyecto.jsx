@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Send, Clock, DollarSign, Tag, Globe, CheckCircle } from 'lucide-react';
+import { Bookmark, Send, Clock, DollarSign, Tag, Globe } from 'lucide-react';
 import { categoriasProyecto } from '../../../../data/proyectosEgresado';
 
 const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
@@ -19,22 +19,21 @@ const formatearPresupuesto = (min, max) =>
 
 const formatearEntrega = (min, max) => `${min} – ${max} días`;
 
-function TarjetaProyecto({ proyecto, postulado }) {
+function TarjetaProyecto({ proyecto }) {
   const navigate = useNavigate();
   const [guardado, setGuardado] = useState(false);
 
   const irAlDetalle = () => {
-    if (!postulado) navigate(`/egresado/dashboard/proyecto/${proyecto.id}`);
+    navigate(`/egresado/dashboard/proyecto/${proyecto.id}`);
   };
 
   return (
     <article
-      className={`tarjetaProyecto acento-${proyecto.colorAcento}${postulado ? ' postulado' : ''}`}
+      className={`tarjetaProyecto acento-${proyecto.colorAcento}`}
       onClick={irAlDetalle}
       role="button"
-      tabIndex={postulado ? -1 : 0}
+      tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter') irAlDetalle(); }}
-      style={postulado ? { cursor: 'default' } : undefined}
     >
       <div className="encabezadoTarjeta">
         <div className={`iconoProyectoContenedor acento-${proyecto.colorAcento}`}>
@@ -98,21 +97,14 @@ function TarjetaProyecto({ proyecto, postulado }) {
             </span>
           </div>
         </div>
-        {postulado ? (
-          <span className="botonPostulado">
-            <CheckCircle size={14} />
-            Postulado
-          </span>
-        ) : (
-          <button
-            type="button"
-            className="botonDetalle"
-            onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}
-          >
-            <Send size={14} />
-            Ver detalle
-          </button>
-        )}
+        <button
+          type="button"
+          className="botonDetalle"
+          onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}
+        >
+          <Send size={14} />
+          Ver detalle
+        </button>
       </div>
     </article>
   );

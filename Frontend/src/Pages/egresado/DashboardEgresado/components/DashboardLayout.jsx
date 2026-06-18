@@ -263,8 +263,7 @@ export default function DashboardLayout({ children }) {
       </header>
 
       <div className="de-body">
-        {!rutaActual.startsWith('/egresado/dashboard/proyecto/') && (
-          <aside className="de-sidebar">
+        <aside className="de-sidebar">
             <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
               <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
               <div className="de-sidebar-profile-info">
@@ -336,9 +335,8 @@ export default function DashboardLayout({ children }) {
               </button>
             </div>
           </aside>
-        )}
 
-        <main className={`de-main fwd-fondo-decorativo${rutaActual.startsWith('/egresado/dashboard/proyecto/') ? ' de-main--full' : ''}`}>
+        <main className="de-main fwd-fondo-decorativo">
           <div className="de-main-content">{children}</div>
           <footer className="de-footer">
             <span className="de-footer-copy">

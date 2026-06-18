@@ -75,8 +75,26 @@ export const egresadoService = {
     return normalizarPropuestaEgresado(respuesta.data?.data ?? respuesta.data);
   },
 
-  async postularse(idPropuesta) {
-    const respuesta = await apiClient.post('/postulaciones', { id_propuesta: idPropuesta });
+  async postularse(idPropuesta, datos = {}) {
+    const respuesta = await apiClient.post('/postulaciones', {
+      id_propuesta: idPropuesta,
+      ...datos,
+    });
+    return respuesta.data;
+  },
+
+  async obtenerPostulacion(id) {
+    const respuesta = await apiClient.get(`/postulaciones/${id}`);
+    return respuesta.data?.data ?? respuesta.data;
+  },
+
+  async actualizarPostulacion(id, datos) {
+    const respuesta = await apiClient.put(`/postulaciones/${id}`, datos);
+    return respuesta.data;
+  },
+
+  async eliminarPostulacion(id) {
+    const respuesta = await apiClient.delete(`/postulaciones/${id}`);
     return respuesta.data;
   },
 };

@@ -302,6 +302,88 @@ const listarHistorial = async (req, res) => {
   }
 };
 
+const crearHistorial = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const { titulo_proyecto, descripcion, enlace, tecnologias, rol_desempenado, fecha_inicio, fecha_fin } = req.body;
+
+    if (!titulo_proyecto || !titulo_proyecto.trim()) {
+      return res.status(400).json({ success: false, message: 'El título del proyecto es obligatorio.' });
+    }
+
+    const historial = await HistorialProyectoEstudiante.create({
+      id_perfil_estudiante: perfil.id_perfil_estudiante,
+      titulo_proyecto: titulo_proyecto.trim(),
+      tipo: 'GITHUB',
+      descripcion: descripcion || '',
+      enlace: enlace || '',
+      tecnologias: tecnologias || '',
+      rol_desempenado: rol_desempenado || '',
+      fecha_inicio: fecha_inicio || null,
+      fecha_fin: fecha_fin || null,
+    });
+
+    res.status(201).json({ success: true, data: historial });
+  } catch (error) {
+    responderError(res, error, 'Error al crear el proyecto.');
+  }
+};
+
+const actualizarHistorial = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const { id } = req.params;
+    const historial = await HistorialProyectoEstudiante.findOne({
+      where: { id_historial_estudiante: id, id_perfil_estudiante: perfil.id_perfil_estudiante },
+    });
+
+    if (!historial) {
+      return res.status(404).json({ success: false, message: 'Proyecto no encontrado.' });
+    }
+
+    const { titulo_proyecto, descripcion, enlace, tecnologias, rol_desempenado, fecha_inicio, fecha_fin } = req.body;
+
+    await historial.update({
+      titulo_proyecto: titulo_proyecto !== undefined ? titulo_proyecto.trim() : historial.titulo_proyecto,
+      descripcion: descripcion !== undefined ? descripcion : historial.descripcion,
+      enlace: enlace !== undefined ? enlace : historial.enlace,
+      tecnologias: tecnologias !== undefined ? tecnologias : historial.tecnologias,
+      rol_desempenado: rol_desempenado !== undefined ? rol_desempenado : historial.rol_desempenado,
+      fecha_inicio: fecha_inicio !== undefined ? fecha_inicio : historial.fecha_inicio,
+      fecha_fin: fecha_fin !== undefined ? fecha_fin : historial.fecha_fin,
+    });
+
+    res.json({ success: true, data: historial });
+  } catch (error) {
+    responderError(res, error, 'Error al actualizar el proyecto.');
+  }
+};
+
+const eliminarHistorial = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const { id } = req.params;
+    const historial = await HistorialProyectoEstudiante.findOne({
+      where: { id_historial_estudiante: id, id_perfil_estudiante: perfil.id_perfil_estudiante },
+    });
+
+    if (!historial) {
+      return res.status(404).json({ success: false, message: 'Proyecto no encontrado.' });
+    }
+
+    await historial.destroy();
+    res.json({ success: true, message: 'Proyecto eliminado correctamente.' });
+  } catch (error) {
+    responderError(res, error, 'Error al eliminar el proyecto.');
+  }
+};
+
 const listarNotificaciones = async (req, res) => {
   try {
     const notificaciones = await Notificacion.findAll({
@@ -560,6 +642,9 @@ const marcarTodasNotificacionesLeidas = async (req, res) => {
 
 module.exports = {
   actualizarPerfil,
+  crearHistorial,
+  actualizarHistorial,
+  eliminarHistorial,
   listarHistorial,
   listarMensajesRecientes,
   listarOfertas,

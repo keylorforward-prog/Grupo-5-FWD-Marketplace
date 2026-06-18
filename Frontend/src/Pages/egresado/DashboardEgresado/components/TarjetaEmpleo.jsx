@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Building2, Clock, DollarSign, Globe, MapPin, Send } from 'lucide-react';
+import { Building2, Clock, DollarSign, Globe, Send, Eye } from 'lucide-react';
 
 const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
 
@@ -8,7 +8,7 @@ const formatearSalario = (min, max) => {
   return `${fmt.format(min)} – ${fmt.format(max)}`;
 };
 
-function TarjetaEmpleo({ empleo }) {
+function TarjetaEmpleo({ empleo, postulado }) {
   const navigate = useNavigate();
 
   const irAlDetalle = () => {
@@ -16,7 +16,7 @@ function TarjetaEmpleo({ empleo }) {
   };
 
   return (
-    <article className="tarjetaEmpleo" onClick={irAlDetalle} role="button" tabIndex={0}
+    <article className={`tarjetaEmpleo${postulado ? ' postulado' : ''}`} onClick={irAlDetalle} role="button" tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter') irAlDetalle(); }}
     >
       <div className="te-encabezado">
@@ -29,7 +29,12 @@ function TarjetaEmpleo({ empleo }) {
             <h3 className="te-titulo">{empleo.titulo}</h3>
           </div>
         </div>
-        <span className={`te-estado te-estado--${empleo.tipoEstado}`}>{empleo.estado}</span>
+        <div className="te-badges">
+          {postulado && (
+            <span className="te-badge-postulado">Postulado</span>
+          )}
+          <span className={`te-estado te-estado--${empleo.tipoEstado}`}>{empleo.estado}</span>
+        </div>
       </div>
 
       <p className="te-descripcion">{empleo.descripcion}</p>
@@ -55,9 +60,9 @@ function TarjetaEmpleo({ empleo }) {
         </div>
       </div>
 
-      <button type="button" className="te-boton" onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}>
-        <Send size={14} />
-        Ver empleo
+      <button type="button" className={`te-boton${postulado ? ' postulado' : ''}`} onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}>
+        {postulado ? <Eye size={14} /> : <Send size={14} />}
+        {postulado ? 'Ver postulación' : 'Ver empleo'}
       </button>
     </article>
   );
