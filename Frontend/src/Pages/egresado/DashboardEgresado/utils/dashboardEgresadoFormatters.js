@@ -33,6 +33,8 @@ const estadoProyecto = (estado) => {
 
 export const formatearPostulacion = (postulacion) => {
   const propuesta = postulacion.propuesta ?? {};
+  const perfilEmpresario = propuesta.perfilEmpresario ?? {};
+  const usuarioEmpresa = perfilEmpresario.usuario ?? {};
   const [status, statusType] = estadoPostulacion(postulacion.estado);
 
   return {
@@ -47,6 +49,7 @@ export const formatearPostulacion = (postulacion) => {
     tipoEstado: statusType,
     fecha: formatearFechaRelativa(postulacion.fecha_postulacion),
     mensaje: postulacion.mensaje_presentacion,
+    empresa: usuarioEmpresa.nombre || 'Empresa',
   };
 };
 
