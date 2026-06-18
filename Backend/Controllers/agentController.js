@@ -133,6 +133,10 @@ const CORRECTION_PROMPT = `Aplicá las correcciones indicadas al JSON del proyec
 
 Datos actuales:`;
 
+const SUGGEST_TECH_PROMPT = `Analiza la siguiente descripción de un proyecto y sugiere una lista separada por comas de las tecnologías recomendadas (ej. React, Node.js, PostgreSQL).
+Solo debes responder con la lista de tecnologías. No incluyas explicaciones, saludos ni formato Markdown.
+Si la descripción no tiene relación con desarrollo de software o no puedes deducir las tecnologías necesarias, debes responder EXACTAMENTE con: "no encontre ninguna recomendacion".`;
+
 function historyToPlainText(history) {
   return history
     .map((msg) => `${msg.role === 'user' ? 'Empresario' : 'Agente'}: ${msg.content}`)
@@ -235,5 +239,32 @@ exports.correct = async (req, res) => {
   } catch (error) {
     console.error('Agent correct error:', error.message);
     res.status(500).json({ success: false, message: 'No pudimos procesar tu proyecto. Intentá de nuevo.' });
+  }
+};
+
+exports.suggestTech = async (req, res) => {
+  try {
+    const { descripcion } = req.body;
+    if (!descripcion || descripcion.trim() === '') {
+      return res.json({ success: true, data: "no encontre ninguna recomendacion" });
+    }
+
+    const response = await client.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      max_tokens: 100,
+      messages: [
+        { role: 'system', content: SUGGEST_TECH_PROMPT },
+        { role: 'user', content: descripcion },
+      ],
+    });
+
+    let text = response.choices[0].message.content ?? '';
+    // Strip possible markdown or quotes just in case
+    text = text.replace(/`/g, '').trim();
+    
+    res.json({ success: true, data: text });
+  } catch (error) {
+    console.error('Agent suggestTech error:', error.message);
+    res.status(500).json({ success: false, message: 'No pudimos sugerir tecnologías. Intentá de nuevo.' });
   }
 };

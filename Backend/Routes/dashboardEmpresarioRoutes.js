@@ -16,7 +16,7 @@ router.get('/perfil', dashboardEmpresarioController.listarPerfil);
 router.put('/perfil', dashboardEmpresarioController.actualizarPerfil);
 router.post('/perfil/foto', upload.single('foto_perfil'), dashboardEmpresarioController.subirFotoPerfil);
 router.get('/propuestas', dashboardEmpresarioController.listarPropuestas);
-router.post('/propuestas', dashboardEmpresarioController.crearPropuesta);
+router.post('/propuestas', upload.single('documento_adjunto'), dashboardEmpresarioController.crearPropuesta);
 router.put('/propuestas/:id', dashboardEmpresarioController.actualizarPropuesta);
 router.delete('/propuestas/:id', dashboardEmpresarioController.eliminarPropuesta);
 router.get('/ofertas-empleo',  dashboardEmpresarioController.listarOfertasEmpleo);
