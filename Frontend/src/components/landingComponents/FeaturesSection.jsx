@@ -1,3 +1,5 @@
+import { Monitor, Palette, Users, Rocket } from 'lucide-react';
+
 export default function FeaturesSection() {
   return (
     <section className="features-section">
@@ -21,10 +23,24 @@ export default function FeaturesSection() {
             </p>
           </div>
 
-          <img
-            src="/Imgs/team.jpg"
-            alt="Equipo"
-          />
+          <div className="feature-mini-cards">
+            <div className="feature-mini-card feature-mini-blue">
+              <span className="feature-mini-icon"><Monitor size={24} /></span>
+              <p>Full Stack</p>
+            </div>
+            <div className="feature-mini-card feature-mini-purple">
+              <span className="feature-mini-icon"><Palette size={24} /></span>
+              <p>UI/UX</p>
+            </div>
+            <div className="feature-mini-card feature-mini-pink">
+              <span className="feature-mini-icon"><Users size={24} /></span>
+              <p>Comunidad</p>
+            </div>
+            <div className="feature-mini-card feature-mini-yellow">
+              <span className="feature-mini-icon"><Rocket size={24} /></span>
+              <p>Evolución</p>
+            </div>
+          </div>
         </div>
 
         <div className="feature-card pink-card">

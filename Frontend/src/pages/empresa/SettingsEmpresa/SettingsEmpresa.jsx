@@ -4,6 +4,7 @@ import CompanyProfile from './components/CompanyProfile';
 import RecruitmentTeam from './components/RecruitmentTeam';
 import NotificationPreferences from './components/NotificationPreferences';
 import SecuritySettings from './components/SecuritySettings';
+
 import './Styles/SettingsEmpresa.css';
 
 const SettingsEmpresa = () => {

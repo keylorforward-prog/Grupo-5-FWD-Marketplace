@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react';
+import FwdLogo from '../../assets/fwd-logo.png';
 
 export default function HeroSection() {
   return (
@@ -33,26 +34,12 @@ export default function HeroSection() {
 
       </div>
 
-      <div className="hero-cards">
-
-        <div className="hero-card hero-card-blue">
-          <h3>Desarrollo</h3>
-          <p>Proyectos Full Stack, Mobile e IA.</p>
-        </div>
-
-        <div className="hero-card hero-card-purple">
-          <h3>UI/UX Design</h3>
-        </div>
-
-        <div className="hero-card hero-card-lavender">
-          <h3>Comunidad</h3>
-        </div>
-
-        <div className="hero-card hero-card-yellow">
-          <h3>Evolución</h3>
-          <p>Certificaciones validadas.</p>
-        </div>
-
+      <div className="hero-logo">
+        <img
+          src={FwdLogo}
+          alt="FWD Marketplace Logo"
+          className="hero-logo-img"
+        />
       </div>
     </section>
   );
