@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
+import apiClient from '../../../../../services/apiClient';
 import DashboardLayout from '../../components/DashboardLayout';
 import './PublicarProyecto.css';
 const PRESUPUESTO_MINIMO = 100000;
@@ -16,6 +17,7 @@ export default function PublicarProyecto() {
     presupuesto_max: '',
     plazo_dias: '15',
   });
+  const [documentoAdjunto, setDocumentoAdjunto] = useState(null);
   useEffect(() => {
     const datosAgente = location.state?.datosAgente;
     if (!datosAgente) return;
@@ -32,10 +34,42 @@ export default function PublicarProyecto() {
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');
   const [mostrarGuiaPrecios, setMostrarGuiaPrecios] = useState(false);
+  const [sugiriendo, setSugiriendo] = useState(false);
+
+  const sugerirTecnologias = async () => {
+    if (!formulario.descripcion.trim()) {
+      setError('Por favor escribe la descripción del proyecto primero.');
+      return;
+    }
+    setSugiriendo(true);
+    setError('');
+    try {
+      const res = await apiClient.post('/agent/suggest-tech', { descripcion: formulario.descripcion });
+      const data = res.data;
+      if (data.success && data.data) {
+        setFormulario((prev) => ({ ...prev, tecnologias_requeridas: data.data }));
+      } else {
+        setError('No pudimos sugerir tecnologías.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Error al conectar con la IA. Asegúrate de que el backend esté corriendo.');
+    } finally {
+      setSugiriendo(false);
+    }
+  };
 
   const manejarCambio = (evento) => {
     const { name, value } = evento.target;
     setFormulario((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const manejarCambioArchivo = (evento) => {
+    if (evento.target.files && evento.target.files.length > 0) {
+      setDocumentoAdjunto(evento.target.files[0]);
+    } else {
+      setDocumentoAdjunto(null);
+    }
   };
 
   const guardar = async () => {
@@ -66,16 +100,22 @@ export default function PublicarProyecto() {
     setGuardando(true);
     setError('');
     try {
-      await dashboardEmpresarioService.crearPropuesta({
-        titulo: formulario.titulo,
-        descripcion: formulario.descripcion,
-        tecnologias_requeridas: formulario.tecnologias_requeridas,
-        plazo_dias: Number(formulario.plazo_dias),
-        presupuesto_min: presupuestoMin,
-        presupuesto_max: presupuestoMax,
-        usar_ia: location.state?.datosAgente?.usar_ia || 'NO',
-        id_conversacion_ia: location.state?.datosAgente?.id_conversacion_ia || null,
-      });
+      const formData = new FormData();
+      formData.append('titulo', formulario.titulo);
+      formData.append('descripcion', formulario.descripcion);
+      formData.append('tecnologias_requeridas', formulario.tecnologias_requeridas);
+      formData.append('plazo_dias', Number(formulario.plazo_dias));
+      if (presupuestoMin) formData.append('presupuesto_min', presupuestoMin);
+      if (presupuestoMax) formData.append('presupuesto_max', presupuestoMax);
+      formData.append('usar_ia', location.state?.datosAgente?.usar_ia || 'NO');
+      if (location.state?.datosAgente?.id_conversacion_ia) {
+        formData.append('id_conversacion_ia', location.state.datosAgente.id_conversacion_ia);
+      }
+      if (documentoAdjunto) {
+        formData.append('documento_adjunto', documentoAdjunto);
+      }
+
+      await dashboardEmpresarioService.crearPropuesta(formData);
       navigate('/DashboardEmpresario/proyectos');
     } catch (err) {
       setError(err.response?.data?.message || 'No se pudo publicar el proyecto.');
@@ -104,10 +144,21 @@ export default function PublicarProyecto() {
             <textarea className="de-form-control de-form-textarea" name="descripcion" value={formulario.descripcion} onChange={manejarCambio} placeholder="Describe el problema, alcance y resultado esperado." />
           </label>
 
-          <label className="de-form-field">
-            <span>Tecnologias requeridas</span>
+          <div className="de-form-field">
+            <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              Tecnologias requeridas
+              <button
+                type="button"
+                className="de-btn-secondary"
+                style={{ fontSize: '0.8rem', padding: '0.2rem 0.6rem', height: 'auto' }}
+                onClick={sugerirTecnologias}
+                disabled={sugiriendo}
+              >
+                {sugiriendo ? 'Sugiriendo...' : 'Sugerir con IA ✨'}
+              </button>
+            </span>
             <input className="de-form-control" name="tecnologias_requeridas" value={formulario.tecnologias_requeridas} onChange={manejarCambio} placeholder="React, Node.js, PostgreSQL o sin preferencia" />
-          </label>
+          </div>
 
           <div className="de-form-grid de-form-grid-2">
             <label className="de-form-field">
@@ -138,6 +189,12 @@ export default function PublicarProyecto() {
               <option value="15">15 dias</option>
               <option value="30">30 dias</option>
             </select>
+          </label>
+
+          <label className="de-form-field">
+            <span>Documento Adjunto (Opcional)</span>
+            <input className="de-form-control" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" onChange={manejarCambioArchivo} />
+            <span style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '0.25rem' }}>Sube requerimientos, un diagrama o un PDF explicativo (Max 5MB).</span>
           </label>
 
           {error && <p className="de-data-state error">{error}</p>}

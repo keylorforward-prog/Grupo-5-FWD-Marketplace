@@ -1,9 +1,30 @@
 import { useRef, useState } from 'react';
 import { Pencil, Globe, ExternalLink, Check, X, Camera } from 'lucide-react';
+import { useAuth } from '../../../../context/AuthContext';
+
+const OPCIONES_ROL = [
+  'Desarrollador de Software',
+  'Desarrollador Frontend',
+  'Desarrollador Backend',
+  'Desarrollador Full Stack',
+  'Desarrollador Mobile',
+  'Ingeniero de Software',
+  'Analista de Datos',
+  'Científico de Datos',
+  'Diseñador UX/UI',
+  'Product Manager',
+  'QA Tester',
+  'DevOps Engineer',
+  'Project Manager',
+  'Scrum Master',
+  'Arquitecto de Software',
+];
 
 function TarjetaUsuario({ perfilApi }) {
   const { perfil, actualizar } = perfilApi;
+  const { user, actualizarUsuario } = useAuth();
   const [editando, setEditando] = useState(false);
+  const [subiendo, setSubiendo] = useState(false);
   const [borrador, setBorrador] = useState({
     nombre: perfil.nombre,
     rol: perfil.rol,
@@ -31,12 +52,29 @@ function TarjetaUsuario({ perfilApi }) {
 
   const abrirSelectorArchivo = () => refArchivo.current?.click();
 
-  const manejarArchivo = (e) => {
+  const manejarArchivo = async (e) => {
     const archivo = e.target.files?.[0];
     if (!archivo) return;
-    const lector = new FileReader();
-    lector.onload = (ev) => actualizar({ avatar: ev.target?.result });
-    lector.readAsDataURL(archivo);
+    const userId = user?.id || user?.id_usuario;
+    if (!userId) return;
+    setSubiendo(true);
+    try {
+      const formData = new FormData();
+      formData.append('foto', archivo);
+      const res = await fetch(`/api/usuarios/${userId}/foto-perfil`, {
+        method: 'PUT',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        actualizarUsuario({ foto_perfil: data.url });
+        actualizar({ avatar: data.url });
+      }
+    } catch (error) {
+      console.error('Error al subir foto de perfil', error);
+    } finally {
+      setSubiendo(false);
+    }
   };
 
   return (
@@ -47,6 +85,7 @@ function TarjetaUsuario({ perfilApi }) {
           type="button"
           className="botonEditarAvatar"
           onClick={abrirSelectorArchivo}
+          disabled={subiendo}
           aria-label="Cambiar foto"
         >
           <Camera size={14} />
@@ -73,7 +112,13 @@ function TarjetaUsuario({ perfilApi }) {
             value={borrador.rol}
             onChange={(e) => setBorrador((b) => ({ ...b, rol: e.target.value }))}
             placeholder="Tu rol o título"
+            list="listaRoles"
           />
+          <datalist id="listaRoles">
+            {OPCIONES_ROL.map((opcion) => (
+              <option key={opcion} value={opcion} />
+            ))}
+          </datalist>
           <input
             className="entradaPerfil"
             value={borrador.portfolio}
