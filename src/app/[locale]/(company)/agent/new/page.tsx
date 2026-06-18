@@ -79,7 +79,25 @@ export default function AgentNewPage() {
     setPublishing(true);
     setPublishError('');
 
-    const result = await publishProjectFromAgent(extracted);
+    const TIPO_CAMBIO = 520;
+
+    function convertirAColones(monto: number, moneda: string): number {
+      if (!monto || monto <= 0) return 0;
+      if (moneda === 'USD') return Math.round(monto * TIPO_CAMBIO);
+      return Math.round(monto);
+    }
+
+    const minColones = convertirAColones(extracted.budget_min, extracted.budget_currency);
+    const maxColones = convertirAColones(extracted.budget_max, extracted.budget_currency);
+
+    const presupuestoMin = minColones > 0 ? Math.max(minColones, 100_000) : 100_000;
+    const presupuestoMax = maxColones > 0 ? maxColones : 0;
+
+    const result = await publishProjectFromAgent({
+      ...extracted,
+      budget_min: presupuestoMin,
+      budget_max: presupuestoMax,
+    });
 
     if (!result.success) {
       setPublishError(result.error);
