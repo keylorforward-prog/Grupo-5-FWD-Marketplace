@@ -60,7 +60,8 @@ export default function DashboardLayout({ activePage, children }) {
   });
   const menuPerfilRef = useRef(null);
   const displayName = user?.nombre || 'Empresa';
-  const company = user?.empresa || user?.nombre_empresa || user?.nombre || 'Empresa';
+  const profileRole = t('empresaLayout.profile.role');
+  const company = profileRole.toUpperCase();
   const email = user?.correo || user?.email || 'empresa@fwd.com';
   const avatar = user?.foto_perfil || '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
 
@@ -190,7 +191,7 @@ export default function DashboardLayout({ activePage, children }) {
                     <div className="de-profile-menu-user">
                       <p className="de-profile-menu-name">{displayName}</p>
                       <p className="de-profile-menu-email">{email}</p>
-                      <span className="de-profile-menu-role">{t('empresaLayout.profile.role')}</span>
+                      <span className="de-profile-menu-role">{profileRole}</span>
                     </div>
                   </div>
 
