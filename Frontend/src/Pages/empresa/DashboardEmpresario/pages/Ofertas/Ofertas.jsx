@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AlertTriangle, CheckCircle2, FileText, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Eye, FileText, XCircle } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
+import PerfilEgresadoModal from '../../components/PerfilEgresadoModal';
 import { formatearOferta } from '../../utils/dashboardEmpresarioFormatters';
 
 export default function Ofertas() {
@@ -14,6 +15,7 @@ export default function Ofertas() {
   const [error, setError] = useState('');
   const [mensaje, setMensaje] = useState(null);
   const [procesando, setProcesando] = useState(null);
+  const [perfilSeleccionado, setPerfilSeleccionado] = useState(null);
 
   const cargarOfertas = async () => {
     setLoading(true);
@@ -89,6 +91,12 @@ export default function Ofertas() {
               <span className="de-badge nueva">{offer.status}</span>
               <strong>₡{offer.amount.toLocaleString('es-CR')}</strong>
               <span className="de-offer-time">{offer.time}</span>
+              {offer.candidate && (
+                <button className="de-panel-action" type="button" onClick={() => setPerfilSeleccionado(offer.candidate)}>
+                  <Eye size={15} />
+                  Ver perfil
+                </button>
+              )}
               {offer.pending && (
                 <div className="de-offer-actions">
                   <button
@@ -115,6 +123,7 @@ export default function Ofertas() {
           </div>
         ))}
       </div>
+      <PerfilEgresadoModal perfil={perfilSeleccionado} onClose={() => setPerfilSeleccionado(null)} />
     </DashboardLayout>
   );
 }

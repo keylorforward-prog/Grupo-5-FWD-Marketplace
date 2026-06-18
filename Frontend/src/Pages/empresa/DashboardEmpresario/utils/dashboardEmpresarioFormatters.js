@@ -10,6 +10,8 @@ const FLECHAS_PROYECTO = [
   '/Imgs/FLECHAS/Flechas-08.png',
 ];
 
+const esUrl = (valor) => /^https?:\/\//i.test(valor || '');
+
 const formatearFechaRelativa = (fecha) => {
   if (!fecha) return 'Sin fecha';
   const diferencia = Date.now() - new Date(fecha).getTime();
@@ -70,16 +72,29 @@ export const formatearTalento = (perfil) => {
   const usuario = perfil.usuario ?? {};
   const curriculum = perfil.curriculum ?? {};
   const rating = Number(perfil.reputacion_total ?? 0);
+  const historialProyectos = perfil.historialProyectos ?? [];
+  const tituloFwd = perfil.titulo_fwd || '';
+  const evidenciaFwd = esUrl(tituloFwd) ? tituloFwd : null;
+  const habilidades = curriculum.habilidades || (!evidenciaFwd ? tituloFwd : '');
 
   return {
     id: perfil.id_perfil_estudiante,
     name: usuario.nombre || 'Estudiante FWD',
     avatar: usuario.foto_perfil || AVATAR_DEFECTO,
     verified: perfil.estado_verificacion === 'VERIFICADO',
-    skills: curriculum.habilidades || perfil.titulo_fwd || 'Sin habilidades registradas',
+    skills: habilidades || 'Sin habilidades registradas',
     rating: rating ? rating.toFixed(1) : '0.0',
-    projects: perfil.postulaciones?.length ?? 0,
+    projects: historialProyectos.length || perfil.postulaciones?.length || 0,
     match: rating ? Math.min(100, Math.round(rating * 20)) : 0,
+    email: usuario.correo,
+    phone: perfil.telefono_whatsapp || usuario.telefono_whatsapp,
+    location: perfil.sede_graduacion || 'Sede no registrada',
+    titleFwd: tituloFwd,
+    evidenceFwd: evidenciaFwd,
+    bio: perfil.descripcion || curriculum.resumen_profesional || curriculum.experiencia_laboral || 'Sin descripcion registrada.',
+    curriculum,
+    historialProyectos,
+    raw: perfil,
   };
 };
 
@@ -96,6 +111,7 @@ export const formatearOferta = (oferta) => {
     time: formatearFechaRelativa(oferta.fecha_oferta),
     status: estado,
     pending: estado === 'PENDIENTE',
+    candidate: oferta.perfilEstudiante ? formatearTalento(oferta.perfilEstudiante) : null,
   };
 };
 
@@ -181,5 +197,6 @@ export const formatearPostulacion = (postulacion) => {
     status: estadoPostulacion(postulacion.estado),
     estaInvitado: postulacion.estado === 'PRESSELECCIONADA' || postulacion.estado === 'CONTRATADO',
     proyecto: postulacion.propuesta?.titulo || '',
+    perfil: formatearTalento(perfil),
   };
 };
