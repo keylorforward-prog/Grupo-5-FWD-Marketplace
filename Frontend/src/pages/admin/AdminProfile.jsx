@@ -1,11 +1,20 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { adminService } from '../../services/adminService';
-import AdminUsuarios from './AdminUsuarios';
-import AdminEgresados from './AdminEgresados';
-import AdminConfiguracion from './AdminConfiguracion';
-import AdminEmpresas from './AdminEmpresas';
+import { Suspense, lazy } from 'react';
+
+const AdminUsuarios = lazy(() => import('./AdminUsuarios'));
+const AdminEgresados = lazy(() => import('./AdminEgresados'));
+const AdminConfiguracion = lazy(() => import('./AdminConfiguracion'));
+const AdminEmpresas = lazy(() => import('./AdminEmpresas'));
+const AdminReportes = lazy(() => import('./AdminReportes'));
+const AdminAuditoria = lazy(() => import('./AdminAuditoria'));
+const AdminSistema = lazy(() => import('./AdminSistema'));
+import AdminDetalleAuditoriaModal from './components/AdminDetalleAuditoriaModal';
+import AdminBusquedaGlobal from './components/AdminBusquedaGlobal';
+import AdminCampanaNotificaciones from './components/AdminCampanaNotificaciones';
 import './AdminProfile.css';
 import {
   LayoutDashboard,
@@ -18,7 +27,10 @@ import {
   MoreVertical,
   Clock,
   HelpCircle,
-  RefreshCw
+  RefreshCw,
+  ShieldAlert,
+  ClipboardList,
+  Activity
 } from 'lucide-react';
 
 // Importación de módulos aislados (Corregido para coincidir con la carpeta "components" en minúscula)
@@ -27,6 +39,7 @@ import TarjetaEstadistica from '../../components/comun/TarjetaEstadistica';
 import InsigniaEstado from '../../components/comun/InsigniaEstado';
 
 export default function AdminProfile() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -43,6 +56,7 @@ export default function AdminProfile() {
   });
   const [overviewLoading, setOverviewLoading] = useState(true);
   const [overviewError, setOverviewError] = useState(null);
+  const [modalAuditoria, setModalAuditoria] = useState({ open: false, evento: null });
 
   const cargarOverview = useCallback(async ({ mostrarCarga = false } = {}) => {
     if (mostrarCarga) setOverviewLoading(true);
@@ -55,56 +69,50 @@ export default function AdminProfile() {
       }
     } catch (error) {
       console.error('Error fetching admin overview:', error);
-      setOverviewError('No se pudo actualizar el resumen administrativo.');
+      setOverviewError(t('admin.messages.loadOverviewError'));
     } finally {
       if (mostrarCarga) setOverviewLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
-    let cancelado = false;
+    cargarOverview({ mostrarCarga: true });
+  }, [cargarOverview]);
 
-    adminService.getOverview()
-      .then((response) => {
-        if (!cancelado && response.success) {
-          setOverviewData((actual) => ({ ...actual, ...response.data }));
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching admin overview:', error);
-        if (!cancelado) setOverviewError('No se pudo cargar el resumen administrativo.');
-      })
-      .finally(() => {
-        if (!cancelado) setOverviewLoading(false);
-      });
-
-    return () => {
-      cancelado = true;
-    };
-  }, []);
-
-  const menuTitles = {
+  const menuTitles = useMemo(() => ({
     dashboard: {
-      title: 'Panel de Administracion',
-      subtitle: 'Resumen operativo de usuarios, proyectos y verificaciones.'
+      title: t('admin.dashboard.title'),
+      subtitle: t('admin.dashboard.subtitle')
     },
     empresas: {
-      title: 'Empresas',
-      subtitle: 'Gestiona organizaciones, perfiles y accesos empresariales.'
+      title: t('admin.companies.menuTitle'),
+      subtitle: t('admin.companies.subtitle')
     },
     egresados: {
-      title: 'Verificacion de Egresados',
-      subtitle: 'Revisa solicitudes pendientes y valida credenciales FWD.'
+      title: t('admin.graduates.menuTitle'),
+      subtitle: t('admin.graduates.subtitle')
     },
     usuarios: {
-      title: 'Gestion de Usuarios',
-      subtitle: 'Busca, revisa y administra cuentas de la plataforma.'
+      title: t('admin.users.menuTitle'),
+      subtitle: t('admin.users.subtitle')
+    },
+    reportes: {
+      title: 'Reportes y denuncias',
+      subtitle: 'Revisa denuncias, resuelve casos y deja trazabilidad.'
+    },
+    auditoria: {
+      title: 'Auditoría completa',
+      subtitle: 'Consulta acciones sensibles, actores y metadata.'
+    },
+    sistema: {
+      title: 'Salud del sistema',
+      subtitle: 'Estado de API, base de datos, S3 y variables críticas.'
     },
     config: {
-      title: 'Configuracion',
-      subtitle: 'Ajustes generales del espacio administrativo.'
+      title: t('admin.config.menuTitle'),
+      subtitle: t('admin.config.subtitle')
     }
-  };
+  }), [t]);
 
   const manejarCerrarSesion = async () => {
     setCerrandoSesion(true);
@@ -117,9 +125,12 @@ export default function AdminProfile() {
   };
 
   const encabezado = menuTitles[activeMenu] || menuTitles.dashboard;
-  const totalAlertas = overviewData.verifiPendientes + overviewData.empresasPendientes + overviewData.reportesAbiertos;
+  const totalAlertas = useMemo(
+    () => overviewData.verifiPendientes + overviewData.empresasPendientes + overviewData.reportesAbiertos,
+    [overviewData.empresasPendientes, overviewData.reportesAbiertos, overviewData.verifiPendientes]
+  );
 
-  const irAAlertas = () => {
+  const irAAlertas = useCallback(() => {
     if (overviewData.verifiPendientes > 0) {
       setActiveMenu('egresados');
       return;
@@ -131,7 +142,7 @@ export default function AdminProfile() {
     }
 
     setActiveMenu('dashboard');
-  };
+  }, [overviewData.verifiPendientes, overviewData.empresasPendientes]);
 
   return (
     <div className="admin-shell">
@@ -151,35 +162,33 @@ export default function AdminProfile() {
           <nav className="admin-nav" aria-label="Navegacion principal de administracion">
             <button className={`admin-nav-link ${activeMenu === 'dashboard' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('dashboard')}>
               <LayoutDashboard size={16} />
-              Dashboard
+              {t('sidebar.dashboard')}
             </button>
             <button className={`admin-nav-link ${activeMenu === 'usuarios' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('usuarios')}>
               <Users size={16} />
-              Usuarios
+              {t('admin.users.tableUser')}s
             </button>
             <button className={`admin-nav-link ${activeMenu === 'egresados' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('egresados')}>
               <GraduationCap size={16} />
-              Egresados
+              {t('admin.graduates.tableGraduate')}s
             </button>
             <button className={`admin-nav-link ${activeMenu === 'empresas' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('empresas')}>
               <Building size={16} />
-              Empresas
+              {t('admin.companies.menuTitle')}
             </button>
             <button className={`admin-nav-link ${activeMenu === 'config' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('config')}>
               <Settings size={16} />
-              Configuracion
+              {t('admin.config.menuTitle')}
             </button>
           </nav>
 
           <div className="admin-topbar-actions">
-            <button className="admin-icon-button" type="button" aria-label="Notificaciones" title="Notificaciones">
-              <Bell size={20} />
-              <span className="admin-notification-dot" aria-hidden="true" />
-            </button>
+            <AdminBusquedaGlobal onNavigate={setActiveMenu} />
+            <AdminCampanaNotificaciones onNavigate={setActiveMenu} />
             <button className="admin-profile-pill" type="button" onClick={() => setActiveMenu('config')}>
               <span className="admin-profile-avatar">AD</span>
               <span className="admin-profile-copy">
-                <span className="admin-profile-name">Administrador</span>
+                <span className="admin-profile-name">{t('header.administrator')}</span>
                 <span className="admin-profile-role">FWD Workspace</span>
               </span>
             </button>
@@ -191,35 +200,38 @@ export default function AdminProfile() {
         <aside className="admin-sidebar">
           <div>
             <div className="admin-sidebar-heading">
-              <p>Admin Workspace</p>
-              <span>Centro de control FWD</span>
+              <p>{t('admin.common.adminWorkspace')}</p>
+              <span>{t('admin.common.fwdControlCenter')}</span>
             </div>
 
             <nav className="admin-sidebar-nav" aria-label="Secciones de administracion">
-              <ElementoBarraLateral icon={LayoutDashboard} label="Dashboard" isActive={activeMenu === 'dashboard'} onClick={() => setActiveMenu('dashboard')} />
-              <ElementoBarraLateral icon={Building} label="Empresas" isActive={activeMenu === 'empresas'} onClick={() => setActiveMenu('empresas')} />
-              <ElementoBarraLateral icon={GraduationCap} label="Egresados" isActive={activeMenu === 'egresados'} onClick={() => setActiveMenu('egresados')} />
-              <ElementoBarraLateral icon={Users} label="Usuarios" isActive={activeMenu === 'usuarios'} onClick={() => setActiveMenu('usuarios')} />
+              <ElementoBarraLateral icon={LayoutDashboard} label={t('sidebar.dashboard')} isActive={activeMenu === 'dashboard'} onClick={() => setActiveMenu('dashboard')} />
+              <ElementoBarraLateral icon={Building} label={t('admin.companies.menuTitle')} isActive={activeMenu === 'empresas'} onClick={() => setActiveMenu('empresas')} />
+              <ElementoBarraLateral icon={GraduationCap} label={t('admin.graduates.tableGraduate') + 's'} isActive={activeMenu === 'egresados'} onClick={() => setActiveMenu('egresados')} />
+              <ElementoBarraLateral icon={Users} label={t('admin.users.tableUser') + 's'} isActive={activeMenu === 'usuarios'} onClick={() => setActiveMenu('usuarios')} />
+              <ElementoBarraLateral icon={ShieldAlert} label="Reportes" isActive={activeMenu === 'reportes'} onClick={() => setActiveMenu('reportes')} />
+              <ElementoBarraLateral icon={ClipboardList} label="Auditoría" isActive={activeMenu === 'auditoria'} onClick={() => setActiveMenu('auditoria')} />
+              <ElementoBarraLateral icon={Activity} label="Sistema" isActive={activeMenu === 'sistema'} onClick={() => setActiveMenu('sistema')} />
             </nav>
           </div>
 
           <div className="admin-sidebar-footer">
             <div className="admin-help-card">
-              <p className="admin-help-title">Necesitas ayuda?</p>
-              <p className="admin-help-text">Consulta lineamientos internos o reporta una incidencia de plataforma.</p>
+              <p className="admin-help-title">{t('admin.common.needHelp')}</p>
+              <p className="admin-help-text">{t('admin.common.helpText')}</p>
               <button className="admin-help-link" type="button">
                 <HelpCircle size={14} />
-                Soporte
+                {t('admin.common.support')}
               </button>
             </div>
-          <ElementoBarraLateral icon={Settings} label="Configuración" isActive={activeMenu === 'config'} onClick={() => setActiveMenu('config')} />
+          <ElementoBarraLateral icon={Settings} label={t('admin.config.menuTitle')} isActive={activeMenu === 'config'} onClick={() => setActiveMenu('config')} />
           <button 
             onClick={manejarCerrarSesion}
             className="admin-logout-button"
             type="button"
             disabled={cerrandoSesion}
           >
-            <LogOut size={20} /> {cerrandoSesion ? 'Cerrando...' : 'Cerrar Sesion'}
+            <LogOut size={20} /> {cerrandoSesion ? t('admin.common.loggingOut') : t('admin.common.logout')}
           </button>
         </div>
       </aside>
@@ -227,7 +239,7 @@ export default function AdminProfile() {
         <main className="admin-main fwd-fondo-decorativo">
           <div className="admin-page-heading">
             <div>
-              <span className="admin-eyebrow">Administracion</span>
+              <span className="admin-eyebrow">{t('admin.common.administration')}</span>
               <h1>{encabezado.title}</h1>
               <p>{encabezado.subtitle}</p>
             </div>
@@ -235,7 +247,7 @@ export default function AdminProfile() {
             <div className="admin-heading-actions">
               <button className="admin-secondary-button" type="button" onClick={irAAlertas}>
                 <Bell size={16} />
-                {totalAlertas} alertas
+                {totalAlertas} {t('admin.common.alerts')}
               </button>
             </div>
           </div>
@@ -250,17 +262,17 @@ export default function AdminProfile() {
               )}
 
               <section className="admin-stats-grid">
-                <TarjetaEstadistica title="Total Usuarios" value={overviewLoading ? '...' : overviewData.totalUsuarios} icon={Users} trend="Global" isPositive={true} colorClass="text-accent" />
-                <TarjetaEstadistica title="Empresas Pendientes" value={overviewLoading ? '...' : overviewData.empresasPendientes} icon={Building} trend="Revision" isPositive={overviewData.empresasPendientes === 0} colorClass="text-magenta" />
-                <TarjetaEstadistica title="Verificaciones Pendientes" value={overviewLoading ? '...' : overviewData.verifiPendientes} icon={Clock} trend="Pendientes" isPositive={overviewData.verifiPendientes === 0} colorClass="text-warning" />
+                <TarjetaEstadistica title={t('admin.dashboard.totalUsers')} value={overviewLoading ? '...' : overviewData.totalUsuarios} icon={Users} trend="Global" isPositive={true} colorClass="text-accent" />
+                <TarjetaEstadistica title={t('admin.dashboard.pendingCompanies')} value={overviewLoading ? '...' : overviewData.empresasPendientes} icon={Building} trend="Revision" isPositive={overviewData.empresasPendientes === 0} colorClass="text-magenta" />
+                <TarjetaEstadistica title={t('admin.dashboard.pendingVerifications')} value={overviewLoading ? '...' : overviewData.verifiPendientes} icon={Clock} trend="Pendientes" isPositive={overviewData.verifiPendientes === 0} colorClass="text-warning" />
               </section>
 
               <section className="admin-panel">
                 <div className="admin-panel-header">
-                  <h3>Actividad Reciente</h3>
+                  <h3>{t('admin.dashboard.recentActivity')}</h3>
                   <button className="admin-text-button" type="button" onClick={() => cargarOverview({ mostrarCarga: true })} disabled={overviewLoading}>
                     <RefreshCw size={15} />
-                    Actualizar
+                    {t('admin.dashboard.update')}
                   </button>
                 </div>
                 
@@ -268,18 +280,18 @@ export default function AdminProfile() {
                   <table className="admin-table">
                     <thead>
                       <tr>
-                        <th>Entidad / Usuario</th>
-                        <th>Accion</th>
-                        <th>Fecha</th>
-                        <th>Estado</th>
-                        <th className="admin-table-actions">Detalles</th>
+                        <th>{t('admin.dashboard.entityUser')}</th>
+                        <th>{t('admin.dashboard.action')}</th>
+                        <th>{t('admin.dashboard.date')}</th>
+                        <th>{t('admin.dashboard.status')}</th>
+                        <th className="admin-table-actions">{t('admin.dashboard.details')}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {overviewLoading ? (
-                        <tr><td colSpan="5" className="admin-muted-cell">Cargando actividad...</td></tr>
+                        <tr><td colSpan="5" className="admin-muted-cell">{t('admin.dashboard.loadingActivity')}</td></tr>
                       ) : overviewData.actividadReciente.length === 0 ? (
-                        <tr><td colSpan="5" className="admin-muted-cell">Aun no hay actividad administrativa registrada.</td></tr>
+                        <tr><td colSpan="5" className="admin-muted-cell">{t('admin.dashboard.noActivity')}</td></tr>
                       ) : (
                         overviewData.actividadReciente.map((evento) => (
                           <tr key={evento.id_auditoria}>
@@ -295,7 +307,13 @@ export default function AdminProfile() {
                             <td>{new Date(evento.fecha).toLocaleString('es-CR', { dateStyle: 'medium', timeStyle: 'short' })}</td>
                             <td><InsigniaEstado status="Completado" /></td>
                             <td className="admin-table-actions">
-                              <button className="admin-row-action" type="button" aria-label="Ver detalles" title={evento.entidad}>
+                              <button 
+                                className="admin-row-action" 
+                                type="button" 
+                                aria-label="Ver detalles" 
+                                title={evento.entidad}
+                                onClick={() => setModalAuditoria({ open: true, evento })}
+                              >
                                 <MoreVertical size={18} />
                               </button>
                             </td>
@@ -309,14 +327,29 @@ export default function AdminProfile() {
             </>
           )}
 
-          {activeMenu === 'usuarios' && <AdminUsuarios onAdminChange={cargarOverview} />}
-          {activeMenu === 'egresados' && <AdminEgresados onAdminChange={cargarOverview} />}
-          {activeMenu === 'empresas' && <AdminEmpresas onAdminChange={cargarOverview} />}
-          {activeMenu === 'config' && <AdminConfiguracion onAdminChange={cargarOverview} />}
+          <Suspense fallback={
+            <div className="admin-empty-state" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span className="admin-muted-cell">{t('admin.common.loading', 'Cargando módulo...')}</span>
+            </div>
+          }>
+            {activeMenu === 'usuarios' && <AdminUsuarios onAdminChange={cargarOverview} />}
+            {activeMenu === 'egresados' && <AdminEgresados onAdminChange={cargarOverview} />}
+            {activeMenu === 'empresas' && <AdminEmpresas onAdminChange={cargarOverview} />}
+            {activeMenu === 'reportes' && <AdminReportes onAdminChange={cargarOverview} />}
+            {activeMenu === 'auditoria' && <AdminAuditoria />}
+            {activeMenu === 'sistema' && <AdminSistema />}
+            {activeMenu === 'config' && <AdminConfiguracion onAdminChange={cargarOverview} />}
+          </Suspense>
           
         </div>
       </main>
       </div>
+
+      <AdminDetalleAuditoriaModal
+        open={modalAuditoria.open}
+        evento={modalAuditoria.evento}
+        onCancel={() => setModalAuditoria({ open: false, evento: null })}
+      />
     </div>
   );
 }

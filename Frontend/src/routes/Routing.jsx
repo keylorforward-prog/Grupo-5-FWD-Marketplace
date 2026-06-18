@@ -30,6 +30,8 @@ import NotificacionesEmpresario from '../pages/empresa/DashboardEmpresario/pages
 import AyudaEmpresario from '../pages/empresa/DashboardEmpresario/pages/Ayuda/Ayuda';
 import PublicarProyecto from '../pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
 import CrearProyectoIA from '../pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
+import OfertasEmpleo from '../pages/empresa/DashboardEmpresario/pages/OfertasEmpleo/OfertasEmpleo';
+import PublicarEmpleo from '../pages/empresa/DashboardEmpresario/pages/PublicarEmpleo/PublicarEmpleo';
 import ConfiguracionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
 import PerfilEmpresa from '../pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
 import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
@@ -140,6 +142,8 @@ export default function Routing() {
         {/* Subrutas de Empresa Dashboard */}
         <Route path="/DashboardEmpresario/perfil" element={<RutaProtegida rolPermitido="empresa"><PerfilEmpresa /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/proyectos" element={<RutaProtegida rolPermitido="empresa"><ProyectosEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/empleos" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpleo /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/publicar-empleo" element={<RutaProtegida rolPermitido="empresa"><PublicarEmpleo /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/ofertas" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpresario /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/entregables" element={<RutaProtegida rolPermitido="empresa"><EntregablesEmpresario /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/mensajes" element={<RutaProtegida rolPermitido="empresa"><MensajesEmpresario /></RutaProtegida>} />
@@ -171,6 +175,7 @@ export default function Routing() {
             </RutaProtegida>
           }
         />
+        <Route path="/Admin" element={<Navigate to={RUTAS.admin} replace />} />
 
         {/* ── Compartidas: placeholders ──────────────────────────────── */}
         <Route

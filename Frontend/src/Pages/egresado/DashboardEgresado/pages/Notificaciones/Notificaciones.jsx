@@ -102,7 +102,7 @@ export default function Notificaciones() {
 
       {error && <p className="de-data-state error">{error}</p>}
 
-      {!loading && !error && notificaciones.length === 0 && (
+      {!loading && notificaciones.length === 0 && (
         <div className="estadoVacio" style={{ padding: '3rem', textAlign: 'center' }}>
           <Bell size={48} />
           <h4>Sin notificaciones</h4>

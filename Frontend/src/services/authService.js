@@ -46,7 +46,7 @@ export const authService = {
    * Iniciar sesión como administrador
    */
   async adminLogin({ email, password }) {
-    const { data } = await apiClient.post('/auth/admin-login', { email, password });
+    const { data } = await api.post('/auth/admin-login', { email, password });
     return data;
   },
 
@@ -100,3 +100,5 @@ export const authService = {
     return data;
   },
 };
+
+

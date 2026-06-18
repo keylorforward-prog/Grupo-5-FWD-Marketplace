@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { authService } from '../../../services/authService';
-import { RUTAS, obtenerRol, rutaDashboardDeRol } from '../../../routes/rutas';
+import { obtenerRol, rutaDashboardDeRol } from '../../../routes/rutas';
 import { Camera, Tag, CreditCard, Smartphone, GraduationCap, Building2, Factory, FileText, AlertCircle, Clock } from 'lucide-react';
 import '../AuthPages.css';
 import './CompletarPerfil.css';
@@ -28,6 +28,13 @@ const CompletarPerfil = () => {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const validarArchivoFwd = (archivo) => {
+    if (!archivo) return 'Debes adjuntar tu título o certificado FWD.';
+    const tiposPermitidos = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'];
+    if (!tiposPermitidos.includes(archivo.type)) return 'La evidencia FWD debe ser PDF, PNG, JPG o WEBP.';
+    return '';
+  };
 
   // Check if profile is already complete
   useEffect(() => {
@@ -61,7 +68,7 @@ const CompletarPerfil = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { rol, cedula, telefono_whatsapp, tipo_empresa, sector } = form;
+    const { rol, cedula, tipo_empresa, sector } = form;
 
     if (!cedula || !rol) {
       setError('Por favor completa todos los campos obligatorios.');
@@ -77,6 +84,13 @@ const CompletarPerfil = () => {
     if (rol === 'EMPRESARIO' && (!tipo_empresa || !sector)) {
       setError('Por favor completa los campos de tipo de empresa y sector.');
       return;
+    }
+    if (rol === 'ESTUDIANTE') {
+      const errorArchivo = validarArchivoFwd(form.titulo_fwd_file);
+      if (errorArchivo) {
+        setError(errorArchivo);
+        return;
+      }
     }
 
     setLoading(true);
@@ -289,8 +303,9 @@ const CompletarPerfil = () => {
                       type="file"
                       name="titulo_fwd_file"
                       onChange={handleFileChange}
-                      accept=".pdf, image/png, image/jpeg, image/jpg"
+                      accept=".pdf, image/png, image/jpeg, image/jpg, image/webp"
                       className="form-input file-input has-icon"
+                      required
                     />
                   </div>
                 </div>

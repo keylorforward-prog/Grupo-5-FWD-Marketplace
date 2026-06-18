@@ -1,58 +1,98 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3000/api/admin';
-
-// Configurar interceptor para enviar el token en todas las peticiones
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    headers: { Authorization: `Bearer ${token}` }
-  };
-};
+import apiClient from './apiClient';
 
 export const adminService = {
   getOverview: async () => {
-    const response = await axios.get(`${API_URL}/overview`, getAuthHeaders());
+    const response = await apiClient.get('/admin/overview');
+    return response.data;
+  },
+
+  buscarGlobal: async (q) => {
+    const response = await apiClient.get('/admin/busqueda', { params: { q } });
+    return response.data;
+  },
+
+  getAdminNotificaciones: async () => {
+    const response = await apiClient.get('/admin/notificaciones');
+    return response.data;
+  },
+
+  getAuditoria: async (params = {}) => {
+    const response = await apiClient.get('/admin/auditoria', { params });
+    return response.data;
+  },
+
+  getReportes: async (params = {}) => {
+    const response = await apiClient.get('/admin/reportes', { params });
+    return response.data;
+  },
+
+  resolverReporte: async (id_reporte, payload) => {
+    const response = await apiClient.post(`/admin/reportes/${id_reporte}/resolver`, payload);
+    return response.data;
+  },
+
+  accionesMasivas: async (payload) => {
+    const response = await apiClient.post('/admin/acciones-masivas', payload);
+    return response.data;
+  },
+
+  getHealthSistema: async () => {
+    const response = await apiClient.get('/admin/system/health');
+    return response.data;
+  },
+
+  exportCsv: async (tipo) => {
+    const response = await apiClient.get(`/admin/export/${tipo}.csv`, { responseType: 'blob' });
     return response.data;
   },
 
   getConfiguracion: async () => {
-    const response = await axios.get(`${API_URL}/configuracion`, getAuthHeaders());
+    const response = await apiClient.get('/admin/configuracion');
     return response.data;
   },
 
   updateConfiguracion: async (configuracion) => {
-    const response = await axios.put(`${API_URL}/configuracion`, { configuracion }, getAuthHeaders());
+    const response = await apiClient.put('/admin/configuracion', { configuracion });
     return response.data;
   },
 
-  getUsuarios: async () => {
-    const response = await axios.get(`${API_URL}/usuarios`, getAuthHeaders());
+  getUsuarios: async (params = {}) => {
+    const response = await apiClient.get('/admin/usuarios', { params });
     return response.data;
   },
 
-  getEmpresas: async () => {
-    const response = await axios.get(`${API_URL}/empresas`, getAuthHeaders());
+  getUsuarioDetalle: async (id_usuario) => {
+    const response = await apiClient.get(`/admin/usuarios/${id_usuario}/detalle`);
+    return response.data;
+  },
+
+  updateUsuario: async (id_usuario, payload) => {
+    const response = await apiClient.put(`/admin/usuarios/${id_usuario}`, payload);
+    return response.data;
+  },
+
+  getEmpresas: async (params = {}) => {
+    const response = await apiClient.get('/admin/empresas', { params });
     return response.data;
   },
 
   updateEstadoEmpresa: async (id_usuario, accion, motivo = null) => {
-    const response = await axios.post(`${API_URL}/empresas/${id_usuario}/estado`, { accion, motivo }, getAuthHeaders());
+    const response = await apiClient.post(`/admin/empresas/${id_usuario}/estado`, { accion, motivo });
     return response.data;
   },
 
   suspendUsuario: async (id_usuario, accion, motivo) => {
-    const response = await axios.post(`${API_URL}/usuarios/${id_usuario}/suspender`, { accion, motivo }, getAuthHeaders());
+    const response = await apiClient.post(`/admin/usuarios/${id_usuario}/suspender`, { accion, motivo });
     return response.data;
   },
 
   getEgresadosPendientes: async () => {
-    const response = await axios.get(`${API_URL}/egresados/pendientes`, getAuthHeaders());
+    const response = await apiClient.get('/admin/egresados/pendientes');
     return response.data;
   },
 
   verifyEstudiante: async (id_usuario, accion, motivo_rechazo = null) => {
-    const response = await axios.post(`${API_URL}/egresados/${id_usuario}/verificar`, { accion, motivo_rechazo }, getAuthHeaders());
+    const response = await apiClient.post(`/admin/egresados/${id_usuario}/verificar`, { accion, motivo_rechazo });
     return response.data;
   }
 };

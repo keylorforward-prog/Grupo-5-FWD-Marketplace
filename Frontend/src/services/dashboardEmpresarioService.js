@@ -64,8 +64,24 @@ export const dashboardEmpresarioService = {
     return apiClient.delete(`/dashboard-empresario/propuestas/${id}`).then(extraerData);
   },
 
+  obtenerOfertasEmpleo(params) {
+    return get('/dashboard-empresario/ofertas-empleo', params);
+  },
+
+  crearOfertaEmpleo(payload) {
+    return apiClient.post('/dashboard-empresario/ofertas-empleo', payload).then(extraerData);
+  },
+
   obtenerOfertas(params) {
     return get('/dashboard-empresario/ofertas', params);
+  },
+
+  aceptarOferta(idOferta) {
+    return apiClient.post(`/dashboard-empresario/ofertas/${idOferta}/aceptar`).then(extraerData);
+  },
+
+  rechazarOferta(idOferta) {
+    return apiClient.post(`/dashboard-empresario/ofertas/${idOferta}/rechazar`).then(extraerData);
   },
 
   obtenerPostulaciones(params) {

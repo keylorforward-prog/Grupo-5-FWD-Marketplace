@@ -5,14 +5,17 @@ const {
   Entregable,
   Evaluacion,
   HistorialProyectoEmpresa,
+  HistorialProyectoEstudiante,
   Notificacion,
   Oferta,
+  OfertaEmpleo,
   Pago,
   PerfilEmpresario,
   PerfilEstudiante,
   Postulacion,
   Propuesta,
   ProyectoPlataforma,
+  sequelize,
   Usuario,
 } = require('../Models');
 
@@ -23,6 +26,43 @@ const obtenerLimite = (valor, defecto = 20) => {
   const numero = Number.parseInt(valor, 10);
   if (Number.isNaN(numero) || numero <= 0) return defecto;
   return Math.min(numero, 100);
+};
+
+const obtenerPagina = (valor) => {
+  const numero = Number.parseInt(valor, 10);
+  if (Number.isNaN(numero) || numero <= 0) return 1;
+  return numero;
+};
+
+const construirFiltroTalento = (search) => {
+  const terminos = String(search || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 5);
+
+  if (!terminos.length) return {};
+
+  return {
+    [Op.and]: terminos.map((termino) => ({
+      [Op.or]: [
+        { titulo_fwd: { [Op.iLike]: `%${termino}%` } },
+        { sede_graduacion: { [Op.iLike]: `%${termino}%` } },
+        { descripcion: { [Op.iLike]: `%${termino}%` } },
+        { '$usuario.nombre$': { [Op.iLike]: `%${termino}%` } },
+        { '$usuario.correo$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.habilidades$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.resumen_profesional$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.experiencia_laboral$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.educacion$': { [Op.iLike]: `%${termino}%` } },
+        { '$curriculum.certificaciones$': { [Op.iLike]: `%${termino}%` } },
+        { '$historialProyectos.titulo_proyecto$': { [Op.iLike]: `%${termino}%` } },
+        { '$historialProyectos.descripcion$': { [Op.iLike]: `%${termino}%` } },
+        { '$historialProyectos.tecnologias$': { [Op.iLike]: `%${termino}%` } },
+        { '$historialProyectos.rol_desempenado$': { [Op.iLike]: `%${termino}%` } },
+      ],
+    })),
+  };
 };
 
 const obtenerPerfilEmpresario = async (req, res) => {
@@ -303,25 +343,34 @@ const listarOfertas = async (req, res) => {
     const perfil = await obtenerPerfilEmpresario(req, res);
     if (!perfil) return;
 
-    const idsPropuestas = await obtenerIdsPropuestas(perfil.id_perfil_empresario);
-    if (!idsPropuestas.length) {
-      res.json({ success: true, data: [] });
+    const idPropuesta = Number.parseInt(req.query.id_propuesta ?? req.query.propuesta, 10);
+    if ((req.query.id_propuesta || req.query.propuesta) && Number.isNaN(idPropuesta)) {
+      res.status(400).json({ success: false, message: 'El proyecto solicitado no es valido.' });
       return;
     }
 
-    const where = { id_proyecto: { [Op.in]: idsPropuestas } };
+    const wherePropuesta = { id_perfil_empresario: perfil.id_perfil_empresario };
+    if (!Number.isNaN(idPropuesta)) wherePropuesta.id_propuesta = idPropuesta;
+
+    const where = {};
     if (req.query.estado === 'pendientes') where.estado = null;
 
     const ofertas = await Oferta.findAll({
       where,
       include: [
-        { model: Propuesta, as: 'propuestaRef' },
+        {
+          model: Propuesta,
+          as: 'propuestaRef',
+          required: true,
+          where: wherePropuesta,
+        },
         {
           model: PerfilEstudiante,
           as: 'perfilEstudiante',
           include: [
             { model: Usuario, as: 'usuario' },
             { model: Curriculum, as: 'curriculum' },
+            { model: HistorialProyectoEstudiante, as: 'historialProyectos' },
           ],
         },
       ],
@@ -332,6 +381,223 @@ const listarOfertas = async (req, res) => {
     res.json({ success: true, data: ofertas });
   } catch (error) {
     responderError(res, error, 'Error al obtener las ofertas del dashboard.');
+  }
+};
+
+const rechazarOferta = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { id_oferta } = req.params;
+    const oferta = await Oferta.findByPk(id_oferta, {
+      include: [
+        {
+          model: Propuesta,
+          as: 'propuestaRef',
+          required: true,
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'perfilEstudiante',
+          include: [{ model: Usuario, as: 'usuario' }],
+        },
+      ],
+    });
+
+    if (!oferta) {
+      return res.status(404).json({ success: false, message: 'Oferta no encontrada.' });
+    }
+
+    const propuesta = oferta.propuestaRef;
+    if (!propuesta || propuesta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      return res.status(403).json({ success: false, message: 'No puedes rechazar una oferta de otro empresario.' });
+    }
+
+    if (oferta.estado === 'ACEPTADA') {
+      return res.status(400).json({ success: false, message: 'No puedes rechazar una oferta aceptada.' });
+    }
+
+    if (oferta.estado === 'RECHAZADA') {
+      return res.status(400).json({ success: false, message: 'Esta oferta ya fue rechazada.' });
+    }
+
+    await oferta.update({ estado: 'RECHAZADA' });
+
+    const usuario = oferta.perfilEstudiante?.usuario;
+    if (usuario) {
+      await Notificacion.create({
+        id_usuario: usuario.id_usuario,
+        tipo: 'OFERTA_RECHAZADA',
+        mensaje: `Tu oferta para "${propuesta.titulo}" fue rechazada.`,
+        leido: false,
+        fecha: new Date(),
+      });
+    }
+
+    res.json({ success: true, message: 'Oferta rechazada correctamente.', data: oferta });
+  } catch (error) {
+    responderError(res, error, 'Error al rechazar la oferta.');
+  }
+};
+
+const aceptarOferta = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) {
+      await t.rollback();
+      return;
+    }
+
+    const { id_oferta } = req.params;
+    const oferta = await Oferta.findByPk(id_oferta, {
+      include: [
+        {
+          model: Propuesta,
+          as: 'propuestaRef',
+          required: true,
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'perfilEstudiante',
+          include: [{ model: Usuario, as: 'usuario' }],
+        },
+      ],
+      transaction: t,
+    });
+
+    if (!oferta) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Oferta no encontrada.' });
+    }
+
+    const propuesta = oferta.propuestaRef;
+    if (!propuesta || propuesta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      await t.rollback();
+      return res.status(403).json({ success: false, message: 'No puedes aceptar una oferta de otro empresario.' });
+    }
+
+    if (propuesta.estado !== 'ACTIVA') {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'Esta propuesta ya no esta abierta para adjudicacion.' });
+    }
+
+    if (oferta.estado === 'ACEPTADA') {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'Esta oferta ya fue aceptada.' });
+    }
+
+    if (oferta.estado && oferta.estado !== 'ACEPTADA') {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'Solo puedes aceptar ofertas pendientes.' });
+    }
+
+    const fechaInicio = new Date();
+    const fechaFinEstimada = new Date(fechaInicio);
+    fechaFinEstimada.setDate(fechaFinEstimada.getDate() + Number(propuesta.plazo_dias || 15));
+
+    await oferta.update({ estado: 'ACEPTADA' }, { transaction: t });
+    await Oferta.update(
+      { estado: 'RECHAZADA' },
+      {
+        where: {
+          id_proyecto: propuesta.id_propuesta,
+          id_oferta: { [Op.ne]: oferta.id_oferta },
+          estado: null,
+        },
+        transaction: t,
+      }
+    );
+
+    await propuesta.update({ estado: 'CERRADA' }, { transaction: t });
+
+    const [proyecto] = await ProyectoPlataforma.findOrCreate({
+      where: { id_propuesta: propuesta.id_propuesta },
+      defaults: {
+        id_propuesta: propuesta.id_propuesta,
+        titulo: propuesta.titulo,
+        descripcion: propuesta.descripcion,
+        estado: 'EN_PROGRESO',
+        fecha_inicio: fechaInicio,
+        fecha_fin_estimada: fechaFinEstimada,
+        fecha_adjudicado: fechaInicio,
+      },
+      transaction: t,
+    });
+
+    await proyecto.update({
+      estado: 'EN_PROGRESO',
+      fecha_inicio: proyecto.fecha_inicio || fechaInicio,
+      fecha_fin_estimada: proyecto.fecha_fin_estimada || fechaFinEstimada,
+      fecha_adjudicado: proyecto.fecha_adjudicado || fechaInicio,
+    }, { transaction: t });
+
+    await Postulacion.update(
+      { estado: 'CONTRATADO' },
+      {
+        where: {
+          id_propuesta: propuesta.id_propuesta,
+          id_perfil_estudiante: oferta.id_perfil_estudiante,
+        },
+        transaction: t,
+      }
+    );
+
+    await Postulacion.update(
+      { estado: 'RECHAZADA' },
+      {
+        where: {
+          id_propuesta: propuesta.id_propuesta,
+          id_perfil_estudiante: { [Op.ne]: oferta.id_perfil_estudiante },
+          estado: { [Op.ne]: 'CONTRATADO' },
+        },
+        transaction: t,
+      }
+    );
+
+    const usuarioAceptado = oferta.perfilEstudiante?.usuario;
+    if (usuarioAceptado) {
+      await Notificacion.create({
+        id_usuario: usuarioAceptado.id_usuario,
+        tipo: 'OFERTA_ACEPTADA',
+        mensaje: `Tu oferta para "${propuesta.titulo}" fue aceptada. El proyecto ya esta en progreso.`,
+        leido: false,
+        fecha: new Date(),
+      }, { transaction: t });
+    }
+
+    const otrasOfertas = await Oferta.findAll({
+      where: {
+        id_proyecto: propuesta.id_propuesta,
+        id_oferta: { [Op.ne]: oferta.id_oferta },
+      },
+      include: [{ model: PerfilEstudiante, as: 'perfilEstudiante', include: [{ model: Usuario, as: 'usuario' }] }],
+      transaction: t,
+    });
+
+    await Promise.all(otrasOfertas.map((otraOferta) => {
+      const usuario = otraOferta.perfilEstudiante?.usuario;
+      if (!usuario) return Promise.resolve();
+      return Notificacion.create({
+        id_usuario: usuario.id_usuario,
+        tipo: 'OFERTA_NO_SELECCIONADA',
+        mensaje: `La empresa selecciono otra oferta para "${propuesta.titulo}".`,
+        leido: false,
+        fecha: new Date(),
+      }, { transaction: t });
+    }));
+
+    await t.commit();
+
+    res.json({
+      success: true,
+      message: 'Oferta aceptada y proyecto adjudicado correctamente.',
+      data: { oferta, proyecto },
+    });
+  } catch (error) {
+    await t.rollback();
+    responderError(res, error, 'Error al aceptar la oferta.');
   }
 };
 
@@ -379,14 +645,52 @@ const listarNotificaciones = async (req, res) => {
 
 const listarTalento = async (req, res) => {
   try {
+    const search = String(req.query.search || req.query.q || '').trim();
+    const searchWhere = construirFiltroTalento(search);
+    const include = [
+      { model: Usuario, as: 'usuario', required: false },
+      { model: Curriculum, as: 'curriculum', required: false },
+      { model: Postulacion, as: 'postulaciones', required: false },
+      { model: HistorialProyectoEstudiante, as: 'historialProyectos', required: false },
+    ];
+    const order = [['reputacion_total', 'DESC'], ['fecha_verificacion', 'DESC']];
+    const limit = obtenerLimite(req.query.limit, 10);
+
+    if (req.query.page) {
+      const page = obtenerPagina(req.query.page);
+      const offset = (page - 1) * limit;
+      const talento = await PerfilEstudiante.findAndCountAll({
+        where: searchWhere,
+        include,
+        order,
+        limit,
+        offset,
+        distinct: true,
+        subQuery: false,
+      });
+
+      res.json({
+        success: true,
+        data: {
+          items: talento.rows,
+          meta: {
+            page,
+            limit,
+            total: talento.count,
+            totalPages: Math.max(1, Math.ceil(talento.count / limit)),
+            hasMore: offset + talento.rows.length < talento.count,
+          },
+        },
+      });
+      return;
+    }
+
     const talento = await PerfilEstudiante.findAll({
-      include: [
-        { model: Usuario, as: 'usuario' },
-        { model: Curriculum, as: 'curriculum' },
-        { model: Postulacion, as: 'postulaciones' },
-      ],
-      order: [['reputacion_total', 'DESC'], ['fecha_verificacion', 'DESC']],
-      limit: obtenerLimite(req.query.limit),
+      where: searchWhere,
+      include,
+      order,
+      limit,
+      subQuery: false,
     });
 
     res.json({ success: true, data: talento });
@@ -414,6 +718,7 @@ const listarPostulaciones = async (req, res) => {
           include: [
             { model: Usuario, as: 'usuario' },
             { model: Curriculum, as: 'curriculum' },
+            { model: HistorialProyectoEstudiante, as: 'historialProyectos' },
           ],
         },
       ],
@@ -651,12 +956,56 @@ const marcarLeidos = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     responderError(res, error, 'Error al marcar mensajes como leídos.');
+const listarOfertasEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+    const ofertas = await OfertaEmpleo.findAll({
+      where: { id_perfil_empresario: perfil.id_perfil_empresario },
+      order: ORDEN_DESC,
+      limit: obtenerLimite(req.query.limit),
+    });
+    res.json({ success: true, data: ofertas });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener las ofertas de empleo.');
+  }
+};
+
+const crearOfertaEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { titulo, descripcion, requisitos, tecnologias_requeridas,
+            tipo_jornada, modalidad, salario_min, salario_max, ubicacion } = req.body;
+
+    if (!titulo || !descripcion) {
+      return res.status(400).json({ success: false, message: 'Título y descripción son obligatorios.' });
+    }
+    if (salario_min && salario_max && Number(salario_min) > Number(salario_max)) {
+      return res.status(400).json({ success: false, message: 'El salario mínimo no puede ser mayor al máximo.' });
+    }
+
+    const oferta = await OfertaEmpleo.create({
+      id_perfil_empresario: perfil.id_perfil_empresario,
+      titulo, descripcion, requisitos, tecnologias_requeridas,
+      tipo_jornada: tipo_jornada || 'tiempo_completo',
+      modalidad: modalidad || 'remoto',
+      salario_min: salario_min || null,
+      salario_max: salario_max || null,
+      ubicacion: ubicacion || null,
+      estado: 'ACTIVA',
+    });
+    res.status(201).json({ success: true, data: oferta });
+  } catch (error) {
+    responderError(res, error, 'Error al crear la oferta de empleo.');
   }
 };
 
 module.exports = {
   actualizarPerfil,
   actualizarPropuesta,
+  crearOfertaEmpleo,
   crearPropuesta,
   eliminarPropuesta,
   enviarMensaje,
@@ -666,6 +1015,7 @@ module.exports = {
   listarMensajesRecientes,
   listarNotificaciones,
   listarOfertas,
+  listarOfertasEmpleo,
   listarPagos,
   listarPerfil,
   listarPostulaciones,
@@ -675,4 +1025,6 @@ module.exports = {
   obtenerConversacion,
   obtenerResumen,
   subirFotoPerfil,
+  aceptarOferta,
+  rechazarOferta,
 };

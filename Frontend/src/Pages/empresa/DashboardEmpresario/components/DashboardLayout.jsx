@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
+import CampanaNotificaciones from '../../../../components/notificaciones/CampanaNotificaciones';
 import {
   Bell,
+  Briefcase,
   ChevronDown,
   FileText,
   FolderOpen,
@@ -32,8 +34,9 @@ const navLinks = [
 
 const sidebarItems = [
   { key: 'inicio', label: 'Inicio', icon: Home, path: '/DashboardEmpresario' },
-  { key: 'proyectos', label: 'Mis Proyectos', icon: FolderOpen, path: '/DashboardEmpresario/proyectos' },
-  { key: 'ofertas', label: 'Ofertas Recibidas', icon: FileText, path: '/DashboardEmpresario/ofertas' },
+  { key: 'proyectos', label: 'Mis Proyectos',    icon: FolderOpen,  path: '/DashboardEmpresario/proyectos' },
+  { key: 'empleos',   label: 'Ofertas de Empleo', icon: Briefcase,   path: '/DashboardEmpresario/empleos' },
+  { key: 'ofertas',   label: 'Ofertas Recibidas', icon: FileText,    path: '/DashboardEmpresario/ofertas' },
   { key: 'entregables', label: 'Entregables', icon: Package, path: '/DashboardEmpresario/entregables' },
   { key: 'mensajes', label: 'Mensajes', icon: MessageSquare, path: '/DashboardEmpresario/mensajes' },
   { key: 'talento', label: 'Talento Recomendado', icon: Users, path: '/DashboardEmpresario/talento' },
@@ -61,7 +64,7 @@ export default function DashboardLayout({ activePage, children }) {
   const profileItems = [
     { key: 'perfil', label: 'Mi Perfil', icon: User, path: '/DashboardEmpresario/perfil' },
     { key: 'proyectos', label: 'Mis proyectos', icon: FolderOpen, path: '/DashboardEmpresario/proyectos' },
-    { key: 'configuracion', label: 'Configuración', icon: Settings, path: '/DashboardEmpresario/configuracion' },
+    { key: 'configuracion', label: 'Configuración', icon: Settings, path: '/SettingsEmpresa' },
   ];
 
   useEffect(() => {
@@ -145,16 +148,7 @@ export default function DashboardLayout({ activePage, children }) {
           </div>
 
           <div className="de-header-right">
-            <button
-              className="de-header-bell de-link-button"
-              type="button"
-              onClick={() => navigate('/DashboardEmpresario/notificaciones')}
-              aria-label="Notificaciones"
-              title="Notificaciones"
-            >
-              <Bell size={20} />
-              <span className="de-header-bell-dot" aria-hidden="true" />
-            </button>
+            <CampanaNotificaciones rutaNotificaciones="/DashboardEmpresario/notificaciones" />
 
             <div className="de-header-profile-wrapper" ref={menuPerfilRef}>
               <button
