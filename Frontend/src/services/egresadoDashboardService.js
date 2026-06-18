@@ -114,4 +114,47 @@ export const egresadoDashboardService = {
   marcarLeidos(idPostulacion) {
     return apiClient.put(`/dashboard-egresado/marcar-leido/${idPostulacion}`).then((r) => r.data);
   },
+
+  obtenerHistorialProyectos() {
+    return get('/dashboard-egresado/historial');
+  },
+
+  async crearHistorialProyecto(proyecto) {
+    try {
+      const respuesta = await apiClient.post('/dashboard-egresado/historial', proyecto);
+      return extraerData(respuesta);
+    } catch (error) {
+      if (esErrorDeRed(error)) return proyecto;
+      throw error;
+    }
+  },
+
+  async actualizarHistorialProyecto(id, proyecto) {
+    try {
+      const respuesta = await apiClient.put(`/dashboard-egresado/historial/${id}`, proyecto);
+      return extraerData(respuesta);
+    } catch (error) {
+      if (esErrorDeRed(error)) return proyecto;
+      throw error;
+    }
+  },
+
+  async eliminarHistorialProyecto(id) {
+    try {
+      await apiClient.delete(`/dashboard-egresado/historial/${id}`);
+    } catch (error) {
+      if (esErrorDeRed(error)) return;
+      throw error;
+    }
+  },
+
+  async obtenerCatalogoTecnologias() {
+    try {
+      const respuesta = await apiClient.get('/catalogo-tecnologias');
+      const data = extraerData(respuesta);
+      return Array.isArray(data) ? data.map((t) => t.nombre) : [];
+    } catch {
+      return [];
+    }
+  },
 };
