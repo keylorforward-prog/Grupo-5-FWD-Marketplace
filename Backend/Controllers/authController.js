@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { Usuario, PerfilEstudiante, PerfilEmpresario } = require('../Models');
+const {Usuario,PerfilEstudiante,PerfilEmpresario,CodigoRecuperacion} = require('../Models');
 const config = require('../Config/config');
 const { uploadFileToS3 } = require('../Config/aws');
-
+const { sendRecoveryEmail } = require('../Services/emailService');
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 const generateToken = (user) => {
@@ -13,6 +13,12 @@ const generateToken = (user) => {
     { expiresIn: config.jwt.expiresIn }
   );
 };
+const generateRecoveryCode = () => {
+  return Math.floor(
+    100000 + Math.random() * 900000
+  ).toString();
+};
+
 
 const cookieOptions = {
   httpOnly: true,
@@ -426,6 +432,74 @@ const completarPerfil = async (req, res) => {
       message: 'Error interno del servidor',
     });
   }
+ 
+};
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'El correo es requerido',
+      });
+    }
+
+    const user = await Usuario.findOne({
+      where: { correo: email },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No existe una cuenta con ese correo',
+      });
+    }
+
+    // Invalidar códigos activos anteriores
+    await CodigoRecuperacion.update(
+      { estado: 'EXPIRADO' },
+      {
+        where: {
+          id_usuario: user.id_usuario,
+          estado: 'ACTIVO',
+        },
+      }
+    );
+    // Enviar el correo de recuperación
+    
+    
+
+    // Generar código
+    const recoveryCode = generateRecoveryCode();
+
+    // Guardar código
+    await CodigoRecuperacion.create({
+      id_usuario: user.id_usuario,
+      codigo: recoveryCode,
+      estado: 'ACTIVO',
+    });
+
+    await sendRecoveryEmail({
+      userName: user.nombre,
+      email: user.correo,
+      recoveryCode,
+    });
+
+    return res.status(200).json({
+  success: true,
+  message: 'Código enviado al correo correctamente',
+});
+
+  } catch (error) {
+    console.error('Error en forgotPassword:', error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+    });
+  }
 };
 
-module.exports = { register, login, adminLogin, logout, me, updatePassword, completarPerfil };
+
+module.exports = { register, login, adminLogin, logout, me, updatePassword, completarPerfil , forgotPassword };
