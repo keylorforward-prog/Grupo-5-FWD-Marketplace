@@ -956,6 +956,9 @@ const marcarLeidos = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     responderError(res, error, 'Error al marcar mensajes como leídos.');
+  }
+};
+
 const listarOfertasEmpleo = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEmpresario(req, res);
