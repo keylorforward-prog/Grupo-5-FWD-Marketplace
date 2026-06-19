@@ -3,12 +3,14 @@ const {
   PerfilEstudiante,
   PerfilEmpresario,
   Postulacion,
+  PostulacionEmpleo,
   Propuesta,
   ProyectoPlataforma,
   Entregable,
   HistorialProyectoEstudiante,
   Notificacion,
   Oferta,
+  OfertaEmpleo,
   Usuario,
   Conversacion,
   Curriculum,
@@ -661,6 +663,81 @@ const listarOfertas = async (req, res) => {
   }
 };
 
+const listarOfertasEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const ofertas = await OfertaEmpleo.findAll({
+      where: { estado: 'ACTIVA' },
+      include: [{
+        model: PerfilEmpresario,
+        as: 'perfilEmpresario',
+        attributes: ['id_perfil_empresario', 'sector', 'logo'],
+        include: [{ model: Usuario, as: 'usuario', attributes: ['nombre'] }],
+      }],
+      order: [['fecha_publicacion', 'DESC']],
+    });
+
+    const postulaciones = await PostulacionEmpleo.findAll({
+      where: { id_perfil_estudiante: perfil.id_perfil_estudiante },
+      attributes: ['id_oferta_empleo'],
+    });
+    const idsPostulados = postulaciones.map((p) => p.id_oferta_empleo);
+
+    const data = ofertas.map((o) => ({
+      ...o.toJSON(),
+      ya_postulado: idsPostulados.includes(o.id_oferta_empleo),
+    }));
+
+    res.json({ success: true, data });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener las ofertas de empleo.');
+  }
+};
+
+const postularOfertaEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const { id_oferta_empleo, carta_presentacion, cv_url } = req.body;
+
+    if (!id_oferta_empleo) {
+      return res.status(400).json({ success: false, message: 'id_oferta_empleo es requerido.' });
+    }
+
+    const oferta = await OfertaEmpleo.findByPk(id_oferta_empleo);
+    if (!oferta) {
+      return res.status(404).json({ success: false, message: 'La oferta de empleo no existe.' });
+    }
+    if (oferta.estado !== 'ACTIVA') {
+      return res.status(400).json({ success: false, message: 'Esta oferta ya no está disponible.' });
+    }
+
+    const yaPostulo = await PostulacionEmpleo.findOne({
+      where: {
+        id_oferta_empleo,
+        id_perfil_estudiante: perfil.id_perfil_estudiante,
+      },
+    });
+    if (yaPostulo) {
+      return res.status(409).json({ success: false, message: 'Ya postulaste a esta oferta.' });
+    }
+
+    const postulacion = await PostulacionEmpleo.create({
+      id_oferta_empleo,
+      id_perfil_estudiante: perfil.id_perfil_estudiante,
+      carta_presentacion:   carta_presentacion ?? null,
+      cv_url:               cv_url ?? null,
+    });
+
+    res.status(201).json({ success: true, data: postulacion });
+  } catch (error) {
+    responderError(res, error, 'Error al postular a la oferta de empleo.');
+  }
+};
+
 const marcarNotificacionLeida = async (req, res) => {
   try {
     const [updated] = await Notificacion.update(
@@ -693,6 +770,8 @@ module.exports = {
   actualizarHistorial,
   eliminarHistorial,
   listarHistorial,
+  listarOfertasEmpleo,
+  postularOfertaEmpleo,
   listarMensajesRecientes,
   listarOfertas,
   obtenerConversacion,

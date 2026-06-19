@@ -22,6 +22,8 @@ router.post('/historial', controller.crearHistorial);
 router.put('/historial/:id', controller.actualizarHistorial);
 router.delete('/historial/:id', controller.eliminarHistorial);
 router.get('/ofertas', controller.listarOfertas);
+router.get('/ofertas-empleo',            controller.listarOfertasEmpleo);
+router.post('/ofertas-empleo/postular', controller.postularOfertaEmpleo);
 router.get('/notificaciones', controller.listarNotificaciones);
 router.put('/notificaciones/:id/leer', controller.marcarNotificacionLeida);
 router.put('/notificaciones/leer-todas', controller.marcarTodasNotificacionesLeidas);
