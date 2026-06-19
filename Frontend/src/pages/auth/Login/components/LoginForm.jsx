@@ -111,7 +111,7 @@ const LoginForm = ({ onSwitchMode }) => {
             <label htmlFor="login-password" className="form-label">
               Contraseña
             </label>
-            <a href="#" className="forgot-link">¿Olvidaste tu contraseña?</a>
+            <Link to={RUTAS.recuperarContrasena} className="forgot-link">¿Olvidaste tu contraseña?</Link>
           </div>
           <div className="input-wrapper">
             <input

@@ -14,6 +14,7 @@ import RegisterPage from '../pages/auth/Registro/RegisterPage';
 import AdminLogin from '../pages/auth/AdminLogin/AdminLogin';
 import GoogleCallback from '../pages/auth/GoogleCallback';
 import CompletarPerfil from '../pages/auth/CompletarPerfil/CompletarPerfil';
+import ForgotPasswordPage from '../pages/RecuperacionContra/ForgotPasswordPage';
 
 // Empresa
 import DashboardEmpresario from '../pages/empresa/DashboardEmpresario/DashboardEmpresario';
@@ -64,6 +65,7 @@ export default function Routing() {
         <Route path={RUTAS.loginAdmin} element={<AdminLogin />} />
         <Route path={RUTAS.login} element={<LoginPage />} />
         <Route path={RUTAS.registro} element={<RegisterPage />} />
+        <Route path={RUTAS.recuperarContrasena} element={<ForgotPasswordPage />} />
         <Route path={RUTAS.googleCallback} element={<GoogleCallback />} />
         <Route path={RUTAS.completarPerfil} element={
           <RutaProtegida>

@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const config = require('../Config/config');
-const { register, login, adminLogin, logout, me, completarPerfil, forgotPassword } = require('../Controllers/authController');
+const { register, login, adminLogin, logout, me, completarPerfil, forgotPassword, verifyRecoveryCode, resetPassword } = require('../Controllers/authController');
 const { verifyToken } = require('../Middleware/authMiddleware');
 const multer = require('multer');
 
@@ -193,5 +193,7 @@ router.get(
     }
   }
 );
+router.post('/verify-recovery-code', verifyRecoveryCode);
 
+router.post('/reset-password', resetPassword);
 module.exports = router;
