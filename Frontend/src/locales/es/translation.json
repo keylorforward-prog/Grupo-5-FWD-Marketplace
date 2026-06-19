@@ -300,6 +300,7 @@
       "days30": "30 dias",
       "budgetMin": "Presupuesto min",
       "budgetMax": "Presupuesto max",
+      "githubUrl": "URL del repositorio (GitHub)",
       "desc": "Descripcion",
       "saving": "Guardando...",
       "save": "Guardar",
@@ -311,7 +312,34 @@
       "pause": "Pausar proyecto",
       "close": "Cerrar proyecto",
       "delete": "Eliminar proyecto"
-    }
+    },
+    "historyTitle": "Historial de Proyectos",
+    "historyEmpty": "Aún no has agregado proyectos al historial.",
+    "historyAdd": "Agregar proyecto",
+    "historyDeleteConfirm": "¿Eliminar este proyecto del historial?",
+    "historySaved": "Proyecto guardado en el historial.",
+    "historyDeleted": "Proyecto eliminado del historial.",
+    "historyForm": {
+      "title": "Título del proyecto",
+      "desc": "Descripción",
+      "tech": "Tecnologías usadas",
+      "link": "Enlace (URL)",
+      "startDate": "Fecha inicio",
+      "endDate": "Fecha fin",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "saving": "Guardando...",
+      "techPlaceholder": "Ej: React, Node.js, PostgreSQL"
+    },
+    "detailTitle": "Detalles del proyecto",
+    "detailOffers": "ofertas",
+    "detailPostulations": "postulaciones",
+    "detailDeadline": "Fecha límite",
+    "detailBudget": "Presupuesto",
+    "detailTech": "Tecnologías",
+    "detailDesc": "Descripción",
+    "detailStatus": "Estado",
+    "detailNoData": "Sin información adicional"
   },
   "egresadoExplorar": {
     "hero": {

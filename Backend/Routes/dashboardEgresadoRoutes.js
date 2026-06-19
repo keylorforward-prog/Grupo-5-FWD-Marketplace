@@ -1,12 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const { verifyToken } = require('../Middleware/authMiddleware');
 const controller = require('../Controllers/dashboardEgresadoController');
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 router.use(verifyToken);
 
 router.get('/perfil', controller.listarPerfil);
 router.put('/perfil', controller.actualizarPerfil);
+router.post('/perfil/cv-documento', upload.single('documento_cv'), controller.subirDocumentoCv);
 router.get('/resumen', controller.obtenerResumen);
 router.get('/postulaciones', controller.listarPostulaciones);
 router.get('/proyectos', controller.listarProyectos);

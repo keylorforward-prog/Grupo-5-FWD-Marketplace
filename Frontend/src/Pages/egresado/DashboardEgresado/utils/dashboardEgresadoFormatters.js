@@ -57,17 +57,34 @@ export const formatearProyecto = (proyecto) => {
   const propuesta = proyecto.propuesta ?? {};
   const [status, statusType] = estadoProyecto(proyecto.estado);
   const entregables = proyecto.entregables ?? [];
+  const empresa = propuesta.perfilEmpresario?.usuario ?? {};
 
   return {
     id: proyecto.id_proyecto,
+    idPropuesta: propuesta.id_propuesta,
     titulo: proyecto.titulo || propuesta.titulo || 'Proyecto',
     descripcion: proyecto.descripcion || propuesta.descripcion || '',
     estado: status,
+    estadoRaw: proyecto.estado,
     tipoEstado: statusType,
     entregablesCount: entregables.length,
     entregablesAprobados: entregables.filter((e) => e.estado === 'APROBADO').length,
+    entregables: entregables.map((e) => ({
+      id: e.id_entregable,
+      titulo: e.titulo,
+      tipo: e.tipo,
+      estado: e.estado,
+      fecha: e.fecha_creacion ? new Date(e.fecha_creacion).toLocaleDateString() : '—',
+    })),
     fechaInicio: proyecto.fecha_inicio ? new Date(proyecto.fecha_inicio).toLocaleDateString() : '—',
     fechaFin: proyecto.fecha_fin_estimada ? new Date(proyecto.fecha_fin_estimada).toLocaleDateString() : '—',
+    tecnologias: (propuesta.tecnologias_requeridas || '').split(',').map((t) => t.trim()).filter(Boolean),
+    presupuestoMin: propuesta.presupuesto_min,
+    presupuestoMax: propuesta.presupuesto_max,
+    modalidad: propuesta.modalidad || 'remoto',
+    empresa: empresa.nombre || 'Empresa',
+    empresaFoto: empresa.foto_perfil || null,
+    github_url: propuesta.github_url || null,
   };
 };
 

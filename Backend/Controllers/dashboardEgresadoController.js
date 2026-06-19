@@ -80,6 +80,7 @@ const listarPerfil = async (req, res) => {
         experiencia: curriculum.experiencia_laboral ? JSON.parse(curriculum.experiencia_laboral) : [],
         resumen_profesional: curriculum.resumen_profesional || '',
         certificaciones: curriculum.certificaciones || '',
+        documento_cv: curriculum.documento_cv || null,
       },
     });
   } catch (error) {
@@ -94,7 +95,7 @@ const actualizarPerfil = async (req, res) => {
 
     const usuario = perfil.usuario || {};
 
-    const { nombre, foto_perfil, avatar, rol, bio, tecnologias, portfolio, linkedin, telefono, educacion, experiencia } = req.body;
+    const { nombre, foto_perfil, avatar, rol, bio, tecnologias, portfolio, linkedin, telefono, educacion, experiencia, resumen_profesional, certificaciones, documento_cv_url } = req.body;
 
     const fotoFinal = foto_perfil ?? avatar;
     if (nombre !== undefined || fotoFinal !== undefined || telefono !== undefined) {
@@ -136,6 +137,15 @@ const actualizarPerfil = async (req, res) => {
     if (experiencia !== undefined) {
       curriculumUpdate.experiencia_laboral = JSON.stringify(experiencia);
     }
+    if (resumen_profesional !== undefined) {
+      curriculumUpdate.resumen_profesional = resumen_profesional;
+    }
+    if (certificaciones !== undefined) {
+      curriculumUpdate.certificaciones = JSON.stringify(certificaciones);
+    }
+    if (documento_cv_url !== undefined) {
+      curriculumUpdate.documento_cv = documento_cv_url;
+    }
     if (Object.keys(curriculumUpdate).length > 0) {
       curriculumUpdate.fecha_actualizacion = new Date();
       await Curriculum.update(curriculumUpdate, { where: { id_curriculum: curriculum.id_curriculum } });
@@ -151,6 +161,35 @@ const actualizarPerfil = async (req, res) => {
     res.json({ success: true, data: actualizado });
   } catch (error) {
     responderError(res, error, 'Error al actualizar el perfil estudiante.');
+  }
+};
+
+const subirDocumentoCv = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'Debes enviar un archivo en el campo documento_cv.' });
+      return;
+    }
+
+    const { uploadFileToS3 } = require('../Config/aws');
+    const urlDocumento = await uploadFileToS3(req.file, 'documentos_cv');
+
+    let curriculum = perfil.curriculum;
+    if (!curriculum) {
+      curriculum = await Curriculum.create({ id_perfil_estudiante: perfil.id_perfil_estudiante });
+    }
+
+    await Curriculum.update(
+      { documento_cv: urlDocumento, fecha_actualizacion: new Date() },
+      { where: { id_curriculum: curriculum.id_curriculum } }
+    );
+
+    res.json({ success: true, data: { documento_cv: urlDocumento } });
+  } catch (error) {
+    responderError(res, error, 'Error al subir el documento CV.');
   }
 };
 
@@ -266,12 +305,19 @@ const listarProyectos = async (req, res) => {
           model: Propuesta,
           as: 'propuesta',
           required: true,
-          include: [{
-            model: Postulacion,
-            as: 'postulaciones',
-            required: true,
-            where: { id_perfil_estudiante: perfil.id_perfil_estudiante },
-          }],
+          include: [
+            {
+              model: Postulacion,
+              as: 'postulaciones',
+              required: true,
+              where: { id_perfil_estudiante: perfil.id_perfil_estudiante },
+            },
+            {
+              model: PerfilEmpresario,
+              as: 'perfilEmpresario',
+              include: [{ model: Usuario, as: 'usuario', attributes: ['nombre', 'foto_perfil'] }],
+            },
+          ],
         },
         { model: Entregable, as: 'entregables' },
       ],
@@ -417,7 +463,7 @@ const listarMensajesRecientes = async (req, res) => {
           include: [{
             model: Usuario,
             as: 'usuario',
-            attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'],
+            attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'],
           }],
         }],
       }],
@@ -642,6 +688,7 @@ const marcarTodasNotificacionesLeidas = async (req, res) => {
 
 module.exports = {
   actualizarPerfil,
+  subirDocumentoCv,
   crearHistorial,
   actualizarHistorial,
   eliminarHistorial,

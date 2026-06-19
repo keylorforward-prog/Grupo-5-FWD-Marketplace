@@ -17,6 +17,7 @@ export default function PublicarProyecto() {
     presupuesto_max: '',
     plazo_dias: '15',
   });
+  const [githubUrl, setGithubUrl] = useState('');
   const [documentoAdjunto, setDocumentoAdjunto] = useState(null);
   useEffect(() => {
     const datosAgente = location.state?.datosAgente;
@@ -111,6 +112,9 @@ export default function PublicarProyecto() {
       if (location.state?.datosAgente?.id_conversacion_ia) {
         formData.append('id_conversacion_ia', location.state.datosAgente.id_conversacion_ia);
       }
+      if (githubUrl.trim()) {
+        formData.append('github_url', githubUrl.trim());
+      }
       if (documentoAdjunto) {
         formData.append('documento_adjunto', documentoAdjunto);
       }
@@ -159,6 +163,12 @@ export default function PublicarProyecto() {
             </span>
             <input className="de-form-control" name="tecnologias_requeridas" value={formulario.tecnologias_requeridas} onChange={manejarCambio} placeholder="React, Node.js, PostgreSQL o sin preferencia" />
           </div>
+
+          <label className="de-form-field">
+            <span>Repositorio GitHub (Opcional)</span>
+            <input className="de-form-control" name="github_url" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} placeholder="https://github.com/tu-empresa/proyecto" />
+            <span style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '0.25rem' }}>Los egresados accederán a este enlace desde la vista de sus proyectos.</span>
+          </label>
 
           <div className="de-form-grid de-form-grid-2">
             <label className="de-form-field">
