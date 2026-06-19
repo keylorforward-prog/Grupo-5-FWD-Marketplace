@@ -193,6 +193,27 @@ router.get(
     }
   }
 );
+// ── GitHub ────────────────────────────────────────────────────────────────────
+router.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
+
+router.get(
+  '/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login', session: false }),
+  async (req, res) => {
+    try {
+      const token = jwt.sign(
+        { id: req.user.id_usuario, email: req.user.correo, rol: req.user.rol },
+        config.jwt.secret,
+        { expiresIn: config.jwt.expiresIn }
+      );
+      res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Error generando token' });
+    }
+  }
+);
+
 router.post('/verify-recovery-code', verifyRecoveryCode);
 
 router.post('/reset-password', resetPassword);

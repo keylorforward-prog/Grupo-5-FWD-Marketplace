@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, CreditCard, Tag, Smartphone, GraduationCap, Building2, Factory, FileText, Lock, LockKeyhole, Eye, EyeOff, AlertCircle, Clock } from 'lucide-react';
+import { User, Mail, CreditCard, Tag, Smartphone, GraduationCap, Building2, Factory, FileText, Lock, LockKeyhole, Eye, EyeOff, AlertCircle, Clock, Link as LinkIcon } from 'lucide-react';
 import { authService } from '../../../../services/authService';
 import { RUTAS } from '../../../../routes/rutas';
 import '../../AuthPages.css';
@@ -8,7 +8,7 @@ import '../../AuthPages.css';
 const RegisterForm = ({ onSwitchMode }) => {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmPassword: '', cedula: '', rol: 'ESTUDIANTE', telefono_whatsapp: '', titulo_fwd_file: null, tipo_empresa: '', sector: '', cedula_juridica_file: null });
+  const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmPassword: '', cedula: '', rol: 'ESTUDIANTE', telefono_whatsapp: '', linkedin: '', titulo_fwd_file: null, tipo_empresa: '', sector: '', cedula_juridica_file: null });
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,16 +26,17 @@ const RegisterForm = ({ onSwitchMode }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { nombre, email, password, confirmPassword, cedula, rol, telefono_whatsapp, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file } = form;
+    const { nombre, email, password, confirmPassword, cedula, rol, telefono_whatsapp, linkedin, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file } = form;
 
     if (!nombre || !email || !password || !confirmPassword || !cedula || !rol) {
       setError('Por favor completa todos los campos.');
       return;
     }
     
-    // Validación de formato de cédula: debe contener guion
-    if (!cedula.includes('-')) {
-      setError('La cédula debe incluir el guion (-). Ejemplo: 1-2342');
+    // Validación cédula costarricense: formato X-XXXX-XXXX (física) o XX-XXXXXXX-XXX (jurídica)
+    const cedulaRegex = /^\d{1,2}-\d{3,4}-\d{3,4}$/;
+    if (!cedulaRegex.test(cedula)) {
+      setError('Formato de cédula inválido. Ejemplos: 1-1231-8232 o 12-3456789-123');
       return;
     }
     
@@ -53,7 +54,7 @@ const RegisterForm = ({ onSwitchMode }) => {
     setSuccessMsg('');
 
     try {
-      const data = await authService.register({ nombre, email, password, cedula, rol, telefono_whatsapp, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file });
+      const data = await authService.register({ nombre, email, password, cedula, rol, telefono_whatsapp, linkedin, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file });
       if (data.success && data.pendingApproval) {
         setSuccessMsg(data.message);
         // Redirigir al login después de 4 segundos
@@ -203,6 +204,23 @@ const RegisterForm = ({ onSwitchMode }) => {
               placeholder="8888-8888"
               className="form-input has-icon"
               required
+            />
+          </div>
+        </div>
+
+        {/* LinkedIn */}
+        <div className="form-group">
+          <label htmlFor="reg-linkedin" className="form-label">Perfil de LinkedIn <span style={{ fontSize: '0.85em', color: '#888' }}>- Opcional</span></label>
+          <div className="input-wrapper">
+            <LinkIcon size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+            <input
+              id="reg-linkedin"
+              type="url"
+              name="linkedin"
+              value={form.linkedin}
+              onChange={handleChange}
+              placeholder="https://linkedin.com/in/tu-perfil"
+              className="form-input has-icon"
             />
           </div>
         </div>
