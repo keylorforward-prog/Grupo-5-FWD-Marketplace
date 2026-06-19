@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trash2, AlertTriangle, Check, X, Eye, EyeOff } from 'lucide-react';
 
 function Seguridad() {
+  const { t } = useTranslation();
   const [modoCambioPassword, setModoCambioPassword] = useState(false);
   const [passwords, setPasswords] = useState({ actual: '', nueva: '', confirmar: '' });
   const [mostrarPassword, setMostrarPassword] = useState(false);
@@ -44,7 +46,7 @@ function Seguridad() {
   return (
     <div id="seguridad" className="tarjetaFormulario">
       <div className="cabeceraFormulario">
-        <h2 className="tituloFormulario">Seguridad</h2>
+        <h2 className="tituloFormulario">{t('egresadoConfiguracion.sections.seguridad')}</h2>
         {mensajePassword && (
           <span className="mensajeExito animate-in">{mensajePassword}</span>
         )}
@@ -52,8 +54,8 @@ function Seguridad() {
 
       <div className="itemSeguridad">
         <div className="textoSeguridad">
-          <h4>Cambiar Contraseña</h4>
-          <p>Actualiza tu contraseña para mantener tu cuenta segura.</p>
+          <h4>{t('egresadoConfiguracion.security.cambiarPassword')}</h4>
+          <p>{t('egresadoConfiguracion.security.cambiarPasswordDesc')}</p>
         </div>
         {!modoCambioPassword && (
           <button
@@ -61,7 +63,7 @@ function Seguridad() {
             className="botonContorno variantePrimaria"
             onClick={() => setModoCambioPassword(true)}
           >
-            Actualizar
+            {t('egresadoConfiguracion.security.actualizar')}
           </button>
         )}
       </div>
@@ -69,7 +71,7 @@ function Seguridad() {
       {modoCambioPassword && (
         <div className="formularioPassword">
           <div className="grupoFormulario">
-            <label>Contraseña actual</label>
+            <label>{t('egresadoConfiguracion.security.passwordActual')}</label>
             <div className="campoPassword">
               <input
                 type={mostrarPassword ? 'text' : 'password'}
@@ -82,7 +84,7 @@ function Seguridad() {
                 type="button"
                 className="botonOjoPassword"
                 onClick={() => setMostrarPassword((m) => !m)}
-                aria-label={mostrarPassword ? 'Ocultar' : 'Mostrar'}
+                aria-label={mostrarPassword ? t('egresadoConfiguracion.security.ocultar') : t('egresadoConfiguracion.security.mostrar')}
               >
                 {mostrarPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -91,7 +93,7 @@ function Seguridad() {
 
           <div className="filaFormulario">
             <div className="grupoFormulario">
-              <label>Nueva contraseña</label>
+              <label>{t('egresadoConfiguracion.security.nuevaPassword')}</label>
               <input
                 type={mostrarPassword ? 'text' : 'password'}
                 name="nueva"
@@ -101,7 +103,7 @@ function Seguridad() {
               />
             </div>
             <div className="grupoFormulario">
-              <label>Confirmar contraseña</label>
+              <label>{t('egresadoConfiguracion.security.confirmarPassword')}</label>
               <input
                 type={mostrarPassword ? 'text' : 'password'}
                 name="confirmar"
@@ -124,10 +126,10 @@ function Seguridad() {
                 setErrorPassword('');
               }}
             >
-              Cancelar
+              {t('egresadoConfiguracion.security.cancelar')}
             </button>
             <button type="button" className="botonPrimario" onClick={guardarPassword}>
-              Guardar contraseña
+              {t('egresadoConfiguracion.security.guardarPassword')}
             </button>
           </div>
         </div>
@@ -136,17 +138,17 @@ function Seguridad() {
       <div className="itemSeguridad">
         <div className="textoSeguridad">
           <h4>
-            Autenticación de dos factores (2FA)
-            {doble2FAActivo && <span className="badgeActivo">Activo</span>}
+            {t('egresadoConfiguracion.security.dosFA')}
+            {doble2FAActivo && <span className="badgeActivo">{t('egresadoConfiguracion.security.activo')}</span>}
           </h4>
-          <p>Añade una capa extra de seguridad usando una app de autenticación.</p>
+          <p>{t('egresadoConfiguracion.security.dosFADesc')}</p>
         </div>
         <button
           type="button"
           className={`botonContorno ${doble2FAActivo ? 'varianteExito' : 'varianteAdvertencia'}`}
           onClick={() => setDoble2FAActivo((d) => !d)}
         >
-          {doble2FAActivo ? 'Desactivar' : 'Configurar'}
+          {doble2FAActivo ? t('egresadoConfiguracion.security.desactivar') : t('egresadoConfiguracion.security.configurar')}
         </button>
       </div>
 
@@ -157,7 +159,7 @@ function Seguridad() {
           onClick={() => setConfirmandoEliminacion(true)}
         >
           <Trash2 size={16} />
-          Eliminar Cuenta
+          {t('egresadoConfiguracion.security.eliminarCuenta')}
         </button>
       </div>
 
@@ -168,16 +170,15 @@ function Seguridad() {
               <div className="iconoModalPeligro">
                 <AlertTriangle size={24} />
               </div>
-              <h3>¿Eliminar tu cuenta?</h3>
+              <h3>{t('egresadoConfiguracion.security.eliminarConfirm')}</h3>
               <p>
-                Esta acción es <strong>permanente</strong>. Perderás tus postulaciones,
-                proyectos y mensajes. Escribe <code>ELIMINAR</code> para confirmar.
+                {t('egresadoConfiguracion.security.eliminarDesc')} <code>ELIMINAR</code>
               </p>
             </div>
             <input
               type="text"
               className="entradaFormulario"
-              placeholder="Escribe ELIMINAR"
+              placeholder={t('egresadoConfiguracion.security.escribeEliminar')}
               value={textoConfirmacion}
               onChange={(e) => setTextoConfirmacion(e.target.value)}
               autoFocus
@@ -191,7 +192,7 @@ function Seguridad() {
                   setTextoConfirmacion('');
                 }}
               >
-                <X size={14} /> Cancelar
+                <X size={14} /> {t('egresadoConfiguracion.security.cancelar')}
               </button>
               <button
                 type="button"
@@ -199,7 +200,7 @@ function Seguridad() {
                 disabled={textoConfirmacion !== 'ELIMINAR'}
                 onClick={confirmarEliminacion}
               >
-                <Check size={14} /> Eliminar cuenta
+                <Check size={14} /> {t('egresadoConfiguracion.security.eliminarBtn')}
               </button>
             </div>
           </div>

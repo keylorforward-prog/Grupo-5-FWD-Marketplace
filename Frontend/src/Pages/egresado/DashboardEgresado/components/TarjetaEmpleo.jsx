@@ -1,7 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Clock, DollarSign, Globe, Send, Eye } from 'lucide-react';
 
-const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
+const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
 
 const formatearSalario = (min, max) => {
   const fmt = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 });
@@ -9,6 +10,7 @@ const formatearSalario = (min, max) => {
 };
 
 function TarjetaEmpleo({ empleo, postulado }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const irAlDetalle = () => {
@@ -48,7 +50,7 @@ function TarjetaEmpleo({ empleo, postulado }) {
       <div className="te-meta">
         <div className="te-meta-item">
           <Globe size={14} />
-          {etiquetaModalidad[empleo.modalidad] || empleo.modalidad}
+          {etiquetaModalidad[empleo.modalidad] ? t(etiquetaModalidad[empleo.modalidad]) : empleo.modalidad}
         </div>
         <div className="te-meta-item">
           <DollarSign size={14} />
@@ -62,7 +64,7 @@ function TarjetaEmpleo({ empleo, postulado }) {
 
       <button type="button" className={`te-boton${postulado ? ' postulado' : ''}`} onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}>
         {postulado ? <Eye size={14} /> : <Send size={14} />}
-        {postulado ? 'Ver postulación' : 'Ver empleo'}
+        {postulado ? t('egresadoPostulaciones.verEmpleo') : t('egresadoPostulaciones.verEmpleo')}
       </button>
     </article>
   );

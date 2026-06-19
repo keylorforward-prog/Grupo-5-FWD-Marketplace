@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, SearchX } from 'lucide-react';
 import TarjetaProyecto from './TarjetaProyecto';
 
@@ -18,16 +19,17 @@ function CuadriculaProyectos({
   totalPaginas,
   onPaginaCambio,
 }) {
+  const { t } = useTranslation();
   const rangoPaginas = generarRangoPaginas(paginaActual, totalPaginas);
 
   return (
     <div className="contenedorResultados">
       <div className="encabezadoResultados">
         <span className="conteoProyectos">
-          {total} {total === 1 ? 'proyecto encontrado' : 'proyectos encontrados'}
+          {total} {t('egresadoExplorar.grid.encontrados')}
         </span>
         <div className="ordenarResultados">
-          <label htmlFor="ordenSelect" className="etiquetaOrdenar">Ordenar por:</label>
+          <label htmlFor="ordenSelect" className="etiquetaOrdenar">{t('egresadoExplorar.grid.ordenarPor')}:</label>
           <select
             id="ordenSelect"
             className="seleccionadorOrdenar"
@@ -44,8 +46,8 @@ function CuadriculaProyectos({
       {proyectos.length === 0 ? (
         <div className="estadoVacio">
           <SearchX size={48} />
-          <h4>No encontramos proyectos</h4>
-          <p>Prueba ajustar los filtros o limpiar la búsqueda.</p>
+          <h4>{t('egresadoExplorar.grid.sinResultados')}</h4>
+          <p>{t('egresadoExplorar.grid.sinResultadosDesc')}</p>
         </div>
       ) : (
         <div className="cuadriculaProyectos">
@@ -62,7 +64,7 @@ function CuadriculaProyectos({
             className="botonPagina flecha"
             disabled={paginaActual === 1}
             onClick={() => onPaginaCambio(paginaActual - 1)}
-            aria-label="Página anterior"
+            aria-label={t('egresadoExplorar.grid.paginaAnterior')}
           >
             <ChevronLeft size={16} />
           </button>
@@ -87,7 +89,7 @@ function CuadriculaProyectos({
             className="botonPagina flecha"
             disabled={paginaActual === totalPaginas}
             onClick={() => onPaginaCambio(paginaActual + 1)}
-            aria-label="Página siguiente"
+            aria-label={t('egresadoExplorar.grid.paginaSiguiente')}
           >
             <ChevronRight size={16} />
           </button>

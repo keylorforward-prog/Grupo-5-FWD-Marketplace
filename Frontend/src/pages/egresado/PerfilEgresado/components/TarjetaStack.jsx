@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Book, Plus, X } from 'lucide-react';
 
 function TarjetaStack({ perfilApi }) {
+  const { t } = useTranslation();
   const { perfil, agregarTecnologia, quitarTecnologia, catalogoTecnologias } = perfilApi;
   const [agregando, setAgregando] = useState(false);
   const [valor, setValor] = useState('');
@@ -32,7 +34,7 @@ function TarjetaStack({ perfilApi }) {
     <div className="tarjetaStack">
       <h3 className="tituloTarjetaStack">
         <Book size={20} className="iconoTituloStack" />
-        Aprendiendo
+        {t('egresadoPerfil.stack.titulo')}
       </h3>
 
       <div className="contenedorStack">
@@ -60,7 +62,7 @@ function TarjetaStack({ perfilApi }) {
               onBlur={confirmar}
               onKeyDown={manejarTecla}
               className="entradaNuevaStack"
-              placeholder="Buscar o escribir tecnología..."
+              placeholder={t('egresadoPerfil.stack.placeholder')}
               list="sugerenciasStack"
             />
             <datalist id="sugerenciasStack">
@@ -73,7 +75,7 @@ function TarjetaStack({ perfilApi }) {
           </>
         ) : (
           <button type="button" className="botonAgregarStack" onClick={iniciarAgregar}>
-            <Plus size={14} /> Agregar
+            <Plus size={14} /> {t('egresadoPerfil.stack.agregar')}
           </button>
         )}
       </div>
