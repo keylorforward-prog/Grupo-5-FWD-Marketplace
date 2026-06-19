@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Check, Edit3, Eye, PauseCircle, PlayCircle, Save, Trash2, XCircle } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -18,6 +19,7 @@ const crearFormulario = (propuesta) => ({
 });
 
 export default function Proyectos() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0);
   const [editandoId, setEditandoId] = useState(null);
@@ -62,11 +64,11 @@ export default function Proyectos() {
     setMensaje('');
     try {
       await dashboardEmpresarioService.actualizarPropuesta(id, normalizarPayload(formulario));
-      setMensaje('Proyecto actualizado correctamente.');
+      setMensaje(t('empresaProyectos.msgUpdateSuccess'));
       cancelarEdicion();
       refrescarPropuestas();
     } catch (err) {
-      setMensaje(err.response?.data?.message || 'No se pudo actualizar el proyecto.');
+      setMensaje(err.response?.data?.message || t('empresaProyectos.msgUpdateError'));
     } finally {
       setAccionandoId(null);
     }
@@ -79,24 +81,24 @@ export default function Proyectos() {
       await dashboardEmpresarioService.actualizarPropuesta(id, { estado });
       refrescarPropuestas();
     } catch (err) {
-      setMensaje(err.response?.data?.message || 'No se pudo cambiar el estado del proyecto.');
+      setMensaje(err.response?.data?.message || t('empresaProyectos.msgStatusError'));
     } finally {
       setAccionandoId(null);
     }
   };
 
   const eliminarProyecto = async (id) => {
-    const confirmado = window.confirm('¿Quieres eliminar este proyecto? Esta accion no se puede deshacer.');
+    const confirmado = window.confirm(t('empresaProyectos.msgDeleteConfirm'));
     if (!confirmado) return;
 
     setAccionandoId(id);
     setMensaje('');
     try {
       await dashboardEmpresarioService.eliminarPropuesta(id);
-      setMensaje('Proyecto eliminado correctamente.');
+      setMensaje(t('empresaProyectos.msgDeleteSuccess'));
       refrescarPropuestas();
     } catch (err) {
-      setMensaje(err.response?.data?.message || 'No se pudo eliminar el proyecto.');
+      setMensaje(err.response?.data?.message || t('empresaProyectos.msgDeleteError'));
     } finally {
       setAccionandoId(null);
     }
@@ -105,16 +107,16 @@ export default function Proyectos() {
   return (
     <DashboardLayout activePage="proyectos">
       <div className="de-page-heading">
-        <h1>Mis Proyectos</h1>
-        <button className="de-btn-primary" type="button" onClick={() => navigate('/DashboardEmpresario/publicar-proyecto')}>Publicar Proyecto</button>
+        <h1>{t('empresaProyectos.title')}</h1>
+        <button className="de-btn-primary" type="button" onClick={() => navigate('/DashboardEmpresario/publicar-proyecto')}>{t('empresaProyectos.btnPublish')}</button>
       </div>
       <div className="de-panel">
         {mensaje && (
-          <p className={`de-data-state ${mensaje.includes('No se pudo') ? 'error' : ''}`}>
+          <p className={`de-data-state ${mensaje.includes('No se pudo') || mensaje.includes('Could not') ? 'error' : ''}`}>
             {mensaje}
           </p>
         )}
-        <EstadoDatos loading={loading} error={error} empty={!proyectos.length} emptyText="Aun no tienes proyectos publicados." />
+        <EstadoDatos loading={loading} error={error} empty={!proyectos.length} emptyText={t('empresaProyectos.empty')} />
         {!loading && !error && propuestas.map((propuesta, index) => {
           const p = formatearPropuesta(propuesta, index);
           const estaEditando = editandoId === propuesta.id_propuesta;
@@ -134,27 +136,27 @@ export default function Proyectos() {
                 <p className="de-project-meta">{p.meta}</p>
                 {estaEditando && (
                   <div className="de-project-edit-form">
-                    <input className="de-form-control" name="titulo" value={formulario.titulo} onChange={cambiarCampo} placeholder="Titulo" />
-                    <input className="de-form-control" name="tecnologias_requeridas" value={formulario.tecnologias_requeridas} onChange={cambiarCampo} placeholder="Tecnologias" />
+                    <input className="de-form-control" name="titulo" value={formulario.titulo} onChange={cambiarCampo} placeholder={t('empresaProyectos.form.title')} />
+                    <input className="de-form-control" name="tecnologias_requeridas" value={formulario.tecnologias_requeridas} onChange={cambiarCampo} placeholder={t('empresaProyectos.form.tech')} />
                     <div className="de-project-edit-row">
                       <select className="de-form-control" name="plazo_dias" value={formulario.plazo_dias} onChange={cambiarCampo}>
-                        <option value="5">5 dias</option>
-                        <option value="15">15 dias</option>
-                        <option value="30">30 dias</option>
+                        <option value="5">{t('empresaProyectos.form.days5')}</option>
+                        <option value="15">{t('empresaProyectos.form.days15')}</option>
+                        <option value="30">{t('empresaProyectos.form.days30')}</option>
                       </select>
-                      <input className="de-form-control" name="presupuesto_min" value={formulario.presupuesto_min} onChange={cambiarCampo} type="number" min="0" placeholder="Presupuesto min" />
-                      <input className="de-form-control" name="presupuesto_max" value={formulario.presupuesto_max} onChange={cambiarCampo} type="number" min="0" placeholder="Presupuesto max" />
+                      <input className="de-form-control" name="presupuesto_min" value={formulario.presupuesto_min} onChange={cambiarCampo} type="number" min="0" placeholder={t('empresaProyectos.form.budgetMin')} />
+                      <input className="de-form-control" name="presupuesto_max" value={formulario.presupuesto_max} onChange={cambiarCampo} type="number" min="0" placeholder={t('empresaProyectos.form.budgetMax')} />
                       <input className="de-form-control" name="fecha_limite" value={formulario.fecha_limite} onChange={cambiarCampo} type="date" />
                     </div>
-                    <textarea className="de-form-control de-form-textarea" name="descripcion" value={formulario.descripcion} onChange={cambiarCampo} placeholder="Descripcion" />
+                    <textarea className="de-form-control de-form-textarea" name="descripcion" value={formulario.descripcion} onChange={cambiarCampo} placeholder={t('empresaProyectos.form.desc')} />
                     <div className="de-project-edit-actions">
                       <button className="de-btn-primary" type="button" onClick={() => guardarCambios(propuesta.id_propuesta)} disabled={estaOcupado}>
                         <Save size={15} />
-                        {estaOcupado ? 'Guardando...' : 'Guardar'}
+                        {estaOcupado ? t('empresaProyectos.form.saving') : t('empresaProyectos.form.save')}
                       </button>
                       <button className="de-btn-outline" type="button" onClick={cancelarEdicion}>
                         <XCircle size={15} />
-                        Cancelar
+                        {t('empresaProyectos.form.cancel')}
                       </button>
                     </div>
                   </div>
@@ -165,7 +167,7 @@ export default function Proyectos() {
                   <Eye size={14} />
                   {p.action}
                 </button>
-                <button className="de-project-icon-button" type="button" onClick={() => iniciarEdicion(propuesta)} disabled={estaOcupado} aria-label="Editar proyecto">
+                <button className="de-project-icon-button" type="button" onClick={() => iniciarEdicion(propuesta)} disabled={estaOcupado} aria-label={t('empresaProyectos.aria.edit')}>
                   <Edit3 size={16} />
                 </button>
                 <button
@@ -173,7 +175,7 @@ export default function Proyectos() {
                   type="button"
                   onClick={() => cambiarEstado(propuesta.id_propuesta, estaPausado ? 'ACTIVA' : 'PAUSADA')}
                   disabled={estaOcupado || propuesta.estado === 'CERRADA' || propuesta.estado === 'CANCELADA'}
-                  aria-label={estaPausado ? 'Activar proyecto' : 'Pausar proyecto'}
+                  aria-label={estaPausado ? t('empresaProyectos.aria.activate') : t('empresaProyectos.aria.pause')}
                 >
                   {estaPausado ? <PlayCircle size={16} /> : <PauseCircle size={16} />}
                 </button>
@@ -182,11 +184,11 @@ export default function Proyectos() {
                   type="button"
                   onClick={() => cambiarEstado(propuesta.id_propuesta, 'CERRADA')}
                   disabled={estaOcupado || propuesta.estado === 'CERRADA'}
-                  aria-label="Cerrar proyecto"
+                  aria-label={t('empresaProyectos.aria.close')}
                 >
                   <Check size={16} />
                 </button>
-                <button className="de-project-icon-button danger" type="button" onClick={() => eliminarProyecto(propuesta.id_propuesta)} disabled={estaOcupado} aria-label="Eliminar proyecto">
+                <button className="de-project-icon-button danger" type="button" onClick={() => eliminarProyecto(propuesta.id_propuesta)} disabled={estaOcupado} aria-label={t('empresaProyectos.aria.delete')}>
                   <Trash2 size={16} />
                 </button>
               </div>

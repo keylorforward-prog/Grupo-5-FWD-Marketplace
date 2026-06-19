@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { RUTAS } from '../../routes/rutas';
 import Button from './Button.jsx';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function Navbar() {
 
       {/* Navegación Desktop */}
       <div className="hidden md:flex items-center gap-4">
+        <LanguageSwitcher />
         <Button variant="ghost" to={RUTAS.login}>
           Iniciar Sesión
         </Button>
@@ -40,6 +42,9 @@ export default function Navbar() {
       {/* Menú Desplegable Móvil */}
       {isOpen && (
         <div className="absolute top-full left-0 w-full bg-[#111827] border-b border-white/10 p-6 flex flex-col gap-4 md:hidden shadow-2xl animate-fade-in">
+          <div className="flex justify-end">
+            <LanguageSwitcher />
+          </div>
           <Button variant="ghost" to={RUTAS.login} className="w-full justify-start py-4" onClick={() => setIsOpen(false)}>
             Iniciar Sesión
           </Button>

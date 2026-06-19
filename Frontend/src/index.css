@@ -91,6 +91,62 @@
   --radius: 1.25rem;
 }
 
+:root[data-theme="dark"] {
+  --primary: #209ce2;
+  --primary-foreground: #ffffff;
+  --secondary: #8c42c6;
+  --secondary-foreground: #ffffff;
+  --accent: #37d6de;
+  --accent-foreground: #1a1a1a;
+  --highlight: #ffdb4d;
+  --highlight-foreground: #1a1a1a;
+  --warning: #faaa4d;
+  --warning-foreground: #ffffff;
+  --magenta: #ff33aa;
+  --magenta-foreground: #ffffff;
+  --success: #37d6de;
+  --destructive: #ef4444;
+
+  --canvas: #0f172a;
+  --surface: #1e293b;
+  --surface-sunken: #020617;
+  --ink-strong: #f8fafc;
+  --ink: #e2e8f0;
+  --ink-muted: #94a3b8;
+  --ink-subtle: #64748b;
+  --border: #334155;
+  --border-strong: #475569;
+
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 4px 8px rgba(0, 0, 0, 0.4), 0 16px 32px rgba(0, 0, 0, 0.6);
+
+  /* Tailwind overrides */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-magenta: var(--magenta);
+  --color-magenta-foreground: var(--magenta-foreground);
+  --color-success: var(--success);
+  --color-destructive: var(--destructive);
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-ink-strong: var(--ink-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+}
+
 
 @layer base {
   * { margin: 0; padding: 0; box-sizing: border-box; }

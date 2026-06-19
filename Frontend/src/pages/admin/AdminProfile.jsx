@@ -37,6 +37,7 @@ import {
 import ElementoBarraLateral from '../../components/comun/ElementoBarraLateral';
 import TarjetaEstadistica from '../../components/comun/TarjetaEstadistica';
 import InsigniaEstado from '../../components/comun/InsigniaEstado';
+import LanguageSwitcher from '../../components/comun/LanguageSwitcher';
 
 export default function AdminProfile() {
   const { t } = useTranslation();
@@ -304,8 +305,8 @@ export default function AdminProfile() {
                               </div>
                             </td>
                             <td>{evento.accion}</td>
-                            <td>{new Date(evento.fecha).toLocaleString('es-CR', { dateStyle: 'medium', timeStyle: 'short' })}</td>
-                            <td><InsigniaEstado status="Completado" /></td>
+                            <td>{new Date(evento.fecha).toLocaleString(t('es-CR'), { dateStyle: 'medium', timeStyle: 'short' })}</td>
+                            <td><InsigniaEstado status={t('admin.profile.dashboard.statusCompleted')} /></td>
                             <td className="admin-table-actions">
                               <button 
                                 className="admin-row-action" 

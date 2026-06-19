@@ -103,6 +103,13 @@ const obtenerIdsProyectos = async (idsPropuestas) => {
 
 const responderError = (res, error, mensaje) => {
   console.error(mensaje, error);
+
+  if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+    const detalle = error.errors?.map((item) => item.message).filter(Boolean).join(' ') || mensaje;
+    res.status(400).json({ success: false, message: detalle });
+    return;
+  }
+
   res.status(500).json({ success: false, message: mensaje });
 };
 
@@ -221,14 +228,15 @@ const crearPropuesta = async (req, res) => {
     if (!perfil) return;
 
     const plazoDias = Number(req.body.plazo_dias);
-    const presupuestoMin = req.body.presupuesto_min === null || req.body.presupuesto_min === undefined
-      ? null
-      : Number(req.body.presupuesto_min);
-    const presupuestoMax = req.body.presupuesto_max === null || req.body.presupuesto_max === undefined
-      ? null
-      : Number(req.body.presupuesto_max);
+    
+    // Convert to null if the string is empty or 'null' (common with FormData)
+    const rawMin = req.body.presupuesto_min;
+    const presupuestoMin = !rawMin || rawMin === 'null' || rawMin === 'undefined' ? null : Number(rawMin);
 
-    if (!presupuestoMin || presupuestoMin < PRESUPUESTO_MINIMO_PROYECTO) {
+    const rawMax = req.body.presupuesto_max;
+    const presupuestoMax = !rawMax || rawMax === 'null' || rawMax === 'undefined' ? null : Number(rawMax);
+
+    if (presupuestoMin !== null && presupuestoMin < PRESUPUESTO_MINIMO_PROYECTO) {
       res.status(400).json({
         success: false,
         message: 'El presupuesto minimo debe ser de al menos ₡100.000.',
@@ -236,13 +244,28 @@ const crearPropuesta = async (req, res) => {
       return;
     }
 
-    if (presupuestoMax !== null && presupuestoMin > presupuestoMax) {
+    if (presupuestoMin !== null && presupuestoMax !== null && presupuestoMin > presupuestoMax) {
       res.status(400).json({
         success: false,
         message: 'El presupuesto minimo no puede ser mayor al presupuesto maximo.',
       });
       return;
     }
+
+    let urlAdjunto = null;
+    let advertenciaAdjunto = null;
+    if (req.file) {
+      try {
+        const { uploadFileToS3 } = require('../Config/aws');
+        urlAdjunto = await uploadFileToS3(req.file, 'documentos_propuestas');
+      } catch (errorAdjunto) {
+        console.error('Error al subir el documento adjunto de la propuesta.', errorAdjunto);
+        advertenciaAdjunto = 'La propuesta se publico, pero no se pudo subir el documento adjunto.';
+      }
+    }
+
+    const rawIaId = req.body.id_conversacion_ia;
+    const idConversacionIa = !rawIaId || rawIaId === 'null' || rawIaId === 'undefined' ? null : Number(rawIaId);
 
     const propuesta = await Propuesta.create({
       id_perfil_empresario: perfil.id_perfil_empresario,
@@ -255,9 +278,16 @@ const crearPropuesta = async (req, res) => {
       presupuesto_max: presupuestoMax,
       estado: 'ACTIVA',
       fecha_limite: construirFechaLimite(plazoDias),
+      id_conversacion_ia: idConversacionIa,
+      documento_adjunto: urlAdjunto
     });
 
-    res.status(201).json({ success: true, data: propuesta });
+    res.status(201).json({
+      success: true,
+      data: propuesta,
+      message: advertenciaAdjunto || 'Propuesta creada correctamente.',
+      warning: advertenciaAdjunto,
+    });
   } catch (error) {
     responderError(res, error, 'Error al crear la propuesta.');
   }
@@ -1030,4 +1060,5 @@ module.exports = {
   subirFotoPerfil,
   aceptarOferta,
   rechazarOferta,
-};
+  };
+
