@@ -21,7 +21,7 @@ export const authService = {
    */
   async register(payload) {
     const formData = new FormData();
-    
+
     Object.keys(payload).forEach(key => {
       if (payload[key] !== null && payload[key] !== undefined) {
         formData.append(key, payload[key]);
@@ -79,7 +79,7 @@ export const authService = {
    */
   async completarPerfil(payload) {
     const formData = new FormData();
-    
+
     Object.keys(payload).forEach(key => {
       if (payload[key] !== null && payload[key] !== undefined) {
         formData.append(key, payload[key]);
@@ -99,6 +99,69 @@ export const authService = {
     const { data } = await api.put('/auth/update-password', { currentPassword, newPassword });
     return data;
   },
+  /**
+ * Solicitar código de recuperación
+ */
+  async forgotPassword(email) {
+    const { data } = await api.post('/auth/forgot-password', {
+      email,
+    });
+
+    return data;
+  },
+
+  /**
+   * Verificar código de recuperación
+   */
+  async verifyRecoveryCode({ email, code }) {
+    const { data } = await api.post('/auth/verify-recovery-code', {
+      email,
+      code,
+    });
+
+    return data;
+  },
+
+  /**
+   * Restablecer contraseña
+   */
+  async resetPassword({ email, code, newPassword }) {
+    const { data } = await api.post('/auth/reset-password', {
+      email,
+      code,
+      newPassword,
+    });
+
+    return data;
+  },
+
+
+};
+const forgotPassword = async (email) => {
+  const { data } = await api.post('/auth/forgot-password', {
+    email,
+  });
+
+  return data;
 };
 
+const verifyRecoveryCode = async (email, code) => {
+  const { data } = await api.post('/auth/verify-code', {
+    email,
+    code,
+  });
 
+  return data;
+};
+
+const resetPassword = async (email, code, newPassword) => {
+  const { data } = await api.post('/auth/reset-password', {
+    email,
+    code,
+    newPassword,
+  });
+
+  return data;
+};
+
+

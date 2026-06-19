@@ -9,11 +9,12 @@ import { RUTAS } from './rutas';
 // ==========================================
 import LandingPage from '../pages/landing/Landing.jsx';
 // Autenticación
-import LoginPage from '../Pages/auth/Login/LoginPage';
-import RegisterPage from '../Pages/auth/Registro/RegisterPage';
-import AdminLogin from '../Pages/auth/AdminLogin/AdminLogin';
-import GoogleCallback from '../Pages/auth/GoogleCallback';
-import CompletarPerfil from '../Pages/auth/CompletarPerfil/CompletarPerfil';
+import LoginPage from '../pages/auth/Login/LoginPage';
+import RegisterPage from '../pages/auth/Registro/RegisterPage';
+import AdminLogin from '../pages/auth/AdminLogin/AdminLogin';
+import GoogleCallback from '../pages/auth/GoogleCallback';
+import CompletarPerfil from '../pages/auth/CompletarPerfil/CompletarPerfil';
+import ForgotPasswordPage from '../pages/RecuperacionContra/ForgotPasswordPage';
 
 // Empresa
 import DashboardEmpresario from '../Pages/empresa/DashboardEmpresario/DashboardEmpresario';
@@ -68,6 +69,7 @@ export default function Routing() {
         <Route path={RUTAS.loginAdmin} element={<AdminLogin />} />
         <Route path={RUTAS.login} element={<LoginPage />} />
         <Route path={RUTAS.registro} element={<RegisterPage />} />
+        <Route path={RUTAS.recuperarContrasena} element={<ForgotPasswordPage />} />
         <Route path={RUTAS.googleCallback} element={<GoogleCallback />} />
         <Route path={RUTAS.completarPerfil} element={
           <RutaProtegida>

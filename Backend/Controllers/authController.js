@@ -500,6 +500,128 @@ const forgotPassword = async (req, res) => {
     });
   }
 };
+const verifyRecoveryCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({
+        success: false,
+        message: 'Correo y código son requeridos',
+      });
+    }
+
+    const user = await Usuario.findOne({
+      where: { correo: email },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No existe una cuenta con ese correo',
+      });
+    }
+
+    const recoveryCode = await CodigoRecuperacion.findOne({
+      where: {
+        id_usuario: user.id_usuario,
+        codigo: code,
+        estado: 'ACTIVO',
+      },
+    });
+
+    if (!recoveryCode) {
+      return res.status(404).json({
+        success: false,
+        message: 'Código inválido o expirado',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Código verificado correctamente',
+    });
+  } catch (error) {
+    console.error('Error en verifyRecoveryCode:', error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+    });
+  }
+};
+const resetPassword = async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    // Validaciones
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email, código y nueva contraseña son requeridos',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'La contraseña debe tener al menos 6 caracteres',
+      });
+    }
+
+    // Buscar usuario
+    const user = await Usuario.findOne({
+      where: { correo: email },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado',
+      });
+    }
+
+    // Buscar código activo
+    const recovery = await CodigoRecuperacion.findOne({
+      where: {
+        id_usuario: user.id_usuario,
+        codigo: code,
+        estado: 'ACTIVO',
+      },
+    });
+
+    if (!recovery) {
+      return res.status(400).json({
+        success: false,
+        message: 'Código inválido o expirado',
+      });
+    }
+
+    // Hashear nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar contraseña
+    user.contrasena_hash = hashedPassword;
+    await user.save();
+
+    // Marcar código como usado
+    recovery.estado = 'USADO';
+    await recovery.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Contraseña actualizada correctamente',
+    });
+
+  } catch (error) {
+    console.error('Error en resetPassword:', error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+    });
+  }
+};
 
 
-module.exports = { register, login, adminLogin, logout, me, updatePassword, completarPerfil , forgotPassword };
+module.exports = { register, login, adminLogin, logout, me, updatePassword, completarPerfil , forgotPassword , verifyRecoveryCode , resetPassword };

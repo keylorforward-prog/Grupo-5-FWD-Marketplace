@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Clock, DollarSign, Globe, Send, Eye } from 'lucide-react';
+import { Clock, Globe, Send } from 'lucide-react';
 
 const FLECHAS = Array.from({ length: 8 }, (_, i) => `/Imgs/FLECHAS/Flechas-${String(i + 1).padStart(2, '0')}.png`);
 
@@ -11,17 +11,22 @@ const indiceFlecha = (id) => {
 
 const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
 
-const formatearSalario = (min, max) => {
-  const fmt = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 });
-  return `${fmt.format(min)} – ${fmt.format(max)}`;
+const etiquetaJornada = {
+  tiempo_completo: 'Tiempo completo',
+  medio_tiempo:    'Medio tiempo',
+  por_horas:       'Por horas',
+  practica:        'Práctica profesional',
 };
 
 function TarjetaEmpleo({ empleo, postulado }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const irAlDetalle = () => {
-    navigate(`/egresado/dashboard/empleo/${empleo.id}`);
+  const irAlDetalle = () => navigate(`/egresado/dashboard/empleo/${empleo.id}`);
+
+  const manejarPostular = (e) => {
+    e.stopPropagation();
+    if (!yaPostulado && onPostular) onPostular(empleo);
   };
 
   return (
@@ -41,10 +46,12 @@ function TarjetaEmpleo({ empleo, postulado }) {
           </div>
         </div>
         <div className="te-badges">
-          {postulado && (
-            <span className="te-badge-postulado">Postulado</span>
+          {yaPostulado && <span className="te-badge-postulado">Postulado</span>}
+          {empleo.tipo_jornada && (
+            <span className={`te-estado te-estado--activo`}>
+              {etiquetaJornada[empleo.tipo_jornada] ?? empleo.tipo_jornada}
+            </span>
           )}
-          <span className={`te-estado te-estado--${empleo.tipoEstado}`}>{empleo.estado}</span>
         </div>
       </div>
 
@@ -67,7 +74,7 @@ function TarjetaEmpleo({ empleo, postulado }) {
         </div>
         <div className="te-meta-item">
           <Clock size={14} />
-          {empleo.publicado || '—'}
+          {formatearSalario(empleo.salario_min, empleo.salario_max)}
         </div>
       </div>
 
