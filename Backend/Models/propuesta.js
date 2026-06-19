@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     fecha_publicacion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
     fecha_limite: { type: DataTypes.DATE, allowNull: true },
     id_conversacion_ia: { type: DataTypes.INTEGER, allowNull: true },
-    documento_adjunto: { type: DataTypes.STRING(255), allowNull: true }
+    documento_adjunto: { type: DataTypes.STRING(255), allowNull: true },
+    github_url: { type: DataTypes.STRING(500), allowNull: true }
   }, { tableName: 'propuesta', timestamps: false, underscored: true, freezeTableName: true });
 };

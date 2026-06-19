@@ -16,6 +16,7 @@ const perfilVacio = {
   linkedin: '',
   bio: '',
   tecnologias: [],
+  documento_cv: null,
 };
 
 export function usePerfilEgresado() {
@@ -44,6 +45,7 @@ export function usePerfilEgresado() {
                 fondo: elegirFondoRotativo(i),
               }))
             : [],
+          documento_cv: data.documento_cv || null,
         });
       })
       .catch(() => {

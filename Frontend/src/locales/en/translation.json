@@ -300,6 +300,7 @@
       "days30": "30 days",
       "budgetMin": "Min budget",
       "budgetMax": "Max budget",
+      "githubUrl": "Repository URL (GitHub)",
       "desc": "Description",
       "saving": "Saving...",
       "save": "Save",
@@ -311,7 +312,34 @@
       "pause": "Pause project",
       "close": "Close project",
       "delete": "Delete project"
-    }
+    },
+    "historyTitle": "Project History",
+    "historyEmpty": "You haven't added any projects to your history yet.",
+    "historyAdd": "Add project",
+    "historyDeleteConfirm": "Delete this project from history?",
+    "historySaved": "Project saved to history.",
+    "historyDeleted": "Project removed from history.",
+    "historyForm": {
+      "title": "Project title",
+      "desc": "Description",
+      "tech": "Technologies used",
+      "link": "Link (URL)",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "techPlaceholder": "E.g.: React, Node.js, PostgreSQL"
+    },
+    "detailTitle": "Project Details",
+    "detailOffers": "offers",
+    "detailPostulations": "applications",
+    "detailDeadline": "Deadline",
+    "detailBudget": "Budget",
+    "detailTech": "Technologies",
+    "detailDesc": "Description",
+    "detailStatus": "Status",
+    "detailNoData": "No additional information"
   },
   "egresadoExplorar": {
     "hero": {

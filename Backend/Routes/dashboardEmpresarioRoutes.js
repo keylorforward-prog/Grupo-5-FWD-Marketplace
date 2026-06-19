@@ -25,6 +25,7 @@ router.get('/ofertas', dashboardEmpresarioController.listarOfertas);
 router.post('/ofertas/:id_oferta/aceptar', dashboardEmpresarioController.aceptarOferta);
 router.post('/ofertas/:id_oferta/rechazar', dashboardEmpresarioController.rechazarOferta);
 router.get('/postulaciones', dashboardEmpresarioController.listarPostulaciones);
+router.put('/postulaciones/:id/estado', dashboardEmpresarioController.actualizarEstadoPostulacion);
 router.get('/talento-recomendado', dashboardEmpresarioController.listarTalento);
 router.get('/entregables', dashboardEmpresarioController.listarEntregables);
 router.get('/mensajes-recientes', dashboardEmpresarioController.listarMensajesRecientes);
@@ -33,6 +34,9 @@ router.post('/enviar-mensaje', dashboardEmpresarioController.enviarMensaje);
 router.put('/marcar-leido/:idPostulacion', dashboardEmpresarioController.marcarLeidos);
 router.get('/notificaciones', dashboardEmpresarioController.listarNotificaciones);
 router.get('/historial', dashboardEmpresarioController.listarHistorial);
+router.post('/historial', dashboardEmpresarioController.crearHistorial);
+router.put('/historial/:id', dashboardEmpresarioController.actualizarHistorial);
+router.delete('/historial/:id', dashboardEmpresarioController.eliminarHistorial);
 router.get('/evaluaciones', dashboardEmpresarioController.listarEvaluaciones);
 router.get('/pagos', dashboardEmpresarioController.listarPagos);
 

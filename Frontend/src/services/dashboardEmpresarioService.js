@@ -126,6 +126,20 @@ export const dashboardEmpresarioService = {
     return get('/dashboard-empresario/historial', params);
   },
 
+  async crearHistorial(payload) {
+    const respuesta = await apiClient.post('/dashboard-empresario/historial', payload);
+    return extraerData(respuesta);
+  },
+
+  async actualizarHistorial(id, payload) {
+    const respuesta = await apiClient.put(`/dashboard-empresario/historial/${id}`, payload);
+    return extraerData(respuesta);
+  },
+
+  async eliminarHistorial(id) {
+    await apiClient.delete(`/dashboard-empresario/historial/${id}`);
+  },
+
   obtenerEvaluaciones(params) {
     return get('/dashboard-empresario/evaluaciones', params);
   },
