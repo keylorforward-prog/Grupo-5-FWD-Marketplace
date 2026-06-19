@@ -18,6 +18,7 @@ function CuadriculaProyectos({
   paginaActual,
   totalPaginas,
   onPaginaCambio,
+  idsPostulados,
 }) {
   const { t } = useTranslation();
   const rangoPaginas = generarRangoPaginas(paginaActual, totalPaginas);
@@ -26,7 +27,7 @@ function CuadriculaProyectos({
     <div className="contenedorResultados">
       <div className="encabezadoResultados">
         <span className="conteoProyectos">
-          {total} {t('egresadoExplorar.grid.encontrados')}
+          {t('egresadoExplorar.grid.encontrados', { count: total })}
         </span>
         <div className="ordenarResultados">
           <label htmlFor="ordenSelect" className="etiquetaOrdenar">{t('egresadoExplorar.grid.ordenarPor')}:</label>
@@ -52,7 +53,7 @@ function CuadriculaProyectos({
       ) : (
         <div className="cuadriculaProyectos">
           {proyectos.map((proyecto) => (
-            <TarjetaProyecto key={proyecto.id} proyecto={proyecto} />
+            <TarjetaProyecto key={proyecto.id} proyecto={proyecto} postulado={idsPostulados?.has(proyecto.id)} />
           ))}
         </div>
       )}

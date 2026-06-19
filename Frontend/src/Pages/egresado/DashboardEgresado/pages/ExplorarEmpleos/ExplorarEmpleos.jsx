@@ -20,6 +20,12 @@ const FILTROS_INICIALES = {
   salarioMax: '',
 };
 
+const OPCIONES_ORDEN = [
+  { valor: 'recientes', key: 'egresadoExplorarEmpleos.ordenRecientes' },
+  { valor: 'salarioDesc', key: 'egresadoExplorarEmpleos.ordenSalarioDesc' },
+  { valor: 'salarioAsc', key: 'egresadoExplorarEmpleos.ordenSalarioAsc' },
+];
+
 function generarRangoPaginas(actual, total) {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
   if (actual <= 4) return [1, 2, 3, 4, 5, '...', total];
@@ -34,6 +40,8 @@ export default function ExplorarEmpleos() {
   const [modalidad, setModalidad] = useState('');
   const [salarioMin, setSalarioMin] = useState('');
   const [salarioMax, setSalarioMax] = useState('');
+  const [tecnologia, setTecnologia] = useState('');
+  const [orden, setOrden] = useState('recientes');
   const [paginaActual, setPaginaActual] = useState(1);
   const [empleos, setEmpleos] = useState([]);
   const [idsPostulados, setIdsPostulados] = useState(null);
@@ -81,10 +89,18 @@ export default function ExplorarEmpleos() {
     setBusqueda('');
     setBusquedaReal('');
     setModalidad('');
+    setTecnologia('');
     setSalarioMin('');
     setSalarioMax('');
+    setOrden('recientes');
     setPaginaActual(1);
   }, []);
+
+  const listaTecnologias = useMemo(() => {
+    const set = new Set();
+    empleos.forEach((e) => (e.tecnologias || []).forEach((t) => set.add(t)));
+    return [...set].sort();
+  }, [empleos]);
 
   const filtradas = useMemo(() => {
     let resultado = empleos;
@@ -101,6 +117,9 @@ export default function ExplorarEmpleos() {
     if (modalidad) {
       resultado = resultado.filter((e) => e.modalidad === modalidad);
     }
+    if (tecnologia) {
+      resultado = resultado.filter((e) => (e.tecnologias || []).includes(tecnologia));
+    }
     if (salarioMin) {
       const min = Number(salarioMin);
       if (min > 0) resultado = resultado.filter((e) => (e.presupuestoMax || 0) >= min);
@@ -109,8 +128,15 @@ export default function ExplorarEmpleos() {
       const max = Number(salarioMax);
       if (max > 0) resultado = resultado.filter((e) => (e.presupuestoMin || 0) <= max);
     }
+    if (orden === 'salarioDesc') {
+      resultado = [...resultado].sort((a, b) => (b.presupuestoMin || 0) - (a.presupuestoMin || 0));
+    } else if (orden === 'salarioAsc') {
+      resultado = [...resultado].sort((a, b) => (a.presupuestoMin || 0) - (b.presupuestoMin || 0));
+    } else {
+      resultado = [...resultado].sort((a, b) => new Date(b.publicado) - new Date(a.publicado));
+    }
     return resultado;
-  }, [empleos, busquedaReal, modalidad, salarioMin, salarioMax]);
+  }, [empleos, busquedaReal, modalidad, tecnologia, salarioMin, salarioMax, orden]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / ITEMS_POR_PAGINA));
   const pagina = Math.min(paginaActual, totalPaginas);
@@ -121,7 +147,7 @@ export default function ExplorarEmpleos() {
   );
 
   const rangoPaginas = generarRangoPaginas(pagina, totalPaginas);
-  const hayFiltros = busquedaReal.trim() || modalidad || salarioMin || salarioMax;
+  const hayFiltros = busquedaReal.trim() || modalidad || tecnologia || salarioMin || salarioMax;
 
   return (
     <div className="contenidoPrincipal">
@@ -195,6 +221,21 @@ export default function ExplorarEmpleos() {
           </div>
 
           <div className="grupoFiltro">
+            <label className="etiquetaFiltro" htmlFor="filtroTecnologia">{t('egresadoExplorarEmpleos.filters.tecnologias')}</label>
+            <select
+              id="filtroTecnologia"
+              className="seleccionadorFiltro"
+              value={tecnologia}
+              onChange={(e) => { setTecnologia(e.target.value); setPaginaActual(1); }}
+            >
+              <option value="">{t('egresadoExplorarEmpleos.filters.todasTecnologias')}</option>
+              {listaTecnologias.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grupoFiltro">
             <label className="etiquetaFiltro">{t('egresadoExplorarEmpleos.filters.salario')}</label>
             <div className="filaRango">
               <div className="campoRango">
@@ -245,8 +286,23 @@ export default function ExplorarEmpleos() {
             <div className="contenedorResultados">
               <div className="encabezadoResultados">
                 <span className="conteoProyectos">
-                  {filtradas.length} {t('egresadoExplorarEmpleos.resultados')}
+                  {t('egresadoExplorarEmpleos.resultados', { count: filtradas.length })}
                 </span>
+                <div className="ordenarResultados">
+                  <label htmlFor="ordenSelect" className="etiquetaOrdenar">
+                    {t('egresadoExplorar.grid.ordenarPor')}:
+                  </label>
+                  <select
+                    id="ordenSelect"
+                    className="seleccionadorOrdenar"
+                    value={orden}
+                    onChange={(e) => { setOrden(e.target.value); setPaginaActual(1); }}
+                  >
+                    {OPCIONES_ORDEN.map((o) => (
+                      <option key={o.valor} value={o.valor}>{t(o.key)}</option>
+                    ))}
+                  </select>
+                </div>
                 {hayFiltros && (
                   <button type="button" className="btnLimpiarFiltros" onClick={limpiarFiltros}>
                     <X size={14} />

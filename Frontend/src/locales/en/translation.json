@@ -251,7 +251,8 @@
       "title_start": "Welcome,",
       "title_fallback": "Graduate",
       "subtitle": "Explore projects, apply, and build your professional portfolio.",
-      "btnExplore": "Explore Projects"
+      "btnExplore": "Explore Projects",
+      "btnExploreEmpleos": "Explore Jobs"
     },
     "activity": {
       "title": "Activity Summary",
@@ -407,12 +408,14 @@
       "presupuesto": "Budget",
       "entrega": "Delivery",
       "verDetalle": "View details",
+      "postularme": "Apply",
       "quitarGuardados": "Remove from saved",
       "guardarProyecto": "Save project"
     }
   },
   "egresadoExplorarEmpleos": {
     "hero": {
+      "kicker": "Explore Jobs",
       "titleStart": "Find your ",
       "titleHighlight": "next job",
       "subtitle": "Job opportunities to boost your professional career.",
@@ -422,6 +425,8 @@
       "titulo": "Filter results",
       "limpiar": "Clear",
       "modalidad": "Modality",
+      "tecnologias": "Technologies",
+      "todasTecnologias": "All technologies",
       "salario": "Monthly salary (CRC)",
       "min": "Min",
       "max": "Max"
@@ -432,6 +437,9 @@
     "sinResultadosTitle": "No jobs found",
     "sinResultadosDesc": "Try different terms or adjust your search.",
     "limpiarFiltros": "Clear filters",
+    "ordenRecientes": "Most recent",
+    "ordenSalarioDesc": "Salary: highest to lowest",
+    "ordenSalarioAsc": "Salary: lowest to highest",
     "paginaAnterior": "Previous page",
     "paginaSiguiente": "Next page"
   },
@@ -518,7 +526,7 @@
     "tabProyectos": "Projects",
     "tabEmpleos": "Jobs",
     "total": "{{count}} application(s)",
-    "totalEmpleos": "job applications",
+    "totalEmpleos": "{{count}} Job(s)",
     "loading": "Loading...",
     "sinPostulaciones": "No applications",
     "sinPostulacionesDesc": "You haven't applied to any projects yet.",
@@ -574,6 +582,7 @@
     "no": "No",
     "btnCancelarPostulacion": "Cancel application",
     "postularme": "Apply to this project",
+    "cancelar": "Cancel",
     "sobreEmpresa": "About the company",
     "sitioWeb": "Website",
     "detalles": "Project details",
@@ -610,6 +619,7 @@
     "no": "No",
     "btnCancelarPostulacion": "Cancel application",
     "postularme": "Apply to this job",
+    "cancelar": "Cancel",
     "sobreEmpresa": "About the company",
     "sitioWeb": "Website",
     "detalles": "Job details",

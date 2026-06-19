@@ -1,7 +1,7 @@
 import { useMemo, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Eye, Building2 } from 'lucide-react';
+import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Eye, Building2, FolderOpen } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
 import { formatearPostulacion } from '../../utils/dashboardEgresadoFormatters';
@@ -24,12 +24,14 @@ const ORDEN_FLUJO = [
 function FlujoPostulacion({ estadoRaw }) {
   const { t } = useTranslation();
   const pasoActual = estadoRaw === 'ENVIADA' ? 0
+    : estadoRaw === 'PENDIENTE' ? 1
     : estadoRaw === 'EN_REVISION' ? 2
-    : estadoRaw === 'PRESSELECCIONADA' ? 3
-    : (estadoRaw === 'CONTRATADO' || estadoRaw === 'RECHAZADA') ? 4
+    : (estadoRaw === 'PRESSELECCIONADA' || estadoRaw === 'PRESELECCIONADA') ? 3
+    : (estadoRaw === 'CONTRATADO' || estadoRaw === 'ACEPTADO') ? 4
+    : estadoRaw === 'RECHAZADA' ? 4
     : -1;
   const esRechazado = estadoRaw === 'RECHAZADA';
-  const esAceptado = estadoRaw === 'CONTRATADO';
+  const esAceptado = estadoRaw === 'CONTRATADO' || estadoRaw === 'ACEPTADO';
 
   return (
     <div className="post-flujo">
@@ -134,7 +136,7 @@ export default function Postulaciones() {
             </button>
             <h1>{t('egresadoPostulaciones.titulo')}</h1>
           </div>
-          <span className="conteoProyectos">{items.length} {tabActivo === 'proyectos' ? t('egresadoPostulaciones.total') : t('egresadoPostulaciones.totalEmpleos')}</span>
+          <span className="conteoProyectos">{tabActivo === 'proyectos' ? t('egresadoPostulaciones.total', { count: items.length }) : t('egresadoPostulaciones.totalEmpleos', { count: items.length })}</span>
         </div>
 
         {loading && <p className="de-data-state">{t('egresadoPostulaciones.loading')}</p>}
@@ -168,7 +170,7 @@ export default function Postulaciones() {
               <div key={p.id} className={`post-card acento-${acentos[i % acentos.length]}`}>
                 <div className="post-cardBody">
                   <div className="post-iconWrap">
-                    <Briefcase size={20} />
+                    <FolderOpen size={20} />
                   </div>
                   <div className="post-content">
                     <div className="post-header">
@@ -208,7 +210,7 @@ export default function Postulaciones() {
                   <button
                     className="post-btnDetalle"
                     type="button"
-                    onClick={() => navigate(`/egresado/dashboard/proyecto/${p.idPropuesta}`)}
+                    onClick={() => navigate(`/egresado/dashboard/proyecto/${p.idPropuesta}`, { state: { desde: 'postulaciones' } })}
                   >
                     <Eye size={15} />
                     {t('egresadoPostulaciones.verProyecto')}
@@ -266,7 +268,7 @@ export default function Postulaciones() {
                   <button
                     className="post-btnDetalle"
                     type="button"
-                    onClick={() => navigate(`/egresado/dashboard/empleo/${p.idPropuesta}`)}
+                    onClick={() => navigate(`/egresado/dashboard/empleo/${p.idPropuesta}`, { state: { desde: 'postulaciones' } })}
                   >
                     <Eye size={15} />
                     {t('egresadoPostulaciones.verEmpleo')}

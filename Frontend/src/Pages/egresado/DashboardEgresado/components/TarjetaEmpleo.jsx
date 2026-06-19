@@ -2,6 +2,13 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Clock, DollarSign, Globe, Send, Eye } from 'lucide-react';
 
+const FLECHAS = Array.from({ length: 8 }, (_, i) => `/Imgs/FLECHAS/Flechas-${String(i + 1).padStart(2, '0')}.png`);
+
+const indiceFlecha = (id) => {
+  if (typeof id === 'number') return id % FLECHAS.length;
+  return Array.from(String(id ?? '')).reduce((acc, c) => acc + c.charCodeAt(0), 0) % FLECHAS.length;
+};
+
 const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
 
 const formatearSalario = (min, max) => {
@@ -18,13 +25,15 @@ function TarjetaEmpleo({ empleo, postulado }) {
   };
 
   return (
-    <article className={`tarjetaEmpleo${postulado ? ' postulado' : ''}`} onClick={irAlDetalle} role="button" tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter') irAlDetalle(); }}
-    >
+    <article className={`tarjetaEmpleo${postulado ? ' postulado' : ''}`}>
       <div className="te-encabezado">
         <div className="te-empresa-info">
           <div className="te-avatar">
-            {empleo.empresa?.charAt(0) || 'E'}
+            {empleo.empresaLogo ? (
+              <img src={empleo.empresaLogo} alt="" className="te-avatar-img" />
+            ) : (
+              <img src={FLECHAS[indiceFlecha(empleo.id)]} alt="" className="te-avatar-img" />
+            )}
           </div>
           <div>
             <p className="te-empresa">{empleo.empresa || 'Empresa'}</p>
@@ -62,9 +71,9 @@ function TarjetaEmpleo({ empleo, postulado }) {
         </div>
       </div>
 
-      <button type="button" className={`te-boton${postulado ? ' postulado' : ''}`} onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}>
+      <button type="button" className={`te-boton${postulado ? ' postulado' : ''}`} onClick={irAlDetalle}>
         {postulado ? <Eye size={14} /> : <Send size={14} />}
-        {postulado ? t('egresadoPostulaciones.verEmpleo') : t('egresadoPostulaciones.verEmpleo')}
+        {postulado ? t('egresadoPostulaciones.verEmpleo') : t('egresadoExplorar.components.postularme')}
       </button>
     </article>
   );

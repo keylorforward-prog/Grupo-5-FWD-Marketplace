@@ -38,6 +38,7 @@ export const normalizarPropuestaEgresado = (propuesta, indice = 0) => {
   const presupuestoMin = numero(propuesta.presupuesto_min ?? propuesta.presupuestoMin, 0);
   const presupuestoMax = numero(propuesta.presupuesto_max ?? propuesta.presupuestoMax, presupuestoMin);
   const empresa = propuesta.perfilEmpresario?.usuario;
+  const perfilEmp = propuesta.perfilEmpresario;
 
   return {
     id: propuesta.id_propuesta ?? propuesta.id,
@@ -53,6 +54,7 @@ export const normalizarPropuestaEgresado = (propuesta, indice = 0) => {
     publicado: (propuesta.fecha_publicacion ?? propuesta.publicado ?? '').toString().slice(0, 10),
     colorAcento: coloresAcento[indice % coloresAcento.length],
     empresa: empresa?.nombre || null,
+    empresaLogo: perfilEmp?.logo || null,
     ...estadoVisual(propuesta.estado),
   };
 };

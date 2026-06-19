@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Eye, X, CheckCircle2 } from 'lucide-react';
+import { Eye, X, CheckCircle2, UserCheck } from 'lucide-react';
 import Tooltip from '../ui/Tooltip';
 import Emergente from '../ui/Emergente';
-import DialogoConfirmacion from '../ui/DialogoConfirmacion';
 import MiniCalendario from './MiniCalendario';
+import DialogoConfirmacion from '../ui/DialogoConfirmacion';
 
 const btnBase = `
   w-8 h-8 flex items-center justify-center flex-shrink-0
@@ -19,14 +19,30 @@ export default function BotonesAccion({
   alVer,
   alInvitar,
   alRechazar,
+  alAceptar,
 }) {
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showRechazar, setShowRechazar] = useState(false);
+  const [showAceptar, setShowAceptar] = useState(false);
+  const [motivo, setMotivo] = useState('');
   const isRejected = status === 'rechazado';
+  const isAceptado = status === 'aceptado';
+
+  const handleRechazar = () => {
+    alRechazar(idCandidato, motivo);
+    setShowRechazar(false);
+    setMotivo('');
+  };
+
+  const handleAceptar = () => {
+    alAceptar(idCandidato, motivo);
+    setShowAceptar(false);
+    setMotivo('');
+  };
 
   return (
     <>
       <div className="flex items-center gap-1.5">
-        {/* Ver perfil → Azul */}
+        {/* Ver perfil → Azul (also sets EN_REVISION) */}
         <Tooltip content="Ver perfil completo">
           <button
             onClick={() => alVer(idCandidato)}
@@ -37,7 +53,7 @@ export default function BotonesAccion({
           </button>
         </Tooltip>
 
-        {/* Agendar → Morado (Arrow) */}
+        {/* Invitar → Morado */}
         <Tooltip content={estaInvitado ? 'Invitación enviada' : 'Agendar entrevista'}>
           <div>
             {estaInvitado ? (
@@ -70,10 +86,23 @@ export default function BotonesAccion({
           </div>
         </Tooltip>
 
+        {/* Aceptar → Verde */}
+        <Tooltip content={isAceptado ? 'Candidato aceptado' : 'Aceptar candidato'}>
+          <button
+            onClick={() => !isAceptado && setShowAceptar(true)}
+            disabled={isAceptado}
+            aria-label={`Aceptar a ${nombreCandidato}`}
+            className={`${btnBase}
+              ${isAceptado ? 'text-emerald-300 cursor-not-allowed' : 'text-emerald-600 hover:text-emerald-700'}`}
+          >
+            <UserCheck className="w-5 h-5" />
+          </button>
+        </Tooltip>
+
         {/* Rechazar → Rojo */}
         <Tooltip content={isRejected ? 'Candidato rechazado' : 'Rechazar candidato'}>
           <button
-            onClick={() => !isRejected && setShowConfirm(true)}
+            onClick={() => !isRejected && setShowRechazar(true)}
             disabled={isRejected}
             aria-label={`Rechazar a ${nombreCandidato}`}
             className={`${btnBase}
@@ -84,16 +113,49 @@ export default function BotonesAccion({
         </Tooltip>
       </div>
 
+      {/* Reject dialog with message */}
       <DialogoConfirmacion
-        open={showConfirm}
+        open={showRechazar}
         variant="danger"
         title="Rechazar candidato"
-        message={`¿Estás seguro de que deseas rechazar a ${nombreCandidato}? Esta acción cambiará su estado a "Rechazado".`}
         confirmLabel="Sí, rechazar"
         cancelLabel="Cancelar"
-        onConfirm={() => { alRechazar(idCandidato); setShowConfirm(false); }}
-        onCancel={() => setShowConfirm(false)}
-      />
+        onConfirm={handleRechazar}
+        onCancel={() => { setShowRechazar(false); setMotivo(''); }}
+      >
+        <p className="text-sm text-gray-600 mb-3">
+          ¿Estás seguro de que deseas rechazar a <strong>{nombreCandidato}</strong>? Se le notificará al candidato.
+        </p>
+        <textarea
+          value={motivo}
+          onChange={(e) => setMotivo(e.target.value)}
+          placeholder="Escribe un mensaje para el candidato (opcional)..."
+          rows={3}
+          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-200 resize-none mb-4"
+        />
+      </DialogoConfirmacion>
+
+      {/* Accept dialog with message */}
+      <DialogoConfirmacion
+        open={showAceptar}
+        variant="default"
+        title="Aceptar candidato"
+        confirmLabel="Sí, aceptar"
+        cancelLabel="Cancelar"
+        onConfirm={handleAceptar}
+        onCancel={() => { setShowAceptar(false); setMotivo(''); }}
+      >
+        <p className="text-sm text-gray-600 mb-3">
+          ¿Estás seguro de que deseas aceptar a <strong>{nombreCandidato}</strong>? Se le notificará al candidato.
+        </p>
+        <textarea
+          value={motivo}
+          onChange={(e) => setMotivo(e.target.value)}
+          placeholder="Escribe un mensaje para el candidato (opcional)..."
+          rows={3}
+          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-200 resize-none mb-4"
+        />
+      </DialogoConfirmacion>
     </>
   );
 }

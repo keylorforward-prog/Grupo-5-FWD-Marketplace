@@ -251,7 +251,8 @@
       "title_start": "Bienvenido,",
       "title_fallback": "Egresado",
       "subtitle": "Explora proyectos, postúlate y construye tu portafolio profesional.",
-      "btnExplore": "Explorar Proyectos"
+      "btnExplore": "Explorar Proyectos",
+      "btnExploreEmpleos": "Explorar Empleos"
     },
     "activity": {
       "title": "Resumen de Actividad",
@@ -407,12 +408,14 @@
       "presupuesto": "Presupuesto",
       "entrega": "Entrega",
       "verDetalle": "Ver detalle",
+      "postularme": "Postularme",
       "quitarGuardados": "Quitar de guardados",
       "guardarProyecto": "Guardar proyecto"
     }
   },
   "egresadoExplorarEmpleos": {
     "hero": {
+      "kicker": "Explorar Empleos",
       "titleStart": "Encuentra tu ",
       "titleHighlight": "próximo empleo",
       "subtitle": "Oportunidades laborales para impulsar tu carrera profesional.",
@@ -422,6 +425,8 @@
       "titulo": "Filtrar resultados",
       "limpiar": "Limpiar",
       "modalidad": "Modalidad",
+      "tecnologias": "Tecnologías",
+      "todasTecnologias": "Todas las tecnologías",
       "salario": "Salario mensual (CRC)",
       "min": "Mín",
       "max": "Máx"
@@ -432,6 +437,9 @@
     "sinResultadosTitle": "No encontramos empleos",
     "sinResultadosDesc": "Intenta con otros términos o prueba ajustar la búsqueda.",
     "limpiarFiltros": "Limpiar filtros",
+    "ordenRecientes": "Más recientes",
+    "ordenSalarioDesc": "Salario: mayor a menor",
+    "ordenSalarioAsc": "Salario: menor a mayor",
     "paginaAnterior": "Página anterior",
     "paginaSiguiente": "Página siguiente"
   },
@@ -518,7 +526,7 @@
     "tabProyectos": "Proyectos",
     "tabEmpleos": "Empleos",
     "total": "{{count}} postulación(es)",
-    "totalEmpleos": "postulaciones a empleos",
+    "totalEmpleos": "{{count}} Empleo(s)",
     "loading": "Cargando...",
     "sinPostulaciones": "Sin postulaciones",
     "sinPostulacionesDesc": "Aún no te has postulado a ningún proyecto.",
@@ -574,6 +582,7 @@
     "no": "No",
     "btnCancelarPostulacion": "Cancelar postulación",
     "postularme": "Postularme a este proyecto",
+    "cancelar": "Cancelar",
     "sobreEmpresa": "Sobre la empresa",
     "sitioWeb": "Sitio web",
     "detalles": "Detalles del proyecto",
@@ -610,6 +619,7 @@
     "no": "No",
     "btnCancelarPostulacion": "Cancelar postulación",
     "postularme": "Postularme a este empleo",
+    "cancelar": "Cancelar",
     "sobreEmpresa": "Sobre la empresa",
     "sitioWeb": "Sitio web",
     "detalles": "Detalles del empleo",

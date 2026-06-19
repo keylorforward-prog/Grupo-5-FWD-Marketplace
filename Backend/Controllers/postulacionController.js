@@ -1,8 +1,19 @@
 const { Postulacion, PerfilEstudiante } = require('../Models');
+const { Op } = require('sequelize');
+
+const DOS_MINUTOS = 2 * 60 * 1000;
+
+const actualizarPendiente = async (postulacion) => {
+  if (postulacion.estado === 'ENVIADA' && Date.now() - new Date(postulacion.fecha_postulacion).getTime() >= DOS_MINUTOS) {
+    postulacion.estado = 'PENDIENTE';
+    await postulacion.save();
+  }
+};
 
 exports.getAll = async (req, res) => {
   try {
     const data = await Postulacion.findAll();
+    await Promise.all(data.map(actualizarPendiente));
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -13,6 +24,7 @@ exports.getById = async (req, res) => {
   try {
     const data = await Postulacion.findByPk(req.params.id);
     if (!data) return res.status(404).json({ success: false, message: 'No encontrado' });
+    await actualizarPendiente(data);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -14,6 +14,15 @@ const {
   Curriculum,
 } = require('../Models');
 
+const DOS_MINUTOS = 2 * 60 * 1000;
+
+const actualizarPendiente = async (postulacion) => {
+  if (postulacion.estado === 'ENVIADA' && Date.now() - new Date(postulacion.fecha_postulacion).getTime() >= DOS_MINUTOS) {
+    postulacion.estado = 'PENDIENTE';
+    await postulacion.save();
+  }
+};
+
 const obtenerLimite = (valor, defecto = 20) => {
   const numero = Number.parseInt(valor, 10);
   if (Number.isNaN(numero) || numero <= 0) return defecto;
@@ -287,6 +296,8 @@ const listarPostulaciones = async (req, res) => {
       order: [['fecha_postulacion', 'DESC']],
       limit: obtenerLimite(req.query.limit),
     });
+
+    await Promise.all(postulaciones.map(actualizarPendiente));
 
     res.json({ success: true, data: postulaciones });
   } catch (error) {

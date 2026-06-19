@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Search, Compass, TrendingUp, Users, Briefcase } from 'lucide-react';
 import { opcionesOrden } from '../../../../../data/proyectosEgresado';
 import { egresadoService } from '../../../../../services/egresadoService';
+import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useFiltroProyectos } from '../../hooks/useFiltroProyectos';
 import BarraLateralFiltros from '../../components/BarraLateralFiltros';
 import CuadriculaProyectos from '../../components/CuadriculaProyectos';
@@ -26,14 +27,20 @@ export default function ExplorarProyectos() {
   const [filtros, setFiltros] = useState(FILTROS_INICIALES);
   const [paginaActual, setPaginaActual] = useState(1);
   const [proyectos, setProyectos] = useState([]);
+  const [idsPostulados, setIdsPostulados] = useState(null);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     let activo = true;
-    egresadoService.listarPropuestas()
-      .then((proyectosData) => {
+    Promise.all([
+      egresadoService.listarPropuestas(),
+      egresadoDashboardService.obtenerPostulaciones(),
+    ])
+      .then(([proyectosData, postulaciones]) => {
         if (!activo) return;
         setProyectos(proyectosData);
+        const ids = new Set((postulaciones || []).map((p) => p.id_propuesta));
+        setIdsPostulados(ids);
       })
       .catch(() => { if (activo) setProyectos([]); })
       .finally(() => { if (activo) setCargando(false); });
@@ -147,6 +154,7 @@ export default function ExplorarProyectos() {
             <CuadriculaProyectos
               proyectos={proyectosPagina}
               total={proyectosFiltrados.length}
+              idsPostulados={idsPostulados}
               orden={filtros.orden}
               onOrdenCambio={(nuevoOrden) => manejarCambioFiltros({ orden: nuevoOrden })}
               opcionesOrden={opcionesOrden}

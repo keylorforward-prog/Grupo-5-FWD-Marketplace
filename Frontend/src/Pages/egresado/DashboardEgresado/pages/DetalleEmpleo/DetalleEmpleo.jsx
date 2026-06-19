@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft, Briefcase, DollarSign, Globe, Building2,
   Send, ExternalLink, Calendar, CheckCircle, X, Mail, Pencil, Trash2,
@@ -27,6 +27,8 @@ export default function DetalleEmpleo() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const rutaVolver = location.state?.desde === 'postulaciones' ? '/egresado/dashboard/postulaciones' : '/egresado/dashboard/explorar-empleos';
   const [empleo, setEmpleo] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -134,7 +136,7 @@ export default function DetalleEmpleo() {
     return (
       <div className="detalle-container">
         <div className="de-data-state error">{error}</div>
-        <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar-empleos')}>
+        <button className="detalle-volver" type="button" onClick={() => navigate(rutaVolver)}>
           <ArrowLeft size={16} /> {t(`${T_NS}.volver`)}
         </button>
       </div>
@@ -150,7 +152,7 @@ export default function DetalleEmpleo() {
 
   return (
     <div className="detalle-container fwd-animar-entrada">
-      <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar-empleos')}>
+      <button className="detalle-volver" type="button" onClick={() => navigate(rutaVolver)}>
         <ArrowLeft size={16} /> {t(`${T_NS}.volver`)}
       </button>
 
@@ -173,7 +175,7 @@ export default function DetalleEmpleo() {
               <div className="detalle-badges">
                 <span className="detalle-badge detalle-badgeModalidad">
                   <Globe size={13} />
-                  {etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad}
+                  {etiquetaModalidad[empleo.modalidad] ? t(etiquetaModalidad[empleo.modalidad]) : empleo.modalidad}
                 </span>
                 <span className={`detalle-badge detalle-badgeEstado ${(empleo.estado || '').toLowerCase()}`}>
                   {empleo.estado}
@@ -321,7 +323,11 @@ export default function DetalleEmpleo() {
             </div>
             <div className="detalle-empresaInfo">
               <div className="detalle-empresaAvatar">
-                {usuarioEmpresa.nombre?.charAt(0) || 'E'}
+                {empresa.logo ? (
+                  <img src={empresa.logo} alt="" className="detalle-empresaLogo" />
+                ) : (
+                  usuarioEmpresa.nombre?.charAt(0) || 'E'
+                )}
               </div>
               <div>
                 <h4 className="detalle-empresaNombre">{usuarioEmpresa.nombre || 'Empresa'}</h4>
@@ -402,7 +408,7 @@ export default function DetalleEmpleo() {
               </div>
               <div className="modal-resumenItem">
                 <span className="modal-resumenLabel">Modalidad</span>
-                <span className="modal-resumenValor">{etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad}</span>
+                <span className="modal-resumenValor">{etiquetaModalidad[empleo.modalidad] ? t(etiquetaModalidad[empleo.modalidad]) : empleo.modalidad}</span>
               </div>
             </div>
 

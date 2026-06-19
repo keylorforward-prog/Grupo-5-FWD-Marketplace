@@ -19,6 +19,15 @@ const {
   Usuario,
 } = require('../Models');
 
+const DOS_MINUTOS = 2 * 60 * 1000;
+
+const actualizarPendiente = async (postulacion) => {
+  if (postulacion.estado === 'ENVIADA' && Date.now() - new Date(postulacion.fecha_postulacion).getTime() >= DOS_MINUTOS) {
+    postulacion.estado = 'PENDIENTE';
+    await postulacion.save();
+  }
+};
+
 const ORDEN_DESC = [['fecha_publicacion', 'DESC']];
 const PRESUPUESTO_MINIMO_PROYECTO = 100000;
 
@@ -758,6 +767,8 @@ const listarPostulaciones = async (req, res) => {
       limit: obtenerLimite(req.query.limit),
     });
 
+    await Promise.all(postulaciones.map(actualizarPendiente));
+
     res.json({ success: true, data: postulaciones });
   } catch (error) {
     responderError(res, error, 'Error al obtener las postulaciones.');
@@ -1117,9 +1128,9 @@ const actualizarEstadoPostulacion = async (req, res) => {
     if (!perfil) return;
 
     const { id } = req.params;
-    const { estado } = req.body;
+    const { estado, mensaje } = req.body;
 
-    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'RECHAZADA', 'CONTRATADO'];
+    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO', 'ACEPTADO'];
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ success: false, message: `Estado invalido. Validos: ${estadosValidos.join(', ')}` });
     }
@@ -1156,16 +1167,18 @@ const actualizarEstadoPostulacion = async (req, res) => {
     if (usuarioEstudiante) {
       const mapaMensajes = {
         EN_REVISION: `Tu postulacion para "${tituloPropuesta}" ha pasado a estar en revision.`,
-        PRESSELECCIONADA: `¡Felicidades! Has sido preseleccionado para "${tituloPropuesta}".`,
-        RECHAZADA: `Tu postulacion para "${tituloPropuesta}" no ha sido seleccionada.`,
-        CONTRATADO: `¡Felicidades! Has sido contratado para "${tituloPropuesta}".`,
+        PRESSELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloPropuesta}".`,
+        PRESELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloPropuesta}".`,
+        RECHAZADA: mensaje || `Tu postulacion para "${tituloPropuesta}" no ha sido seleccionada.`,
+        CONTRATADO: mensaje || `¡Felicidades! Has sido contratado para "${tituloPropuesta}".`,
+        ACEPTADO: mensaje || `¡Felicidades! Has sido aceptado para "${tituloPropuesta}".`,
       };
-      const mensaje = mapaMensajes[estado];
-      if (mensaje) {
+      const notifMensaje = mapaMensajes[estado];
+      if (notifMensaje) {
         await Notificacion.create({
           id_usuario: usuarioEstudiante.id_usuario,
           tipo: `POSTULACION_${estado}`,
-          mensaje,
+          mensaje: notifMensaje,
           leido: false,
           fecha: new Date(),
         });

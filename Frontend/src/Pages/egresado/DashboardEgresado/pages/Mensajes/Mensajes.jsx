@@ -276,7 +276,7 @@ export default function Mensajes() {
           <h1>{t('egresadoMensajes.titulo')}</h1>
         </div>
         {!loading && !error && (
-          <span className="conteoProyectos">{conversacionesFiltradas.length} {t('egresadoMensajes.total')}</span>
+          <span className="conteoProyectos">{t('egresadoMensajes.total', { count: conversacionesFiltradas.length })}</span>
         )}
       </div>
 
