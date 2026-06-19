@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Briefcase, X, SlidersHorizontal } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
 import TarjetaEmpleo from '../../components/TarjetaEmpleo';
@@ -6,10 +7,9 @@ import TarjetaEmpleo from '../../components/TarjetaEmpleo';
 const ITEMS_POR_PAGINA = 6;
 
 const MODALIDADES = [
-  { key: '', label: 'Todas' },
-  { key: 'remoto', label: 'Remoto' },
-  { key: 'hibrido', label: 'Híbrido' },
-  { key: 'presencial', label: 'Presencial' },
+  { valor: 'remoto', key: 'egresadoExplorar.components.remoto' },
+  { valor: 'hibrido', key: 'egresadoExplorar.components.hibrido' },
+  { valor: 'presencial', key: 'egresadoExplorar.components.presencial' },
 ];
 
 function generarRangoPaginas(actual, total) {
@@ -108,6 +108,7 @@ function ModalPostular({ oferta, onCerrar, onExito }) {
 
 
 export default function ExplorarEmpleos() {
+  const { t } = useTranslation();
   const [busqueda, setBusqueda] = useState('');
   const [busquedaReal, setBusquedaReal] = useState('');
   const [modalidad, setModalidad] = useState('');
@@ -193,12 +194,12 @@ export default function ExplorarEmpleos() {
     <div className="contenidoPrincipal">
       <section className="seccionHero fwd-animar-entrada">
         <div className="textoHero">
-          <span className="kickerHero">Explorar Empleos</span>
+          <span className="kickerHero">{t('egresadoExplorarEmpleos.hero.kicker')}</span>
           <h1 className="tituloHero">
-            Encuentra tu <span className="textoResaltado">próximo empleo</span>
+            {t('egresadoExplorarEmpleos.hero.titleStart')} <span className="textoResaltado">{t('egresadoExplorarEmpleos.hero.titleHighlight')}</span>
           </h1>
           <p className="subtituloHero">
-            Oportunidades laborales para impulsar tu carrera. Conecta con empresas que buscan talento como el tuyo.
+            {t('egresadoExplorarEmpleos.hero.subtitle')}
           </p>
           <div className="contenedorBusqueda">
             <div className="barraBusqueda">
@@ -206,7 +207,7 @@ export default function ExplorarEmpleos() {
               <input
                 type="text"
                 className="inputBusqueda"
-                placeholder="Buscar por título, empresa o tecnología..."
+                placeholder={t('egresadoExplorarEmpleos.hero.searchPlaceholder')}
                 value={busqueda}
                 onChange={(e) => manejarBusqueda(e.target.value)}
               />
@@ -254,37 +255,35 @@ export default function ExplorarEmpleos() {
           <div className="encabezadoFiltros">
             <h4 className="tituloFiltros">
               <SlidersHorizontal size={18} />
-              Filtrar resultados
+              {t('egresadoExplorarEmpleos.filters.titulo')}
             </h4>
             <button type="button" className="botonLimpiar" onClick={limpiarFiltros}>
-              Limpiar
+              {t('egresadoExplorarEmpleos.filters.limpiar')}
             </button>
           </div>
 
           <div className="grupoFiltro">
-            <label className="etiquetaFiltro">Modalidad</label>
+            <label className="etiquetaFiltro">{t('egresadoExplorarEmpleos.filters.modalidad')}</label>
             <div className="opcionesModalidad">
-              {MODALIDADES.map(({ key, label }) => (
-                key && (
-                  <label key={key} className="opcionCheckbox">
-                    <input
-                      type="checkbox"
-                      checked={modalidad === key}
-                      onChange={() => cambiarModalidad(modalidad === key ? '' : key)}
-                    />
-                    <span className="casillaPersonalizada" />
-                    {label}
-                  </label>
-                )
+              {MODALIDADES.map(({ valor, key }) => (
+                <label key={valor} className="opcionCheckbox">
+                  <input
+                    type="checkbox"
+                    checked={modalidad === valor}
+                    onChange={() => cambiarModalidad(modalidad === valor ? '' : valor)}
+                  />
+                  <span className="casillaPersonalizada" />
+                  {t(key)}
+                </label>
               ))}
             </div>
           </div>
 
           <div className="grupoFiltro">
-            <label className="etiquetaFiltro">Salario mensual (CRC)</label>
+            <label className="etiquetaFiltro">{t('egresadoExplorarEmpleos.filters.salario')}</label>
             <div className="filaRango">
               <div className="campoRango">
-                <span className="prefijoRango">Mín</span>
+                <span className="prefijoRango">{t('egresadoExplorarEmpleos.filters.min')}</span>
                 <input
                   type="number"
                   min={0}
@@ -295,7 +294,7 @@ export default function ExplorarEmpleos() {
                 />
               </div>
               <div className="campoRango">
-                <span className="prefijoRango">Máx</span>
+                <span className="prefijoRango">{t('egresadoExplorarEmpleos.filters.max')}</span>
                 <input
                   type="number"
                   min={0}
@@ -311,19 +310,19 @@ export default function ExplorarEmpleos() {
 
         <div className="columnaResultadosEgresado">
           {cargando ? (
-            <p className="de-data-state">Cargando oportunidades...</p>
+            <p className="de-data-state">{t('egresadoExplorarEmpleos.loading')}</p>
           ) : paginaItems.length === 0 ? (
             <div className="estadoVacio">
               <Briefcase size={48} />
-              <h4>{hayFiltros ? 'Sin resultados' : 'No hay empleos disponibles'}</h4>
+              <h4>{hayFiltros ? t('egresadoExplorarEmpleos.sinResultados') : t('egresadoExplorarEmpleos.sinResultadosTitle')}</h4>
               <p>
                 {hayFiltros
-                  ? 'Intentá con otros términos o quitá los filtros.'
-                  : 'Volvé más tarde para ver nuevas oportunidades.'}
+                  ? t('egresadoExplorarEmpleos.sinResultadosDesc')
+                  : t('egresadoExplorarEmpleos.sinResultadosDesc')}
               </p>
               {hayFiltros && (
                 <button type="button" className="post-emptyBtn" onClick={limpiarFiltros}>
-                  Limpiar filtros
+                  {t('egresadoExplorarEmpleos.limpiarFiltros')}
                 </button>
               )}
             </div>
@@ -331,13 +330,12 @@ export default function ExplorarEmpleos() {
             <div className="contenedorResultados">
               <div className="encabezadoResultados">
                 <span className="conteoProyectos">
-                  {filtradas.length} {filtradas.length === 1 ? 'oportunidad' : 'oportunidades'}
-                  {hayFiltros && ' encontradas'}
+                  {filtradas.length} {t('egresadoExplorarEmpleos.resultados')}
                 </span>
                 {hayFiltros && (
                   <button type="button" className="btnLimpiarFiltros" onClick={limpiarFiltros}>
                     <X size={14} />
-                    Limpiar filtros
+                    {t('egresadoExplorarEmpleos.limpiarFiltros')}
                   </button>
                 )}
               </div>
@@ -360,7 +358,7 @@ export default function ExplorarEmpleos() {
                     className="botonPagina flecha"
                     disabled={pagina === 1}
                     onClick={() => setPaginaActual(pagina - 1)}
-                    aria-label="Página anterior"
+                    aria-label={t('egresadoExplorarEmpleos.paginaAnterior')}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
                   </button>
@@ -383,7 +381,7 @@ export default function ExplorarEmpleos() {
                     className="botonPagina flecha"
                     disabled={pagina === totalPaginas}
                     onClick={() => setPaginaActual(pagina + 1)}
-                    aria-label="Página siguiente"
+                    aria-label={t('egresadoExplorarEmpleos.paginaSiguiente')}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
                   </button>

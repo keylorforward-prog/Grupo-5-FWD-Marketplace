@@ -1,4 +1,5 @@
 import { useMemo, Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Eye, Building2 } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
@@ -8,19 +9,20 @@ import { formatearPostulacion } from '../../utils/dashboardEgresadoFormatters';
 const acentos = ['azul', 'aqua', 'naranja', 'morado', 'magenta', 'amarillo'];
 
 const TABS = [
-  { key: 'proyectos', label: 'Proyectos', icon: Briefcase },
-  { key: 'empleos', label: 'Empleos', icon: Building2 },
+  { key: 'proyectos', labelKey: 'tabProyectos', icon: Briefcase },
+  { key: 'empleos', labelKey: 'tabEmpleos', icon: Building2 },
 ];
 
 const ORDEN_FLUJO = [
-  { key: 'ENVIADA', label: 'Enviada' },
-  { key: 'PENDIENTE', label: 'Pendiente' },
-  { key: 'EN_REVISION', label: 'En Revisión' },
-  { key: 'PRESSELECCIONADA', label: 'Preseleccionada' },
-  { key: 'FINAL', label: '' },
+  { key: 'ENVIADA', labelKey: 'flujoEnviada' },
+  { key: 'PENDIENTE', labelKey: 'flujoPendiente' },
+  { key: 'EN_REVISION', labelKey: 'flujoRevision' },
+  { key: 'PRESSELECCIONADA', labelKey: 'flujoPreseleccionada' },
+  { key: 'FINAL', labelKey: '' },
 ];
 
 function FlujoPostulacion({ estadoRaw }) {
+  const { t } = useTranslation();
   const pasoActual = estadoRaw === 'ENVIADA' ? 0
     : estadoRaw === 'EN_REVISION' ? 2
     : estadoRaw === 'PRESSELECCIONADA' ? 3
@@ -34,8 +36,8 @@ function FlujoPostulacion({ estadoRaw }) {
       {ORDEN_FLUJO.map((paso, i) => {
         const esUltimo = i === ORDEN_FLUJO.length - 1;
         const label = esUltimo
-          ? (esRechazado ? 'Rechazada' : esAceptado ? 'Aceptada' : '—')
-          : paso.label;
+          ? (esRechazado ? t('egresadoPostulaciones.flujoRechazada') : esAceptado ? t('egresadoPostulaciones.flujoAceptada') : '—')
+          : t(`egresadoPostulaciones.${paso.labelKey}`);
         const icono = esUltimo
           ? (esRechazado ? '✕' : esAceptado ? '✓' : (ORDEN_FLUJO.length).toString())
           : (i < pasoActual ? '✓' : (i + 1).toString());
@@ -91,6 +93,7 @@ function FlujoPostulacion({ estadoRaw }) {
 }
 
 export default function Postulaciones() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const tabActivo = location.pathname.includes('/empleos') ? 'empleos' : 'proyectos';
@@ -108,17 +111,17 @@ export default function Postulaciones() {
     <div className="post-layout fwd-animar-entrada">
       <div className="post-main">
         <div className="post-tabs">
-          {TABS.map((t) => {
-            const Icon = t.icon;
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
             return (
               <button
-                key={t.key}
-                className={`post-tab${tabActivo === t.key ? ' active' : ''}`}
+                key={tab.key}
+                className={`post-tab${tabActivo === tab.key ? ' active' : ''}`}
                 type="button"
-                onClick={() => navigate(`/egresado/dashboard/postulaciones/${t.key}`)}
+                onClick={() => navigate(`/egresado/dashboard/postulaciones/${tab.key}`)}
               >
                 <Icon size={16} />
-                {t.label}
+                {t(`egresadoPostulaciones.${tab.labelKey}`)}
               </button>
             );
           })}
@@ -129,21 +132,21 @@ export default function Postulaciones() {
             <button className="de-project-icon-button" type="button" onClick={() => navigate('/egresado/dashboard')}>
               <ArrowLeft size={18} />
             </button>
-            <h1>Mis Postulaciones</h1>
+            <h1>{t('egresadoPostulaciones.titulo')}</h1>
           </div>
-          <span className="conteoProyectos">{items.length} {tabActivo === 'proyectos' ? 'postulaciones' : 'postulaciones a empleos'}</span>
+          <span className="conteoProyectos">{items.length} {tabActivo === 'proyectos' ? t('egresadoPostulaciones.total') : t('egresadoPostulaciones.totalEmpleos')}</span>
         </div>
 
-        {loading && <p className="de-data-state">Cargando...</p>}
+        {loading && <p className="de-data-state">{t('egresadoPostulaciones.loading')}</p>}
         {error && <p className="de-data-state error">{error}</p>}
 
         {!loading && !error && items.length === 0 && tabActivo === 'proyectos' && (
           <div className="post-empty">
             <SearchX size={48} />
-            <h4>Sin postulaciones</h4>
-            <p>Aún no te has postulado a ningún proyecto. ¡Explora y encuentra tu próximo desafío!</p>
+            <h4>{t('egresadoPostulaciones.sinPostulaciones')}</h4>
+            <p>{t('egresadoPostulaciones.sinPostulacionesDesc')}</p>
             <button className="post-emptyBtn" type="button" onClick={() => navigate('/egresado/dashboard/explorar')}>
-              Explorar proyectos
+              {t('egresadoPostulaciones.explorarProyectos')}
             </button>
           </div>
         )}
@@ -151,10 +154,10 @@ export default function Postulaciones() {
         {!loading && !error && items.length === 0 && tabActivo === 'empleos' && (
           <div className="post-empty">
             <Briefcase size={48} />
-            <h4>Sin postulaciones a empleos</h4>
-            <p>Aún no te has postulado a ningún empleo. ¡Explora y encuentra tu próximo empleo!</p>
+            <h4>{t('egresadoPostulaciones.sinPostulaciones')}</h4>
+            <p>{t('egresadoPostulaciones.sinPostulacionesEmpleosDesc')}</p>
             <button className="post-emptyBtn" type="button" onClick={() => navigate('/egresado/dashboard/explorar-empleos')}>
-              Explorar empleos
+              {t('egresadoPostulaciones.explorarEmpleos')}
             </button>
           </div>
         )}
@@ -194,7 +197,7 @@ export default function Postulaciones() {
                       {p.mensaje && (
                         <span className="post-metaItem post-mensaje" title={p.mensaje}>
                           <Clock size={13} />
-                          Con mensaje
+                          {t('egresadoPostulaciones.conMensaje')}
                         </span>
                       )}
                     </div>
@@ -208,7 +211,7 @@ export default function Postulaciones() {
                     onClick={() => navigate(`/egresado/dashboard/proyecto/${p.idPropuesta}`)}
                   >
                     <Eye size={15} />
-                    Ver proyecto
+                    {t('egresadoPostulaciones.verProyecto')}
                   </button>
                 </div>
               </div>
@@ -252,7 +255,7 @@ export default function Postulaciones() {
                       {p.mensaje && (
                         <span className="post-metaItem post-mensaje" title={p.mensaje}>
                           <Clock size={13} />
-                          Con mensaje
+                          {t('egresadoPostulaciones.conMensaje')}
                         </span>
                       )}
                     </div>
@@ -266,7 +269,7 @@ export default function Postulaciones() {
                     onClick={() => navigate(`/egresado/dashboard/empleo/${p.idPropuesta}`)}
                   >
                     <Eye size={15} />
-                    Ver empleo
+                    {t('egresadoPostulaciones.verEmpleo')}
                   </button>
                 </div>
               </div>

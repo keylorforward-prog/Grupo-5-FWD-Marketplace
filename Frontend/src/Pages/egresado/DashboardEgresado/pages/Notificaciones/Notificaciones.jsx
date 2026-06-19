@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Bell, CheckCheck, Mail, MessageSquare,
@@ -9,11 +10,11 @@ import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoReq
 import { formatearNotificacion } from '../../utils/dashboardEgresadoFormatters';
 
 const TIPO_CONFIG = {
-  postulacion: { icon: Mail, label: 'Postulación', color: '#2563eb', bg: '#eff6ff' },
-  proyecto: { icon: FolderOpen, label: 'Proyecto', color: '#7c3aed', bg: '#f5f3ff' },
-  mensaje: { icon: MessageSquare, label: 'Mensaje', color: '#059669', bg: '#ecfdf5' },
-  sistema: { icon: Info, label: 'Sistema', color: '#d97706', bg: '#fffbeb' },
-  oferta: { icon: ExternalLink, label: 'Oferta', color: '#0891b2', bg: '#ecfeff' },
+  postulacion: { icon: Mail, labelKey: 'tipoPostulacion', color: '#2563eb', bg: '#eff6ff' },
+  proyecto: { icon: FolderOpen, labelKey: 'tipoProyecto', color: '#7c3aed', bg: '#f5f3ff' },
+  mensaje: { icon: MessageSquare, labelKey: 'tipoMensaje', color: '#059669', bg: '#ecfdf5' },
+  sistema: { icon: Info, labelKey: 'tipoSistema', color: '#d97706', bg: '#fffbeb' },
+  oferta: { icon: ExternalLink, labelKey: 'tipoOferta', color: '#0891b2', bg: '#ecfeff' },
 };
 
 const agruparPorFecha = (notificaciones) => {
@@ -36,13 +37,14 @@ const agruparPorFecha = (notificaciones) => {
 };
 
 const ETIQUETAS_GRUPO = {
-  hoy: 'Hoy',
-  ayer: 'Ayer',
-  semana: 'Esta semana',
-  anterior: 'Anterior',
+  hoy: 'egresadoNotificaciones.grupoHoy',
+  ayer: 'egresadoNotificaciones.grupoAyer',
+  semana: 'egresadoNotificaciones.grupoSemana',
+  anterior: 'egresadoNotificaciones.grupoAnterior',
 };
 
 export default function Notificaciones() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [animando, setAnimando] = useState(null);
 
@@ -77,16 +79,16 @@ export default function Notificaciones() {
           <button className="de-project-icon-button" type="button" onClick={() => navigate('/egresado/dashboard')}>
             <ArrowLeft size={18} />
           </button>
-          <h1>Notificaciones</h1>
+          <h1>{t('egresadoNotificaciones.titulo')}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {!loading && !error && sinLeer > 0 && (
-            <span className="notif-sinLeer">{sinLeer} sin leer</span>
+            <span className="notif-sinLeer">{sinLeer} {t('egresadoNotificaciones.sinLeer')}</span>
           )}
           {!loading && !error && sinLeer > 0 && (
             <button className="notif-marcarTodas" type="button" onClick={marcarTodas}>
               <CheckCheck size={15} />
-              Marcar todas leídas
+              {t('egresadoNotificaciones.marcarTodasLeidas')}
             </button>
           )}
         </div>
@@ -105,8 +107,8 @@ export default function Notificaciones() {
       {!loading && notificaciones.length === 0 && (
         <div className="estadoVacio" style={{ padding: '3rem', textAlign: 'center' }}>
           <Bell size={48} />
-          <h4>Sin notificaciones</h4>
-          <p>No tienes notificaciones nuevas. Te avisaremos cuando algo importante ocurra.</p>
+          <h4>{t('egresadoNotificaciones.empty')}</h4>
+          <p>{t('egresadoNotificaciones.emptyDesc')}</p>
         </div>
       )}
 
@@ -115,7 +117,7 @@ export default function Notificaciones() {
           {grupos.map(([key, items]) => (
             <div key={key} className="notif-grupo">
               <div className="notif-grupo-header">
-                <span className="notif-grupo-label">{ETIQUETAS_GRUPO[key]}</span>
+                <span className="notif-grupo-label">{t(ETIQUETAS_GRUPO[key])}</span>
                 <span className="notif-grupo-count">{items.length}</span>
               </div>
               {items.map((n) => {
@@ -133,7 +135,7 @@ export default function Notificaciones() {
                     </div>
                     <div className="notif-card-body">
                       <div className="notif-card-header">
-                        <span className="notif-card-tipo" style={{ color: tipoCfg.color }}>{tipoCfg.label}</span>
+                        <span className="notif-card-tipo" style={{ color: tipoCfg.color }}>{t(`egresadoNotificaciones.${tipoCfg.labelKey}`)}</span>
                         <span className="notif-card-tiempo">{n.tiempo}</span>
                       </div>
                       <p className="notif-card-texto">{n.texto}</p>
@@ -144,7 +146,7 @@ export default function Notificaciones() {
                           className="notif-card-leer-btn"
                           type="button"
                           onClick={(e) => { e.stopPropagation(); marcarLeida(n.id); }}
-                          title="Marcar como leída"
+                          title={t('egresadoNotificaciones.marcarLeida')}
                         >
                           <CheckCircle2 size={16} />
                         </button>

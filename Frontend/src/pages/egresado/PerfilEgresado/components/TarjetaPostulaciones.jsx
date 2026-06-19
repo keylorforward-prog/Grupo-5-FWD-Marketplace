@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FileText, MoreVertical } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../services/egresadoDashboardService';
 import { formatearPostulacion } from '../../DashboardEgresado/utils/dashboardEgresadoFormatters';
 
 const filtros = [
-  { valor: 'todas', etiqueta: 'Todas' },
-  { valor: 'nueva', etiqueta: 'Enviadas' },
-  { valor: 'revision', etiqueta: 'En revisión' },
-  { valor: 'recepcion', etiqueta: 'Preseleccionadas' },
-  { valor: 'rechazado', etiqueta: 'Rechazadas' },
+  { valor: 'todas', key: 'filtroTodas' },
+  { valor: 'nueva', key: 'filtroEnviadas' },
+  { valor: 'revision', key: 'filtroRevision' },
+  { valor: 'recepcion', key: 'filtroPreseleccionadas' },
+  { valor: 'rechazado', key: 'filtroRechazadas' },
 ];
 
 const coloresAvatar = [
@@ -24,6 +25,7 @@ const inferirIniciales = (texto) =>
   (texto || '??').split(' ').map((p) => p[0]).join('').toUpperCase().slice(0, 2);
 
 function TarjetaPostulaciones() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [postulaciones, setPostulaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -72,9 +74,9 @@ function TarjetaPostulaciones() {
           <div className="iconoDocumento">
             <FileText size={20} />
           </div>
-          <h3 className="tituloTarjetaSeccion">Mis Postulaciones a Prácticas</h3>
+          <h3 className="tituloTarjetaSeccion">{t('egresadoPerfil.applications.titulo')}</h3>
         </div>
-        <span className="conteoPostulaciones">{totalActivas} Activas</span>
+        <span className="conteoPostulaciones">{totalActivas} {t('egresadoPerfil.applications.activas')}</span>
       </div>
 
       <div className="filtrosPostulaciones">
@@ -85,17 +87,17 @@ function TarjetaPostulaciones() {
             className={`chipFiltroPostulacion ${filtroActivo === f.valor ? 'activo' : ''}`}
             onClick={() => setFiltroActivo(f.valor)}
           >
-            {f.etiqueta}
+            {t(`egresadoPerfil.applications.${f.key}`)}
           </button>
         ))}
       </div>
 
       <div className="listaPostulaciones">
         {cargando ? (
-          <div className="vacioPostulaciones">Cargando postulaciones...</div>
+          <div className="vacioPostulaciones">{t('egresadoPerfil.applications.loading')}</div>
         ) : lista.length === 0 ? (
           <div className="vacioPostulaciones">
-            Sin postulaciones en este estado.
+            {t('egresadoPerfil.applications.empty')}
           </div>
         ) : (
           lista.map((postulacion) => (
@@ -129,7 +131,7 @@ function TarjetaPostulaciones() {
                     onClick={() =>
                       setMenuAbierto(menuAbierto === postulacion.id ? null : postulacion.id)
                     }
-                    aria-label="Más opciones"
+                    aria-label={t('egresadoPerfil.applications.masOpciones')}
                   >
                     <MoreVertical size={20} />
                   </button>
@@ -138,12 +140,12 @@ function TarjetaPostulaciones() {
                       <button type="button" onClick={() => {
                         setMenuAbierto(null);
                         navigate(`/egresado/dashboard/proyecto/${postulacion.idPropuesta}`);
-                      }}>Ver detalle</button>
+                      }}>{t('egresadoPerfil.applications.verDetalle')}</button>
                       <button type="button" onClick={() => {
                         setMenuAbierto(null);
                         navigate(`/egresado/dashboard/mensajes?postulacion=${postulacion.id}`);
-                      }}>Contactar empresa</button>
-                      <button type="button" className="peligro">Retirar postulación</button>
+                      }}>{t('egresadoPerfil.applications.contactarEmpresa')}</button>
+                      <button type="button" className="peligro">{t('egresadoPerfil.applications.retirar')}</button>
                     </div>
                   )}
                 </div>
@@ -160,7 +162,7 @@ function TarjetaPostulaciones() {
             className="botonVerHistorial"
             onClick={() => setVerTodas((v) => !v)}
           >
-            {verTodas ? 'Ver menos' : 'Ver todo el historial de postulaciones'}
+            {verTodas ? t('egresadoPerfil.applications.verMenos') : t('egresadoPerfil.applications.verHistorial')}
           </button>
         </div>
       )}

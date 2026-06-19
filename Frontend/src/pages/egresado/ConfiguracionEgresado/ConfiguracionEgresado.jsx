@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, Briefcase, Bell, Lock } from 'lucide-react';
 import DashboardLayout from '../DashboardEgresado/components/DashboardLayout';
 import InformacionCuenta from './components/InformacionCuenta';
@@ -9,13 +10,14 @@ import { useScrollSpy } from './hooks/useScrollSpy';
 import './styles/ConfiguracionEgresado.css';
 
 const seccionesConfiguracion = [
-  { id: 'cuenta', etiqueta: 'Información de Cuenta', icono: User },
-  { id: 'preferencias', etiqueta: 'Preferencias Profesionales', icono: Briefcase },
-  { id: 'notificaciones', etiqueta: 'Notificaciones', icono: Bell },
-  { id: 'seguridad', etiqueta: 'Seguridad', icono: Lock },
+  { id: 'cuenta', key: 'sections.cuenta', icono: User },
+  { id: 'preferencias', key: 'sections.preferencias', icono: Briefcase },
+  { id: 'notificaciones', key: 'sections.notificaciones', icono: Bell },
+  { id: 'seguridad', key: 'sections.seguridad', icono: Lock },
 ];
 
 function ConfiguracionEgresado() {
+  const { t } = useTranslation();
   const ids = useMemo(() => seccionesConfiguracion.map((s) => s.id), []);
   const [seccionActiva, setSeccionActiva] = useScrollSpy(ids, { offset: 140 });
 
@@ -28,12 +30,12 @@ function ConfiguracionEgresado() {
     <DashboardLayout>
       <div className="mainConfiguracion fwd-fondo-decorativo">
         <div className="cabeceraConfiguracion fwd-animar-entrada">
-          <span className="kickerConfiguracion">PANEL DE PREFERENCIAS</span>
+          <span className="kickerConfiguracion">{t('egresadoConfiguracion.kicker')}</span>
           <h1 className="tituloConfiguracion">
-            Configuración<span className="puntoTituloConfiguracion">.</span>
+            {t('egresadoConfiguracion.title')}<span className="puntoTituloConfiguracion">.</span>
           </h1>
           <p className="subtituloConfiguracion">
-            Gestiona tu identidad profesional y preferencias de la plataforma.
+            {t('egresadoConfiguracion.subtitle')}
           </p>
         </div>
 
@@ -48,7 +50,7 @@ function ConfiguracionEgresado() {
             </div>
 
             <nav className="navegacionInterna">
-              {seccionesConfiguracion.map(({ id, etiqueta, icono: Icono }) => (
+              {seccionesConfiguracion.map(({ id, key, icono: Icono }) => (
                 <button
                   key={id}
                   type="button"
@@ -56,7 +58,7 @@ function ConfiguracionEgresado() {
                   onClick={() => desplazarASeccion(id)}
                 >
                   <span className="iconoBotonNav"><Icono size={18} /></span>
-                  {etiqueta}
+                  {t(`egresadoConfiguracion.${key}`)}
                 </button>
               ))}
             </nav>

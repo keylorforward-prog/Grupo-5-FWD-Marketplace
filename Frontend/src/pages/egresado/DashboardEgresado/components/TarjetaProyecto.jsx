@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Bookmark, Send, Clock, DollarSign, Tag, Globe } from 'lucide-react';
 import { categoriasProyecto } from '../../../../data/proyectosEgresado';
 
-const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
+const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
 const etiquetaCategoria = Object.fromEntries(
   categoriasProyecto.filter((c) => c.valor !== 'todas').map((c) => [c.valor, c.etiqueta])
 );
@@ -20,6 +21,7 @@ const formatearPresupuesto = (min, max) =>
 const formatearEntrega = (min, max) => `${min} – ${max} días`;
 
 function TarjetaProyecto({ proyecto }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [guardado, setGuardado] = useState(false);
 
@@ -51,7 +53,7 @@ function TarjetaProyecto({ proyecto }) {
           type="button"
           className={`botonGuardar ${guardado ? 'activo' : ''}`}
           onClick={() => setGuardado((g) => !g)}
-          aria-label={guardado ? 'Quitar de guardados' : 'Guardar proyecto'}
+          aria-label={guardado ? t('egresadoExplorar.components.quitarGuardados') : t('egresadoExplorar.components.guardarProyecto')}
         >
           <Bookmark size={18} fill={guardado ? 'currentColor' : 'none'} />
         </button>
@@ -64,7 +66,7 @@ function TarjetaProyecto({ proyecto }) {
         </span>
         <span className="metaBadge metaModalidad">
           <Globe size={12} />
-          {etiquetaModalidad[proyecto.modalidad] ?? proyecto.modalidad}
+          {etiquetaModalidad[proyecto.modalidad] ? t(etiquetaModalidad[proyecto.modalidad]) : proyecto.modalidad}
         </span>
       </div>
 
@@ -81,7 +83,7 @@ function TarjetaProyecto({ proyecto }) {
           <div className="datoPie">
             <span className="etiquetaDato">
               <DollarSign size={12} />
-              Presupuesto
+              {t('egresadoExplorar.components.presupuesto')}
             </span>
             <span className="valorDato">
               {formatearPresupuesto(proyecto.presupuestoMin, proyecto.presupuestoMax)}
@@ -90,7 +92,7 @@ function TarjetaProyecto({ proyecto }) {
           <div className="datoPie">
             <span className="etiquetaDato">
               <Clock size={12} />
-              Entrega
+              {t('egresadoExplorar.components.entrega')}
             </span>
             <span className="valorDato">
               {formatearEntrega(proyecto.diasMin, proyecto.diasMax)}
@@ -103,7 +105,7 @@ function TarjetaProyecto({ proyecto }) {
           onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}
         >
           <Send size={14} />
-          Ver detalle
+          {t('egresadoExplorar.components.verDetalle')}
         </button>
       </div>
     </article>

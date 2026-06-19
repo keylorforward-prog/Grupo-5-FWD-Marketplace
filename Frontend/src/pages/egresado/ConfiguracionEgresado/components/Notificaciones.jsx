@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Mail, MessageSquare, Briefcase } from 'lucide-react';
 
 const CLAVE_ALMACENAMIENTO = 'preferenciasNotificacion';
@@ -7,22 +8,22 @@ const opcionesNotificacion = [
   {
     id: 'postulaciones',
     icono: Mail,
-    titulo: 'Alertas de Postulación',
-    descripcion: 'Recibe un correo cuando una empresa vea tu perfil o cambie tu estado.',
+    tituloKey: 'alertasPostulacion',
+    descKey: 'alertasPostulacionDesc',
     variante: 'azul',
   },
   {
     id: 'mensajes',
     icono: MessageSquare,
-    titulo: 'Nuevos Mensajes',
-    descripcion: 'Notificaciones push para mensajes directos de recruiters.',
+    tituloKey: 'nuevosMensajes',
+    descKey: 'nuevosMensajesDesc',
     variante: 'naranja',
   },
   {
     id: 'proyectos',
     icono: Briefcase,
-    titulo: 'Nuevos Proyectos',
-    descripcion: 'Avísame de proyectos nuevos que coincidan con mis preferencias.',
+    tituloKey: 'nuevosProyectos',
+    descKey: 'nuevosProyectosDesc',
     variante: 'aqua',
   },
 ];
@@ -30,6 +31,7 @@ const opcionesNotificacion = [
 const valoresPorDefecto = { postulaciones: true, mensajes: true, proyectos: false };
 
 function Notificaciones() {
+  const { t } = useTranslation();
   const [preferencias, setPreferencias] = useState(() => {
     const guardado = localStorage.getItem(CLAVE_ALMACENAMIENTO);
     return guardado ? { ...valoresPorDefecto, ...JSON.parse(guardado) } : valoresPorDefecto;
@@ -46,18 +48,18 @@ function Notificaciones() {
   return (
     <div id="notificaciones" className="tarjetaFormulario">
       <div className="cabeceraFormulario">
-        <h2 className="tituloFormulario">Notificaciones</h2>
+        <h2 className="tituloFormulario">{t('egresadoConfiguracion.notifications.titulo')}</h2>
       </div>
 
-      {opcionesNotificacion.map(({ id, icono: Icono, titulo, descripcion, variante }) => (
+      {opcionesNotificacion.map(({ id, icono: Icono, tituloKey, descKey, variante }) => (
         <div key={id} className="itemNotificacion">
           <div className="infoNotificacion">
             <div className={`iconoNotificacion ${variante}`}>
               <Icono size={18} />
             </div>
             <div className="textoNotificacion">
-              <h4>{titulo}</h4>
-              <p>{descripcion}</p>
+              <h4>{t(`egresadoConfiguracion.notifications.${tituloKey}`)}</h4>
+              <p>{t(`egresadoConfiguracion.notifications.${descKey}`)}</p>
             </div>
           </div>
           <label className="interruptor">

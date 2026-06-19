@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, FolderOpen, GitFork, Package, SearchX } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
@@ -16,6 +17,7 @@ const BADGE_ESTADOS = {
 };
 
 export default function MisProyectos() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data, loading, error } = useDashboardEgresadoRequest(
     () => egresadoDashboardService.obtenerProyectos(),
@@ -44,19 +46,19 @@ export default function MisProyectos() {
           <button className="de-project-icon-button" type="button" onClick={() => navigate('/egresado/dashboard')}>
             <ArrowLeft size={18} />
           </button>
-          <h1>Mis Proyectos</h1>
+          <h1>{t('egresadoProyectos.titulo')}</h1>
         </div>
-        <span className="conteoProyectos">{proyectos.length} proyectos</span>
+        <span className="conteoProyectos">{proyectos.length} {t('egresadoProyectos.total')}</span>
       </div>
 
-      {loading && <p className="de-data-state">Cargando proyectos...</p>}
+      {loading && <p className="de-data-state">{t('egresadoProyectos.loading')}</p>}
       {error && <p className="de-data-state error">{error}</p>}
 
       {!loading && !error && proyectos.length === 0 && (
         <div className="estadoVacio" style={{ padding: '3rem', textAlign: 'center' }}>
           <SearchX size={48} />
-          <h4>Sin proyectos activos</h4>
-          <p>Cuando una empresa te contrate, tus proyectos aparecerán aquí.</p>
+          <h4>{t('egresadoProyectos.empty')}</h4>
+          <p>{t('egresadoProyectos.emptyDesc')}</p>
         </div>
       )}
 
@@ -88,7 +90,7 @@ export default function MisProyectos() {
                           }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <GitFork size={12} /> Repo <ExternalLink size={10} />
+                          <GitFork size={12} /> {t('egresadoProyectos.repo')} <ExternalLink size={10} />
                         </a>
                       )}
                     </div>
@@ -100,10 +102,10 @@ export default function MisProyectos() {
                       display: 'flex', gap: '1.5rem', marginTop: '0.5rem',
                       fontSize: '0.78rem', color: 'var(--ink-subtle)', flexWrap: 'wrap',
                     }}>
-                      <span><Package size={12} style={{ marginRight: '0.25rem' }} /> Entregables: {p.entregablesAprobados}/{p.entregablesCount}</span>
-                      {p.empresa && <span>Empresa: {p.empresa}</span>}
-                      <span>Inicio: {p.fechaInicio}</span>
-                      <span>Fin: {p.fechaFin}</span>
+                      <span><Package size={12} style={{ marginRight: '0.25rem' }} /> {t('egresadoProyectos.entregables')}: {p.entregablesAprobados}/{p.entregablesCount}</span>
+                      {p.empresa && <span>{t('egresadoProyectos.empresa')}: {p.empresa}</span>}
+                      <span>{t('egresadoProyectos.inicio')}: {p.fechaInicio}</span>
+                      <span>{t('egresadoProyectos.fin')}: {p.fechaFin}</span>
                     </div>
 
                     {expandido && (
@@ -111,7 +113,7 @@ export default function MisProyectos() {
                         <div className="de-detail-grid">
                           {p.tecnologias.length > 0 && (
                             <div className="de-detail-section">
-                              <strong>Tecnologías</strong>
+                              <strong>{t('egresadoProyectos.tecnologias')}</strong>
                               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.25rem' }}>
                                 {p.tecnologias.map((t, i) => (
                                   <span key={t} className="de-chip">{t}</span>
@@ -121,17 +123,17 @@ export default function MisProyectos() {
                           )}
                           {(p.presupuestoMin || p.presupuestoMax) && (
                             <div className="de-detail-row">
-                              {p.presupuestoMin && <span><strong>Presupuesto min:</strong> ₡{Number(p.presupuestoMin).toLocaleString()}</span>}
-                              {p.presupuestoMax && <span><strong>Presupuesto max:</strong> ₡{Number(p.presupuestoMax).toLocaleString()}</span>}
+                              {p.presupuestoMin && <span><strong>{t('egresadoProyectos.presupuestoMin')}:</strong> ₡{Number(p.presupuestoMin).toLocaleString()}</span>}
+                              {p.presupuestoMax && <span><strong>{t('egresadoProyectos.presupuestoMax')}:</strong> ₡{Number(p.presupuestoMax).toLocaleString()}</span>}
                             </div>
                           )}
                           <div className="de-detail-row">
-                            <span><strong>Modalidad:</strong> {p.modalidad}</span>
-                            <span><strong>Estado:</strong> <span className={`de-badge ${BADGE_ESTADOS[p.estadoRaw] || 'recepcion'}`}>{p.estado}</span></span>
+                            <span><strong>{t('egresadoProyectos.modalidad')}:</strong> {p.modalidad}</span>
+                            <span><strong>{t('egresadoProyectos.estado')}:</strong> <span className={`de-badge ${BADGE_ESTADOS[p.estadoRaw] || 'recepcion'}`}>{p.estado}</span></span>
                           </div>
                           <div className="de-detail-row">
-                            <span><strong>Inicio:</strong> {p.fechaInicio}</span>
-                            <span><strong>Fin estimado:</strong> {p.fechaFin}</span>
+                            <span><strong>{t('egresadoProyectos.inicio')}:</strong> {p.fechaInicio}</span>
+                            <span><strong>{t('egresadoProyectos.finEstimado')}:</strong> {p.fechaFin}</span>
                           </div>
 
                           <div style={{ marginTop: '0.5rem' }}>
@@ -141,17 +143,17 @@ export default function MisProyectos() {
                               onClick={() => toggleEntregables(p.id)}
                               style={{ fontSize: '0.72rem' }}
                             >
-                              <Package size={12} /> {verEntregables ? 'Ocultar entregables' : 'Ver entregables'} ({p.entregablesCount})
+                              <Package size={12} /> {verEntregables ? t('egresadoProyectos.ocultarEntregables') : t('egresadoProyectos.verEntregables')} ({p.entregablesCount})
                             </button>
                           </div>
 
                           {verEntregables && (
                             <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
                               <strong style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                                Historial de Entregables
+                                {t('egresadoProyectos.historialEntregables')}
                               </strong>
                               {p.entregables.length === 0 ? (
-                                <p style={{ fontSize: '0.82rem', color: 'var(--ink-subtle)', marginTop: '0.25rem' }}>Sin entregables aún.</p>
+                                <p style={{ fontSize: '0.82rem', color: 'var(--ink-subtle)', marginTop: '0.25rem' }}>{t('egresadoProyectos.sinEntregables')}</p>
                               ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.4rem' }}>
                                   {p.entregables.map((e) => (
@@ -181,7 +183,7 @@ export default function MisProyectos() {
                     className="de-project-icon-button"
                     type="button"
                     onClick={() => toggleDetalle(p.id)}
-                    aria-label={expandido ? 'Cerrar detalles' : 'Ver detalles'}
+                    aria-label={expandido ? t('egresadoProyectos.cerrarDetalles') : t('egresadoProyectos.verDetalles')}
                     style={{ flexShrink: 0 }}
                   >
                     {expandido ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

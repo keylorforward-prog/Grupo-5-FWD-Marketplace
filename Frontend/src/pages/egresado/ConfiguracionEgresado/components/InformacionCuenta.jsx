@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../../context/AuthContext';
 
 const ESTADO_INICIAL = {
@@ -10,6 +11,7 @@ const ESTADO_INICIAL = {
 const CLAVE_ALMACENAMIENTO = 'informacionCuenta';
 
 function InformacionCuenta() {
+  const { t } = useTranslation();
   const { user, actualizarUsuario } = useAuth();
   const [datosFormulario, setDatosFormulario] = useState(() => {
     const datosGuardados = localStorage.getItem(CLAVE_ALMACENAMIENTO);
@@ -59,20 +61,20 @@ function InformacionCuenta() {
   return (
     <div id="cuenta" className="tarjetaFormulario">
       <div className="cabeceraFormulario">
-        <h2 className="tituloFormulario">Información de Cuenta</h2>
+        <h2 className="tituloFormulario">{t('egresadoConfiguracion.accountInfo.titulo')}</h2>
         <div className="accionesFormulario">
           {mensajeExito && (
-            <span className="mensajeExito animate-in">¡Cambios guardados!</span>
+            <span className="mensajeExito animate-in">{t('egresadoConfiguracion.accountInfo.guardado')}</span>
           )}
           <button className="botonPrimario" onClick={manejarGuardar}>
-            Guardar Cambios
+            {t('egresadoConfiguracion.accountInfo.guardarCambios')}
           </button>
         </div>
       </div>
 
       <div className="filaFormulario filaAvatarFormulario">
         <div className="grupoFormulario grupoAvatar">
-          <label>Foto de Perfil</label>
+          <label>{t('egresadoConfiguracion.accountInfo.fotoPerfil')}</label>
           <div className="contenedorAvatarFormulario">
             <img src={fotoPerfil} alt="Foto de perfil" className="avatarFormulario" />
             <button
@@ -81,7 +83,7 @@ function InformacionCuenta() {
               onClick={() => refArchivo.current?.click()}
               disabled={subiendo}
             >
-              {subiendo ? 'Subiendo...' : 'Cambiar foto'}
+              {subiendo ? t('egresadoConfiguracion.accountInfo.subiendo') : t('egresadoConfiguracion.accountInfo.cambiarFoto')}
             </button>
             <input
               ref={refArchivo}
@@ -96,7 +98,7 @@ function InformacionCuenta() {
 
       <div className="filaFormulario">
         <div className="grupoFormulario">
-          <label>Nombre Completo</label>
+          <label>{t('egresadoConfiguracion.accountInfo.nombreCompleto')}</label>
           <input
             type="text"
             name="nombre"
@@ -106,7 +108,7 @@ function InformacionCuenta() {
           />
         </div>
         <div className="grupoFormulario">
-          <label>Correo Electrónico</label>
+          <label>{t('egresadoConfiguracion.accountInfo.correo')}</label>
           <input
             type="email"
             name="email"
@@ -118,7 +120,7 @@ function InformacionCuenta() {
       </div>
 
       <div className="grupoFormulario">
-        <label>Biografía Corta</label>
+        <label>{t('egresadoConfiguracion.accountInfo.biografia')}</label>
         <textarea
           className="areaTextoFormulario"
           name="bio"

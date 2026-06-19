@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft, Briefcase, DollarSign, Globe, Building2,
@@ -7,21 +8,23 @@ import {
 import { egresadoService } from '../../../../../services/egresadoService';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 
-const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
+const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
+const T_NS = 'egresadoEmpleoDetalle';
 
 const formatoSalario = new Intl.NumberFormat('es-CR', {
   style: 'currency', currency: 'CRC', maximumFractionDigits: 0,
 });
 
-const etiquetaEstadoPostulacion = {
-  ENVIADA: 'Enviada',
-  EN_REVISION: 'En revisión',
-  PRESELECCIONADA: 'Preseleccionada',
-  RECHAZADA: 'Rechazada',
-  CONTRATADO: 'Contratado',
+const ETQ_ESTADO = {
+  ENVIADA: 'egresadoPostulaciones.flujoEnviada',
+  EN_REVISION: 'egresadoPostulaciones.flujoRevision',
+  PRESELECCIONADA: 'egresadoPostulaciones.flujoPreseleccionada',
+  RECHAZADA: 'egresadoPostulaciones.flujoRechazada',
+  CONTRATADO: 'egresadoPostulaciones.flujoAceptada',
 };
 
 export default function DetalleEmpleo() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [empleo, setEmpleo] = useState(null);
@@ -122,7 +125,7 @@ export default function DetalleEmpleo() {
   if (cargando) {
     return (
       <div className="detalle-container">
-        <div className="de-data-state">Cargando empleo...</div>
+        <div className="de-data-state">{t(`${T_NS}.loading`)}</div>
       </div>
     );
   }
@@ -132,7 +135,7 @@ export default function DetalleEmpleo() {
       <div className="detalle-container">
         <div className="de-data-state error">{error}</div>
         <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar-empleos')}>
-          <ArrowLeft size={16} /> Volver a empleos
+          <ArrowLeft size={16} /> {t(`${T_NS}.volver`)}
         </button>
       </div>
     );
@@ -148,7 +151,7 @@ export default function DetalleEmpleo() {
   return (
     <div className="detalle-container fwd-animar-entrada">
       <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar-empleos')}>
-        <ArrowLeft size={16} /> Volver a empleos
+        <ArrowLeft size={16} /> {t(`${T_NS}.volver`)}
       </button>
 
       {error && (
@@ -183,7 +186,7 @@ export default function DetalleEmpleo() {
             <div className="detalle-metaItem">
               <DollarSign size={16} />
               <div>
-                <span className="detalle-metaLabel">Salario mensual</span>
+                <span className="detalle-metaLabel">{t(`${T_NS}.salarioMensual`)}</span>
                 <span className="detalle-metaValor">
                   {formatoSalario.format(salarioMin)} – {formatoSalario.format(salarioMax)}
                 </span>
@@ -192,14 +195,14 @@ export default function DetalleEmpleo() {
             <div className="detalle-metaItem">
               <Globe size={16} />
               <div>
-                <span className="detalle-metaLabel">Modalidad</span>
-                <span className="detalle-metaValor">{etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad}</span>
+                <span className="detalle-metaLabel">{t(`${T_NS}.modalidad`)}</span>
+                <span className="detalle-metaValor">{etiquetaModalidad[empleo.modalidad] ? t(etiquetaModalidad[empleo.modalidad]) : empleo.modalidad}</span>
               </div>
             </div>
             <div className="detalle-metaItem">
               <Calendar size={16} />
               <div>
-                <span className="detalle-metaLabel">Publicado</span>
+                <span className="detalle-metaLabel">{t(`${T_NS}.publicado`)}</span>
                 <span className="detalle-metaValor">
                   {empleo.fecha_publicacion
                     ? new Date(empleo.fecha_publicacion).toLocaleDateString('es-CR')
@@ -210,13 +213,13 @@ export default function DetalleEmpleo() {
           </div>
 
           <div className="detalle-seccion">
-            <h2 className="detalle-seccionTitulo">Descripción del empleo</h2>
+            <h2 className="detalle-seccionTitulo">{t(`${T_NS}.descripcion`)}</h2>
             <p className="detalle-descripcion">{empleo.descripcion}</p>
           </div>
 
           {tecnologias.length > 0 && (
             <div className="detalle-seccion">
-              <h2 className="detalle-seccionTitulo">Tecnologías requeridas</h2>
+              <h2 className="detalle-seccionTitulo">{t(`${T_NS}.tecnologias`)}</h2>
               <div className="detalle-techs">
                 {tecnologias.map((tech) => (
                   <span key={tech} className="etiquetaTecnologia detalle-tech">{tech}</span>
@@ -230,17 +233,17 @@ export default function DetalleEmpleo() {
               <div className="detalle-postulacion-header">
                 <div className="detalle-postulacion-titulo">
                   <CheckCircle size={18} />
-                  <span>Tu postulación</span>
+                  <span>{t(`${T_NS}.tuPostulacion`)}</span>
                 </div>
                 <span className={`etiquetaEstadoPostulacion ${(postulacion.estado || 'ENVIADA').toLowerCase()}`}>
-                  {etiquetaEstadoPostulacion[postulacion.estado] || postulacion.estado}
+                  {t(ETQ_ESTADO[postulacion.estado] || postulacion.estado)}
                 </span>
               </div>
 
               {postulacion.mensaje_presentacion && (
                 <div className="detalle-postulacion-campo">
                   <span className="detalle-postulacion-label">
-                    <Mail size={14} /> Mensaje de presentación
+                    <Mail size={14} /> {t(`${T_NS}.mensajePresentacion`)}
                   </span>
                   <p className="detalle-postulacion-valor">{postulacion.mensaje_presentacion}</p>
                 </div>
@@ -249,14 +252,14 @@ export default function DetalleEmpleo() {
               {postulacion.presupuesto_max != null && (
                 <div className="detalle-postulacion-campo">
                   <span className="detalle-postulacion-label">
-                    <DollarSign size={14} /> Expectativa salarial
+                    <DollarSign size={14} /> {t(`${T_NS}.expectativaSalarial`)}
                   </span>
                   <p className="detalle-postulacion-valor">{formatoSalario.format(postulacion.presupuesto_max)}</p>
                 </div>
               )}
 
               <div className="detalle-postulacion-fecha">
-                Postulaste el {new Date(postulacion.fecha_postulacion).toLocaleDateString('es-CR')}
+                {t(`${T_NS}.postulasteEl`)} {new Date(postulacion.fecha_postulacion).toLocaleDateString('es-CR')}
               </div>
 
               <div className="detalle-postulacion-acciones">
@@ -265,18 +268,18 @@ export default function DetalleEmpleo() {
                   className="detalle-postulacion-btn editar"
                   onClick={() => abrirModal(true)}
                 >
-                  <Pencil size={14} /> Editar
+                  <Pencil size={14} /> {t(`${T_NS}.editar`)}
                 </button>
                 {confirmarCancelar ? (
                   <div className="detalle-postulacion-confirmar">
-                    <span>¿Cancelar postulación?</span>
+                    <span>{t(`${T_NS}.cancelarPostulacion`)}</span>
                     <button
                       type="button"
                       className="detalle-postulacion-btn confirmar-si"
                       onClick={cancelarPostulacion}
                       disabled={cancelando}
                     >
-                      {cancelando ? 'Cancelando...' : 'Sí, cancelar'}
+                      {cancelando ? t(`${T_NS}.cancelando`) : t(`${T_NS}.siCancelar`)}
                     </button>
                     <button
                       type="button"
@@ -284,7 +287,7 @@ export default function DetalleEmpleo() {
                       onClick={() => setConfirmarCancelar(false)}
                       disabled={cancelando}
                     >
-                      No
+                      {t(`${T_NS}.no`)}
                     </button>
                   </div>
                 ) : (
@@ -293,7 +296,7 @@ export default function DetalleEmpleo() {
                     className="detalle-postulacion-btn cancelar"
                     onClick={() => setConfirmarCancelar(true)}
                   >
-                    <Trash2 size={14} /> Cancelar postulación
+                    <Trash2 size={14} /> {t(`${T_NS}.btnCancelarPostulacion`)}
                   </button>
                 )}
               </div>
@@ -305,7 +308,7 @@ export default function DetalleEmpleo() {
               onClick={() => abrirModal(false)}
             >
               <Send size={16} />
-              Postularme a este empleo
+              {t(`${T_NS}.postularme`)}
             </button>
           )}
         </div>
@@ -314,7 +317,7 @@ export default function DetalleEmpleo() {
           <div className="detalle-sideCard">
             <div className="detalle-sideHeader">
               <Building2 size={18} />
-              <h3>Sobre la empresa</h3>
+              <h3>{t(`${T_NS}.sobreEmpresa`)}</h3>
             </div>
             <div className="detalle-empresaInfo">
               <div className="detalle-empresaAvatar">
@@ -340,7 +343,7 @@ export default function DetalleEmpleo() {
                 rel="noopener noreferrer"
                 className="detalle-empresaWeb"
               >
-                <ExternalLink size={14} /> Sitio web
+                <ExternalLink size={14} /> {t(`${T_NS}.sitioWeb`)}
               </a>
             )}
           </div>
@@ -348,18 +351,18 @@ export default function DetalleEmpleo() {
           <div className="detalle-sideCard">
             <div className="detalle-sideHeader">
               <Briefcase size={18} />
-              <h3>Detalles del empleo</h3>
+              <h3>{t(`${T_NS}.detalles`)}</h3>
             </div>
             <dl className="detalle-dl">
-              <dt>Modalidad</dt>
-              <dd>{etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad}</dd>
-              <dt>Salario min.</dt>
+              <dt>{t(`${T_NS}.modalidad`)}</dt>
+              <dd>{etiquetaModalidad[empleo.modalidad] ? t(etiquetaModalidad[empleo.modalidad]) : empleo.modalidad}</dd>
+              <dt>{t(`${T_NS}.salarioMin`)}</dt>
               <dd>{formatoSalario.format(salarioMin)}</dd>
-              <dt>Salario máx.</dt>
+              <dt>{t(`${T_NS}.salarioMax`)}</dt>
               <dd>{formatoSalario.format(salarioMax)}</dd>
-              <dt>Plazo entrega</dt>
+              <dt>{t(`${T_NS}.plazoEntrega`)}</dt>
               <dd>{empleo.plazo_dias} días</dd>
-              <dt>Publicado</dt>
+              <dt>{t(`${T_NS}.publicado`)}</dt>
               <dd>{empleo.fecha_publicacion ? new Date(empleo.fecha_publicacion).toLocaleDateString('es-CR') : '—'}</dd>
             </dl>
           </div>
@@ -376,12 +379,12 @@ export default function DetalleEmpleo() {
               <Send size={28} />
             </div>
             <h2 className="modal-titulo">
-              {modoEdicion ? 'Editar postulación' : 'Postularme a este empleo'}
+              {modoEdicion ? t(`${T_NS}.editarPostulacion`) : t(`${T_NS}.modalPostularme`)}
             </h2>
             <p className="modal-desc">
               {modoEdicion
-                ? 'Actualiza tu mensaje de presentación o tu expectativa salarial.'
-                : 'Cuéntale a la empresa por qué eres el candidato ideal y cuáles son tus expectativas salariales.'}
+                ? t(`${T_NS}.modalEditarMsg`)
+                : t(`${T_NS}.modalPostularMsg`)}
             </p>
 
             <div className="modal-resumen">
@@ -408,7 +411,7 @@ export default function DetalleEmpleo() {
             <div className="modal-form">
               <div className="modal-campo">
                 <label className="modal-label">
-                  <Mail size={14} /> Mensaje de presentación <span className="modal-opcional">(opcional)</span>
+                  <Mail size={14} /> {t(`${T_NS}.campoMensaje`)}
                 </label>
                 <textarea
                   className="modal-textarea"
@@ -420,7 +423,7 @@ export default function DetalleEmpleo() {
               </div>
               <div className="modal-campo">
                 <label className="modal-label">
-                  <DollarSign size={14} /> Expectativa salarial <span className="modal-opcional">(opcional)</span>
+                  <DollarSign size={14} /> {t(`${T_NS}.campoSalario`)}
                 </label>
                 <input
                   className="modal-input"
@@ -435,7 +438,7 @@ export default function DetalleEmpleo() {
                     if (val.length <= 7) setPresupuesto(val);
                   }}
                 />
-                <span className="modal-ayuda">¿Cuál es tu expectativa salarial mensual en CRC? (máx. 7 dígitos)</span>
+                <span className="modal-ayuda">{t(`${T_NS}.campoSalarioHint`)}</span>
               </div>
             </div>
 
@@ -446,7 +449,7 @@ export default function DetalleEmpleo() {
                 onClick={() => setMostrarModal(false)}
                 disabled={enviando}
               >
-                Cancelar
+                {t(`${T_NS}.cancelar`)}
               </button>
               <button
                 type="button"
@@ -455,11 +458,11 @@ export default function DetalleEmpleo() {
                 disabled={enviando || (modoEdicion && !hayCambios)}
               >
                 {enviando ? (
-                  <>Guardando...</>
+                  <>{t(`${T_NS}.guardando`)}</>
                 ) : modoEdicion && !hayCambios ? (
-                  <><Send size={16} /> Sin cambios</>
+                  <><Send size={16} /> {t(`${T_NS}.sinCambios`)}</>
                 ) : (
-                  <><Send size={16} /> {modoEdicion ? 'Guardar cambios' : 'Postularme'}</>
+                  <><Send size={16} /> {modoEdicion ? t(`${T_NS}.guardarCambios`) : t(`${T_NS}.postularmeBtn`)}</>
                 )}
               </button>
             </div>

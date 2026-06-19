@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, ArrowUpRight, Plus, Pencil, Trash2, Check, X, Loader2, AlertTriangle, Book, Calendar } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../services/egresadoDashboardService';
 
@@ -23,6 +24,7 @@ const mapearHistorial = (h, i) => ({
 });
 
 function ProyectosAcademicos({ perfilApi }) {
+  const { t } = useTranslation();
   const { catalogoTecnologias } = perfilApi || {};
   const [proyectos, setProyectos] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
@@ -129,29 +131,29 @@ function ProyectosAcademicos({ perfilApi }) {
   const FormularioProyecto = ({ autoFocus }) => (
     <div className="formularioProyectoPersonal">
       <div className="filaFormularioDoble">
-        <input className="entradaProyectoPersonal" placeholder="Título del proyecto"
+        <input className="entradaProyectoPersonal" placeholder={t('egresadoPerfil.academicProjects.form.titulo')}
           value={borrador.titulo}
           onChange={(e) => setBorrador((b) => ({ ...b, titulo: e.target.value }))}
           autoFocus={autoFocus}
         />
         <select className="selectProyectoPersonal" value={borrador.tipo}
           onChange={(e) => setBorrador((b) => ({ ...b, tipo: e.target.value }))}>
-          <option value="GITHUB">GitHub</option>
-          <option value="PLATAFORMA">Plataforma</option>
+          <option value="GITHUB">{t('egresadoPerfil.academicProjects.form.github')}</option>
+          <option value="PLATAFORMA">{t('egresadoPerfil.academicProjects.form.plataforma')}</option>
         </select>
       </div>
 
-      <textarea className="textareaProyectoPersonal" placeholder="Descripción del proyecto"
+      <textarea className="textareaProyectoPersonal" placeholder={t('egresadoPerfil.academicProjects.form.descripcion')}
         rows={3} value={borrador.descripcion}
         onChange={(e) => setBorrador((b) => ({ ...b, descripcion: e.target.value }))}
       />
 
       <div className="filaFormularioDoble">
-        <input className="entradaProyectoPersonal" placeholder="Rol desempeñado (ej. Frontend Developer)"
+        <input className="entradaProyectoPersonal" placeholder={t('egresadoPerfil.academicProjects.form.rol')}
           value={borrador.rol}
           onChange={(e) => setBorrador((b) => ({ ...b, rol: e.target.value }))}
         />
-        <input className="entradaProyectoPersonal" placeholder="URL del repositorio"
+        <input className="entradaProyectoPersonal" placeholder={t('egresadoPerfil.academicProjects.form.url')}
           value={borrador.enlace}
           onChange={(e) => setBorrador((b) => ({ ...b, enlace: e.target.value }))}
         />
@@ -177,7 +179,7 @@ function ProyectosAcademicos({ perfilApi }) {
       <div className="campoTecnologiasForm">
         <div className="filaTechInput">
           <input ref={refTechInput} type="text" className="entradaProyectoPersonal"
-            placeholder="Buscar o escribir tecnología..."
+            placeholder={t('egresadoPerfil.academicProjects.form.techPlaceholder')}
             value={techInput}
             onChange={(e) => setTechInput(e.target.value)}
             onKeyDown={(e) => {
@@ -210,10 +212,10 @@ function ProyectosAcademicos({ perfilApi }) {
 
       <div className="accionesProyectoPersonal">
         <button type="button" className="botonGuardarMini" onClick={guardar} disabled={guardando}>
-          {guardando ? <Loader2 size={14} className="iconoGirando" /> : <Check size={14} />} Guardar
+          {guardando ? <Loader2 size={14} className="iconoGirando" /> : <Check size={14} />} {t('egresadoPerfil.academicProjects.form.guardar')}
         </button>
         <button type="button" className="botonCancelarMini" onClick={cancelar} disabled={guardando}>
-          <X size={14} /> Cancelar
+          <X size={14} /> {t('egresadoPerfil.academicProjects.form.cancelar')}
         </button>
       </div>
     </div>
@@ -222,21 +224,21 @@ function ProyectosAcademicos({ perfilApi }) {
   return (
     <>
       <div className="encabezadoProyectosAcademicos">
-        <h3 className="tituloProyectosSeccion">Proyectos Académicos y Prácticas</h3>
+        <h3 className="tituloProyectosSeccion">{t('egresadoPerfil.academicProjects.titulo')}</h3>
         <button type="button" className="botonAgregarProyecto" onClick={agregarNuevo}>
-          <Plus size={14} /> Agregar
+          <Plus size={14} /> {t('egresadoPerfil.academicProjects.agregar')}
         </button>
       </div>
 
       {cargando ? (
         <div className="vacioPostulaciones">
-          <Loader2 size={20} className="iconoGirando" /> Cargando proyectos...
+          <Loader2 size={20} className="iconoGirando" /> {t('egresadoPerfil.academicProjects.loading')}
         </div>
       ) : (
         <div className="cuadriculaProyectosPersonales">
           {proyectos.length === 0 && !editandoId && (
             <p className="vacioPostulaciones" style={{ gridColumn: '1 / -1' }}>
-              Aún no has agregado ningún proyecto. ¡Presiona "Agregar" para comenzar!
+              {t('egresadoPerfil.academicProjects.empty')}
             </p>
           )}
 
@@ -249,31 +251,31 @@ function ProyectosAcademicos({ perfilApi }) {
                 ) : confirmandoId === proyecto.id ? (
                   <div className="confirmacionEliminar">
                     <AlertTriangle size={24} className="iconoAdvertencia" />
-                    <p className="textoConfirmacion">¿Eliminar este proyecto?</p>
-                    <p className="subtituloConfirmacion">Esta acción no se puede deshacer.</p>
+                    <p className="textoConfirmacion">{t('egresadoPerfil.academicProjects.eliminarConfirm')}</p>
+                    <p className="subtituloConfirmacion">{t('egresadoPerfil.academicProjects.eliminarDesc')}</p>
                     <div className="accionesConfirmacion">
                       <button type="button" className="botonConfirmarSi" onClick={() => ejecutarEliminar(proyecto.id)}>
-                        <Trash2 size={14} /> Sí, eliminar
+                        <Trash2 size={14} /> {t('egresadoPerfil.academicProjects.siEliminar')}
                       </button>
                       <button type="button" className="botonConfirmarNo" onClick={cancelarEliminar}>
-                        <X size={14} /> Cancelar
+                        <X size={14} /> {t('egresadoPerfil.academicProjects.cancelar')}
                       </button>
                     </div>
                   </div>
                 ) : (
                   <>
                     <div className="accionesTarjetaProyecto">
-                      <button type="button" onClick={() => iniciarEdicion(proyecto)} aria-label="Editar">
+                      <button type="button" onClick={() => iniciarEdicion(proyecto)} aria-label={t('egresadoPerfil.academicProjects.editar')}>
                         <Pencil size={14} />
                       </button>
-                      <button type="button" onClick={() => confirmarEliminar(proyecto.id)} className="peligro" aria-label="Eliminar">
+                      <button type="button" onClick={() => confirmarEliminar(proyecto.id)} className="peligro" aria-label={t('egresadoPerfil.academicProjects.eliminar')}>
                         <Trash2 size={14} />
                       </button>
                     </div>
 
                     <div className="encabezadoCardProyecto">
                       <span className={`tipoBadge ${proyecto.tipo === 'GITHUB' ? 'tipoGithub' : 'tipoPlataforma'}`}>
-                        <Book size={10} /> {proyecto.tipo === 'GITHUB' ? 'GitHub' : 'Plataforma'}
+                        <Book size={10} /> {proyecto.tipo === 'GITHUB' ? t('egresadoPerfil.academicProjects.form.github') : t('egresadoPerfil.academicProjects.form.plataforma')}
                       </span>
                     </div>
 
