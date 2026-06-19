@@ -1,7 +1,7 @@
 import React from 'react';
 import DashboardLayout from '../DashboardEmpresario/components/DashboardLayout';
 import CompanyProfile from './components/CompanyProfile';
-import RecruitmentTeam from './components/RecruitmentTeam';
+import LegalIdSection from './components/LegalIdSection';
 import NotificationPreferences from './components/NotificationPreferences';
 import SecuritySettings from './components/SecuritySettings';
 
@@ -15,7 +15,7 @@ const SettingsEmpresa = () => {
           <CompanyProfile />
 
           <div className="se-grid-2">
-            <RecruitmentTeam />
+            <LegalIdSection />
             <NotificationPreferences />
           </div>
 

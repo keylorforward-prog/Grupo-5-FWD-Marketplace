@@ -321,18 +321,19 @@ body.dark-theme {
 .se-avatar-box {
   width: 128px;
   height: 128px;
-  border-radius: 12px;
+  border-radius: 50%;
   border: 2px solid var(--color-outline-variant);
   background-color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-base);
+  padding: 0;
   box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06);
   transition: transform 0.2s;
+  overflow: hidden;
 }
 .se-avatar-container:hover .se-avatar-box { transform: scale(1.05); }
-.se-avatar-img { width: 100%; height: 100%; object-fit: contain; }
+.se-avatar-img { width: 100%; height: 100%; object-fit: cover; }
 .se-edit-avatar-btn {
   position: absolute;
   bottom: -8px;

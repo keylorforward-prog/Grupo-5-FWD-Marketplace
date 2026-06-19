@@ -62,6 +62,7 @@ exports.getProfileByUserId = async (req, res) => {
       data: {
         nombre: usuario.nombre,
         cedula: usuario.cedula,
+        telefono_whatsapp: usuario.telefono_whatsapp || perfil?.telefono_whatsapp || '',
         sitio_web: perfil?.sitio_web || '',
         sector: perfil?.sector || '',
         descripcion: perfil?.descripcion || '',
@@ -74,20 +75,25 @@ exports.getProfileByUserId = async (req, res) => {
 
 exports.updateProfileByUserId = async (req, res) => {
   try {
-    const { nombre, cedula, sitio_web, sector, descripcion } = req.body;
+    const { nombre, cedula, telefono_whatsapp, sitio_web, sector, descripcion } = req.body;
     const id_usuario = req.params.id_usuario;
 
     // Actualizamos Usuario
-    await Usuario.update({ nombre, cedula }, { where: { id_usuario } });
+    await Usuario.update({ nombre, cedula, telefono_whatsapp }, { where: { id_usuario } });
 
     // Actualizamos PerfilEmpresario
     await PerfilEmpresario.update(
-      { sitio_web, sector, descripcion },
+      { sitio_web, sector, descripcion, telefono_whatsapp },
       { where: { id_usuario } }
     );
 
     res.status(200).json({ success: true, message: 'Perfil de empresa actualizado correctamente' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error en updateProfileByUserId:", error);
+    let errorMessage = error.message;
+    if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
+      errorMessage = error.errors.map(e => e.message).join(', ');
+    }
+    res.status(500).json({ success: false, message: errorMessage, raw: error });
   }
 };
