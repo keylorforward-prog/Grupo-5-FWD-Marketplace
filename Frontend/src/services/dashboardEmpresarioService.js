@@ -88,6 +88,10 @@ export const dashboardEmpresarioService = {
     return get('/dashboard-empresario/postulaciones', params);
   },
 
+  actualizarEstadoPostulacion(id, estado) {
+    return apiClient.put(`/dashboard-empresario/postulaciones/${id}/estado`, { estado }).then(extraerData);
+  },
+
   obtenerTalentoRecomendado(params) {
     return get('/dashboard-empresario/talento-recomendado', params);
   },
@@ -120,6 +124,20 @@ export const dashboardEmpresarioService = {
 
   obtenerHistorial(params) {
     return get('/dashboard-empresario/historial', params);
+  },
+
+  async crearHistorial(payload) {
+    const respuesta = await apiClient.post('/dashboard-empresario/historial', payload);
+    return extraerData(respuesta);
+  },
+
+  async actualizarHistorial(id, payload) {
+    const respuesta = await apiClient.put(`/dashboard-empresario/historial/${id}`, payload);
+    return extraerData(respuesta);
+  },
+
+  async eliminarHistorial(id) {
+    await apiClient.delete(`/dashboard-empresario/historial/${id}`);
   },
 
   obtenerEvaluaciones(params) {

@@ -1,6 +1,6 @@
 import { useMemo, Fragment } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Building2, Eye } from 'lucide-react';
+import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Eye, Building2 } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
 import { formatearPostulacion } from '../../utils/dashboardEgresadoFormatters';
@@ -90,123 +90,19 @@ function FlujoPostulacion({ estadoRaw }) {
   );
 }
 
-function FlujoEmpleo({ estado }) {
-  const estadoKey = (estado || 'PENDIENTE').toLowerCase();
-  const aceptado = estadoKey === 'aceptada';
-  const rechazado = estadoKey === 'rechazada';
-
-  const ORDEN_EMPLEO = [
-    { key: 'RECIBIDA', label: 'Recibida' },
-    { key: 'PENDIENTE', label: 'Pendiente' },
-    { key: 'EN_REVISION', label: 'En Revisión' },
-    { key: 'PRESELECCIONADA', label: 'Preseleccionada' },
-    { key: 'FINAL', label: '' },
-  ];
-
-  const pasoActual = (estadoKey === 'pendiente' || estadoKey === 'recibida') ? 0
-    : aceptado ? 4
-    : rechazado ? 4
-    : -1;
-
-  return (
-    <div className="post-flujo">
-      {ORDEN_EMPLEO.map((paso, i) => {
-        const esUltimo = i === ORDEN_EMPLEO.length - 1;
-        const label = esUltimo
-          ? (rechazado ? 'Rechazada' : aceptado ? 'Aceptada' : '—')
-          : paso.label;
-        const icono = esUltimo
-          ? (rechazado ? '✕' : aceptado ? '✓' : (ORDEN_EMPLEO.length).toString())
-          : (i < pasoActual ? '✓' : (i + 1).toString());
-
-        let claseBola = '';
-        let claseEtiqueta = '';
-        let claseraya = '';
-
-        if (rechazado) {
-          if (i < pasoActual) {
-            claseBola = 'completado';
-            claseEtiqueta = 'completado';
-            claseraya = 'completado';
-          } else if (i === pasoActual) {
-            claseBola = 'rechazado-final';
-            claseEtiqueta = 'rechazado';
-            claseraya = 'rechazado-linea';
-          }
-        } else if (aceptado) {
-          if (i < pasoActual) {
-            claseBola = 'completado';
-            claseEtiqueta = 'completado';
-            claseraya = 'completado';
-          } else if (i === pasoActual) {
-            claseBola = 'aceptado';
-            claseEtiqueta = 'aceptado';
-            claseraya = 'completado';
-          }
-        } else if (pasoActual >= 0) {
-          if (i < pasoActual) {
-            claseBola = 'completado';
-            claseEtiqueta = 'completado';
-            claseraya = 'completado';
-          } else if (i === pasoActual) {
-            claseBola = 'activo';
-            claseEtiqueta = 'activo';
-            claseraya = 'completado';
-          }
-        }
-
-        return (
-          <Fragment key={paso.key}>
-            {i > 0 && <span className={`post-flujo-raya ${claseraya}`} />}
-            <div className="post-flujo-paso">
-              <span className={`post-flujo-bola ${claseBola}`}>{icono}</span>
-              <span className={`post-flujo-etiqueta ${claseEtiqueta}`}>{label}</span>
-            </div>
-          </Fragment>
-        );
-      })}
-    </div>
-  );
-}
-
-const formatearOferta = (o) => {
-  const propuesta = o.propuestaRef || {};
-  const empresa = propuesta.perfilEmpresario?.usuario;
-  return {
-    id: o.id_oferta,
-    titulo: propuesta.titulo || 'Oferta de empleo',
-    descripcion: o.propuesta || propuesta.descripcion || '',
-    empresa: empresa?.nombre || 'Empresa',
-    estado: o.estado || 'PENDIENTE',
-    tipoEstado: (o.estado || '').toLowerCase() === 'aceptada' ? 'activo' : 'pendiente',
-    fecha: o.fecha_oferta ? new Date(o.fecha_oferta).toLocaleDateString('es-CR') : '—',
-    cantidad: o.cantidad,
-  };
-};
-
 export default function Postulaciones() {
   const navigate = useNavigate();
   const location = useLocation();
   const tabActivo = location.pathname.includes('/empleos') ? 'empleos' : 'proyectos';
 
-  const { data: postData, loading: postLoading, error: postError } = useDashboardEgresadoRequest(
+  const { data, loading, error } = useDashboardEgresadoRequest(
     () => egresadoDashboardService.obtenerPostulaciones(),
     [],
     []
   );
 
-  const { data: ofertasData, loading: ofertasLoading, error: ofertasError } = useDashboardEgresadoRequest(
-    () => egresadoDashboardService.obtenerOfertas(),
-    [],
-    []
-  );
-
-  const postulaciones = useMemo(() => (postData || []).map(formatearPostulacion), [postData]);
-  const ofertas = useMemo(() => (ofertasData || []).map(formatearOferta), [ofertasData]);
-
-  const loading = tabActivo === 'proyectos' ? postLoading : ofertasLoading;
-  const error = tabActivo === 'proyectos' ? postError : ofertasError;
-  const items = tabActivo === 'proyectos' ? postulaciones : ofertas;
+  const postulaciones = useMemo(() => (data || []).map(formatearPostulacion), [data]);
+  const items = postulaciones;
 
   return (
     <div className="post-layout fwd-animar-entrada">
@@ -235,7 +131,7 @@ export default function Postulaciones() {
             </button>
             <h1>Mis Postulaciones</h1>
           </div>
-          <span className="conteoProyectos">{items.length} {tabActivo === 'proyectos' ? 'postulaciones' : 'ofertas'}</span>
+          <span className="conteoProyectos">{items.length} {tabActivo === 'proyectos' ? 'postulaciones' : 'postulaciones a empleos'}</span>
         </div>
 
         {loading && <p className="de-data-state">Cargando...</p>}
@@ -254,9 +150,12 @@ export default function Postulaciones() {
 
         {!loading && !error && items.length === 0 && tabActivo === 'empleos' && (
           <div className="post-empty">
-            <Building2 size={48} />
-            <h4>Sin ofertas de empleo</h4>
-            <p>Aún no has recibido ofertas de empleo. Las empresas te contactarán cuando tengan una oportunidad para ti.</p>
+            <Briefcase size={48} />
+            <h4>Sin postulaciones a empleos</h4>
+            <p>Aún no te has postulado a ningún empleo. ¡Explora y encuentra tu próximo empleo!</p>
+            <button className="post-emptyBtn" type="button" onClick={() => navigate('/egresado/dashboard/explorar-empleos')}>
+              Explorar empleos
+            </button>
           </div>
         )}
 
@@ -319,39 +218,52 @@ export default function Postulaciones() {
 
         {!loading && !error && items.length > 0 && tabActivo === 'empleos' && (
           <div className="post-list">
-            {ofertas.map((o, i) => (
-              <div key={o.id} className={`post-card acento-${acentos[i % acentos.length]}`}>
+            {postulaciones.map((p, i) => (
+              <div key={p.id} className={`post-card acento-${acentos[i % acentos.length]}`}>
                 <div className="post-cardBody">
                   <div className="post-iconWrap">
-                    <Building2 size={20} />
+                    <Briefcase size={20} />
                   </div>
                   <div className="post-content">
                     <div className="post-header">
-                      <h3 className="post-title">{o.titulo}</h3>
-                      <span className={`de-badge ${o.tipoEstado}`}>{o.estado}</span>
+                      <h3 className="post-title">{p.titulo}</h3>
+                      <span className={`de-badge ${p.tipoEstado}`}>{p.estado}</span>
                     </div>
-                    <p className="post-empresa">{o.empresa}</p>
-                    {o.descripcion && <p className="post-desc">{o.descripcion}</p>}
+                    <p className="post-empresa">{p.empresa}</p>
+                    {p.descripcion && <p className="post-desc">{p.descripcion}</p>}
+                    {p.tecnologias.length > 0 && (
+                      <div className="post-techs">
+                        {p.tecnologias.map((tech) => (
+                          <span key={tech} className="etiquetaTecnologia">{tech}</span>
+                        ))}
+                      </div>
+                    )}
                     <div className="post-meta">
                       <span className="post-metaItem">
                         <Calendar size={13} />
-                        {o.fecha}
+                        {p.fecha}
                       </span>
-                      {o.cantidad && (
+                      {p.presupuesto && (
                         <span className="post-metaItem">
                           <DollarSign size={13} />
-                          ₡{Number(o.cantidad).toLocaleString()}
+                          ${Number(p.presupuesto).toLocaleString('en-US')}
+                        </span>
+                      )}
+                      {p.mensaje && (
+                        <span className="post-metaItem post-mensaje" title={p.mensaje}>
+                          <Clock size={13} />
+                          Con mensaje
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-                <FlujoEmpleo estado={o.estado} />
+                <FlujoPostulacion estadoRaw={p.estadoRaw} />
                 <div className="post-acciones">
                   <button
                     className="post-btnDetalle"
                     type="button"
-                    onClick={() => navigate(`/egresado/dashboard/empleo/${o.id}`)}
+                    onClick={() => navigate(`/egresado/dashboard/empleo/${p.idPropuesta}`)}
                   >
                     <Eye size={15} />
                     Ver empleo

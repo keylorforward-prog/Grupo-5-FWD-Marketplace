@@ -65,6 +65,14 @@ export const formatearPropuesta = (propuesta, indice = 0) => {
     action: ofertas > 0 ? 'Ver ofertas' : 'Gestionar',
     arrowSrc: FLECHAS_PROYECTO[indice % FLECHAS_PROYECTO.length],
     iconColor: ['blue', 'orange', 'green', 'purple'][indice % 4],
+    github_url: propuesta.github_url || null,
+    descripcion: propuesta.descripcion,
+    tecnologias_requeridas: propuesta.tecnologias_requeridas,
+    presupuesto_min: propuesta.presupuesto_min,
+    presupuesto_max: propuesta.presupuesto_max,
+    plazo_dias: propuesta.plazo_dias,
+    estado: propuesta.estado,
+    fecha_limite: propuesta.fecha_limite,
   };
 };
 

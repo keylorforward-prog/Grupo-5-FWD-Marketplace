@@ -51,7 +51,14 @@ export default function DashboardLayout({ children }) {
   const sidebarItems = [
     { key: 'inicio', label: t('egresadoLayout.sidebar.inicio'), icon: Home, path: '/egresado/dashboard' },
     { key: 'explorar', label: t('egresadoLayout.sidebar.explorar'), icon: Compass, path: '/egresado/dashboard/explorar' },
-    { key: 'postulaciones', label: t('egresadoLayout.sidebar.postulaciones'), icon: FileText, path: '/egresado/dashboard/postulaciones' },
+    { key: 'explorar-empleos', label: 'Explorar Empleos', icon: Briefcase, path: '/egresado/dashboard/explorar-empleos' },
+    {
+      key: 'postulaciones', label: t('egresadoLayout.sidebar.postulaciones'), icon: FileText,
+      children: [
+        { key: 'postulaciones-proyectos', label: 'Proyectos', path: '/egresado/dashboard/postulaciones/proyectos' },
+        { key: 'postulaciones-empleos', label: 'Empleos', path: '/egresado/dashboard/postulaciones/empleos' },
+      ],
+    },
     { key: 'proyectos', label: t('egresadoLayout.sidebar.proyectos'), icon: FolderOpen, path: '/egresado/dashboard/proyectos' },
     { key: 'historial', label: t('egresadoLayout.sidebar.historial'), icon: History, path: '/egresado/dashboard/historial' },
     { key: 'mensajes', label: t('egresadoLayout.sidebar.mensajes'), icon: MessageSquare, path: '/egresado/dashboard/mensajes' },
@@ -279,8 +286,7 @@ export default function DashboardLayout({ children }) {
       </header>
 
       <div className="de-body">
-        {!rutaActual.startsWith('/egresado/dashboard/proyecto/') && (
-          <aside className="de-sidebar">
+        <aside className="de-sidebar">
             <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
               <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
               <div className="de-sidebar-profile-info">
@@ -352,9 +358,8 @@ export default function DashboardLayout({ children }) {
               </button>
             </div>
           </aside>
-        )}
 
-        <main className={`de-main fwd-fondo-decorativo${rutaActual.startsWith('/egresado/dashboard/proyecto/') ? ' de-main--full' : ''}`}>
+        <main className="de-main fwd-fondo-decorativo">
           <div className="de-main-content">{children}</div>
           <footer className="de-footer">
             <span className="de-footer-copy">

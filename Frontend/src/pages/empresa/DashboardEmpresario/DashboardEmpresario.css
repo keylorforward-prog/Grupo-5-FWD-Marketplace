@@ -873,6 +873,82 @@
   font-weight: 700;
 }
 
+.de-offers-project-filter {
+  display: grid;
+  gap: 0.35rem;
+  min-width: min(100%, 320px);
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.de-offers-project-filter .de-form-control {
+  min-height: 42px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.95rem;
+}
+
+.de-offers-heading-actions {
+  display: flex;
+  align-items: end;
+  gap: 0.8rem;
+}
+
+.de-offers-project-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.de-offers-project-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.de-offers-project-card:last-child {
+  border-bottom: 0;
+}
+
+.de-offers-project-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.de-offers-project-info {
+  min-width: 0;
+}
+
+.de-offers-project-info h2 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 1rem;
+}
+
+.de-offers-project-info p {
+  display: -webkit-box;
+  margin: 0.25rem 0;
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.de-offers-project-info span {
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
 .de-form-grid {
   display: grid;
   gap: 1rem;
@@ -3052,6 +3128,24 @@
 }
 
 @media (max-width: 600px) {
+  .de-page-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .de-offers-project-filter {
+    min-width: 0;
+  }
+  .de-offers-heading-actions,
+  .de-offers-project-card {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+  .de-offers-heading-actions {
+    display: grid;
+  }
+  .de-offers-project-card .de-panel-action {
+    justify-content: center;
+  }
   .de-modal-backdrop {
     align-items: flex-start;
     padding: 0.75rem;
@@ -3187,4 +3281,77 @@
   background: color-mix(in srgb, var(--primary, #008fd4) 12%, transparent);
   border-color: var(--primary, #008fd4);
   color: var(--primary, #008fd4);
+}
+
+/* ── Project Detail Sections ──────────────────────────────────────────── */
+.de-project-detail {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--surface-sunken, #f8f9fc);
+  border-radius: 12px;
+  border: 1px solid var(--border, #e9edf4);
+  animation: fadeSlideIn 0.2s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.de-detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.de-detail-section strong,
+.de-detail-row strong {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.15rem;
+}
+
+.de-detail-section p {
+  font-size: 0.82rem;
+  color: var(--ink, #1f2937);
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.de-detail-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+
+.de-detail-row span {
+  font-size: 0.82rem;
+  color: var(--ink, #1f2937);
+}
+
+.de-detail-link {
+  font-size: 0.82rem;
+  color: var(--primary, #008fd4);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  word-break: break-all;
+}
+
+.de-detail-link:hover {
+  text-decoration: underline;
+}
+
+.de-panel-history {
+  margin-top: 24px;
+}
+
+.de-panel-history:hover {
+  transform: none;
 }

@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     habilidades: { type: DataTypes.TEXT, allowNull: true },
     certificaciones: { type: DataTypes.TEXT, allowNull: true },
     enlaces: { type: DataTypes.STRING(500), allowNull: true },
+    documento_cv: { type: DataTypes.STRING(500), allowNull: true },
     fecha_actualizacion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW }
   }, { tableName: 'curriculum', timestamps: false, underscored: true, freezeTableName: true });
 };

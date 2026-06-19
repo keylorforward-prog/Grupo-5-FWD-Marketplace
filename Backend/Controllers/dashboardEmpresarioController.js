@@ -279,7 +279,8 @@ const crearPropuesta = async (req, res) => {
       estado: 'ACTIVA',
       fecha_limite: construirFechaLimite(plazoDias),
       id_conversacion_ia: idConversacionIa,
-      documento_adjunto: urlAdjunto
+      documento_adjunto: urlAdjunto,
+      github_url: req.body.github_url || null
     });
 
     res.status(201).json({
@@ -330,6 +331,7 @@ const actualizarPropuesta = async (req, res) => {
       'presupuesto_max',
       'estado',
       'fecha_limite',
+      'github_url',
     ];
     const cambios = camposPermitidos.reduce((acumulado, campo) => {
       if (Object.prototype.hasOwnProperty.call(req.body, campo)) {
@@ -813,6 +815,80 @@ const listarHistorial = async (req, res) => {
   }
 };
 
+const crearHistorial = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { titulo_proyecto, descripcion, tecnologias_usadas, enlace, fecha_inicio, fecha_fin } = req.body;
+    if (!titulo_proyecto?.trim()) {
+      return res.status(400).json({ success: false, message: 'El título del proyecto es obligatorio.' });
+    }
+
+    const historial = await HistorialProyectoEmpresa.create({
+      id_perfil_empresario: perfil.id_perfil_empresario,
+      titulo_proyecto: titulo_proyecto.trim(),
+      descripcion: descripcion || null,
+      tecnologias_usadas: tecnologias_usadas || null,
+      enlace: enlace || null,
+      fecha_inicio: fecha_inicio || null,
+      fecha_fin: fecha_fin || null,
+    });
+
+    res.status(201).json({ success: true, data: historial });
+  } catch (error) {
+    responderError(res, error, 'Error al crear historial de proyecto.');
+  }
+};
+
+const actualizarHistorial = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const historial = await HistorialProyectoEmpresa.findOne({
+      where: { id_historial_empresa: req.params.id, id_perfil_empresario: perfil.id_perfil_empresario },
+    });
+
+    if (!historial) {
+      return res.status(404).json({ success: false, message: 'Historial no encontrado.' });
+    }
+
+    const camposPermitidos = ['titulo_proyecto', 'descripcion', 'tecnologias_usadas', 'enlace', 'fecha_inicio', 'fecha_fin'];
+    const cambios = camposPermitidos.reduce((acc, campo) => {
+      if (Object.prototype.hasOwnProperty.call(req.body, campo)) {
+        acc[campo] = req.body[campo];
+      }
+      return acc;
+    }, {});
+
+    await historial.update(cambios);
+    res.json({ success: true, data: historial });
+  } catch (error) {
+    responderError(res, error, 'Error al actualizar historial de proyecto.');
+  }
+};
+
+const eliminarHistorial = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const historial = await HistorialProyectoEmpresa.findOne({
+      where: { id_historial_empresa: req.params.id, id_perfil_empresario: perfil.id_perfil_empresario },
+    });
+
+    if (!historial) {
+      return res.status(404).json({ success: false, message: 'Historial no encontrado.' });
+    }
+
+    await historial.destroy();
+    res.json({ success: true, message: 'Historial eliminado correctamente.' });
+  } catch (error) {
+    responderError(res, error, 'Error al eliminar historial de proyecto.');
+  }
+};
+
 const listarEvaluaciones = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEmpresario(req, res);
@@ -1035,7 +1111,83 @@ const crearOfertaEmpleo = async (req, res) => {
   }
 };
 
+const actualizarEstadoPostulacion = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'RECHAZADA', 'CONTRATADO'];
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({ success: false, message: `Estado invalido. Validos: ${estadosValidos.join(', ')}` });
+    }
+
+    const postulacion = await Postulacion.findByPk(id, {
+      include: [
+        {
+          model: Propuesta,
+          as: 'propuesta',
+          required: true,
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'perfilEstudiante',
+          include: [{ model: Usuario, as: 'usuario' }],
+        },
+      ],
+    });
+
+    if (!postulacion) {
+      return res.status(404).json({ success: false, message: 'Postulacion no encontrada.' });
+    }
+
+    if (postulacion.propuesta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      return res.status(403).json({ success: false, message: 'No tienes permiso para modificar esta postulacion.' });
+    }
+
+    const estadoAnterior = postulacion.estado;
+    await postulacion.update({ estado });
+
+    const tituloPropuesta = postulacion.propuesta.titulo;
+    const usuarioEstudiante = postulacion.perfilEstudiante?.usuario;
+
+    if (usuarioEstudiante) {
+      const mapaMensajes = {
+        EN_REVISION: `Tu postulacion para "${tituloPropuesta}" ha pasado a estar en revision.`,
+        PRESSELECCIONADA: `¡Felicidades! Has sido preseleccionado para "${tituloPropuesta}".`,
+        RECHAZADA: `Tu postulacion para "${tituloPropuesta}" no ha sido seleccionada.`,
+        CONTRATADO: `¡Felicidades! Has sido contratado para "${tituloPropuesta}".`,
+      };
+      const mensaje = mapaMensajes[estado];
+      if (mensaje) {
+        await Notificacion.create({
+          id_usuario: usuarioEstudiante.id_usuario,
+          tipo: `POSTULACION_${estado}`,
+          mensaje,
+          leido: false,
+          fecha: new Date(),
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Estado actualizado a "${estado}".`,
+      data: { id: postulacion.id_postulacion, estadoAnterior, estadoActual: estado },
+    });
+  } catch (error) {
+    responderError(res, error, 'Error al actualizar el estado de la postulacion.');
+  }
+};
+
 module.exports = {
+  aceptarOferta,
+  actualizarEstadoPostulacion,
+  actualizarHistorial,
+  crearHistorial,
+  eliminarHistorial,
   actualizarPerfil,
   actualizarPropuesta,
   crearOfertaEmpleo,
@@ -1057,8 +1209,7 @@ module.exports = {
   marcarLeidos,
   obtenerConversacion,
   obtenerResumen,
-  subirFotoPerfil,
-  aceptarOferta,
   rechazarOferta,
+  subirFotoPerfil,
   };
 

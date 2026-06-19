@@ -1,6 +1,9 @@
-import { useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, GitBranch, BookOpen, Calendar, User, Link as LinkIcon, Code, Clock, SearchX, Layers } from 'lucide-react';
+import {
+  ArrowLeft, ExternalLink, GitBranch, BookOpen, Calendar, User, Link as LinkIcon,
+  Code, SearchX, Layers, Plus, Pencil, Trash2, Check, X, AlertTriangle
+} from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
 import { formatearHistorial } from '../../utils/dashboardEgresadoFormatters';
@@ -10,13 +13,23 @@ const TIPO_CONFIG = {
   PLATAFORMA: { icon: BookOpen, label: 'Plataforma', color: '#7c3aed', bg: '#f3e8ff' },
 };
 
+const VACIO = () => ({
+  titulo_proyecto: '', tipo: 'GITHUB', descripcion: '', enlace: '',
+  tecnologias: '', rol_desempenado: '', fecha_inicio: '', fecha_fin: '',
+});
+
 export default function Historial() {
   const navigate = useNavigate();
-  const { data, loading, error } = useDashboardEgresadoRequest(
+  const { data, loading, error, refetch } = useDashboardEgresadoRequest(
     () => egresadoDashboardService.obtenerHistorial(),
     [],
     []
   );
+
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState(null);
+  const [guardando, setGuardando] = useState(false);
+  const [confirmId, setConfirmId] = useState(null);
 
   const historiales = useMemo(() => (data || []).map(formatearHistorial), [data]);
 
@@ -27,6 +40,61 @@ export default function Historial() {
     return { total, github, plataforma };
   }, [historiales]);
 
+  const iniciarEdit = (item) => {
+    if (item) {
+      setEditId(item.id_historial_estudiante);
+      setForm({
+        titulo_proyecto: item.titulo_proyecto || '',
+        tipo: item.tipo || 'GITHUB',
+        descripcion: item.descripcion || '',
+        enlace: item.enlace || '',
+        tecnologias: item.tecnologias || '',
+        rol_desempenado: item.rol_desempenado || '',
+        fecha_inicio: item.fecha_inicio ? item.fecha_inicio.slice(0, 10) : '',
+        fecha_fin: item.fecha_fin ? item.fecha_fin.slice(0, 10) : '',
+      });
+    } else {
+      setEditId('nuevo');
+      setForm(VACIO());
+    }
+  };
+
+  const cancelarEdit = () => { setEditId(null); setForm(null); };
+
+  const cambiarCampo = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const guardar = async () => {
+    if (!form?.titulo_proyecto?.trim()) return;
+    setGuardando(true);
+    try {
+      if (editId === 'nuevo') {
+        await egresadoDashboardService.crearHistorialProyecto(form);
+      } else {
+        await egresadoDashboardService.actualizarHistorialProyecto(editId, form);
+      }
+      refetch();
+      cancelarEdit();
+    } catch {
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  const eliminar = async (id) => {
+    setGuardando(true);
+    try {
+      await egresadoDashboardService.eliminarHistorialProyecto(id);
+      refetch();
+      setConfirmId(null);
+    } catch {
+    } finally {
+      setGuardando(false);
+    }
+  };
+
   return (
     <div className="fwd-animar-entrada">
       <div className="de-page-heading">
@@ -36,9 +104,12 @@ export default function Historial() {
           </button>
           <h1>Historial de Proyectos</h1>
         </div>
-        {!loading && !error && (
-          <span className="conteoProyectos">{historiales.length} registro{historiales.length !== 1 ? 's' : ''}</span>
-        )}
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {!loading && !error && <span className="conteoProyectos">{historiales.length} registro{historiales.length !== 1 ? 's' : ''}</span>}
+          <button className="de-btn-primary" type="button" onClick={() => iniciarEdit(null)} disabled={guardando}>
+            <Plus size={15} /> Agregar
+          </button>
+        </div>
       </div>
 
       {!loading && !error && historiales.length > 0 && (
@@ -67,6 +138,40 @@ export default function Historial() {
         </div>
       )}
 
+      {/* Formulario nuevo/edicion */}
+      {editId && form && (
+        <div className="historial-form-wrap">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+            <input className="de-form-control" name="titulo_proyecto" value={form.titulo_proyecto} onChange={cambiarCampo}
+              placeholder="Título del proyecto" autoFocus />
+            <select className="de-form-control" name="tipo" value={form.tipo} onChange={cambiarCampo}>
+              <option value="GITHUB">GitHub</option>
+              <option value="PLATAFORMA">Plataforma</option>
+            </select>
+            <input className="de-form-control" name="rol_desempenado" value={form.rol_desempenado} onChange={cambiarCampo}
+              placeholder="Rol desempeñado" />
+            <input className="de-form-control" name="tecnologias" value={form.tecnologias} onChange={cambiarCampo}
+              placeholder="Tecnologías (separadas por coma)" />
+            <input className="de-form-control" name="enlace" value={form.enlace} onChange={cambiarCampo}
+              placeholder="URL del repositorio" />
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input className="de-form-control" name="fecha_inicio" value={form.fecha_inicio} onChange={cambiarCampo} type="date" placeholder="Inicio" />
+              <input className="de-form-control" name="fecha_fin" value={form.fecha_fin} onChange={cambiarCampo} type="date" placeholder="Fin" />
+            </div>
+            <textarea className="de-form-control de-form-textarea" name="descripcion" value={form.descripcion} onChange={cambiarCampo}
+              placeholder="Descripción" rows={2} style={{ gridColumn: '1 / -1' }} />
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+            <button className="de-btn-primary" type="button" onClick={guardar} disabled={guardando || !form.titulo_proyecto?.trim()}>
+              <Check size={14} /> {guardando ? 'Guardando...' : 'Guardar'}
+            </button>
+            <button className="de-btn-outline" type="button" onClick={cancelarEdit} disabled={guardando}>
+              <X size={14} /> Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
       {loading && (
         <div className="historial-loading">
           {[1, 2, 3].map((i) => (
@@ -90,6 +195,11 @@ export default function Historial() {
           {historiales.map((h, idx) => {
             const tipoCfg = TIPO_CONFIG[h.tipo] || TIPO_CONFIG.PLATAFORMA;
             const TipoIcon = tipoCfg.icon;
+            const raw = (data || [])[idx];
+            const enEdicion = editId === raw?.id_historial_estudiante;
+
+            if (enEdicion) return null;
+
             return (
               <div key={h.id} className="historial-card" style={{ '--accent-color': tipoCfg.color, '--accent-bg': tipoCfg.bg }}>
                 <div className="historial-card-dot" style={{ backgroundColor: tipoCfg.color }}>
@@ -104,9 +214,7 @@ export default function Historial() {
                     </span>
                   </div>
 
-                  {h.descripcion && (
-                    <p className="historial-card-desc">{h.descripcion}</p>
-                  )}
+                  {h.descripcion && <p className="historial-card-desc">{h.descripcion}</p>}
 
                   <div className="historial-card-meta">
                     {h.rol && (
@@ -131,16 +239,29 @@ export default function Historial() {
                   )}
 
                   {h.enlace && (
-                    <a
-                      href={h.enlace}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="historial-card-link"
-                    >
+                    <a href={h.enlace} target="_blank" rel="noopener noreferrer" className="historial-card-link">
                       <LinkIcon size={13} />
-                      Ver repositorio
-                      <ExternalLink size={12} />
+                      Ver repositorio <ExternalLink size={12} />
                     </a>
+                  )}
+                </div>
+                <div className="historial-card-actions">
+                  <button className="de-project-icon-button" type="button" onClick={() => iniciarEdit(raw)} disabled={guardando}>
+                    <Pencil size={13} />
+                  </button>
+                  {confirmId === raw?.id_historial_estudiante ? (
+                    <>
+                      <button className="de-project-icon-button danger" type="button" onClick={() => eliminar(raw.id_historial_estudiante)} disabled={guardando}>
+                        <Trash2 size={13} />
+                      </button>
+                      <button className="de-project-icon-button" type="button" onClick={() => setConfirmId(null)}>
+                        <X size={13} />
+                      </button>
+                    </>
+                  ) : (
+                    <button className="de-project-icon-button danger" type="button" onClick={() => setConfirmId(raw?.id_historial_estudiante)} disabled={guardando}>
+                      <Trash2 size={13} />
+                    </button>
                   )}
                 </div>
               </div>

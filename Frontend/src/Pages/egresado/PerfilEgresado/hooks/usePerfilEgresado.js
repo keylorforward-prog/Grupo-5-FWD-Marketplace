@@ -16,14 +16,19 @@ const perfilVacio = {
   linkedin: '',
   bio: '',
   tecnologias: [],
+  documento_cv: null,
 };
 
 export function usePerfilEgresado() {
   const [perfil, setPerfil] = useState(perfilVacio);
   const [cargando, setCargando] = useState(true);
+  const [catalogoTecnologias, setCatalogoTecnologias] = useState([]);
 
   useEffect(() => {
     let activo = true;
+    egresadoDashboardService.obtenerCatalogoTecnologias().then((lista) => {
+      if (activo) setCatalogoTecnologias(lista);
+    });
     egresadoDashboardService.obtenerPerfil()
       .then((data) => {
         if (!activo) return;
@@ -40,6 +45,7 @@ export function usePerfilEgresado() {
                 fondo: elegirFondoRotativo(i),
               }))
             : [],
+          documento_cv: data.documento_cv || null,
         });
       })
       .catch(() => {
@@ -89,5 +95,5 @@ export function usePerfilEgresado() {
     });
   }, []);
 
-  return { perfil, actualizar, agregarTecnologia, quitarTecnologia, cargando };
+  return { perfil, actualizar, agregarTecnologia, quitarTecnologia, cargando, catalogoTecnologias };
 }

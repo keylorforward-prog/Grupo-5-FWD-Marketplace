@@ -1,36 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Briefcase, Clock, MapPin, Search, Send, X } from 'lucide-react';
+import { Search, Briefcase, X, SlidersHorizontal } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
+import TarjetaEmpleo from '../../components/TarjetaEmpleo';
 
 const ITEMS_POR_PAGINA = 6;
 
 const MODALIDADES = [
-  { key: '',           label: 'Todas' },
-  { key: 'remoto',     label: 'Remoto' },
-  { key: 'hibrido',   label: 'Híbrido' },
+  { key: '', label: 'Todas' },
+  { key: 'remoto', label: 'Remoto' },
+  { key: 'hibrido', label: 'Híbrido' },
   { key: 'presencial', label: 'Presencial' },
 ];
-
-const ETIQUETA_JORNADA = {
-  tiempo_completo: 'Tiempo completo',
-  medio_tiempo:    'Medio tiempo',
-  por_horas:       'Por horas',
-  practica:        'Práctica profesional',
-};
-
-const ETIQUETA_MODALIDAD = {
-  remoto:     'Remoto',
-  hibrido:    'Híbrido',
-  presencial: 'Presencial',
-};
-
-function formatearSalario(min, max) {
-  if (min == null && max == null) return 'A convenir';
-  const fmt = new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 });
-  if (min != null && max != null) return `₡${fmt.format(min)} – ₡${fmt.format(max)}`;
-  if (min != null) return `Desde ₡${fmt.format(min)}`;
-  return `Hasta ₡${fmt.format(max)}`;
-}
 
 function generarRangoPaginas(actual, total) {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -125,71 +105,25 @@ function ModalPostular({ oferta, onCerrar, onExito }) {
   );
 }
 
-function CardEmpleo({ empleo, onPostular }) {
-  return (
-    <article className="bg-surface border border-border rounded-2xl p-5 flex flex-col gap-3 shadow-soft">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-xs font-semibold text-ink-muted uppercase tracking-wide">
-            {empleo.empresa || 'Empresa'}
-          </p>
-          <h3 className="font-heading font-bold text-base text-ink mt-0.5">{empleo.titulo}</h3>
-        </div>
-        {empleo.tipo_jornada && (
-          <span className="shrink-0 text-xs bg-primary/10 text-primary rounded-full px-2.5 py-1">
-            {ETIQUETA_JORNADA[empleo.tipo_jornada] ?? empleo.tipo_jornada}
-          </span>
-        )}
-      </div>
 
-      <p className="text-sm text-ink-muted line-clamp-3">{empleo.descripcion}</p>
-
-      {empleo.tecnologias.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {empleo.tecnologias.map((t) => (
-            <span key={t} className="text-xs bg-surface-sunken text-ink-muted rounded-full px-2.5 py-1">{t}</span>
-          ))}
-        </div>
-      )}
-
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
-        <span className="flex items-center gap-1">
-          <MapPin size={12} />
-          {empleo.ubicacion
-            ? `${ETIQUETA_MODALIDAD[empleo.modalidad] ?? empleo.modalidad} · ${empleo.ubicacion}`
-            : (ETIQUETA_MODALIDAD[empleo.modalidad] ?? empleo.modalidad)}
-        </span>
-        <span className="flex items-center gap-1">
-          <Clock size={12} />
-          {formatearSalario(empleo.salario_min, empleo.salario_max)}
-        </span>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => !empleo.ya_postulado && onPostular(empleo)}
-        disabled={empleo.ya_postulado}
-        className="mt-auto w-full rounded-full py-2.5 text-sm font-medium flex items-center justify-center gap-2
-          bg-primary text-primary-foreground hover:opacity-90 transition
-          disabled:bg-surface-sunken disabled:text-ink-muted disabled:cursor-not-allowed"
-      >
-        <Send size={14} />
-        {empleo.ya_postulado ? 'Ya postulaste' : 'Postular'}
-      </button>
-    </article>
-  );
-}
 
 export default function ExplorarEmpleos() {
-  const [busqueda, setBusqueda]                 = useState('');
-  const [busquedaReal, setBusquedaReal]         = useState('');
-  const [modalidad, setModalidad]               = useState('');
-  const [paginaActual, setPaginaActual]         = useState(1);
-  const [empleos, setEmpleos]                   = useState([]);
-  const [cargando, setCargando]                 = useState(true);
+  const [busqueda, setBusqueda] = useState('');
+  const [busquedaReal, setBusquedaReal] = useState('');
+  const [modalidad, setModalidad] = useState('');
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [empleos, setEmpleos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [salarioMin, setSalarioMin] = useState('');
+  const [salarioMax, setSalarioMax] = useState('');
   const [ofertaPostulando, setOfertaPostulando] = useState(null);
-  const [exitoId, setExitoId]                   = useState(null);
+  const [exitoId, setExitoId] = useState(null);
   const debounceRef = useRef(null);
+
+  const cambiarModalidad = useCallback((m) => {
+    setModalidad(m);
+    setPaginaActual(1);
+  }, []);
 
   useEffect(() => {
     let activo = true;
@@ -206,10 +140,6 @@ export default function ExplorarEmpleos() {
     debounceRef.current = setTimeout(() => { setBusquedaReal(valor); setPaginaActual(1); }, 300);
   }, []);
 
-  const limpiarFiltros = useCallback(() => {
-    setBusqueda(''); setBusquedaReal(''); setModalidad(''); setPaginaActual(1);
-  }, []);
-
   const manejarExito = useCallback((idOferta) => {
     setEmpleos((prev) => prev.map((e) => e.id === idOferta ? { ...e, ya_postulado: true } : e));
     setExitoId(idOferta);
@@ -217,18 +147,38 @@ export default function ExplorarEmpleos() {
     setTimeout(() => setExitoId(null), 4000);
   }, []);
 
+  const limpiarFiltros = useCallback(() => {
+    setBusqueda('');
+    setBusquedaReal('');
+    setModalidad('');
+    setSalarioMin('');
+    setSalarioMax('');
+    setPaginaActual(1);
+  }, []);
+
   const filtradas = useMemo(() => {
-    let r = empleos;
+    let resultado = empleos;
     const q = busquedaReal.trim().toLowerCase();
-    if (q) r = r.filter((e) =>
-      e.titulo?.toLowerCase().includes(q) ||
-      e.descripcion?.toLowerCase().includes(q) ||
-      e.empresa?.toLowerCase().includes(q) ||
-      e.tecnologias?.some((t) => t.toLowerCase().includes(q))
-    );
-    if (modalidad) r = r.filter((e) => e.modalidad === modalidad);
-    return r;
-  }, [empleos, busquedaReal, modalidad]);
+    if (q) {
+      resultado = resultado.filter(
+        (e) =>
+          e.titulo?.toLowerCase().includes(q) ||
+          e.descripcion?.toLowerCase().includes(q) ||
+          e.empresa?.toLowerCase().includes(q) ||
+          e.tecnologias?.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    if (modalidad) {
+      resultado = resultado.filter((e) => e.modalidad === modalidad);
+    }
+    if (salarioMin) {
+      resultado = resultado.filter((e) => e.salario_max == null || e.salario_max >= Number(salarioMin));
+    }
+    if (salarioMax) {
+      resultado = resultado.filter((e) => e.salario_min == null || e.salario_min <= Number(salarioMax));
+    }
+    return resultado;
+  }, [empleos, busquedaReal, modalidad, salarioMin, salarioMax]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / ITEMS_POR_PAGINA));
   const pagina       = Math.min(paginaActual, totalPaginas);
@@ -237,7 +187,7 @@ export default function ExplorarEmpleos() {
     [filtradas, pagina]
   );
   const rangoPaginas = generarRangoPaginas(pagina, totalPaginas);
-  const hayFiltros   = busquedaReal.trim() || modalidad;
+  const hayFiltros = busquedaReal.trim() || modalidad;
 
   return (
     <div className="contenidoPrincipal">
@@ -292,7 +242,7 @@ export default function ExplorarEmpleos() {
             key={m.key}
             type="button"
             className={`chipModalidad${modalidad === m.key ? ' activo' : ''}`}
-            onClick={() => { setModalidad(m.key); setPaginaActual(1); }}
+            onClick={() => cambiarModalidad(m.key)}
           >
             {m.label}
           </button>
@@ -300,6 +250,65 @@ export default function ExplorarEmpleos() {
       </div>
 
       <div className="seccionListado fwd-animar-entrada" style={{ animationDelay: '0.3s' }}>
+        <aside className="barraLateralFiltros">
+          <div className="encabezadoFiltros">
+            <h4 className="tituloFiltros">
+              <SlidersHorizontal size={18} />
+              Filtrar resultados
+            </h4>
+            <button type="button" className="botonLimpiar" onClick={limpiarFiltros}>
+              Limpiar
+            </button>
+          </div>
+
+          <div className="grupoFiltro">
+            <label className="etiquetaFiltro">Modalidad</label>
+            <div className="opcionesModalidad">
+              {MODALIDADES.map(({ key, label }) => (
+                key && (
+                  <label key={key} className="opcionCheckbox">
+                    <input
+                      type="checkbox"
+                      checked={modalidad === key}
+                      onChange={() => cambiarModalidad(modalidad === key ? '' : key)}
+                    />
+                    <span className="casillaPersonalizada" />
+                    {label}
+                  </label>
+                )
+              ))}
+            </div>
+          </div>
+
+          <div className="grupoFiltro">
+            <label className="etiquetaFiltro">Salario mensual (CRC)</label>
+            <div className="filaRango">
+              <div className="campoRango">
+                <span className="prefijoRango">Mín</span>
+                <input
+                  type="number"
+                  min={0}
+                  className="inputRango"
+                  placeholder="0"
+                  value={salarioMin}
+                  onChange={(e) => { setSalarioMin(e.target.value); setPaginaActual(1); }}
+                />
+              </div>
+              <div className="campoRango">
+                <span className="prefijoRango">Máx</span>
+                <input
+                  type="number"
+                  min={0}
+                  className="inputRango"
+                  placeholder="∞"
+                  value={salarioMax}
+                  onChange={(e) => { setSalarioMax(e.target.value); setPaginaActual(1); }}
+                />
+              </div>
+            </div>
+          </div>
+        </aside>
+
         <div className="columnaResultadosEgresado">
           {cargando ? (
             <p className="de-data-state">Cargando oportunidades...</p>
@@ -327,14 +336,20 @@ export default function ExplorarEmpleos() {
                 </span>
                 {hayFiltros && (
                   <button type="button" className="btnLimpiarFiltros" onClick={limpiarFiltros}>
-                    <X size={14} /> Limpiar filtros
+                    <X size={14} />
+                    Limpiar filtros
                   </button>
                 )}
               </div>
 
               <div className="cuadriculaProyectos">
                 {paginaItems.map((e) => (
-                  <CardEmpleo key={e.id} empleo={e} onPostular={setOfertaPostulando} />
+                  <TarjetaEmpleo
+                    key={e.id}
+                    empleo={e}
+                    onPostular={() => setOfertaPostulando(e)}
+                    yaPostulado={e.ya_postulado}
+                  />
                 ))}
               </div>
 

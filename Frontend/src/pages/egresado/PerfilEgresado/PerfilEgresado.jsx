@@ -4,6 +4,7 @@ import TarjetaStack from './components/TarjetaStack';
 import TarjetaBio from './components/TarjetaBio';
 import TarjetaPostulaciones from './components/TarjetaPostulaciones';
 import ProyectosAcademicos from './components/ProyectosAcademicos';
+import TarjetaCurriculum from './components/TarjetaCurriculum';
 import { usePerfilEgresado } from './hooks/usePerfilEgresado';
 import './styles/PerfilEgresado.css';
 
@@ -39,12 +40,13 @@ function PerfilEgresado() {
           <aside className="columnaLateralPerfil fwd-stagger">
             <TarjetaUsuario perfilApi={perfilApi} />
             <TarjetaStack perfilApi={perfilApi} />
+            <TarjetaCurriculum perfilApi={perfilApi} />
           </aside>
 
           <section className="columnaContenidoPerfil fwd-stagger">
             <TarjetaBio perfilApi={perfilApi} />
             <TarjetaPostulaciones />
-            <ProyectosAcademicos />
+            <ProyectosAcademicos perfilApi={perfilApi} />
           </section>
         </main>
       </div>

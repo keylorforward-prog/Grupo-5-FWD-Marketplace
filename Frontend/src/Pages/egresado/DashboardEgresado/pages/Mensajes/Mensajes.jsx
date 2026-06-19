@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageSquare, SearchX, Mail, MailOpen, Inbox, Send, Clock, User, ChevronLeft, Building, Shield } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Search, SearchX, Mail, MailOpen, Inbox, Send, Clock, User, ChevronLeft, Building, Shield } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useAuth } from '../../../../../context/AuthContext';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
@@ -23,6 +23,7 @@ const formatearConversacion = (c, userId) => {
     tiempo: formatearFechaRelativa(c.fecha_envio),
     leido: c.leido || esPropio,
     contacto,
+    cedula: contacto?.cedula || '',
     esPropio,
   };
 };
@@ -217,6 +218,7 @@ export default function Mensajes() {
   const { user } = useAuth();
   const [conversacionActiva, setConversacionActiva] = useState(null);
   const [leidosLocal, setLeidosLocal] = useState(() => cargarLeidos());
+  const [busqueda, setBusqueda] = useState('');
   const userId = user?.id_usuario;
 
   const { data, loading, error } = useDashboardEgresadoRequest(
@@ -230,12 +232,23 @@ export default function Mensajes() {
     [data, userId]
   );
 
+  const termino = busqueda.toLowerCase().trim();
+  const conversacionesFiltradas = useMemo(
+    () => termino
+      ? conversaciones.filter((c) =>
+          (c.contacto?.nombre || '').toLowerCase().includes(termino) ||
+          (c.cedula || '').toLowerCase().includes(termino)
+        )
+      : conversaciones,
+    [conversaciones, termino]
+  );
+
   const stats = useMemo(() => {
-    const total = conversaciones.length;
-    const noLeidos = conversaciones.filter((c) => !c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion)).length;
+    const total = conversacionesFiltradas.length;
+    const noLeidos = conversacionesFiltradas.filter((c) => !c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion)).length;
     const leidos = total - noLeidos;
     return { total, noLeidos, leidos };
-  }, [conversaciones, leidosLocal]);
+  }, [conversacionesFiltradas, leidosLocal]);
 
   const conversationActivaData = conversaciones.find(
     (c) => c.idPostulacion === conversacionActiva
@@ -260,7 +273,7 @@ export default function Mensajes() {
           <h1>Mensajes</h1>
         </div>
         {!loading && !error && (
-          <span className="conteoProyectos">{conversaciones.length} conversacione{conversaciones.length !== 1 ? 's' : ''}</span>
+          <span className="conteoProyectos">{conversacionesFiltradas.length} conversacione{conversacionesFiltradas.length !== 1 ? 's' : ''}</span>
         )}
       </div>
 
@@ -300,8 +313,34 @@ export default function Mensajes() {
                 {stats.leidos} leídos
               </div>
             </div>
+            <div className="mensajes-sidebar-busqueda">
+              <Search size={14} />
+              <input
+                type="text"
+                className="mensajes-buscar-input"
+                placeholder="Buscar por nombre o identificación..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+              />
+              {busqueda && (
+                <button
+                  type="button"
+                  className="mensajes-buscar-limpiar"
+                  onClick={() => setBusqueda('')}
+                  aria-label="Limpiar búsqueda"
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+            {termino && conversacionesFiltradas.length === 0 && (
+              <div className="mensajes-sidebar-empty-busqueda">
+                <SearchX size={24} />
+                <p>No se encontraron resultados para "<strong>{busqueda}</strong>"</p>
+              </div>
+            )}
             <div className="mensajes-sidebar-list">
-              {conversaciones.map((c) => {
+              {conversacionesFiltradas.map((c) => {
                 const RoleIcon = ROLE_ICONS[c.contacto?.rol] || User;
                 const inicial = (c.contacto?.nombre || '?')[0].toUpperCase();
                 const activa = c.idPostulacion === conversacionActiva;
