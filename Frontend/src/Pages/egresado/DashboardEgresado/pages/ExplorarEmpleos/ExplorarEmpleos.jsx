@@ -1,23 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Search, Briefcase, X, SlidersHorizontal } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
-import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import TarjetaEmpleo from '../../components/TarjetaEmpleo';
 
 const ITEMS_POR_PAGINA = 6;
-const MODALIDADES = [
-  { valor: 'remoto', etiqueta: 'Remoto' },
-  { valor: 'hibrido', etiqueta: 'Híbrido' },
-  { valor: 'presencial', etiqueta: 'Presencial' },
-];
 
-const FILTROS_INICIALES = {
-  busqueda: '',
-  busquedaReal: '',
-  modalidad: '',
-  salarioMin: '',
-  salarioMax: '',
-};
+const MODALIDADES = [
+  { key: '', label: 'Todas' },
+  { key: 'remoto', label: 'Remoto' },
+  { key: 'hibrido', label: 'Híbrido' },
+  { key: 'presencial', label: 'Presencial' },
+];
 
 function generarRangoPaginas(actual, total) {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
@@ -26,30 +19,116 @@ function generarRangoPaginas(actual, total) {
   return [1, '...', actual - 1, actual, actual + 1, '...', total];
 }
 
+function ModalPostular({ oferta, onCerrar, onExito }) {
+  const [carta, setCarta]       = useState('');
+  const [cvUrl, setCvUrl]       = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError]       = useState('');
+
+  const enviar = async () => {
+    setEnviando(true);
+    setError('');
+    try {
+      await egresadoService.postularOfertaEmpleo({
+        id_oferta_empleo:   oferta.id,
+        carta_presentacion: carta.trim() || null,
+        cv_url:             cvUrl.trim() || null,
+      });
+      onExito(oferta.id);
+    } catch (err) {
+      setError(err.response?.data?.message || 'No se pudo enviar la postulación. Intentá de nuevo.');
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}
+    >
+      <div className="bg-surface rounded-2xl shadow-soft w-full max-w-lg mx-4 p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading font-bold text-lg text-ink">Postular a {oferta.titulo}</h2>
+          <button type="button" onClick={onCerrar} className="text-ink-muted hover:text-ink">
+            <X size={20} />
+          </button>
+        </div>
+
+        <label className="block space-y-1">
+          <span className="text-sm font-medium text-ink">Carta de presentación</span>
+          <textarea
+            className="w-full bg-surface-sunken rounded-xl px-4 py-3 text-sm text-ink outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+            rows={5}
+            placeholder="Contale al empresario por qué sos el candidato ideal para este puesto..."
+            value={carta}
+            onChange={(e) => setCarta(e.target.value)}
+          />
+        </label>
+
+        <label className="block space-y-1">
+          <span className="text-sm font-medium text-ink">
+            Enlace a tu CV <span className="text-ink-subtle">(opcional)</span>
+          </span>
+          <input
+            type="url"
+            className="w-full bg-surface-sunken rounded-xl px-4 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-primary/30"
+            placeholder="https://drive.google.com/..."
+            value={cvUrl}
+            onChange={(e) => setCvUrl(e.target.value)}
+          />
+        </label>
+
+        {error && (
+          <p className="text-sm text-destructive bg-destructive/10 rounded-xl px-4 py-2.5">{error}</p>
+        )}
+
+        <div className="flex gap-3 pt-1">
+          <button
+            type="button"
+            onClick={onCerrar}
+            className="flex-1 rounded-full py-2.5 text-sm font-medium border border-border text-ink-muted hover:text-ink transition"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={enviar}
+            disabled={enviando}
+            className="flex-1 rounded-full py-2.5 text-sm font-medium bg-primary text-primary-foreground disabled:opacity-50 hover:opacity-90 transition"
+          >
+            {enviando ? 'Enviando...' : 'Enviar postulación'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
 export default function ExplorarEmpleos() {
   const [busqueda, setBusqueda] = useState('');
   const [busquedaReal, setBusquedaReal] = useState('');
   const [modalidad, setModalidad] = useState('');
-  const [salarioMin, setSalarioMin] = useState('');
-  const [salarioMax, setSalarioMax] = useState('');
   const [paginaActual, setPaginaActual] = useState(1);
   const [empleos, setEmpleos] = useState([]);
-  const [idsPostulados, setIdsPostulados] = useState(null);
   const [cargando, setCargando] = useState(true);
+  const [salarioMin, setSalarioMin] = useState('');
+  const [salarioMax, setSalarioMax] = useState('');
+  const [ofertaPostulando, setOfertaPostulando] = useState(null);
+  const [exitoId, setExitoId] = useState(null);
   const debounceRef = useRef(null);
+
+  const cambiarModalidad = useCallback((m) => {
+    setModalidad(m);
+    setPaginaActual(1);
+  }, []);
 
   useEffect(() => {
     let activo = true;
-    Promise.all([
-      egresadoService.listarPropuestas(),
-      egresadoDashboardService.obtenerPostulaciones(),
-    ])
-      .then(([data, postulaciones]) => {
-        if (!activo) return;
-        setEmpleos(data);
-        const ids = new Set((postulaciones || []).map((p) => p.id_propuesta));
-        setIdsPostulados(ids);
-      })
+    egresadoService.listarOfertasEmpleo()
+      .then((data) => { if (activo) setEmpleos(data); })
       .catch(() => { if (activo) setEmpleos([]); })
       .finally(() => { if (activo) setCargando(false); });
     return () => { activo = false; };
@@ -58,21 +137,14 @@ export default function ExplorarEmpleos() {
   const manejarBusqueda = useCallback((valor) => {
     setBusqueda(valor);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setBusquedaReal(valor);
-      setPaginaActual(1);
-    }, 300);
+    debounceRef.current = setTimeout(() => { setBusquedaReal(valor); setPaginaActual(1); }, 300);
   }, []);
 
-  const limpiarBusqueda = useCallback(() => {
-    setBusqueda('');
-    setBusquedaReal('');
-    setPaginaActual(1);
-  }, []);
-
-  const cambiarModalidad = useCallback((m) => {
-    setModalidad(m);
-    setPaginaActual(1);
+  const manejarExito = useCallback((idOferta) => {
+    setEmpleos((prev) => prev.map((e) => e.id === idOferta ? { ...e, ya_postulado: true } : e));
+    setExitoId(idOferta);
+    setOfertaPostulando(null);
+    setTimeout(() => setExitoId(null), 4000);
   }, []);
 
   const limpiarFiltros = useCallback(() => {
@@ -100,26 +172,22 @@ export default function ExplorarEmpleos() {
       resultado = resultado.filter((e) => e.modalidad === modalidad);
     }
     if (salarioMin) {
-      const min = Number(salarioMin);
-      if (min > 0) resultado = resultado.filter((e) => (e.presupuestoMax || 0) >= min);
+      resultado = resultado.filter((e) => e.salario_max == null || e.salario_max >= Number(salarioMin));
     }
     if (salarioMax) {
-      const max = Number(salarioMax);
-      if (max > 0) resultado = resultado.filter((e) => (e.presupuestoMin || 0) <= max);
+      resultado = resultado.filter((e) => e.salario_min == null || e.salario_min <= Number(salarioMax));
     }
     return resultado;
   }, [empleos, busquedaReal, modalidad, salarioMin, salarioMax]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / ITEMS_POR_PAGINA));
-  const pagina = Math.min(paginaActual, totalPaginas);
-
-  const paginaItems = useMemo(
+  const pagina       = Math.min(paginaActual, totalPaginas);
+  const paginaItems  = useMemo(
     () => filtradas.slice((pagina - 1) * ITEMS_POR_PAGINA, pagina * ITEMS_POR_PAGINA),
     [filtradas, pagina]
   );
-
   const rangoPaginas = generarRangoPaginas(pagina, totalPaginas);
-  const hayFiltros = busquedaReal.trim() || modalidad || salarioMin || salarioMax;
+  const hayFiltros = busquedaReal.trim() || modalidad;
 
   return (
     <div className="contenidoPrincipal">
@@ -130,7 +198,7 @@ export default function ExplorarEmpleos() {
             Encuentra tu <span className="textoResaltado">próximo empleo</span>
           </h1>
           <p className="subtituloHero">
-            Oportunidades laborales para impulsar tu carrera profesional. Conecta con empresas que buscan talento como el tuyo.
+            Oportunidades laborales para impulsar tu carrera. Conecta con empresas que buscan talento como el tuyo.
           </p>
           <div className="contenedorBusqueda">
             <div className="barraBusqueda">
@@ -138,12 +206,17 @@ export default function ExplorarEmpleos() {
               <input
                 type="text"
                 className="inputBusqueda"
-                placeholder="Buscar empleos por título, empresa, tecnología..."
+                placeholder="Buscar por título, empresa o tecnología..."
                 value={busqueda}
                 onChange={(e) => manejarBusqueda(e.target.value)}
               />
               {busqueda && (
-                <button type="button" className="btnLimpiarBusqueda" onClick={limpiarBusqueda} aria-label="Limpiar búsqueda">
+                <button
+                  type="button"
+                  className="btnLimpiarBusqueda"
+                  onClick={() => { setBusqueda(''); setBusquedaReal(''); setPaginaActual(1); }}
+                  aria-label="Limpiar búsqueda"
+                >
                   <X size={16} />
                 </button>
               )}
@@ -163,6 +236,19 @@ export default function ExplorarEmpleos() {
         </div>
       </section>
 
+      <div className="filtrosModalidad fwd-animar-entrada" style={{ animationDelay: '0.15s' }}>
+        {MODALIDADES.map((m) => (
+          <button
+            key={m.key}
+            type="button"
+            className={`chipModalidad${modalidad === m.key ? ' activo' : ''}`}
+            onClick={() => cambiarModalidad(m.key)}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+
       <div className="seccionListado fwd-animar-entrada" style={{ animationDelay: '0.3s' }}>
         <aside className="barraLateralFiltros">
           <div className="encabezadoFiltros">
@@ -178,16 +264,18 @@ export default function ExplorarEmpleos() {
           <div className="grupoFiltro">
             <label className="etiquetaFiltro">Modalidad</label>
             <div className="opcionesModalidad">
-              {MODALIDADES.map(({ valor, etiqueta }) => (
-                <label key={valor} className="opcionCheckbox">
-                  <input
-                    type="checkbox"
-                    checked={modalidad === valor}
-                    onChange={() => cambiarModalidad(modalidad === valor ? '' : valor)}
-                  />
-                  <span className="casillaPersonalizada" />
-                  {etiqueta}
-                </label>
+              {MODALIDADES.map(({ key, label }) => (
+                key && (
+                  <label key={key} className="opcionCheckbox">
+                    <input
+                      type="checkbox"
+                      checked={modalidad === key}
+                      onChange={() => cambiarModalidad(modalidad === key ? '' : key)}
+                    />
+                    <span className="casillaPersonalizada" />
+                    {label}
+                  </label>
+                )
               ))}
             </div>
           </div>
@@ -227,11 +315,11 @@ export default function ExplorarEmpleos() {
           ) : paginaItems.length === 0 ? (
             <div className="estadoVacio">
               <Briefcase size={48} />
-              <h4>{hayFiltros ? 'Sin resultados' : 'No encontramos empleos'}</h4>
+              <h4>{hayFiltros ? 'Sin resultados' : 'No hay empleos disponibles'}</h4>
               <p>
                 {hayFiltros
-                  ? 'Intenta con otros términos de búsqueda o quita los filtros.'
-                  : 'Prueba ajustar la búsqueda o vuelve más tarde.'}
+                  ? 'Intentá con otros términos o quitá los filtros.'
+                  : 'Volvé más tarde para ver nuevas oportunidades.'}
               </p>
               {hayFiltros && (
                 <button type="button" className="post-emptyBtn" onClick={limpiarFiltros}>
@@ -253,9 +341,15 @@ export default function ExplorarEmpleos() {
                   </button>
                 )}
               </div>
+
               <div className="cuadriculaProyectos">
                 {paginaItems.map((e) => (
-                  <TarjetaEmpleo key={e.id} empleo={e} postulado={idsPostulados?.has(e.id)} />
+                  <TarjetaEmpleo
+                    key={e.id}
+                    empleo={e}
+                    onPostular={() => setOfertaPostulando(e)}
+                    yaPostulado={e.ya_postulado}
+                  />
                 ))}
               </div>
 
@@ -270,7 +364,6 @@ export default function ExplorarEmpleos() {
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
                   </button>
-
                   {rangoPaginas.map((p, i) =>
                     p === '...' ? (
                       <span key={`puntos-${i}`} className="puntosPaginacion">…</span>
@@ -285,7 +378,6 @@ export default function ExplorarEmpleos() {
                       </button>
                     )
                   )}
-
                   <button
                     type="button"
                     className="botonPagina flecha"
@@ -301,6 +393,20 @@ export default function ExplorarEmpleos() {
           )}
         </div>
       </div>
+
+      {ofertaPostulando && (
+        <ModalPostular
+          oferta={ofertaPostulando}
+          onCerrar={() => setOfertaPostulando(null)}
+          onExito={manejarExito}
+        />
+      )}
+
+      {exitoId && (
+        <div className="fixed bottom-6 right-6 z-50 bg-surface border border-border rounded-2xl shadow-soft px-5 py-3 text-sm text-ink">
+          Postulación enviada con éxito.
+        </div>
+      )}
     </div>
   );
 }

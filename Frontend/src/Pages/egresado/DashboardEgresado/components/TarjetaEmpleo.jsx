@@ -1,39 +1,56 @@
 import { useNavigate } from 'react-router-dom';
-import { Building2, Clock, DollarSign, Globe, Send, Eye } from 'lucide-react';
+import { Clock, Globe, Send } from 'lucide-react';
 
 const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
 
-const formatearSalario = (min, max) => {
-  const fmt = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', maximumFractionDigits: 0 });
-  return `${fmt.format(min)} – ${fmt.format(max)}`;
+const etiquetaJornada = {
+  tiempo_completo: 'Tiempo completo',
+  medio_tiempo:    'Medio tiempo',
+  por_horas:       'Por horas',
+  practica:        'Práctica profesional',
 };
 
-function TarjetaEmpleo({ empleo, postulado }) {
+function formatearSalario(min, max) {
+  if (min == null && max == null) return 'A convenir';
+  const fmt = new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 });
+  if (min != null && max != null) return `₡${fmt.format(min)} – ₡${fmt.format(max)}`;
+  if (min != null) return `Desde ₡${fmt.format(min)}`;
+  return `Hasta ₡${fmt.format(max)}`;
+}
+
+function TarjetaEmpleo({ empleo, onPostular, yaPostulado }) {
   const navigate = useNavigate();
 
-  const irAlDetalle = () => {
-    navigate(`/egresado/dashboard/empleo/${empleo.id}`);
+  const irAlDetalle = () => navigate(`/egresado/dashboard/empleo/${empleo.id}`);
+
+  const manejarPostular = (e) => {
+    e.stopPropagation();
+    if (!yaPostulado && onPostular) onPostular(empleo);
   };
 
   return (
-    <article className={`tarjetaEmpleo${postulado ? ' postulado' : ''}`} onClick={irAlDetalle} role="button" tabIndex={0}
+    <article
+      className={`tarjetaEmpleo${yaPostulado ? ' postulado' : ''}`}
+      onClick={irAlDetalle}
+      role="button"
+      tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter') irAlDetalle(); }}
     >
       <div className="te-encabezado">
         <div className="te-empresa-info">
-          <div className="te-avatar">
-            {empleo.empresa?.charAt(0) || 'E'}
-          </div>
+          <div className="te-avatar">{empleo.empresa?.charAt(0) || 'E'}</div>
           <div>
             <p className="te-empresa">{empleo.empresa || 'Empresa'}</p>
             <h3 className="te-titulo">{empleo.titulo}</h3>
           </div>
         </div>
         <div className="te-badges">
-          {postulado && (
-            <span className="te-badge-postulado">Postulado</span>
+          {yaPostulado && <span className="te-badge-postulado">Postulado</span>}
+          {empleo.tipo_jornada && (
+            <span className={`te-estado te-estado--activo`}>
+              {etiquetaJornada[empleo.tipo_jornada] ?? empleo.tipo_jornada}
+            </span>
           )}
-          <span className={`te-estado te-estado--${empleo.tipoEstado}`}>{empleo.estado}</span>
         </div>
       </div>
 
@@ -48,21 +65,24 @@ function TarjetaEmpleo({ empleo, postulado }) {
       <div className="te-meta">
         <div className="te-meta-item">
           <Globe size={14} />
-          {etiquetaModalidad[empleo.modalidad] || empleo.modalidad}
-        </div>
-        <div className="te-meta-item">
-          <DollarSign size={14} />
-          {empleo.presupuestoMin != null ? formatearSalario(empleo.presupuestoMin, empleo.presupuestoMax) : '—'}
+          {empleo.ubicacion
+            ? `${etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad} · ${empleo.ubicacion}`
+            : (etiquetaModalidad[empleo.modalidad] ?? empleo.modalidad)}
         </div>
         <div className="te-meta-item">
           <Clock size={14} />
-          {empleo.publicado || '—'}
+          {formatearSalario(empleo.salario_min, empleo.salario_max)}
         </div>
       </div>
 
-      <button type="button" className={`te-boton${postulado ? ' postulado' : ''}`} onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}>
-        {postulado ? <Eye size={14} /> : <Send size={14} />}
-        {postulado ? 'Ver postulación' : 'Ver empleo'}
+      <button
+        type="button"
+        className={`te-boton${yaPostulado ? ' postulado' : ''}`}
+        onClick={manejarPostular}
+        disabled={yaPostulado}
+      >
+        <Send size={14} />
+        {yaPostulado ? 'Ya postulaste' : 'Postular'}
       </button>
     </article>
   );
