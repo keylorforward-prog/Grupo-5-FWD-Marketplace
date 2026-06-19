@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Briefcase,
@@ -40,6 +41,7 @@ const DATOS_INICIALES_INICIO = {
 const cargarInicio = () => dashboardEmpresarioService.obtenerInicio();
 
 export default function Inicio() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data, loading, error } = useDashboardEmpresarioRequest(
@@ -61,21 +63,21 @@ export default function Inicio() {
     <DashboardLayout activePage="inicio">
       <section className="de-hero fwd-animar-entrada">
         <div className="de-hero-content">
-          <span className="de-hero-kicker">Marketplace FWD</span>
+          <span className="de-hero-kicker">{t('empresaDashboardInicio.hero.kicker')}</span>
           <h1 className="de-hero-title">
-            Bienvenido, <span>{user?.nombre || 'Empresa'}</span>
+            {t('empresaDashboardInicio.hero.title_start')} <span>{user?.nombre || t('empresaDashboardInicio.hero.title_fallback')}</span>
           </h1>
           <p className="de-hero-subtitle">
-            Publica tu proyecto y conecta con talento verificado de FWD.
+            {t('empresaDashboardInicio.hero.subtitle')}
           </p>
           <div className="de-hero-actions">
             <button className="de-btn-primary" type="button" onClick={irAPublicarProyecto}>
               <Plus size={16} />
-              Publicar Proyecto
+              {t('empresaDashboardInicio.hero.btnPublish')}
             </button>
             <button className="de-btn-outline" type="button" onClick={irACrearProyectoIA}>
               <Sparkles size={16} />
-              Crear Proyecto con IA
+              {t('empresaDashboardInicio.hero.btnAIPublish')}
             </button>
           </div>
         </div>
@@ -93,32 +95,32 @@ export default function Inicio() {
       </section>
 
       <section className="de-activity">
-        <h2 className="de-activity-title">Resumen de Actividad</h2>
+        <h2 className="de-activity-title">{t('empresaDashboardInicio.activity.title')}</h2>
         <div className="de-stats-grid">
           <div className="de-stat-card">
             <div className="de-stat-icon blue"><Briefcase size={20} /></div>
             <span className="de-stat-value">{data.resumen.proyectosPublicados ?? 0}</span>
-            <span className="de-stat-label">Proyectos Publicados</span>
+            <span className="de-stat-label">{t('empresaDashboardInicio.activity.projectsPublished')}</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon green"><ClipboardList size={20} /></div>
             <span className="de-stat-value">{data.resumen.proyectosActivos ?? 0}</span>
-            <span className="de-stat-label">Proyectos Activos</span>
+            <span className="de-stat-label">{t('empresaDashboardInicio.activity.projectsActive')}</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon orange"><FileText size={20} /></div>
             <span className="de-stat-value">{data.resumen.ofertasRecibidas ?? 0}</span>
-            <span className="de-stat-label">Ofertas Recibidas</span>
+            <span className="de-stat-label">{t('empresaDashboardInicio.activity.offersReceived')}</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon purple"><TrendingUp size={20} /></div>
             <span className="de-stat-value">{data.resumen.proyectosFinalizados ?? 0}</span>
-            <span className="de-stat-label">Proyectos Finalizados</span>
+            <span className="de-stat-label">{t('empresaDashboardInicio.activity.projectsFinished')}</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon magenta"><UserCheck size={20} /></div>
             <span className="de-stat-value">{data.resumen.estudiantesContratados ?? 0}</span>
-            <span className="de-stat-label">Estudiantes Contratados</span>
+            <span className="de-stat-label">{t('empresaDashboardInicio.activity.studentsHired')}</span>
           </div>
         </div>
       </section>
@@ -126,10 +128,10 @@ export default function Inicio() {
       <div className="de-grid-3">
         <div className="de-panel">
           <div className="de-panel-header">
-            <h3 className="de-panel-title">Mis Proyectos Recientes</h3>
-            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/proyectos')}>Ver todos</button>
+            <h3 className="de-panel-title">{t('empresaDashboardInicio.projects.title')}</h3>
+            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/proyectos')}>{t('empresaDashboardInicio.projects.viewAll')}</button>
           </div>
-          <EstadoDatos loading={loading} error={error} empty={!propuestas.length} emptyText="Aun no tienes proyectos publicados." />
+          <EstadoDatos loading={loading} error={error} empty={!propuestas.length} emptyText={t('empresaDashboardInicio.projects.empty')} />
           {!loading && !error && propuestas.map((p) => (
             <div key={p.id} className="de-project-item">
               <div className={`de-project-icon-wrap ${p.iconColor}`}>
@@ -154,38 +156,42 @@ export default function Inicio() {
 
         <div className="de-panel">
           <div className="de-panel-header">
-            <h3 className="de-panel-title">Talento Recomendado por IA</h3>
-            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/talento')}>Ver mas</button>
+            <h3 className="de-panel-title">{t('empresaDashboardInicio.talent.title')}</h3>
+            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/talento')}>{t('empresaDashboardInicio.talent.viewMore')}</button>
           </div>
-          <EstadoDatos loading={loading} error={error} empty={!talento.length} emptyText="No hay talento recomendado disponible." />
-          {!loading && !error && talento.map((t) => (
-            <div key={t.id} className="de-talent-item">
-              <img src={t.avatar} alt={t.name} className="de-talent-avatar" />
+          <EstadoDatos loading={loading} error={error} empty={!talento.length} emptyText={t('empresaDashboardInicio.talent.empty')} />
+          {!loading && !error && talento.map((tItem) => (
+            <div key={tItem.id} className="de-talent-item">
+              <img src={tItem.avatar} alt={tItem.name} className="de-talent-avatar" />
               <div className="de-talent-info">
                 <div className="de-talent-name">
-                  {t.name}
-                  {t.verified && <CheckCircle2 size={14} className="de-talent-verified" />}
+                  {tItem.name}
+                  {tItem.verified && <CheckCircle2 size={14} className="de-talent-verified" />}
                 </div>
-                <p className="de-talent-skills">{t.skills}</p>
-                <p className="de-talent-rating">Calificacion {t.rating} ({t.projects} proyectos)</p>
+                <p className="de-talent-skills">{tItem.skills}</p>
+                <p className="de-talent-rating">
+                  {t('empresaDashboardInicio.talent.rating')
+                    .replace('{{rating}}', tItem.rating)
+                    .replace('{{projects}}', tItem.projects)}
+                </p>
               </div>
               <div className="de-talent-match">
-                <span className="de-talent-match-pct">{t.match}%</span>
-                <span className="de-talent-match-label">Coincidencia</span>
+                <span className="de-talent-match-pct">{tItem.match}%</span>
+                <span className="de-talent-match-label">{t('empresaDashboardInicio.talent.match')}</span>
               </div>
             </div>
           ))}
           <button className="de-panel-footer-link de-link-button" type="button" onClick={() => navigate('/DashboardEmpresario/talento')}>
-            Ver mas candidatos <ArrowRight size={14} />
+            {t('empresaDashboardInicio.talent.viewMoreBtn')} <ArrowRight size={14} />
           </button>
         </div>
 
         <div className="de-panel">
           <div className="de-panel-header">
-            <h3 className="de-panel-title">Ofertas Pendientes <span className="de-alert-dot" /></h3>
-            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/ofertas')}>Ver todas</button>
+            <h3 className="de-panel-title">{t('empresaDashboardInicio.offers.title')} <span className="de-alert-dot" /></h3>
+            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/ofertas')}>{t('empresaDashboardInicio.offers.viewAll')}</button>
           </div>
-          <EstadoDatos loading={loading} error={error} empty={!ofertas.length} emptyText="No hay ofertas pendientes." />
+          <EstadoDatos loading={loading} error={error} empty={!ofertas.length} emptyText={t('empresaDashboardInicio.offers.empty')} />
           {!loading && !error && ofertas.map((o) => (
             <div key={o.id} className="de-offer-item">
               <div className="de-offer-icon-wrap"><FileText size={16} /></div>
@@ -194,13 +200,13 @@ export default function Inicio() {
                 <p className="de-offer-sender">{o.sender}</p>
               </div>
               <div className="de-offer-right">
-                <span className="de-badge nueva">Nueva</span>
+                <span className="de-badge nueva">{t('empresaDashboardInicio.offers.new')}</span>
                 <span className="de-offer-time">{o.time}</span>
               </div>
             </div>
           ))}
           <button className="de-panel-footer-link de-link-button" type="button" onClick={() => navigate('/DashboardEmpresario/ofertas')}>
-            Revisar todas las ofertas <ArrowRight size={14} />
+            {t('empresaDashboardInicio.offers.reviewAllBtn')} <ArrowRight size={14} />
           </button>
         </div>
       </div>
@@ -208,10 +214,10 @@ export default function Inicio() {
       <div className="de-grid-3">
         <div className="de-panel">
           <div className="de-panel-header">
-            <h3 className="de-panel-title">Entregables Pendientes</h3>
-            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/entregables')}>Ver todos</button>
+            <h3 className="de-panel-title">{t('empresaDashboardInicio.deliverables.title')}</h3>
+            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/entregables')}>{t('empresaDashboardInicio.deliverables.viewAll')}</button>
           </div>
-          <EstadoDatos loading={loading} error={error} empty={!entregables.length} emptyText="No hay entregables pendientes." />
+          <EstadoDatos loading={loading} error={error} empty={!entregables.length} emptyText={t('empresaDashboardInicio.deliverables.empty')} />
           {!loading && !error && entregables.map((d) => (
             <div key={d.id} className="de-deliverable-item">
               <div className="de-deliverable-icon"><Package size={16} /></div>
@@ -226,10 +232,10 @@ export default function Inicio() {
 
         <div className="de-panel">
           <div className="de-panel-header">
-            <h3 className="de-panel-title">Mensajes Recientes</h3>
-            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/mensajes')}>Ver todos</button>
+            <h3 className="de-panel-title">{t('empresaDashboardInicio.messages.title')}</h3>
+            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/mensajes')}>{t('empresaDashboardInicio.messages.viewAll')}</button>
           </div>
-          <EstadoDatos loading={loading} error={error} empty={!mensajes.length} emptyText="No hay mensajes recientes." />
+          <EstadoDatos loading={loading} error={error} empty={!mensajes.length} emptyText={t('empresaDashboardInicio.messages.empty')} />
           {!loading && !error && mensajes.map((m) => (
             <div key={m.id} className="de-message-item">
               <img src={m.avatar} alt={m.name} className="de-message-avatar" />
@@ -247,10 +253,10 @@ export default function Inicio() {
 
         <div className="de-panel">
           <div className="de-panel-header">
-            <h3 className="de-panel-title">Notificaciones</h3>
-            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/notificaciones')}>Ver todas</button>
+            <h3 className="de-panel-title">{t('empresaDashboardInicio.notifications.title')}</h3>
+            <button className="de-panel-action" type="button" onClick={() => navigate('/DashboardEmpresario/notificaciones')}>{t('empresaDashboardInicio.notifications.viewAll')}</button>
           </div>
-          <EstadoDatos loading={loading} error={error} empty={!notificaciones.length} emptyText="No hay notificaciones." />
+          <EstadoDatos loading={loading} error={error} empty={!notificaciones.length} emptyText={t('empresaDashboardInicio.notifications.empty')} />
           {!loading && !error && notificaciones.map((n) => (
             <div key={n.id} className="de-notif-item">
               <div className={`de-notif-icon ${n.iconType}`}>{n.icon}</div>

@@ -14,6 +14,7 @@ export type ExtractedProject = {
   work_mode: 'remote' | 'hybrid' | 'onsite';
   budget_min: number;
   budget_max: number;
+  budget_currency: 'USD' | 'CRC';
   usa_ia: boolean;
   raw_requirements: string;
 };

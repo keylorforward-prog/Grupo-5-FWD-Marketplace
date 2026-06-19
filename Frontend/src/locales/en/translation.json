@@ -55,5 +55,823 @@
     "minLen": "Password must be at least 6 characters",
     "success": "Password updated successfully",
     "error": "An error occurred"
+  },
+  "admin": {
+    "profile": {
+      "menu": {
+        "dashboard": {
+          "title": "Admin Dashboard",
+          "subtitle": "Operational overview of users, projects, and verifications."
+        },
+        "empresas": {
+          "title": "Companies",
+          "subtitle": "Manage organizations, profiles, and enterprise access."
+        },
+        "egresados": {
+          "title": "Alumni Verification",
+          "subtitle": "Review pending requests and validate FWD credentials."
+        },
+        "usuarios": {
+          "title": "User Management",
+          "subtitle": "Search, review, and manage platform accounts."
+        },
+        "config": {
+          "title": "Configuration",
+          "subtitle": "General settings for the administrative space."
+        }
+      },
+      "nav": {
+        "dashboard": "Dashboard",
+        "usuarios": "Users",
+        "egresados": "Alumni",
+        "empresas": "Companies",
+        "config": "Configuration"
+      },
+      "sidebar": {
+        "workspace": "Admin Workspace",
+        "controlCenter": "FWD Control Center",
+        "helpTitle": "Need help?",
+        "helpText": "Consult internal guidelines or report a platform incident.",
+        "support": "Support",
+        "logout": "Log Out",
+        "loggingOut": "Logging out..."
+      },
+      "dashboard": {
+        "alerts": "alerts",
+        "errorLoading": "Could not load the administrative overview.",
+        "totalUsers": "Total Users",
+        "pendingCompanies": "Pending Companies",
+        "pendingVerifications": "Pending Verifications",
+        "trendGlobal": "Global",
+        "trendRevision": "Revision",
+        "trendPending": "Pending",
+        "recentActivity": "Recent Activity",
+        "refresh": "Refresh",
+        "table": {
+          "entity": "Entity / User",
+          "action": "Action",
+          "date": "Date",
+          "status": "Status",
+          "details": "Details"
+        },
+        "loadingActivity": "Loading activity...",
+        "noActivity": "No administrative activity recorded yet.",
+        "statusCompleted": "Completed"
+      },
+      "topbar": {
+        "administrator": "Administrator",
+        "workspace": "FWD Workspace"
+      }
+    }
+  },
+  "empresaLayout": {
+    "nav": {
+      "inicio": "Home",
+      "proyectos": "My Projects",
+      "talento": "Find Talent",
+      "mensajes": "Messages",
+      "notificaciones": "Notifications"
+    },
+    "sidebar": {
+      "inicio": "Home",
+      "proyectos": "My Projects",
+      "empleos": "Job Offers",
+      "ofertas": "Received Offers",
+      "entregables": "Deliverables",
+      "mensajes": "Messages",
+      "talento": "Recommended Talent",
+      "historial": "Project History",
+      "evaluaciones": "Reviews",
+      "facturacion": "Billing",
+      "configuracion": "Configuration"
+    },
+    "profile": {
+      "perfil": "My Profile",
+      "proyectos": "My Projects",
+      "configuracion": "Configuration",
+      "company": "Company",
+      "role": "Business owner",
+      "online": "Online",
+      "fullProfile": "View full profile",
+      "themeLight": "Dark theme",
+      "themeDark": "Light theme",
+      "support": "Support & Help",
+      "logout": "Log Out",
+      "loggingOut": "Logging out..."
+    },
+    "help": {
+      "title": "Need help?",
+      "text": "Our help center is available 24/7 for you.",
+      "button": "Go to Help Center"
+    },
+    "footer": {
+      "rights": "All rights reserved.",
+      "terms": "Terms and Conditions",
+      "privacy": "Privacy Policy",
+      "contact": "Contact"
+    }
+  },
+  "egresadoLayout": {
+    "sidebar": {
+      "inicio": "Home",
+      "explorar": "Explore Projects",
+      "explorarEmpleos": "Explore Jobs",
+      "postulaciones": "My Applications",
+      "postulacionesProyectos": "Projects",
+      "postulacionesEmpleos": "Jobs",
+      "proyectos": "My Projects",
+      "historial": "History",
+      "mensajes": "Messages",
+      "notificaciones": "Notifications",
+      "perfil": "My Profile",
+      "configuracion": "Configuration"
+    },
+    "profile": {
+      "perfil": "My Profile",
+      "configuracion": "Configuration",
+      "role": "FWD Alumni"
+    }
+  },
+  "empresaDashboardInicio": {
+    "hero": {
+      "kicker": "FWD Marketplace",
+      "title_start": "Welcome,",
+      "title_fallback": "Company",
+      "subtitle": "Publish your project and connect with verified FWD talent.",
+      "btnPublish": "Publish Project",
+      "btnAIPublish": "Create Project with AI"
+    },
+    "activity": {
+      "title": "Activity Summary",
+      "projectsPublished": "Published Projects",
+      "projectsActive": "Active Projects",
+      "offersReceived": "Offers Received",
+      "projectsFinished": "Completed Projects",
+      "studentsHired": "Hired Students"
+    },
+    "projects": {
+      "title": "My Recent Projects",
+      "viewAll": "View all",
+      "empty": "You have no published projects yet."
+    },
+    "talent": {
+      "title": "AI Recommended Talent",
+      "viewMore": "View more",
+      "empty": "No recommended talent available.",
+      "rating": "Rating {{rating}} ({{projects}} projects)",
+      "match": "Match",
+      "viewMoreBtn": "View more candidates"
+    },
+    "offers": {
+      "title": "Pending Offers",
+      "viewAll": "View all",
+      "empty": "No pending offers.",
+      "new": "New",
+      "reviewAllBtn": "Review all offers"
+    },
+    "deliverables": {
+      "title": "Pending Deliverables",
+      "viewAll": "View all",
+      "empty": "No pending deliverables."
+    },
+    "messages": {
+      "title": "Recent Messages",
+      "viewAll": "View all",
+      "empty": "No recent messages."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "viewAll": "View all",
+      "empty": "No notifications."
+    }
+  },
+  "egresadoDashboardInicio": {
+    "hero": {
+      "kicker": "FWD Marketplace",
+      "title_start": "Welcome,",
+      "title_fallback": "Graduate",
+      "subtitle": "Explore projects, apply, and build your professional portfolio.",
+      "btnExplore": "Explore Projects"
+    },
+    "activity": {
+      "title": "Activity Summary",
+      "reputation": "Reputation",
+      "activeApplications": "Active Applications",
+      "projectsInProgress": "Projects in Progress",
+      "completedProjects": "Completed Projects",
+      "offersReceived": "Offers Received"
+    },
+    "applications": {
+      "title": "Recent Applications",
+      "viewAll": "View all",
+      "loading": "Loading applications...",
+      "empty": "You have not applied to any project yet.",
+      "viewAllBtn": "View all applications"
+    },
+    "projects": {
+      "title": "Active Projects",
+      "viewAll": "View all",
+      "loading": "Loading projects...",
+      "empty": "You have no active projects.",
+      "statusInDev": "In development",
+      "statusInRev": "Under review",
+      "deliveryEst": "Estimated delivery: {{date}}",
+      "noEstDate": "No estimated date"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "viewAll": "View all",
+      "loading": "Loading notifications...",
+      "empty": "No notifications."
+    }
+  },
+  "empresaProyectos": {
+    "title": "My Projects",
+    "btnPublish": "Publish Project",
+    "empty": "You have no published projects yet.",
+    "msgUpdateSuccess": "Project updated successfully.",
+    "msgUpdateError": "Could not update the project.",
+    "msgStatusError": "Could not change the project status.",
+    "msgDeleteConfirm": "Do you want to delete this project? This action cannot be undone.",
+    "msgDeleteSuccess": "Project deleted successfully.",
+    "msgDeleteError": "Could not delete the project.",
+    "form": {
+      "title": "Title",
+      "tech": "Technologies",
+      "days5": "5 days",
+      "days15": "15 days",
+      "days30": "30 days",
+      "budgetMin": "Min budget",
+      "budgetMax": "Max budget",
+      "githubUrl": "Repository URL (GitHub)",
+      "desc": "Description",
+      "saving": "Saving...",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "aria": {
+      "edit": "Edit project",
+      "activate": "Activate project",
+      "pause": "Pause project",
+      "close": "Close project",
+      "delete": "Delete project"
+    },
+    "historyTitle": "Project History",
+    "historyEmpty": "You haven't added any projects to your history yet.",
+    "historyAdd": "Add project",
+    "historyDeleteConfirm": "Delete this project from history?",
+    "historySaved": "Project saved to history.",
+    "historyDeleted": "Project removed from history.",
+    "historyForm": {
+      "title": "Project title",
+      "desc": "Description",
+      "tech": "Technologies used",
+      "link": "Link (URL)",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "techPlaceholder": "E.g.: React, Node.js, PostgreSQL"
+    },
+    "detailTitle": "Project Details",
+    "detailOffers": "offers",
+    "detailPostulations": "applications",
+    "detailDeadline": "Deadline",
+    "detailBudget": "Budget",
+    "detailTech": "Technologies",
+    "detailDesc": "Description",
+    "detailStatus": "Status",
+    "detailNoData": "No additional information"
+  },
+  "egresadoExplorar": {
+    "hero": {
+      "kicker": "Explore Projects",
+      "titleStart": "Find your ",
+      "titleHighlight": "next challenge",
+      "subtitle": "Connect with companies looking for talent like yours. Explore, apply, and build your portfolio.",
+      "searchPlaceholder": "Search projects by title, technology or description...",
+      "clearSearch": "Clear search"
+    },
+    "categories": {
+      "todas": {
+        "label": "All projects",
+        "desc": "View full catalog"
+      },
+      "web": {
+        "label": "Web Development",
+        "desc": "React, Next.js, HTML/CSS"
+      },
+      "backend": {
+        "label": "Backend / API",
+        "desc": "Node.js, Express, APIs"
+      },
+      "movil": {
+        "label": "Mobile Development",
+        "desc": "React Native, apps"
+      },
+      "data": {
+        "label": "Data & Analytics",
+        "desc": "Dashboards, SQL,Chart.js"
+      },
+      "diseno": {
+        "label": "UI/UX Design",
+        "desc": "Figma, prototyping"
+      }
+    },
+    "loading": "Loading projects...",
+    "grid": {
+      "encontrados": "{{count}} project(s) found",
+      "ordenarPor": "Sort by:",
+      "sinResultados": "No projects found",
+      "sinResultadosDesc": "Try adjusting the filters or clearing the search.",
+      "paginaAnterior": "Previous page",
+      "paginaSiguiente": "Next page"
+    },
+    "filters": {
+      "titulo": "Filter results",
+      "limpiar": "Clear",
+      "categoria": "Category",
+      "tecnologias": "Technologies",
+      "todasTecnologias": "All technologies",
+      "presupuesto": "Budget (USD)",
+      "min": "Min",
+      "max": "Max",
+      "duracion": "Duration",
+      "modalidad": "Modality"
+    },
+    "components": {
+      "remoto": "Remote",
+      "hibrido": "Hybrid",
+      "presencial": "On-site",
+      "presupuesto": "Budget",
+      "entrega": "Delivery",
+      "verDetalle": "View details",
+      "quitarGuardados": "Remove from saved",
+      "guardarProyecto": "Save project"
+    }
+  },
+  "egresadoExplorarEmpleos": {
+    "hero": {
+      "titleStart": "Find your ",
+      "titleHighlight": "next job",
+      "subtitle": "Job opportunities to boost your professional career.",
+      "searchPlaceholder": "Search jobs by title, company, technology..."
+    },
+    "filters": {
+      "titulo": "Filter results",
+      "limpiar": "Clear",
+      "modalidad": "Modality",
+      "salario": "Monthly salary (CRC)",
+      "min": "Min",
+      "max": "Max"
+    },
+    "resultados": "{{count}} opportunity(ies) found",
+    "loading": "Loading opportunities...",
+    "sinResultados": "No results",
+    "sinResultadosTitle": "No jobs found",
+    "sinResultadosDesc": "Try different terms or adjust your search.",
+    "limpiarFiltros": "Clear filters",
+    "paginaAnterior": "Previous page",
+    "paginaSiguiente": "Next page"
+  },
+  "egresadoPerfil": {
+    "banner": {
+      "kicker": "TALENT DASHBOARD",
+      "title": "My Student Profile",
+      "subtitle": "Your professional identity on FWD. Keep your information up to date to stand out to companies."
+    },
+    "userCard": {
+      "cambiarFoto": "Change photo",
+      "nombrePlaceholder": "Full name",
+      "rolPlaceholder": "Your role or title",
+      "portfolioPlaceholder": "Portfolio URL",
+      "linkedinPlaceholder": "LinkedIn URL",
+      "guardar": "Save",
+      "cancelar": "Cancel",
+      "editarPerfil": "Edit profile",
+      "portfolio": "Portfolio",
+      "linkedin": "LinkedIn"
+    },
+    "bio": {
+      "titulo": "Bio",
+      "editar": "Edit",
+      "placeholder": "Tell us about yourself...",
+      "cancelar": "Cancel",
+      "guardar": "Save"
+    },
+    "stack": {
+      "titulo": "Learning",
+      "placeholder": "Search or type technology...",
+      "agregar": "Add"
+    },
+    "curriculum": {
+      "titulo": "Resume",
+      "subiendo": "Uploading...",
+      "actualizar": "Update Resume (PDF)",
+      "subir": "Upload Resume (PDF)",
+      "verDocumento": "View current document"
+    },
+    "academicProjects": {
+      "titulo": "Academic Projects & Internships",
+      "agregar": "Add",
+      "loading": "Loading projects...",
+      "empty": "You haven't added any projects yet. Press \"Add\" to get started!",
+      "eliminarConfirm": "Delete this project?",
+      "eliminarDesc": "This action cannot be undone.",
+      "siEliminar": "Yes, delete",
+      "cancelar": "Cancel",
+      "editar": "Edit",
+      "eliminar": "Delete",
+      "form": {
+        "titulo": "Project title",
+        "github": "GitHub",
+        "plataforma": "Platform",
+        "descripcion": "Project description",
+        "rol": "Role performed (e.g. Frontend Developer)",
+        "url": "Repository URL",
+        "techPlaceholder": "Search or type technology...",
+        "guardar": "Save",
+        "cancelar": "Cancel"
+      }
+    },
+    "applications": {
+      "titulo": "My Internship Applications",
+      "activas": "{{count}} Active",
+      "filtroTodas": "All",
+      "filtroEnviadas": "Sent",
+      "filtroRevision": "Under review",
+      "filtroPreseleccionadas": "Shortlisted",
+      "filtroRechazadas": "Rejected",
+      "loading": "Loading applications...",
+      "empty": "No applications in this status.",
+      "verDetalle": "View details",
+      "contactarEmpresa": "Contact company",
+      "retirar": "Withdraw application",
+      "verMenos": "Show less",
+      "verHistorial": "View full application history",
+      "masOpciones": "More options"
+    }
+  },
+  "egresadoPostulaciones": {
+    "titulo": "My Applications",
+    "tabProyectos": "Projects",
+    "tabEmpleos": "Jobs",
+    "total": "{{count}} application(s)",
+    "totalEmpleos": "job applications",
+    "loading": "Loading...",
+    "sinPostulaciones": "No applications",
+    "sinPostulacionesDesc": "You haven't applied to any projects yet.",
+    "sinPostulacionesEmpleosDesc": "You haven't applied to any jobs yet.",
+    "explorarProyectos": "Explore projects",
+    "explorarEmpleos": "Explore jobs",
+    "conMensaje": "With message",
+    "verProyecto": "View project",
+    "verEmpleo": "View job",
+    "flujoEnviada": "Sent",
+    "flujoPendiente": "Pending",
+    "flujoRevision": "Under Review",
+    "flujoPreseleccionada": "Shortlisted",
+    "flujoRechazada": "Rejected",
+    "flujoAceptada": "Accepted"
+  },
+  "egresadoProyectos": {
+    "titulo": "My Projects",
+    "total": "{{count}} project(s)",
+    "loading": "Loading projects...",
+    "empty": "No active projects",
+    "emptyDesc": "When a company hires you, your projects will appear here.",
+    "entregables": "Deliverables: {{aprobados}}/{{total}}",
+    "empresa": "Company: {{nombre}}",
+    "inicio": "Start: {{fecha}}",
+    "fin": "End: {{fecha}}",
+    "tecnologias": "Technologies",
+    "presupuestoMin": "Min budget:",
+    "presupuestoMax": "Max budget:",
+    "modalidad": "Modality:",
+    "estado": "Status:",
+    "finEstimado": "Estimated end:",
+    "ocultarEntregables": "Hide deliverables",
+    "verEntregables": "View deliverables",
+    "historialEntregables": "Deliverable History",
+    "sinEntregables": "No deliverables yet.",
+    "repo": "Repo",
+    "cerrarDetalles": "Close details",
+    "verDetalles": "View details"
+  },
+  "egresadoProyectoDetalle": {
+    "volver": "Back to projects",
+    "loading": "Loading project...",
+    "descripcion": "Project description",
+    "tecnologias": "Required technologies",
+    "tuPostulacion": "Your application",
+    "mensajePresentacion": "Cover message",
+    "propuestaEconomica": "Your proposal",
+    "postulasteEl": "Applied on {{fecha}}",
+    "editar": "Edit",
+    "cancelarPostulacion": "Cancel application?",
+    "siCancelar": "Yes, cancel",
+    "no": "No",
+    "btnCancelarPostulacion": "Cancel application",
+    "postularme": "Apply to this project",
+    "sobreEmpresa": "About the company",
+    "sitioWeb": "Website",
+    "detalles": "Project details",
+    "modalidad": "Modality",
+    "presupuestoMin": "Min budget",
+    "presupuestoMax": "Max budget",
+    "plazoEntrega": "Delivery deadline",
+    "publicado": "Published",
+    "editarPostulacion": "Edit application",
+    "modalPostularme": "Apply to this project",
+    "modalEditarMsg": "Update your message and proposal...",
+    "modalPostularMsg": "Tell the company why you are the ideal candidate...",
+    "campoMensaje": "Cover message",
+    "campoPropuesta": "Your proposal",
+    "campoPropuestaHint": "How much budget do you estimate for this project?",
+    "guardando": "Saving...",
+    "sinCambios": "No changes",
+    "guardarCambios": "Save changes",
+    "postularmeBtn": "Apply"
+  },
+  "egresadoEmpleoDetalle": {
+    "volver": "Back to jobs",
+    "loading": "Loading job...",
+    "descripcion": "Job description",
+    "tecnologias": "Required technologies",
+    "tuPostulacion": "Your application",
+    "mensajePresentacion": "Cover message",
+    "expectativaSalarial": "Salary expectation",
+    "postulasteEl": "Applied on {{fecha}}",
+    "editar": "Edit",
+    "cancelarPostulacion": "Cancel application?",
+    "siCancelar": "Yes, cancel",
+    "cancelando": "Canceling...",
+    "no": "No",
+    "btnCancelarPostulacion": "Cancel application",
+    "postularme": "Apply to this job",
+    "sobreEmpresa": "About the company",
+    "sitioWeb": "Website",
+    "detalles": "Job details",
+    "modalidad": "Modality",
+    "salarioMin": "Min salary",
+    "salarioMax": "Max salary",
+    "plazoEntrega": "Delivery deadline",
+    "publicado": "Published",
+    "salarioMensual": "Monthly salary",
+    "editarPostulacion": "Edit application",
+    "modalPostularme": "Apply to this job",
+    "campoMensaje": "Cover message",
+    "campoSalario": "Salary expectation",
+    "campoSalarioHint": "What is your monthly salary expectation?",
+    "guardando": "Saving...",
+    "sinCambios": "No changes",
+    "guardarCambios": "Save changes",
+    "postularmeBtn": "Apply"
+  },
+  "egresadoHistorial": {
+    "titulo": "Project History",
+    "total": "{{count}} record(s)",
+    "agregar": "Add",
+    "totalProyectos": "Total projects",
+    "github": "GitHub",
+    "plataforma": "Platform",
+    "form": {
+      "titulo": "Project title",
+      "rol": "Role performed",
+      "tech": "Technologies (comma separated)",
+      "url": "Repository URL",
+      "descripcion": "Description",
+      "guardando": "Saving...",
+      "guardar": "Save",
+      "cancelar": "Cancel"
+    },
+    "empty": "No history",
+    "emptyDesc": "Your completed projects will appear here.",
+    "verRepositorio": "View repository"
+  },
+  "egresadoMensajes": {
+    "titulo": "Messages",
+    "total": "{{count}} conversation(s)",
+    "sinMensajes": "No messages",
+    "sinMensajesDesc": "When you have conversations with companies, they will appear here.",
+    "conversaciones": "Conversations",
+    "noLeidos": "{{count}} unread",
+    "leidos": "{{count}} read",
+    "buscarPlaceholder": "Search by name or ID...",
+    "sinResultados": "No results found for \"{{termino}}\"",
+    "egresado": "Alumni",
+    "empresa": "Company",
+    "admin": "Admin",
+    "sinMensajesChat": "No messages yet",
+    "escribeMensaje": "Write a message...",
+    "hoy": "Today",
+    "ayer": "Yesterday",
+    "errorEnvio": "Error sending message.",
+    "seleccionaConversacion": "Select a conversation",
+    "seleccionaDesc": "Choose a chat from the left panel to view messages."
+  },
+  "egresadoNotificaciones": {
+    "titulo": "Notifications",
+    "sinLeer": "{{count}} unread",
+    "marcarTodasLeidas": "Mark all as read",
+    "empty": "No notifications",
+    "emptyDesc": "You have no new notifications.",
+    "grupoHoy": "Today",
+    "grupoAyer": "Yesterday",
+    "grupoSemana": "This week",
+    "grupoAnterior": "Earlier",
+    "marcarLeida": "Mark as read",
+    "tipoPostulacion": "Application",
+    "tipoProyecto": "Project",
+    "tipoMensaje": "Message",
+    "tipoSistema": "System",
+    "tipoOferta": "Offer"
+  },
+  "egresadoConfiguracion": {
+    "kicker": "PREFERENCES PANEL",
+    "title": "Settings",
+    "subtitle": "Manage your professional identity and platform preferences.",
+    "sections": {
+      "cuenta": "Account Information",
+      "preferencias": "Professional Preferences",
+      "notificaciones": "Notifications",
+      "seguridad": "Security"
+    },
+    "accountInfo": {
+      "titulo": "Account Information",
+      "guardado": "Changes saved!",
+      "guardarCambios": "Save Changes",
+      "fotoPerfil": "Profile Picture",
+      "subiendo": "Uploading...",
+      "cambiarFoto": "Change photo",
+      "nombreCompleto": "Full Name",
+      "correo": "Email Address",
+      "biografia": "Short Bio"
+    },
+    "preferences": {
+      "titulo": "Professional Preferences",
+      "guardado": "Changes saved!",
+      "guardarCambios": "Save Changes",
+      "interesRol": "Role Interest",
+      "expectativaSalarial": "Salary Expectation (Annual)",
+      "tecnologiasPrincipales": "Main Technologies",
+      "nuevaTech": "New tech...",
+      "anadir": "Add"
+    },
+    "notifications": {
+      "titulo": "Notifications",
+      "alertasPostulacion": "Application Alerts",
+      "alertasPostulacionDesc": "Receive an email when a company views your profile or changes your status.",
+      "nuevosMensajes": "New Messages",
+      "nuevosMensajesDesc": "Push notifications for direct messages from recruiters.",
+      "nuevosProyectos": "New Projects",
+      "nuevosProyectosDesc": "Notify me of new projects that match my preferences."
+    },
+    "security": {
+      "titulo": "Security",
+      "cambiarPassword": "Change Password",
+      "cambiarPasswordDesc": "Update your password to keep your account secure.",
+      "actualizar": "Update",
+      "passwordActual": "Current password",
+      "nuevaPassword": "New password",
+      "confirmarPassword": "Confirm password",
+      "cancelar": "Cancel",
+      "guardarPassword": "Save password",
+      "dosFA": "Two-Factor Authentication (2FA)",
+      "activo": "Active",
+      "dosFADesc": "Add an extra layer of security using an authenticator app.",
+      "desactivar": "Disable",
+      "configurar": "Set up",
+      "eliminarCuenta": "Delete Account",
+      "eliminarConfirm": "Delete your account?",
+      "eliminarDesc": "This action is permanent and cannot be undone.",
+      "escribeEliminar": "Type DELETE",
+      "eliminarBtn": "Delete account",
+      "ocultar": "Hide",
+      "mostrar": "Show"
+    }
+  },
+  "auth": {
+    "overlayLeft": {
+      "titleStart": "Welcome back!",
+      "titleHighlight": "Keep growing.",
+      "desc": "To keep connected with us please login with your personal info and discover new projects.",
+      "btn": "Sign In"
+    },
+    "overlayRight": {
+      "titleStart": "The future does not wait,",
+      "titleHighlight": "boost your talent.",
+      "desc": "Join the leading platform for junior developers. Find high-impact projects and connect with the most innovative companies.",
+      "btn": "Sign Up"
+    },
+    "login": {
+      "titleStart": "Access your career",
+      "subtitle": "Welcome back. Enter your credentials to continue.",
+      "btnGoogle": "Continue with Google",
+      "orEmail": "OR WITH EMAIL",
+      "email": "Email Address",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "passwordPlaceholder": "••••••••",
+      "rememberMe": "Keep me logged in",
+      "loading": "Signing in...",
+      "submit": "Sign In",
+      "noAccount": "Do not have an account?",
+      "registerNow": "Sign up now",
+      "errFields": "Please complete all fields.",
+      "errDefault": "Error signing in. Please try again."
+    },
+    "register": {
+      "titleStart": "Create your account",
+      "subtitle": "Fill in your details to join the platform.",
+      "successMsg": "Account created successfully",
+      "redirecting": "Redirecting to login...",
+      "name": "Full name",
+      "namePlaceholder": "John Doe",
+      "cedula": "ID Card ",
+      "cedulaHint": "(include hyphen)",
+      "cedulaPlaceholder": "1-2342",
+      "role": "Account type",
+      "roleStudent": "Student",
+      "roleCompany": "Company",
+      "phone": "Phone (WhatsApp)",
+      "phonePlaceholder": "8888-8888",
+      "fileStudent": "FWD Degree (PDF or Image)",
+      "companyType": "Company Type",
+      "companyTypePlaceholder": "E.g. Startup, SME, etc.",
+      "sector": "Sector",
+      "sectorPlaceholder": "Technology, Finance, Health",
+      "fileCompany": "Corporate ID (PDF or Image) ",
+      "optional": "- Optional",
+      "passwordPlaceholder": "Minimum 6 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Repeat your password",
+      "loading": "Creating account...",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "loginNow": "Sign in",
+      "errFields": "Please complete all fields.",
+      "errCedula": "The ID must include the hyphen (-). Example: 1-2342",
+      "errPasswordLen": "The password must have at least 6 characters.",
+      "errPasswordMatch": "The passwords do not match.",
+      "errDefault": "Error signing up. Please try again."
+    }
+  },
+  "landing": {
+    "projects": "Projects",
+    "juniors": "Juniors",
+    "empresas": "Companies",
+    "acceder": "Sign In",
+    "hero": {
+      "badge": "FORWARD MOMENTUM ECOSYSTEM",
+      "title1": "Build the",
+      "titlePink": "Future",
+      "title2": "of your Career",
+      "titleCyan": "Today.",
+      "description": "We connect the brightest emerging talent with real industry projects.",
+      "btnExplore": "Explore Projects",
+      "btnCompanies": "For Companies"
+    },
+    "cta": {
+      "title": "Ready to take the next step?",
+      "subtitle": "Join the largest tech talent network in Costa Rica.",
+      "btnRegister": "Sign Up Free",
+      "btnProjects": "View Projects"
+    },
+    "features": {
+      "badge": "HOW IT WORKS",
+      "title": "An ecosystem designed to grow",
+      "subtitle": "We facilitate the connection between emerging talent and innovative companies.",
+      "f1_title": "Real Projects",
+      "f1_desc": "Gain experience working on verified projects by real companies.",
+      "f2_title": "Direct Feedback",
+      "f2_desc": "Receive valuable feedback from industry professionals.",
+      "f3_title": "Verified Portfolio",
+      "f3_desc": "Build a track record validated by the FWD platform.",
+      "f4_title": "Networking",
+      "f4_desc": "Connect with other juniors and leading tech companies."
+    },
+    "footer": {
+      "rights": "Forward Foundation Costa Rica.",
+      "platform": "PLATFORM",
+      "legal": "LEGAL",
+      "contact": "CONTACT",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    },
+    "stats": {
+      "juniors": "Active Juniors",
+      "companies": "Companies",
+      "projects": "Completed Projects",
+      "hired": "Hiring Rate"
+    },
+    "carousel": {
+      "badge": "FEATURED PROJECTS",
+      "title": "Explore real opportunities",
+      "subtitle": "Discover the latest projects published by companies in our network.",
+      "viewAll": "View all projects"
+    }
   }
 }

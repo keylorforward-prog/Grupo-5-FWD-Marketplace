@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "node --watch app.js",
+    "dev": "node app.js",
+    "dev:watch": "node --watch app.js",
+    "seed:ofertas": "node scripts/seedOfertas.js",
+    "seed:conversaciones": "node scripts/seedConversaciones.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

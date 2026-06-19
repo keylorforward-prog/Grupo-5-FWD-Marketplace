@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Book, Plus, X } from 'lucide-react';
 
 function TarjetaStack({ perfilApi }) {
-  const { perfil, agregarTecnologia, quitarTecnologia } = perfilApi;
+  const { t } = useTranslation();
+  const { perfil, agregarTecnologia, quitarTecnologia, catalogoTecnologias } = perfilApi;
   const [agregando, setAgregando] = useState(false);
   const [valor, setValor] = useState('');
   const refInput = useRef(null);
@@ -32,7 +34,7 @@ function TarjetaStack({ perfilApi }) {
     <div className="tarjetaStack">
       <h3 className="tituloTarjetaStack">
         <Book size={20} className="iconoTituloStack" />
-        Aprendiendo
+        {t('egresadoPerfil.stack.titulo')}
       </h3>
 
       <div className="contenedorStack">
@@ -51,19 +53,29 @@ function TarjetaStack({ perfilApi }) {
         ))}
 
         {agregando ? (
-          <input
-            ref={refInput}
-            type="text"
-            value={valor}
-            onChange={(e) => setValor(e.target.value)}
-            onBlur={confirmar}
-            onKeyDown={manejarTecla}
-            className="entradaNuevaStack"
-            placeholder="Nueva tech..."
-          />
+          <>
+            <input
+              ref={refInput}
+              type="text"
+              value={valor}
+              onChange={(e) => setValor(e.target.value)}
+              onBlur={confirmar}
+              onKeyDown={manejarTecla}
+              className="entradaNuevaStack"
+              placeholder={t('egresadoPerfil.stack.placeholder')}
+              list="sugerenciasStack"
+            />
+            <datalist id="sugerenciasStack">
+              {catalogoTecnologias
+                .filter((t) => !perfil.tecnologias.some((p) => p.nombre.toLowerCase() === t.toLowerCase()))
+                .map((t) => (
+                  <option key={t} value={t} />
+                ))}
+            </datalist>
+          </>
         ) : (
           <button type="button" className="botonAgregarStack" onClick={iniciarAgregar}>
-            <Plus size={14} /> Agregar
+            <Plus size={14} /> {t('egresadoPerfil.stack.agregar')}
           </button>
         )}
       </div>

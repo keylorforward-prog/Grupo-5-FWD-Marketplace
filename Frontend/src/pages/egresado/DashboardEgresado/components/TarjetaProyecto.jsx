@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Send, Clock, DollarSign, Tag, Globe, CheckCircle } from 'lucide-react';
+import { Bookmark, Send, Clock, DollarSign, Tag, Globe } from 'lucide-react';
 import { categoriasProyecto } from '../../../../data/proyectosEgresado';
 
-const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
+const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
 const etiquetaCategoria = Object.fromEntries(
   categoriasProyecto.filter((c) => c.valor !== 'todas').map((c) => [c.valor, c.etiqueta])
 );
@@ -19,22 +20,22 @@ const formatearPresupuesto = (min, max) =>
 
 const formatearEntrega = (min, max) => `${min} – ${max} días`;
 
-function TarjetaProyecto({ proyecto, postulado }) {
+function TarjetaProyecto({ proyecto }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [guardado, setGuardado] = useState(false);
 
   const irAlDetalle = () => {
-    if (!postulado) navigate(`/egresado/dashboard/proyecto/${proyecto.id}`);
+    navigate(`/egresado/dashboard/proyecto/${proyecto.id}`);
   };
 
   return (
     <article
-      className={`tarjetaProyecto acento-${proyecto.colorAcento}${postulado ? ' postulado' : ''}`}
+      className={`tarjetaProyecto acento-${proyecto.colorAcento}`}
       onClick={irAlDetalle}
       role="button"
-      tabIndex={postulado ? -1 : 0}
+      tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter') irAlDetalle(); }}
-      style={postulado ? { cursor: 'default' } : undefined}
     >
       <div className="encabezadoTarjeta">
         <div className={`iconoProyectoContenedor acento-${proyecto.colorAcento}`}>
@@ -52,7 +53,7 @@ function TarjetaProyecto({ proyecto, postulado }) {
           type="button"
           className={`botonGuardar ${guardado ? 'activo' : ''}`}
           onClick={() => setGuardado((g) => !g)}
-          aria-label={guardado ? 'Quitar de guardados' : 'Guardar proyecto'}
+          aria-label={guardado ? t('egresadoExplorar.components.quitarGuardados') : t('egresadoExplorar.components.guardarProyecto')}
         >
           <Bookmark size={18} fill={guardado ? 'currentColor' : 'none'} />
         </button>
@@ -65,7 +66,7 @@ function TarjetaProyecto({ proyecto, postulado }) {
         </span>
         <span className="metaBadge metaModalidad">
           <Globe size={12} />
-          {etiquetaModalidad[proyecto.modalidad] ?? proyecto.modalidad}
+          {etiquetaModalidad[proyecto.modalidad] ? t(etiquetaModalidad[proyecto.modalidad]) : proyecto.modalidad}
         </span>
       </div>
 
@@ -82,7 +83,7 @@ function TarjetaProyecto({ proyecto, postulado }) {
           <div className="datoPie">
             <span className="etiquetaDato">
               <DollarSign size={12} />
-              Presupuesto
+              {t('egresadoExplorar.components.presupuesto')}
             </span>
             <span className="valorDato">
               {formatearPresupuesto(proyecto.presupuestoMin, proyecto.presupuestoMax)}
@@ -91,28 +92,21 @@ function TarjetaProyecto({ proyecto, postulado }) {
           <div className="datoPie">
             <span className="etiquetaDato">
               <Clock size={12} />
-              Entrega
+              {t('egresadoExplorar.components.entrega')}
             </span>
             <span className="valorDato">
               {formatearEntrega(proyecto.diasMin, proyecto.diasMax)}
             </span>
           </div>
         </div>
-        {postulado ? (
-          <span className="botonPostulado">
-            <CheckCircle size={14} />
-            Postulado
-          </span>
-        ) : (
-          <button
-            type="button"
-            className="botonDetalle"
-            onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}
-          >
-            <Send size={14} />
-            Ver detalle
-          </button>
-        )}
+        <button
+          type="button"
+          className="botonDetalle"
+          onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}
+        >
+          <Send size={14} />
+          {t('egresadoExplorar.components.verDetalle')}
+        </button>
       </div>
     </article>
   );

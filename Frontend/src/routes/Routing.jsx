@@ -17,24 +17,26 @@ import CompletarPerfil from '../pages/auth/CompletarPerfil/CompletarPerfil';
 import ForgotPasswordPage from '../pages/RecuperacionContra/ForgotPasswordPage';
 
 // Empresa
-import DashboardEmpresario from '../pages/empresa/DashboardEmpresario/DashboardEmpresario';
-import ProyectosEmpresario from '../pages/empresa/DashboardEmpresario/pages/Proyectos/Proyectos';
-import OfertasEmpresario from '../pages/empresa/DashboardEmpresario/pages/Ofertas/Ofertas';
-import EntregablesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Entregables/Entregables';
-import MensajesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Mensajes/Mensajes';
-import TalentoEmpresario from '../pages/empresa/DashboardEmpresario/pages/Talento/Talento';
-import HistorialEmpresario from '../pages/empresa/DashboardEmpresario/pages/Historial/Historial';
-import EvaluacionesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Evaluaciones/Evaluaciones';
-import FacturacionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Facturacion/Facturacion';
-import NotificacionesEmpresario from '../pages/empresa/DashboardEmpresario/pages/Notificaciones/Notificaciones';
-import AyudaEmpresario from '../pages/empresa/DashboardEmpresario/pages/Ayuda/Ayuda';
-import PublicarProyecto from '../pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
-import CrearProyectoIA from '../pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
-import ConfiguracionEmpresario from '../pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
-import PerfilEmpresa from '../pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
-import GestionPostulaciones from '../pages/empresa/Postulaciones/GestionPostulaciones';
-import AdminProfile from '../pages/admin/AdminProfile';
-import SettingsEmpresa from '../pages/empresa/SettingsEmpresa/SettingsEmpresa';
+import DashboardEmpresario from '../Pages/empresa/DashboardEmpresario/DashboardEmpresario';
+import ProyectosEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Proyectos/Proyectos';
+import OfertasEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Ofertas/Ofertas';
+import EntregablesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Entregables/Entregables';
+import MensajesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Mensajes/Mensajes';
+import TalentoEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Talento/Talento';
+import HistorialEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Historial/Historial';
+import EvaluacionesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Evaluaciones/Evaluaciones';
+import FacturacionEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Facturacion/Facturacion';
+import NotificacionesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Notificaciones/Notificaciones';
+import AyudaEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Ayuda/Ayuda';
+import PublicarProyecto from '../Pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
+import CrearProyectoIA from '../Pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
+import OfertasEmpleo from '../Pages/empresa/DashboardEmpresario/pages/OfertasEmpleo/OfertasEmpleo';
+import PublicarEmpleo from '../Pages/empresa/DashboardEmpresario/pages/PublicarEmpleo/PublicarEmpleo';
+import ConfiguracionEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
+import PerfilEmpresa from '../Pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
+import GestionPostulaciones from '../Pages/empresa/Postulaciones/GestionPostulaciones';
+import AdminProfile from '../Pages/admin/AdminProfile';
+import SettingsEmpresa from '../Pages/empresa/SettingsEmpresa/SettingsEmpresa';
 
 // Egresado
 import DashboardEgresado from '../Pages/egresado/DashboardEgresado/DashboardEgresado';
@@ -45,14 +47,16 @@ import HistorialEgresado from '../Pages/egresado/DashboardEgresado/pages/Histori
 import MensajesEgresado from '../Pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
 import NotificacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
 import ExplorarProyectos from '../Pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
+import ExplorarEmpleos from '../Pages/egresado/DashboardEgresado/pages/ExplorarEmpleos/ExplorarEmpleos';
+import DetalleEmpleo from '../Pages/egresado/DashboardEgresado/pages/DetalleEmpleo/DetalleEmpleo';
 import ProyectoDetalle from '../Pages/egresado/DashboardEgresado/pages/ProyectoDetalle/ProyectoDetalle';
 import PerfilEgresado from '../Pages/egresado/PerfilEgresado/PerfilEgresado';
 import ConfiguracionEgresado from '../Pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
 
 
 // Comunes
-import Proximamente from '../pages/comun/Proximamente';
-import PaginaNoEncontrada from '../pages/comun/PaginaNoEncontrada';
+import Proximamente from '../Pages/comun/Proximamente';
+import PaginaNoEncontrada from '../Pages/comun/PaginaNoEncontrada';
 
 export default function Routing() {
   return (
@@ -95,8 +99,12 @@ export default function Routing() {
         >
           <Route index element={<InicioEgresado />} />
           <Route path="explorar" element={<ExplorarProyectos />} />
+          <Route path="explorar-empleos" element={<ExplorarEmpleos />} />
+          <Route path="empleo/:id" element={<DetalleEmpleo />} />
           <Route path="proyecto/:id" element={<ProyectoDetalle />} />
-          <Route path="postulaciones" element={<PostulacionesEgresado />} />
+          <Route path="postulaciones" element={<Navigate to="proyectos" replace />} />
+          <Route path="postulaciones/proyectos" element={<PostulacionesEgresado />} />
+          <Route path="postulaciones/empleos" element={<PostulacionesEgresado />} />
           <Route path="proyectos" element={<MisProyectosEgresado />} />
           <Route path="historial" element={<HistorialEgresado />} />
           <Route path="mensajes" element={<MensajesEgresado />} />
@@ -135,6 +143,8 @@ export default function Routing() {
         {/* Subrutas de Empresa Dashboard */}
         <Route path="/DashboardEmpresario/perfil" element={<RutaProtegida rolPermitido="empresa"><PerfilEmpresa /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/proyectos" element={<RutaProtegida rolPermitido="empresa"><ProyectosEmpresario /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/empleos" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpleo /></RutaProtegida>} />
+        <Route path="/DashboardEmpresario/publicar-empleo" element={<RutaProtegida rolPermitido="empresa"><PublicarEmpleo /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/ofertas" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpresario /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/entregables" element={<RutaProtegida rolPermitido="empresa"><EntregablesEmpresario /></RutaProtegida>} />
         <Route path="/DashboardEmpresario/mensajes" element={<RutaProtegida rolPermitido="empresa"><MensajesEmpresario /></RutaProtegida>} />
@@ -166,6 +176,7 @@ export default function Routing() {
             </RutaProtegida>
           }
         />
+        <Route path="/Admin" element={<Navigate to={RUTAS.admin} replace />} />
 
         {/* ── Compartidas: placeholders ──────────────────────────────── */}
         <Route

@@ -9,6 +9,8 @@ const HistorialProyectoEstudiante = require('./historialProyectoEstudiante')(seq
 const PerfilEmpresario = require('./perfilEmpresario')(sequelize, DataTypes);
 const HistorialProyectoEmpresa = require('./historialProyectoEmpresa')(sequelize, DataTypes);
 const Propuesta = require('./propuesta')(sequelize, DataTypes);
+const OfertaEmpleo = require('./ofertaEmpleo')(sequelize, DataTypes);
+const PostulacionEmpleo = require('./postulacionEmpleo')(sequelize, DataTypes);
 const CatalogoTecnologia = require('./catalogoTecnologia')(sequelize, DataTypes);
 const TecnologiaPropuesta = require('./tecnologiaPropuesta')(sequelize, DataTypes);
 const Postulacion = require('./postulacion')(sequelize, DataTypes);
@@ -51,6 +53,14 @@ HistorialProyectoEstudiante.belongsTo(PerfilEstudiante, { foreignKey: 'id_perfil
 
 PerfilEmpresario.hasMany(Propuesta, { foreignKey: 'id_perfil_empresario', as: 'propuestas' });
 Propuesta.belongsTo(PerfilEmpresario, { foreignKey: 'id_perfil_empresario', as: 'perfilEmpresario' });
+
+PerfilEmpresario.hasMany(OfertaEmpleo, { foreignKey: 'id_perfil_empresario', as: 'ofertasEmpleo' });
+OfertaEmpleo.belongsTo(PerfilEmpresario, { foreignKey: 'id_perfil_empresario', as: 'perfilEmpresario' });
+
+OfertaEmpleo.hasMany(PostulacionEmpleo, { foreignKey: 'id_oferta_empleo', as: 'postulaciones' });
+PostulacionEmpleo.belongsTo(OfertaEmpleo, { foreignKey: 'id_oferta_empleo', as: 'oferta' });
+PostulacionEmpleo.belongsTo(PerfilEstudiante, { foreignKey: 'id_perfil_estudiante', as: 'estudiante' });
+PerfilEstudiante.hasMany(PostulacionEmpleo, { foreignKey: 'id_perfil_estudiante', as: 'postulacionesEmpleo' });
 
 PerfilEmpresario.hasMany(HistorialProyectoEmpresa, { foreignKey: 'id_perfil_empresario', as: 'historialProyectos' });
 HistorialProyectoEmpresa.belongsTo(PerfilEmpresario, { foreignKey: 'id_perfil_empresario', as: 'perfilEmpresario' });
@@ -129,6 +139,8 @@ module.exports = {
   PerfilEmpresario,
   HistorialProyectoEmpresa,
   Propuesta,
+  OfertaEmpleo,
+  PostulacionEmpleo,
   CatalogoTecnologia,
   TecnologiaPropuesta,
   Postulacion,

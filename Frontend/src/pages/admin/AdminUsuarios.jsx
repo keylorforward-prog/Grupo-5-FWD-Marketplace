@@ -1,56 +1,84 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, memo } from 'react';
 import { adminService } from '../../services/adminService';
-import { Search, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Search, AlertTriangle, CheckCircle, Pencil } from 'lucide-react';
 import AdminMotivoModal from './components/AdminMotivoModal';
+import AdminUsuarioModal from './components/AdminUsuarioModal';
+import AdminExportButton from './components/AdminExportButton';
+import { useDebounce } from '../../hooks/useDebounce';
 
-export default function AdminUsuarios({ onAdminChange }) {
+const PAGE_SIZE = 25;
+
+const AdminUsuarios = memo(function AdminUsuarios({ onAdminChange }) {
+  const { t } = useTranslation();
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [filtroRol, setFiltroRol] = useState('TODOS');
+  const [filtroEstado, setFiltroEstado] = useState('TODOS');
+  const [meta, setMeta] = useState({ page: 1, total: 0, hasMore: false });
   const [mensaje, setMensaje] = useState(null);
   const [modalSuspension, setModalSuspension] = useState({ open: false, usuario: null });
+  const [modalUsuario, setModalUsuario] = useState({ open: false, usuario: null });
   const [procesandoAccion, setProcesandoAccion] = useState(false);
 
-  const fetchUsuarios = useCallback(async () => {
+  const fetchUsuarios = useCallback(async ({ page = 1, append = false, mostrarCarga = true } = {}) => {
     try {
-      setLoading(true);
-      const res = await adminService.getUsuarios();
+      if (mostrarCarga) setLoading(true);
+      const res = await adminService.getUsuarios({
+        page,
+        limit: PAGE_SIZE,
+        search: debouncedSearchTerm.trim() || undefined,
+        rol: filtroRol,
+        estado: filtroEstado,
+      });
       if (res.success) {
-        setUsuarios(res.data);
+        setUsuarios((actuales) => (append ? [...actuales, ...res.data] : res.data));
+        setMeta(res.meta || { page, total: res.data.length, hasMore: false });
       }
     } catch (error) {
       console.error('Error cargando usuarios', error);
-      setMensaje({ tipo: 'error', texto: 'No se pudo cargar la lista de usuarios.' });
+      setMensaje({ tipo: 'error', texto: t('admin.messages.loadUsersError') });
     } finally {
-      setLoading(false);
+      if (mostrarCarga) setLoading(false);
     }
-  }, []);
+  }, [debouncedSearchTerm, filtroEstado, filtroRol, t]);
 
   useEffect(() => {
-    let cancelado = false;
+    fetchUsuarios({ page: 1 });
+  }, [fetchUsuarios]);
 
-    adminService.getUsuarios()
-      .then((res) => {
-        if (!cancelado && res.success) {
-          setUsuarios(res.data);
-        }
-      })
-      .catch((error) => {
-        console.error('Error cargando usuarios', error);
-        if (!cancelado) {
-          setMensaje({ tipo: 'error', texto: 'No se pudo cargar la lista de usuarios.' });
-        }
-      })
-      .finally(() => {
-        if (!cancelado) {
-          setLoading(false);
-        }
-      });
+  const guardarUsuario = async (idUsuario, payload) => {
+    setProcesandoAccion(true);
 
-    return () => {
-      cancelado = true;
-    };
-  }, []);
+    try {
+      const res = await adminService.updateUsuario(idUsuario, payload);
+      if (res.success) {
+        setMensaje({ tipo: 'success', texto: res.message || 'Usuario actualizado correctamente.' });
+        setModalUsuario({ open: false, usuario: null });
+        await fetchUsuarios({ page: 1 });
+        onAdminChange?.();
+      }
+    } catch (error) {
+      console.error('Error actualizando usuario', error);
+      setMensaje({ tipo: 'error', texto: error.response?.data?.message || 'No se pudo actualizar el usuario.' });
+    } finally {
+      setProcesandoAccion(false);
+    }
+  };
+
+  const abrirDetalleUsuario = async (usuario) => {
+    setModalUsuario({ open: true, usuario });
+    try {
+      const res = await adminService.getUsuarioDetalle(usuario.id_usuario);
+      if (res.success) {
+        setModalUsuario({ open: true, usuario: { ...res.data.usuario, detalleAdmin: res.data } });
+      }
+    } catch (error) {
+      console.error('Error cargando detalle de usuario', error);
+    }
+  };
 
   const handleSuspension = async (id, estadoActual, motivo = null) => {
     const accion = estadoActual === 'SUSPENDIDA' ? 'REACTIVAR' : 'SUSPENDER';
@@ -58,13 +86,13 @@ export default function AdminUsuarios({ onAdminChange }) {
     try {
       const res = await adminService.suspendUsuario(id, accion, motivo);
       if (res.success) {
-        setMensaje({ tipo: 'success', texto: res.message || 'Estado actualizado correctamente.' });
-        await fetchUsuarios();
+        setMensaje({ tipo: 'success', texto: res.message || t('admin.messages.statusUpdated') });
+        await fetchUsuarios({ page: 1 });
         onAdminChange?.();
       }
     } catch (error) {
       console.error('Error cambiando estado del usuario', error);
-      setMensaje({ tipo: 'error', texto: error.response?.data?.message || 'Error cambiando estado.' });
+      setMensaje({ tipo: 'error', texto: error.response?.data?.message || t('admin.messages.statusUpdateError') });
     }
   };
 
@@ -84,38 +112,44 @@ export default function AdminUsuarios({ onAdminChange }) {
     try {
       const res = await adminService.suspendUsuario(modalSuspension.usuario.id_usuario, 'SUSPENDER', motivo);
       if (res.success) {
-        setMensaje({ tipo: 'success', texto: res.message || 'Usuario suspendido correctamente.' });
+        setMensaje({ tipo: 'success', texto: res.message || t('admin.messages.userSuspended') });
         setModalSuspension({ open: false, usuario: null });
-        await fetchUsuarios();
+        await fetchUsuarios({ page: 1 });
         onAdminChange?.();
       }
     } catch (error) {
       console.error('Error cambiando estado del usuario', error);
-      setMensaje({ tipo: 'error', texto: error.response?.data?.message || 'Error cambiando estado.' });
+      setMensaje({ tipo: 'error', texto: error.response?.data?.message || t('admin.messages.statusUpdateError') });
     } finally {
       setProcesandoAccion(false);
     }
   };
 
-  const filteredUsuarios = usuarios.filter(u =>
-    u.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.rol?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <div className="admin-content animate-in">
-      <div className="admin-module-heading">
-        <h3>Gestion de Usuarios</h3>
+      <div className="admin-module-heading" style={{ justifyContent: 'flex-end' }}>
         <div className="admin-search">
           <Search size={18} />
           <input
             type="text"
-            placeholder="Buscar usuario..."
+            placeholder={t('admin.users.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <div className="admin-filter-tabs" aria-label="Filtros de usuarios">
+          {['TODOS', 'ADMIN', 'ESTUDIANTE', 'EMPRESARIO'].map((rol) => (
+            <button key={rol} className={`admin-filter-tab ${filtroRol === rol ? 'active' : ''}`} type="button" onClick={() => setFiltroRol(rol)}>
+              {rol}
+            </button>
+          ))}
+          {['TODOS', 'ACTIVA', 'PENDIENTE', 'SUSPENDIDA'].map((estado) => (
+            <button key={estado} className={`admin-filter-tab ${filtroEstado === estado ? 'active' : ''}`} type="button" onClick={() => setFiltroEstado(estado)}>
+              {estado}
+            </button>
+          ))}
+        </div>
+        <AdminExportButton tipo="usuarios" />
       </div>
 
       {mensaje && (
@@ -130,20 +164,20 @@ export default function AdminUsuarios({ onAdminChange }) {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Usuario</th>
-                <th>Rol</th>
-                <th>Registro</th>
-                <th>Estado</th>
-                <th className="admin-table-actions">Acciones</th>
+                <th>{t('admin.users.tableUser')}</th>
+                <th>{t('admin.users.tableRole')}</th>
+                <th>{t('admin.users.tableRegistration')}</th>
+                <th>{t('admin.users.tableStatus')}</th>
+                <th className="admin-table-actions">{t('admin.users.tableActions')}</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="5" className="admin-muted-cell">Cargando usuarios...</td></tr>
-              ) : filteredUsuarios.length === 0 ? (
-                <tr><td colSpan="5" className="admin-muted-cell">No se encontraron usuarios.</td></tr>
+                <tr><td colSpan="5" className="admin-muted-cell">{t('admin.users.loadingUsers')}</td></tr>
+              ) : usuarios.length === 0 ? (
+                <tr><td colSpan="5" className="admin-muted-cell">{t('admin.users.noUsersFound')}</td></tr>
               ) : (
-                filteredUsuarios.map(u => (
+                usuarios.map(u => (
                   <tr key={u.id_usuario}>
                     <td>
                       <div className="admin-user-cell">
@@ -166,14 +200,24 @@ export default function AdminUsuarios({ onAdminChange }) {
                       </span>
                     </td>
                     <td className="admin-table-actions">
-                      <button 
-                        onClick={() => abrirSuspension(u)}
-                        className={`admin-action-button ${u.estado_cuenta === 'SUSPENDIDA' ? 'success' : 'danger'}`}
-                        type="button"
-                      >
-                        {u.estado_cuenta === 'SUSPENDIDA' ? <CheckCircle size={14} /> : <AlertTriangle size={14} />}
-                        {u.estado_cuenta === 'SUSPENDIDA' ? 'Reactivar' : 'Suspender'}
-                      </button>
+                      <div className="admin-action-group">
+                        <button
+                          onClick={() => abrirDetalleUsuario(u)}
+                          className="admin-action-button neutral"
+                          type="button"
+                        >
+                          <Pencil size={14} />
+                          Ver / editar
+                        </button>
+                        <button 
+                          onClick={() => abrirSuspension(u)}
+                          className={`admin-action-button ${u.estado_cuenta === 'SUSPENDIDA' ? 'success' : 'danger'}`}
+                          type="button"
+                        >
+                          {u.estado_cuenta === 'SUSPENDIDA' ? <CheckCircle size={14} /> : <AlertTriangle size={14} />}
+                          {u.estado_cuenta === 'SUSPENDIDA' ? t('admin.users.reactivate') : t('admin.users.suspend')}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -181,19 +225,36 @@ export default function AdminUsuarios({ onAdminChange }) {
             </tbody>
           </table>
         </div>
+        {!loading && meta.hasMore && (
+          <div className="admin-load-more">
+            <button className="admin-action-button neutral" type="button" onClick={() => fetchUsuarios({ page: meta.page + 1, append: true, mostrarCarga: false })}>
+              Cargar más ({usuarios.length}/{meta.total})
+            </button>
+          </div>
+        )}
       </section>
 
       <AdminMotivoModal
         open={modalSuspension.open}
-        title="Suspender usuario"
-        description={`Estas por suspender a ${modalSuspension.usuario?.nombre || 'este usuario'}. Indica el motivo para que quede trazado en auditoria.`}
-        label="Motivo de suspension"
-        placeholder="Ej. Incumplimiento de politicas, actividad sospechosa, informacion falsa..."
-        confirmLabel="Suspender usuario"
+        title={t('admin.users.suspendUserTitle')}
+        description={t('admin.users.suspendUserDesc', { name: modalSuspension.usuario?.nombre || 'este usuario' })}
+        label={t('admin.users.suspendReasonLabel')}
+        placeholder={t('admin.users.suspendReasonPlaceholder')}
+        confirmLabel={t('admin.users.suspendUserConfirm')}
         loading={procesandoAccion}
         onCancel={() => setModalSuspension({ open: false, usuario: null })}
         onConfirm={confirmarSuspension}
       />
+
+      <AdminUsuarioModal
+        open={modalUsuario.open}
+        usuario={modalUsuario.usuario}
+        loading={procesandoAccion}
+        onCancel={() => setModalUsuario({ open: false, usuario: null })}
+        onSave={guardarUsuario}
+      />
     </div>
   );
-}
+});
+
+export default AdminUsuarios;

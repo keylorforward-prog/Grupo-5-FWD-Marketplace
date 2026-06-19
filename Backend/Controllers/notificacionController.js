@@ -11,12 +11,17 @@ exports.getAll = async (req, res) => {
 
 exports.getMisNotificaciones = async (req, res) => {
   try {
-    const data = await Notificacion.findAll({
-      where: { id_usuario: req.user.id_usuario },
-      order: [['fecha', 'DESC']],
-      limit: 5
-    });
-    res.status(200).json({ success: true, data });
+    const limite = Math.min(Number.parseInt(req.query.limit, 10) || 10, 50);
+    const where = { id_usuario: req.user.id_usuario };
+    const [data, unreadCount] = await Promise.all([
+      Notificacion.findAll({
+        where,
+        order: [['fecha', 'DESC']],
+        limit: limite
+      }),
+      Notificacion.count({ where: { ...where, leido: false } })
+    ]);
+    res.status(200).json({ success: true, data, unreadCount });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -43,10 +48,26 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const [updated] = await Notificacion.update(req.body, { where: { id_notificacion: req.params.id } });
+    const where = { id_notificacion: req.params.id };
+    if (req.user) where.id_usuario = req.user.id_usuario;
+
+    const [updated] = await Notificacion.update(req.body, { where });
     if (!updated) return res.status(404).json({ success: false, message: 'No encontrado' });
     const data = await Notificacion.findByPk(req.params.id);
     res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.markMineAsRead = async (req, res) => {
+  try {
+    await Notificacion.update(
+      { leido: true },
+      { where: { id_usuario: req.user.id_usuario, leido: false } }
+    );
+
+    res.status(200).json({ success: true, unreadCount: 0 });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

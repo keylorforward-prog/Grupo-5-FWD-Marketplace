@@ -10,6 +10,8 @@ const FLECHAS_PROYECTO = [
   '/Imgs/FLECHAS/Flechas-08.png',
 ];
 
+const esUrl = (valor) => /^https?:\/\//i.test(valor || '');
+
 const formatearFechaRelativa = (fecha) => {
   if (!fecha) return 'Sin fecha';
   const diferencia = Date.now() - new Date(fecha).getTime();
@@ -63,6 +65,14 @@ export const formatearPropuesta = (propuesta, indice = 0) => {
     action: ofertas > 0 ? 'Ver ofertas' : 'Gestionar',
     arrowSrc: FLECHAS_PROYECTO[indice % FLECHAS_PROYECTO.length],
     iconColor: ['blue', 'orange', 'green', 'purple'][indice % 4],
+    github_url: propuesta.github_url || null,
+    descripcion: propuesta.descripcion,
+    tecnologias_requeridas: propuesta.tecnologias_requeridas,
+    presupuesto_min: propuesta.presupuesto_min,
+    presupuesto_max: propuesta.presupuesto_max,
+    plazo_dias: propuesta.plazo_dias,
+    estado: propuesta.estado,
+    fecha_limite: propuesta.fecha_limite,
   };
 };
 
@@ -70,27 +80,46 @@ export const formatearTalento = (perfil) => {
   const usuario = perfil.usuario ?? {};
   const curriculum = perfil.curriculum ?? {};
   const rating = Number(perfil.reputacion_total ?? 0);
+  const historialProyectos = perfil.historialProyectos ?? [];
+  const tituloFwd = perfil.titulo_fwd || '';
+  const evidenciaFwd = esUrl(tituloFwd) ? tituloFwd : null;
+  const habilidades = curriculum.habilidades || (!evidenciaFwd ? tituloFwd : '');
 
   return {
     id: perfil.id_perfil_estudiante,
     name: usuario.nombre || 'Estudiante FWD',
     avatar: usuario.foto_perfil || AVATAR_DEFECTO,
     verified: perfil.estado_verificacion === 'VERIFICADO',
-    skills: curriculum.habilidades || perfil.titulo_fwd || 'Sin habilidades registradas',
+    skills: habilidades || 'Sin habilidades registradas',
     rating: rating ? rating.toFixed(1) : '0.0',
-    projects: perfil.postulaciones?.length ?? 0,
+    projects: historialProyectos.length || perfil.postulaciones?.length || 0,
     match: rating ? Math.min(100, Math.round(rating * 20)) : 0,
+    email: usuario.correo,
+    phone: perfil.telefono_whatsapp || usuario.telefono_whatsapp,
+    location: perfil.sede_graduacion || 'Sede no registrada',
+    titleFwd: tituloFwd,
+    evidenceFwd: evidenciaFwd,
+    bio: perfil.descripcion || curriculum.resumen_profesional || curriculum.experiencia_laboral || 'Sin descripcion registrada.',
+    curriculum,
+    historialProyectos,
+    raw: perfil,
   };
 };
 
 export const formatearOferta = (oferta) => {
   const estudiante = oferta.perfilEstudiante?.usuario;
+  const estado = oferta.estado || 'PENDIENTE';
   return {
     id: oferta.id_oferta,
     title: oferta.propuestaRef?.titulo || 'Oferta recibida',
     sender: estudiante?.nombre || 'Estudiante FWD',
+    email: estudiante?.correo,
+    amount: Number(oferta.cantidad || 0),
+    description: oferta.propuesta,
     time: formatearFechaRelativa(oferta.fecha_oferta),
-    status: oferta.estado || 'PENDIENTE',
+    status: estado,
+    pending: estado === 'PENDIENTE',
+    candidate: oferta.perfilEstudiante ? formatearTalento(oferta.perfilEstudiante) : null,
   };
 };
 
@@ -176,5 +205,6 @@ export const formatearPostulacion = (postulacion) => {
     status: estadoPostulacion(postulacion.estado),
     estaInvitado: postulacion.estado === 'PRESSELECCIONADA' || postulacion.estado === 'CONTRATADO',
     proyecto: postulacion.propuesta?.titulo || '',
+    perfil: formatearTalento(perfil),
   };
 };

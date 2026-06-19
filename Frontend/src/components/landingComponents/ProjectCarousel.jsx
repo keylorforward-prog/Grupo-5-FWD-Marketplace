@@ -1,6 +1,9 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ProjectCarousel() {
+  const { t } = useTranslation();
+
   const scrollCarousel = (direction) => {
     const container = document.getElementById('project-carousel');
 
@@ -41,10 +44,10 @@ export default function ProjectCarousel() {
 
       <div className="project-carousel-header">
         <div>
-          <h2>Proyectos Destacados</h2>
+          <h2>{t('landing.carousel.title', 'Proyectos Destacados')}</h2>
 
           <p>
-            Explora las últimas innovaciones de nuestra comunidad.
+            {t('landing.carousel.subtitle', 'Explora las últimas innovaciones de nuestra comunidad.')}
           </p>
         </div>
 
@@ -70,7 +73,7 @@ export default function ProjectCarousel() {
           >
             <div className="project-image">
               <div className="project-overlay">
-                <span>Technologies Used</span>
+                <span>{t('landing.carousel.techsUsed', 'Technologies Used')}</span>
 
                 <div className="project-techs">
                   {project.techs.map((tech) => (

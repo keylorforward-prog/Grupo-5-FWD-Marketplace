@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { authService } from '../../../../services/authService';
 import { useAuth } from '../../../../context/AuthContext';
 import { obtenerRol, rutaDashboardDeRol, RUTAS } from '../../../../routes/rutas.js';
 import "../../AuthPages.css";
 const LoginForm = ({ onSwitchMode }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -22,7 +24,7 @@ const LoginForm = ({ onSwitchMode }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.email || !form.password) {
-      setError('Por favor completa todos los campos.');
+      setError(t('auth.login.errFields'));
       return;
     }
 
@@ -37,7 +39,7 @@ const LoginForm = ({ onSwitchMode }) => {
         navigate(rutaDashboardDeRol(rol), { replace: true });
       }
     } catch (err) {
-      const msg = err.response?.data?.message || 'Error al iniciar sesión. Intenta de nuevo.';
+      const msg = err.response?.data?.message || t('auth.login.errDefault');
       setError(msg);
     } finally {
       setLoading(false);
@@ -48,8 +50,8 @@ const LoginForm = ({ onSwitchMode }) => {
     <div className="auth-card">
       {/* Card Header */}
       <div className="card-header">
-        <h2>Acceder a tu carrera<span className="dot-accent">.</span></h2>
-        <p>Bienvenido de nuevo. Ingresa tus credenciales para continuar.</p>
+        <h2>{t('auth.login.titleStart')}<span className="dot-accent">.</span></h2>
+        <p>{t('auth.login.subtitle')}</p>
       </div>
 
       {/* Google Auth */}
@@ -67,7 +69,7 @@ const LoginForm = ({ onSwitchMode }) => {
           <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
           <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
         </svg>
-        Continuar con Google
+        {t('auth.login.btnGoogle')}
       </button>
 
       {/* GitHub Auth */}
@@ -87,7 +89,7 @@ const LoginForm = ({ onSwitchMode }) => {
 
       {/* Divider */}
       <div className="auth-divider">
-        <span>O CON EMAIL</span>
+        <span>{t('auth.login.orEmail')}</span>
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
@@ -102,7 +104,7 @@ const LoginForm = ({ onSwitchMode }) => {
         {/* Email */}
         <div className="form-group">
           <label htmlFor="login-email" className="form-label">
-            Correo Electrónico
+            {t('auth.login.email')}
           </label>
           <div className="input-wrapper">
             <input
@@ -111,7 +113,7 @@ const LoginForm = ({ onSwitchMode }) => {
               name="email"
               value={form.email}
               onChange={handleChange}
-              placeholder="nombre@ejemplo.com"
+              placeholder={t('auth.login.emailPlaceholder')}
               className="form-input"
               autoComplete="email"
               required
@@ -123,7 +125,7 @@ const LoginForm = ({ onSwitchMode }) => {
         <div className="form-group">
           <div className="form-label-row">
             <label htmlFor="login-password" className="form-label">
-              Contraseña
+              {t('auth.login.password')}
             </label>
             <Link to={RUTAS.recuperarContrasena} className="forgot-link">¿Olvidaste tu contraseña?</Link>
           </div>
@@ -134,7 +136,7 @@ const LoginForm = ({ onSwitchMode }) => {
               name="password"
               value={form.password}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder={t('auth.login.passwordPlaceholder')}
               className="form-input"
               autoComplete="current-password"
               required
@@ -158,7 +160,7 @@ const LoginForm = ({ onSwitchMode }) => {
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
           />
-          <label htmlFor="remember-me">Mantener sesión iniciada</label>
+          <label htmlFor="remember-me">{t('auth.login.rememberMe')}</label>
         </div>
 
         {/* Submit */}
@@ -171,18 +173,18 @@ const LoginForm = ({ onSwitchMode }) => {
           {loading ? (
             <span className="btn-loading">
               <span className="spinner-sm" />
-              Iniciando sesión...
+              {t('auth.login.loading')}
             </span>
           ) : (
-            'Iniciar Sesión'
+            t('auth.login.submit')
           )}
         </button>
       </form>
 
       {/* Footer */}
       <div className="auth-footer">
-        ¿No tienes una cuenta?{' '}
-        <Link to={RUTAS.registro}>Regístrate ahora</Link>
+        {t('auth.login.noAccount')}{' '}
+        <Link to={RUTAS.registro}>{t('auth.login.registerNow')}</Link>
       </div>
     </div>
   );

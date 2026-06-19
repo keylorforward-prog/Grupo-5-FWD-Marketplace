@@ -1,34 +1,36 @@
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import FwdLogo from '../../assets/fwd-logo.png';
 
 export default function HeroSection() {
+  const { t } = useTranslation();
+
   return (
     <section className="hero-section">
       <div className="hero-content">
 
         <span className="hero-badge">
-          FORWARD MOMENTUM ECOSYSTEM
+          {t('landing.hero.badge', 'FORWARD MOMENTUM ECOSYSTEM')}
         </span>
 
         <h1>
-          Construye el <span className="pink">Futuro</span>
+          {t('landing.hero.title1', 'Construye el')} <span className="pink">{t('landing.hero.titlePink', 'Futuro')}</span>
           <br />
-          de tu Carrera <span className="cyan">Hoy.</span>
+          {t('landing.hero.title2', 'de tu Carrera')} <span className="cyan">{t('landing.hero.titleCyan', 'Hoy.')}</span>
         </h1>
 
         <p>
-          Conectamos el talento emergente más brillante con
-          proyectos reales de la industria.
+          {t('landing.hero.description', 'Conectamos el talento emergente más brillante con proyectos reales de la industria.')}
         </p>
 
         <div className="hero-buttons">
           <button className="landing-btn landing-btn-purple">
-            Explorar Proyectos
+            {t('landing.hero.btnExplore', 'Explorar Proyectos')}
             <ArrowRight size={16} />
           </button>
 
           <button className="landing-btn landing-btn-white">
-            Para Empresas
+            {t('landing.hero.btnCompanies', 'Para Empresas')}
           </button>
         </div>
 

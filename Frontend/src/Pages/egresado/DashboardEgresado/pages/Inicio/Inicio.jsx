@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Bell,
@@ -31,6 +32,7 @@ const DATOS_INICIALES = {
 const cargarInicio = () => egresadoDashboardService.obtenerInicio();
 
 export default function Inicio() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data, loading, error } = useDashboardEgresadoRequest(cargarInicio, DATOS_INICIALES, []);
@@ -42,17 +44,17 @@ export default function Inicio() {
     <>
       <section className="de-hero fwd-animar-entrada">
         <div className="de-hero-content">
-          <span className="de-hero-kicker">Marketplace FWD</span>
+          <span className="de-hero-kicker">{t('egresadoDashboardInicio.hero.kicker')}</span>
           <h1 className="de-hero-title">
-            Bienvenido, <span>{user?.nombre || 'Egresado'}</span>
+            {t('egresadoDashboardInicio.hero.title_start')} <span>{user?.nombre || t('egresadoDashboardInicio.hero.title_fallback')}</span>
           </h1>
           <p className="de-hero-subtitle">
-            Explora proyectos, postúlate y construye tu portafolio profesional.
+            {t('egresadoDashboardInicio.hero.subtitle')}
           </p>
           <div className="de-hero-actions">
             <button className="de-btn-primary" type="button" onClick={() => navigate('/egresado/dashboard/explorar')}>
               <Compass size={16} />
-              Explorar Proyectos
+              {t('egresadoDashboardInicio.hero.btnExplore')}
             </button>
           </div>
         </div>
@@ -70,32 +72,32 @@ export default function Inicio() {
       </section>
 
       <section className="de-activity">
-        <h2 className="de-activity-title">Resumen de Actividad</h2>
+        <h2 className="de-activity-title">{t('egresadoDashboardInicio.activity.title')}</h2>
         <div className="de-stats-grid">
           <div className="de-stat-card">
             <div className="de-stat-icon blue"><Star size={20} /></div>
             <span className="de-stat-value">{data.resumen.reputacion ?? '—'}</span>
-            <span className="de-stat-label">Reputación</span>
+            <span className="de-stat-label">{t('egresadoDashboardInicio.activity.reputation')}</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon orange"><FileText size={20} /></div>
             <span className="de-stat-value">{data.resumen.postulacionesActivas ?? 0}</span>
-            <span className="de-stat-label">Postulaciones Activas</span>
+            <span className="de-stat-label">{t('egresadoDashboardInicio.activity.activeApplications')}</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon green"><FolderOpen size={20} /></div>
             <span className="de-stat-value">{data.resumen.proyectosEnProgreso ?? 0}</span>
-            <span className="de-stat-label">Proyectos en Progreso</span>
+            <span className="de-stat-label">{t('egresadoDashboardInicio.activity.projectsInProgress')}</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon purple"><CheckCircle2 size={20} /></div>
             <span className="de-stat-value">{data.resumen.proyectosCompletados ?? 0}</span>
-            <span className="de-stat-label">Proyectos Completados</span>
+            <span className="de-stat-label">{t('egresadoDashboardInicio.activity.completedProjects')}</span>
           </div>
           <div className="de-stat-card">
             <div className="de-stat-icon magenta"><TrendingUp size={20} /></div>
             <span className="de-stat-value">{data.resumen.ofertasRecibidas ?? 0}</span>
-            <span className="de-stat-label">Ofertas Recibidas</span>
+            <span className="de-stat-label">{t('egresadoDashboardInicio.activity.offersReceived')}</span>
           </div>
         </div>
       </section>
@@ -103,13 +105,13 @@ export default function Inicio() {
       <div className="de-grid-3">
         <div className="de-panel">
           <div className="de-panel-header">
-            <h3 className="de-panel-title">Postulaciones Recientes</h3>
-            <button className="de-panel-action" type="button" onClick={() => navigate('/egresado/dashboard/postulaciones')}>Ver todas</button>
+            <h3 className="de-panel-title">{t('egresadoDashboardInicio.applications.title')}</h3>
+            <button className="de-panel-action" type="button" onClick={() => navigate('/egresado/dashboard/postulaciones')}>{t('egresadoDashboardInicio.applications.viewAll')}</button>
           </div>
-          {loading && <p className="de-data-state">Cargando postulaciones...</p>}
+          {loading && <p className="de-data-state">{t('egresadoDashboardInicio.applications.loading')}</p>}
           {error && <p className="de-data-state error">{error}</p>}
           {!loading && !error && postulaciones.length === 0 && (
-            <p className="de-data-state">Aún no te has postulado a ningún proyecto.</p>
+            <p className="de-data-state">{t('egresadoDashboardInicio.applications.empty')}</p>
           )}
           {!loading && !error && postulaciones.slice(0, 4).map((p) => (
             <div key={p.id} className="de-offer-item">
@@ -123,19 +125,19 @@ export default function Inicio() {
           ))}
           {postulaciones.length > 0 && (
             <button className="de-panel-footer-link de-link-button" type="button" onClick={() => navigate('/egresado/dashboard/postulaciones')}>
-              Ver todas las postulaciones <ArrowRight size={14} />
+              {t('egresadoDashboardInicio.applications.viewAllBtn')} <ArrowRight size={14} />
             </button>
           )}
         </div>
 
         <div className="de-panel">
           <div className="de-panel-header">
-            <h3 className="de-panel-title">Proyectos Activos</h3>
-            <button className="de-panel-action" type="button" onClick={() => navigate('/egresado/dashboard/proyectos')}>Ver todos</button>
+            <h3 className="de-panel-title">{t('egresadoDashboardInicio.projects.title')}</h3>
+            <button className="de-panel-action" type="button" onClick={() => navigate('/egresado/dashboard/proyectos')}>{t('egresadoDashboardInicio.projects.viewAll')}</button>
           </div>
-          {loading && <p className="de-data-state">Cargando proyectos...</p>}
+          {loading && <p className="de-data-state">{t('egresadoDashboardInicio.projects.loading')}</p>}
           {!loading && !error && data.proyectos.length === 0 && (
-            <p className="de-data-state">No tienes proyectos activos.</p>
+            <p className="de-data-state">{t('egresadoDashboardInicio.projects.empty')}</p>
           )}
           {!loading && !error && data.proyectos.slice(0, 3).map((proyecto) => (
             <div key={proyecto.id_proyecto} className="de-project-item">
@@ -144,13 +146,13 @@ export default function Inicio() {
                 <div className="de-project-name">
                   {proyecto.titulo}
                   <span className={`de-badge ${proyecto.estado === 'EN_PROGRESO' ? 'desarrollo' : 'revision'}`}>
-                    {proyecto.estado === 'EN_PROGRESO' ? 'En desarrollo' : 'En revisión'}
+                    {proyecto.estado === 'EN_PROGRESO' ? t('egresadoDashboardInicio.projects.statusInDev') : t('egresadoDashboardInicio.projects.statusInRev')}
                   </span>
                 </div>
                 <p className="de-project-meta">
                   {proyecto.fecha_fin_estimada
-                    ? `Entrega estimada: ${new Date(proyecto.fecha_fin_estimada).toLocaleDateString()}`
-                    : 'Sin fecha estimada'}
+                    ? t('egresadoDashboardInicio.projects.deliveryEst').replace('{{date}}', new Date(proyecto.fecha_fin_estimada).toLocaleDateString())
+                    : t('egresadoDashboardInicio.projects.noEstDate')}
                 </p>
               </div>
             </div>
@@ -159,12 +161,12 @@ export default function Inicio() {
 
         <div className="de-panel">
           <div className="de-panel-header">
-            <h3 className="de-panel-title">Notificaciones</h3>
-            <button className="de-panel-action" type="button" onClick={() => navigate('/egresado/dashboard/notificaciones')}>Ver todas</button>
+            <h3 className="de-panel-title">{t('egresadoDashboardInicio.notifications.title')}</h3>
+            <button className="de-panel-action" type="button" onClick={() => navigate('/egresado/dashboard/notificaciones')}>{t('egresadoDashboardInicio.notifications.viewAll')}</button>
           </div>
-          {loading && <p className="de-data-state">Cargando notificaciones...</p>}
+          {loading && <p className="de-data-state">{t('egresadoDashboardInicio.notifications.loading')}</p>}
           {!loading && !error && notificaciones.length === 0 && (
-            <p className="de-data-state">No hay notificaciones.</p>
+            <p className="de-data-state">{t('egresadoDashboardInicio.notifications.empty')}</p>
           )}
           {!loading && !error && notificaciones.slice(0, 4).map((n) => (
             <div key={n.id} className="de-notif-item">

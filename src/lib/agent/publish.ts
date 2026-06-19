@@ -1,17 +1,12 @@
 import type { ExtractedProject } from './types';
 import { ok, err, type Result } from '@/lib/result';
 
-const TIPO_CAMBIO_USD_CRC = 520;
 const PRESUPUESTO_MINIMO_CRC = 100_000;
 
 function mapPlazoDias(durationWeeks: number): 5 | 15 | 30 {
   if (durationWeeks <= 2) return 5;
   if (durationWeeks <= 4) return 15;
   return 30;
-}
-
-function usdToCrc(usd: number): number {
-  return usd * TIPO_CAMBIO_USD_CRC;
 }
 
 function buildDescripcion(project: ExtractedProject): string {
@@ -34,7 +29,7 @@ export async function publishProjectFromAgent(
 ): Promise<Result<{ id: number }>> {
   try {
     const presupuestoMinCrc = project.budget_min > 0
-      ? Math.max(usdToCrc(project.budget_min), PRESUPUESTO_MINIMO_CRC)
+      ? Math.max(project.budget_min, PRESUPUESTO_MINIMO_CRC)
       : PRESUPUESTO_MINIMO_CRC;
 
     const payload: Record<string, unknown> = {
@@ -48,7 +43,7 @@ export async function publishProjectFromAgent(
     };
 
     if (project.budget_max > 0) {
-      payload.presupuesto_max = usdToCrc(project.budget_max);
+      payload.presupuesto_max = project.budget_max;
     }
 
     const res = await fetch('/api/dashboard-empresario/propuestas', {

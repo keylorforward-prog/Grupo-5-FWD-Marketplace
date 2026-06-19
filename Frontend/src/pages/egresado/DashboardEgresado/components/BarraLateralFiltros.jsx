@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal } from 'lucide-react';
 import {
   categoriasProyecto,
@@ -6,12 +7,13 @@ import {
 } from '../../../../data/proyectosEgresado';
 
 const MODALIDADES = [
-  { valor: 'remoto', etiqueta: 'Remoto' },
-  { valor: 'hibrido', etiqueta: 'Híbrido' },
-  { valor: 'presencial', etiqueta: 'Presencial' },
+  { valor: 'remoto', key: 'egresadoExplorar.components.remoto' },
+  { valor: 'hibrido', key: 'egresadoExplorar.components.hibrido' },
+  { valor: 'presencial', key: 'egresadoExplorar.components.presencial' },
 ];
 
 function BarraLateralFiltros({ filtros, onCambio, onLimpiar }) {
+  const { t } = useTranslation();
   const toggleModalidad = (valor) => {
     const yaActiva = filtros.modalidades.includes(valor);
     onCambio({
@@ -26,15 +28,15 @@ function BarraLateralFiltros({ filtros, onCambio, onLimpiar }) {
       <div className="encabezadoFiltros">
         <h4 className="tituloFiltros">
           <SlidersHorizontal size={18} />
-          Filtrar resultados
+          {t('egresadoExplorar.filters.titulo')}
         </h4>
         <button type="button" className="botonLimpiar" onClick={onLimpiar}>
-          Limpiar
+          {t('egresadoExplorar.filters.limpiar')}
         </button>
       </div>
 
       <div className="grupoFiltro">
-        <label className="etiquetaFiltro" htmlFor="filtroCategoria">Categoría</label>
+        <label className="etiquetaFiltro" htmlFor="filtroCategoria">{t('egresadoExplorar.filters.categoria')}</label>
         <select
           id="filtroCategoria"
           className="seleccionadorFiltro"
@@ -48,14 +50,14 @@ function BarraLateralFiltros({ filtros, onCambio, onLimpiar }) {
       </div>
 
       <div className="grupoFiltro">
-        <label className="etiquetaFiltro" htmlFor="filtroTecnologia">Tecnologías</label>
+        <label className="etiquetaFiltro" htmlFor="filtroTecnologia">{t('egresadoExplorar.filters.tecnologias')}</label>
         <select
           id="filtroTecnologia"
           className="seleccionadorFiltro"
           value={filtros.tecnologia}
           onChange={(e) => onCambio({ tecnologia: e.target.value })}
         >
-          <option value="">Todas las tecnologías</option>
+          <option value="">{t('egresadoExplorar.filters.todasTecnologias')}</option>
           {catalogoTecnologias.map((t) => (
             <option key={t} value={t}>{t}</option>
           ))}
@@ -63,10 +65,10 @@ function BarraLateralFiltros({ filtros, onCambio, onLimpiar }) {
       </div>
 
       <div className="grupoFiltro">
-        <label className="etiquetaFiltro">Presupuesto (USD)</label>
+        <label className="etiquetaFiltro">{t('egresadoExplorar.filters.presupuesto')}</label>
         <div className="filaRango">
           <div className="campoRango">
-            <span className="prefijoRango">Mín</span>
+            <span className="prefijoRango">{t('egresadoExplorar.filters.min')}</span>
             <input
               type="number"
               min={0}
@@ -78,7 +80,7 @@ function BarraLateralFiltros({ filtros, onCambio, onLimpiar }) {
             />
           </div>
           <div className="campoRango">
-            <span className="prefijoRango">Máx</span>
+            <span className="prefijoRango">{t('egresadoExplorar.filters.max')}</span>
             <input
               type="number"
               min={filtros.presupuestoMin || 0}
@@ -93,7 +95,7 @@ function BarraLateralFiltros({ filtros, onCambio, onLimpiar }) {
       </div>
 
       <div className="grupoFiltro">
-        <label className="etiquetaFiltro" htmlFor="filtroDuracion">Duración</label>
+        <label className="etiquetaFiltro" htmlFor="filtroDuracion">{t('egresadoExplorar.filters.duracion')}</label>
         <select
           id="filtroDuracion"
           className="seleccionadorFiltro"
@@ -107,9 +109,9 @@ function BarraLateralFiltros({ filtros, onCambio, onLimpiar }) {
       </div>
 
       <div className="grupoFiltro">
-        <label className="etiquetaFiltro">Modalidad</label>
+        <label className="etiquetaFiltro">{t('egresadoExplorar.filters.modalidad')}</label>
         <div className="opcionesModalidad">
-          {MODALIDADES.map(({ valor, etiqueta }) => (
+          {MODALIDADES.map(({ valor, key }) => (
             <label key={valor} className="opcionCheckbox">
               <input
                 type="checkbox"
@@ -117,7 +119,7 @@ function BarraLateralFiltros({ filtros, onCambio, onLimpiar }) {
                 onChange={() => toggleModalidad(valor)}
               />
               <span className="casillaPersonalizada"></span>
-              {etiqueta}
+              {t(key)}
             </label>
           ))}
         </div>

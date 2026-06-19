@@ -16,30 +16,36 @@ const perfilVacio = {
   linkedin: '',
   bio: '',
   tecnologias: [],
+  documento_cv: null,
 };
 
 export function usePerfilEgresado() {
   const [perfil, setPerfil] = useState(perfilVacio);
   const [cargando, setCargando] = useState(true);
+  const [catalogoTecnologias, setCatalogoTecnologias] = useState([]);
 
   useEffect(() => {
     let activo = true;
+    egresadoDashboardService.obtenerCatalogoTecnologias().then((lista) => {
+      if (activo) setCatalogoTecnologias(lista);
+    });
     egresadoDashboardService.obtenerPerfil()
       .then((data) => {
         if (!activo) return;
         setPerfil({
           nombre: data.nombre || data.usuario?.nombre || '',
-          rol: data.rol || 'Estudiante de Desarrollo de Software',
+          rol: data.titulo_fwd || data.rol || 'Estudiante de Desarrollo de Software',
           avatar: data.foto_perfil || data.usuario?.foto_perfil || perfilVacio.avatar,
           portfolio: data.portfolio || '',
           linkedin: data.linkedin || '',
-          bio: data.bio || '',
+          bio: data.descripcion || data.bio || '',
           tecnologias: Array.isArray(data.tecnologias)
             ? data.tecnologias.map((t, i) => ({
                 nombre: typeof t === 'string' ? t : t.nombre,
                 fondo: elegirFondoRotativo(i),
               }))
             : [],
+          documento_cv: data.documento_cv || null,
         });
       })
       .catch(() => {
@@ -89,5 +95,5 @@ export function usePerfilEgresado() {
     });
   }, []);
 
-  return { perfil, actualizar, agregarTecnologia, quitarTecnologia, cargando };
+  return { perfil, actualizar, agregarTecnologia, quitarTecnologia, cargando, catalogoTecnologias };
 }

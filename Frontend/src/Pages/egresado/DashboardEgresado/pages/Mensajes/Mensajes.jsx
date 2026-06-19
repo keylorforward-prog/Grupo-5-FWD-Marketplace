@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageSquare, SearchX, Mail, MailOpen, Inbox, Send, Clock, User, ChevronLeft, Building, Shield } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Search, SearchX, Mail, MailOpen, Inbox, Send, Clock, User, ChevronLeft, Building, Shield } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useAuth } from '../../../../../context/AuthContext';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
@@ -23,6 +24,7 @@ const formatearConversacion = (c, userId) => {
     tiempo: formatearFechaRelativa(c.fecha_envio),
     leido: c.leido || esPropio,
     contacto,
+    cedula: contacto?.cedula || '',
     esPropio,
   };
 };
@@ -57,11 +59,15 @@ const formatearFechaChat = (fecha) => {
 };
 
 function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [mensajes, setMensajes] = useState([]);
   const [contacto, setContacto] = useState(contactoProp);
   const [cargando, setCargando] = useState(true);
+  const [enviando, setEnviando] = useState(false);
+  const [nuevoMensaje, setNuevoMensaje] = useState('');
   const chatEndRef = useRef(null);
+  const chatMessagesRef = useRef(null);
 
   useEffect(() => {
     let activo = true;
@@ -71,6 +77,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
         if (!activo) return;
         setMensajes(data?.mensajes || data || []);
         if (data?.contacto) setContacto(data.contacto);
+        egresadoDashboardService.marcarLeidos(idPostulacion).catch(() => {});
       })
       .catch(() => {})
       .finally(() => { if (activo) setCargando(false); });
@@ -78,10 +85,34 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
   }, [idPostulacion]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatMessagesRef.current && chatEndRef.current) {
+      chatMessagesRef.current.scrollTop = chatEndRef.current.offsetTop - chatMessagesRef.current.offsetTop;
+    }
   }, [mensajes]);
 
   const userId = user?.id_usuario;
+
+  const handleEnviar = async () => {
+    const texto = nuevoMensaje.trim();
+    if (!texto || enviando) return;
+    setEnviando(true);
+    try {
+      const creado = await egresadoDashboardService.enviarMensaje(idPostulacion, texto);
+      setMensajes((prev) => [...prev, creado]);
+      setNuevoMensaje('');
+    } catch {
+      alert(t('egresadoMensajes.errorEnvio'));
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleEnviar();
+    }
+  };
 
   const agruparPorFecha = useMemo(() => {
     const grupos = {};
@@ -94,7 +125,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
   }, [mensajes]);
 
   return (
-    <div className="chat-view">
+    <div className="chat-view fwd-animar-entrada">
       <div className="chat-header">
         <button className="chat-back-btn" type="button" onClick={onBack}>
           <ChevronLeft size={20} />
@@ -112,7 +143,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
         </div>
       </div>
 
-      <div className="chat-messages">
+      <div className="chat-messages" ref={chatMessagesRef}>
         {cargando && (
           <div className="chat-loading">
             {[1, 2, 3].map((i) => <div key={i} className="chat-skeleton" />)}
@@ -122,7 +153,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
         {!cargando && mensajes.length === 0 && (
           <div className="chat-empty">
             <MessageSquare size={32} />
-            <p>No hay mensajes aún</p>
+            <p>{t('egresadoMensajes.sinMensajesChat')}</p>
           </div>
         )}
 
@@ -158,10 +189,13 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
         <input
           className="chat-input"
           type="text"
-          placeholder="Escribe un mensaje..."
-          disabled
+          placeholder={t('egresadoMensajes.escribeMensaje')}
+          value={nuevoMensaje}
+          onChange={(e) => setNuevoMensaje(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={enviando}
         />
-        <button className="chat-send-btn" type="button" disabled>
+        <button className="chat-send-btn" type="button" onClick={handleEnviar} disabled={enviando || !nuevoMensaje.trim()}>
           <Send size={18} />
         </button>
       </div>
@@ -169,10 +203,25 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
   );
 }
 
+const STORAGE_KEY = 'fwd_leidos_local';
+
+const cargarLeidos = () => {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+  } catch { return new Set(); }
+};
+
+const guardarLeidos = (set) => {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...set])); } catch {}
+};
+
 export default function Mensajes() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [conversacionActiva, setConversacionActiva] = useState(null);
+  const [leidosLocal, setLeidosLocal] = useState(() => cargarLeidos());
+  const [busqueda, setBusqueda] = useState('');
   const userId = user?.id_usuario;
 
   const { data, loading, error } = useDashboardEgresadoRequest(
@@ -181,18 +230,41 @@ export default function Mensajes() {
     []
   );
 
-  const conversaciones = useMemo(() => (data || []).map((c) => formatearConversacion(c, userId)), [data, userId]);
+  const conversaciones = useMemo(
+    () => (data || []).map((c) => formatearConversacion(c, userId)),
+    [data, userId]
+  );
+
+  const termino = busqueda.toLowerCase().trim();
+  const conversacionesFiltradas = useMemo(
+    () => termino
+      ? conversaciones.filter((c) =>
+          (c.contacto?.nombre || '').toLowerCase().includes(termino) ||
+          (c.cedula || '').toLowerCase().includes(termino)
+        )
+      : conversaciones,
+    [conversaciones, termino]
+  );
 
   const stats = useMemo(() => {
-    const total = conversaciones.length;
-    const noLeidos = conversaciones.filter((c) => !c.leido && !c.esPropio).length;
+    const total = conversacionesFiltradas.length;
+    const noLeidos = conversacionesFiltradas.filter((c) => !c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion)).length;
     const leidos = total - noLeidos;
     return { total, noLeidos, leidos };
-  }, [conversaciones]);
+  }, [conversacionesFiltradas, leidosLocal]);
 
   const conversationActivaData = conversaciones.find(
     (c) => c.idPostulacion === conversacionActiva
   );
+
+  const abrirChat = (id) => {
+    setConversacionActiva(id);
+    setLeidosLocal((prev) => {
+      const nuevo = new Set(prev).add(id);
+      guardarLeidos(nuevo);
+      return nuevo;
+    });
+  };
 
   return (
     <div className="mensajes-page">
@@ -201,10 +273,10 @@ export default function Mensajes() {
           <button className="de-project-icon-button" type="button" onClick={() => navigate('/egresado/dashboard')}>
             <ArrowLeft size={18} />
           </button>
-          <h1>Mensajes</h1>
+          <h1>{t('egresadoMensajes.titulo')}</h1>
         </div>
         {!loading && !error && (
-          <span className="conteoProyectos">{conversaciones.length} conversacione{conversaciones.length !== 1 ? 's' : ''}</span>
+          <span className="conteoProyectos">{conversacionesFiltradas.length} {t('egresadoMensajes.total')}</span>
         )}
       </div>
 
@@ -221,8 +293,8 @@ export default function Mensajes() {
       {!loading && !error && conversaciones.length === 0 && (
         <div className="mensajes-empty">
           <SearchX size={48} />
-          <h4>Sin mensajes</h4>
-          <p>Cuando tengas conversaciones con empresas, aparecerán aquí.</p>
+          <h4>{t('egresadoMensajes.sinMensajes')}</h4>
+          <p>{t('egresadoMensajes.sinMensajesDesc')}</p>
         </div>
       )}
 
@@ -231,31 +303,57 @@ export default function Mensajes() {
           <div className="mensajes-sidebar">
             <div className="mensajes-sidebar-header">
               <Inbox size={16} />
-              <span>Conversaciones</span>
+              <span>{t('egresadoMensajes.conversaciones')}</span>
               <span className="mensajes-sidebar-count">{stats.total}</span>
             </div>
             <div className="mensajes-sidebar-stats">
               <div className="mensajes-sidebar-stat" data-type="unread">
                 <Mail size={13} />
-                {stats.noLeidos} no leídos
+                {stats.noLeidos} {t('egresadoMensajes.noLeidos')}
               </div>
               <div className="mensajes-sidebar-stat" data-type="read">
                 <MailOpen size={13} />
-                {stats.leidos} leídos
+                {stats.leidos} {t('egresadoMensajes.leidos')}
               </div>
             </div>
+            <div className="mensajes-sidebar-busqueda">
+              <Search size={14} />
+              <input
+                type="text"
+                className="mensajes-buscar-input"
+                placeholder={t('egresadoMensajes.buscarPlaceholder')}
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+              />
+              {busqueda && (
+                <button
+                  type="button"
+                  className="mensajes-buscar-limpiar"
+                  onClick={() => setBusqueda('')}
+                  aria-label="Limpiar búsqueda"
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+            {termino && conversacionesFiltradas.length === 0 && (
+              <div className="mensajes-sidebar-empty-busqueda">
+                <SearchX size={24} />
+                <p>{t('egresadoMensajes.sinResultados')} "<strong>{busqueda}</strong>"</p>
+              </div>
+            )}
             <div className="mensajes-sidebar-list">
-              {conversaciones.map((c) => {
+              {conversacionesFiltradas.map((c) => {
                 const RoleIcon = ROLE_ICONS[c.contacto?.rol] || User;
                 const inicial = (c.contacto?.nombre || '?')[0].toUpperCase();
                 const activa = c.idPostulacion === conversacionActiva;
                 return (
                   <div
                     key={c.idPostulacion}
-                    className={`mensajes-item${!c.leido && !c.esPropio ? ' unread' : ''}${activa ? ' active' : ''}`}
-                    onClick={() => setConversacionActiva(c.idPostulacion)}
+                    className={`mensajes-item${!c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion) ? ' unread' : ''}${activa ? ' active' : ''}`}
+                    onClick={() => abrirChat(c.idPostulacion)}
                   >
-                    <div className={`mensajes-item-avatar${!c.leido && !c.esPropio ? ' unread' : ''}`}>
+                    <div className={`mensajes-item-avatar${!c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion) ? ' unread' : ''}`}>
                       {c.contacto?.foto_perfil ? (
                         <img src={c.contacto.foto_perfil} alt="" className="mensajes-avatar-img" />
                       ) : (
@@ -269,7 +367,7 @@ export default function Mensajes() {
                           {c.contacto?.rol && (
                             <span className="mensajes-item-role-badge" data-rol={c.contacto.rol}>
                               <RoleIcon size={10} />
-                              {c.contacto.rol === 'estudiante' ? 'Egresado' : c.contacto.rol === 'empresa' ? 'Empresa' : 'Admin'}
+                              {c.contacto.rol === 'estudiante' ? t('egresadoMensajes.egresado') : c.contacto.rol === 'empresa' ? t('egresadoMensajes.empresa') : t('egresadoMensajes.admin')}
                             </span>
                           )}
                         </div>
@@ -281,7 +379,7 @@ export default function Mensajes() {
                         <p className="mensajes-item-preview">{c.ultimoMensaje}</p>
                       </div>
                     </div>
-                    {!c.leido && !c.esPropio && <span className="mensajes-item-dot" />}
+                    {!c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion) && <span className="mensajes-item-dot" />}
                   </div>
                 );
               })}
@@ -299,8 +397,8 @@ export default function Mensajes() {
             ) : (
               <div className="mensajes-chat-empty">
                 <MessageSquare size={48} />
-                <h4>Selecciona una conversación</h4>
-                <p>Elige un chat del panel izquierdo para ver los mensajes.</p>
+                <h4>{t('egresadoMensajes.seleccionaConversacion')}</h4>
+                <p>{t('egresadoMensajes.seleccionaDesc')}</p>
               </div>
             )}
           </div>

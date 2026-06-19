@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, DollarSign, Clock, Tag, Globe, Building2,
-  Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, AlertTriangle,
+  ArrowLeft, DollarSign, Tag, Globe, Building2,
+  Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, Mail, Pencil, Trash2,
 } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
+import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { categoriasProyecto } from '../../../../../data/proyectosEgresado';
 
-const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
+const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
+const T_NS = 'egresadoProyectoDetalle';
 const etiquetaCategoria = Object.fromEntries(
   categoriasProyecto.filter((c) => c.valor !== 'todas').map((c) => [c.valor, c.etiqueta])
 );
@@ -16,20 +19,46 @@ const formatoMoneda = new Intl.NumberFormat('en-US', {
   style: 'currency', currency: 'USD', maximumFractionDigits: 0,
 });
 
+const ETQ_ESTADO = {
+  ENVIADA: 'egresadoPostulaciones.flujoEnviada',
+  EN_REVISION: 'egresadoPostulaciones.flujoRevision',
+  PRESELECCIONADA: 'egresadoPostulaciones.flujoPreseleccionada',
+  RECHAZADA: 'egresadoPostulaciones.flujoRechazada',
+  CONTRATADO: 'egresadoPostulaciones.flujoAceptada',
+};
+
 export default function ProyectoDetalle() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [proyecto, setProyecto] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
-  const [postulado, setPostulado] = useState(false);
+  const [postulacion, setPostulacion] = useState(null);
   const [enviando, setEnviando] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [mensaje, setMensaje] = useState('');
+  const [presupuesto, setPresupuesto] = useState('');
+  const [originalMensaje, setOriginalMensaje] = useState('');
+  const [originalPresupuesto, setOriginalPresupuesto] = useState('');
+  const [confirmarCancelar, setConfirmarCancelar] = useState(false);
+  const [cancelando, setCancelando] = useState(false);
 
   useEffect(() => {
     let activo = true;
-    egresadoService.obtenerPropuestaPorId(id)
-      .then((data) => { if (activo) setProyecto(data); })
+    Promise.all([
+      egresadoService.obtenerPropuestaPorId(id),
+      egresadoDashboardService.obtenerPostulaciones(),
+    ])
+      .then(([proyectoData, postulaciones]) => {
+        if (!activo) return;
+        setProyecto(proyectoData);
+        const match = (postulaciones || []).find(
+          (p) => p.id_propuesta === Number(id) || p.propuesta?.id_propuesta === Number(id)
+        );
+        if (match) setPostulacion(match);
+      })
       .catch((err) => { if (activo) setError(err.message); })
       .finally(() => { if (activo) setCargando(false); });
     return () => { activo = false; };
@@ -38,9 +67,22 @@ export default function ProyectoDetalle() {
   const confirmarPostulacion = async () => {
     setEnviando(true);
     try {
-      await egresadoService.postularse(Number(id));
-      setPostulado(true);
+      const datos = {};
+      if (mensaje.trim()) datos.mensaje_presentacion = mensaje.trim();
+      if (presupuesto) datos.presupuesto_max = Number(presupuesto);
+
+      if (modoEdicion && postulacion) {
+        const resp = await egresadoService.actualizarPostulacion(postulacion.id_postulacion, datos);
+        const updated = resp?.data ?? resp;
+        setPostulacion((prev) => ({ ...prev, ...updated }));
+      } else {
+        const resp = await egresadoService.postularse(Number(id), datos);
+        const created = resp?.data ?? resp;
+        setPostulacion((prev) => ({ ...prev, ...created, id_postulacion: created.id_postulacion }));
+      }
       setMostrarModal(false);
+      setModoEdicion(false);
+      setError(null);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -48,10 +90,46 @@ export default function ProyectoDetalle() {
     }
   };
 
+  const cancelarPostulacion = async () => {
+    if (!postulacion) return;
+    setCancelando(true);
+    try {
+      await egresadoService.eliminarPostulacion(postulacion.id_postulacion);
+      setPostulacion(null);
+      setConfirmarCancelar(false);
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setCancelando(false);
+    }
+  };
+
+  const hayCambios = modoEdicion
+    ? mensaje !== originalMensaje || presupuesto !== originalPresupuesto
+    : true;
+
+  const abrirModal = (editando = false) => {
+    if (editando && postulacion) {
+      const msg = postulacion.mensaje_presentacion || '';
+      const pre = postulacion.presupuesto_max ? String(postulacion.presupuesto_max) : '';
+      setMensaje(msg);
+      setPresupuesto(pre);
+      setOriginalMensaje(msg);
+      setOriginalPresupuesto(pre);
+      setModoEdicion(true);
+    } else {
+      setMensaje('');
+      setPresupuesto('');
+      setModoEdicion(false);
+    }
+    setMostrarModal(true);
+  };
+
   if (cargando) {
     return (
       <div className="detalle-container">
-        <div className="de-data-state">Cargando proyecto...</div>
+        <div className="de-data-state">{t(`${T_NS}.loading`)}</div>
       </div>
     );
   }
@@ -61,7 +139,7 @@ export default function ProyectoDetalle() {
       <div className="detalle-container">
         <div className="de-data-state error">{error}</div>
         <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar')}>
-          <ArrowLeft size={16} /> Volver a explorar
+          <ArrowLeft size={16} /> {t(`${T_NS}.volver`)}
         </button>
       </div>
     );
@@ -75,12 +153,12 @@ export default function ProyectoDetalle() {
   const presupuestoMax = Number(proyecto.presupuesto_max) || presupuestoMin;
 
   return (
-    <div className="detalle-container">
+    <div className="detalle-container fwd-animar-entrada">
       <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar')}>
-        <ArrowLeft size={16} /> Volver a proyectos
+        <ArrowLeft size={16} /> {t(`${T_NS}.volver`)}
       </button>
 
-      {error && postulado === false && (
+      {error && (
         <div className="de-data-state error" style={{ marginBottom: '1rem' }}>{error}</div>
       )}
 
@@ -92,6 +170,10 @@ export default function ProyectoDetalle() {
             </div>
             <div className="detalle-headerInfo">
               <h1 className="detalle-titulo">{proyecto.titulo}</h1>
+              <p className="de-empresa-nombre">
+                <Building2 size={14} />
+                {usuarioEmpresa.nombre || 'Empresa'}
+              </p>
               <div className="detalle-badges">
                 <span className="detalle-badge detalle-badgeCategoria">
                   <Tag size={13} />
@@ -112,23 +194,23 @@ export default function ProyectoDetalle() {
             <div className="detalle-metaItem">
               <DollarSign size={16} />
               <div>
-                <span className="detalle-metaLabel">Presupuesto</span>
+                <span className="detalle-metaLabel">{t(`${T_NS}.presupuesto`)}</span>
                 <span className="detalle-metaValor">
                   {formatoMoneda.format(presupuestoMin)} – {formatoMoneda.format(presupuestoMax)}
                 </span>
               </div>
             </div>
             <div className="detalle-metaItem">
-              <Clock size={16} />
+              <Globe size={16} />
               <div>
-                <span className="detalle-metaLabel">Plazo de entrega</span>
-                <span className="detalle-metaValor">{proyecto.plazo_dias} días</span>
+                <span className="detalle-metaLabel">{t(`${T_NS}.modalidad`)}</span>
+                <span className="detalle-metaValor">{etiquetaModalidad[proyecto.modalidad] ? t(etiquetaModalidad[proyecto.modalidad]) : proyecto.modalidad}</span>
               </div>
             </div>
             <div className="detalle-metaItem">
               <Calendar size={16} />
               <div>
-                <span className="detalle-metaLabel">Publicado</span>
+                <span className="detalle-metaLabel">{t(`${T_NS}.publicado`)}</span>
                 <span className="detalle-metaValor">
                   {proyecto.fecha_publicacion
                     ? new Date(proyecto.fecha_publicacion).toLocaleDateString()
@@ -139,13 +221,13 @@ export default function ProyectoDetalle() {
           </div>
 
           <div className="detalle-seccion">
-            <h2 className="detalle-seccionTitulo">Descripción del proyecto</h2>
+            <h2 className="detalle-seccionTitulo">{t(`${T_NS}.descripcion`)}</h2>
             <p className="detalle-descripcion">{proyecto.descripcion}</p>
           </div>
 
           {tecnologias.length > 0 && (
             <div className="detalle-seccion">
-              <h2 className="detalle-seccionTitulo">Tecnologías requeridas</h2>
+              <h2 className="detalle-seccionTitulo">{t(`${T_NS}.tecnologias`)}</h2>
               <div className="detalle-techs">
                 {tecnologias.map((tech) => (
                   <span key={tech} className="etiquetaTecnologia detalle-tech">{tech}</span>
@@ -154,19 +236,87 @@ export default function ProyectoDetalle() {
             </div>
           )}
 
-          {postulado ? (
-            <div className="detalle-exito">
-              <CheckCircle size={20} />
-              <span>Te has postulado exitosamente. La empresa revisará tu solicitud.</span>
+          {postulacion ? (
+            <div className="detalle-postulacion-card">
+              <div className="detalle-postulacion-header">
+                <div className="detalle-postulacion-titulo">
+                  <CheckCircle size={18} />
+                  <span>{t(`${T_NS}.tuPostulacion`)}</span>
+                </div>
+                <span className={`etiquetaEstadoPostulacion ${(postulacion.estado || 'ENVIADA').toLowerCase()}`}>
+                  {t(ETQ_ESTADO[postulacion.estado] || postulacion.estado)}
+                </span>
+              </div>
+
+              {postulacion.mensaje_presentacion && (
+                <div className="detalle-postulacion-campo">
+                  <span className="detalle-postulacion-label">
+                    <Mail size={14} /> {t(`${T_NS}.mensajePresentacion`)}
+                  </span>
+                  <p className="detalle-postulacion-valor">{postulacion.mensaje_presentacion}</p>
+                </div>
+              )}
+
+              {postulacion.presupuesto_max != null && (
+                <div className="detalle-postulacion-campo">
+                  <span className="detalle-postulacion-label">
+                    <DollarSign size={14} /> {t(`${T_NS}.propuestaEconomica`)}
+                  </span>
+                  <p className="detalle-postulacion-valor">{formatoMoneda.format(postulacion.presupuesto_max)}</p>
+                </div>
+              )}
+
+              <div className="detalle-postulacion-fecha">
+                {t(`${T_NS}.postulasteEl`)} {new Date(postulacion.fecha_postulacion).toLocaleDateString()}
+              </div>
+
+              <div className="detalle-postulacion-acciones">
+                <button
+                  type="button"
+                  className="detalle-postulacion-btn editar"
+                  onClick={() => abrirModal(true)}
+                >
+                  <Pencil size={14} /> {t(`${T_NS}.editar`)}
+                </button>
+                {confirmarCancelar ? (
+                  <div className="detalle-postulacion-confirmar">
+                    <span>{t(`${T_NS}.cancelarPostulacion`)}</span>
+                    <button
+                      type="button"
+                      className="detalle-postulacion-btn confirmar-si"
+                      onClick={cancelarPostulacion}
+                      disabled={cancelando}
+                    >
+                      {cancelando ? t(`${T_NS}.cancelando`) : t(`${T_NS}.siCancelar`)}
+                    </button>
+                    <button
+                      type="button"
+                      className="detalle-postulacion-btn confirmar-no"
+                      onClick={() => setConfirmarCancelar(false)}
+                      disabled={cancelando}
+                    >
+                      {t(`${T_NS}.no`)}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="detalle-postulacion-btn cancelar"
+                    onClick={() => setConfirmarCancelar(true)}
+                  >
+                    <Trash2 size={14} /> {t(`${T_NS}.btnCancelarPostulacion`)}
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <button
               type="button"
               className="detalle-postularBtn"
-              onClick={() => setMostrarModal(true)}
+              onClick={() => abrirModal(false)}
             >
               <Send size={16} />
-              Postularme a este proyecto
+              {t(`${T_NS}.postularme`)}
             </button>
           )}
         </div>
@@ -175,7 +325,7 @@ export default function ProyectoDetalle() {
           <div className="detalle-sideCard">
             <div className="detalle-sideHeader">
               <Building2 size={18} />
-              <h3>Sobre la empresa</h3>
+              <h3>{t(`${T_NS}.sobreEmpresa`)}</h3>
             </div>
             <div className="detalle-empresaInfo">
               <div className="detalle-empresaAvatar">
@@ -185,6 +335,9 @@ export default function ProyectoDetalle() {
                 <h4 className="detalle-empresaNombre">{usuarioEmpresa.nombre || 'Empresa'}</h4>
                 {empresa.sector && (
                   <p className="detalle-empresaSector">{empresa.sector}</p>
+                )}
+                {usuarioEmpresa.correo && (
+                  <p className="detalle-empresaSector">{usuarioEmpresa.correo}</p>
                 )}
               </div>
             </div>
@@ -198,7 +351,7 @@ export default function ProyectoDetalle() {
                 rel="noopener noreferrer"
                 className="detalle-empresaWeb"
               >
-                <ExternalLink size={14} /> Sitio web
+                <ExternalLink size={14} /> {t(`${T_NS}.sitioWeb`)}
               </a>
             )}
           </div>
@@ -206,18 +359,18 @@ export default function ProyectoDetalle() {
           <div className="detalle-sideCard">
             <div className="detalle-sideHeader">
               <Briefcase size={18} />
-              <h3>Detalles</h3>
+              <h3>{t(`${T_NS}.detalles`)}</h3>
             </div>
             <dl className="detalle-dl">
-              <dt>Modalidad</dt>
-              <dd>{etiquetaModalidad[proyecto.modalidad] ?? proyecto.modalidad}</dd>
-              <dt>Plazo</dt>
-              <dd>{proyecto.plazo_dias} días</dd>
-              <dt>Presupuesto min.</dt>
+              <dt>{t(`${T_NS}.modalidad`)}</dt>
+              <dd>{etiquetaModalidad[proyecto.modalidad] ? t(etiquetaModalidad[proyecto.modalidad]) : proyecto.modalidad}</dd>
+              <dt>{t(`${T_NS}.presupuestoMin`)}</dt>
               <dd>{formatoMoneda.format(presupuestoMin)}</dd>
-              <dt>Presupuesto máx.</dt>
+              <dt>{t(`${T_NS}.presupuestoMax`)}</dt>
               <dd>{formatoMoneda.format(presupuestoMax)}</dd>
-              <dt>Publicado</dt>
+              <dt>{t(`${T_NS}.plazoEntrega`)}</dt>
+              <dd>{proyecto.plazo_dias} días</dd>
+              <dt>{t(`${T_NS}.publicado`)}</dt>
               <dd>{proyecto.fecha_publicacion ? new Date(proyecto.fecha_publicacion).toLocaleDateString() : '—'}</dd>
             </dl>
           </div>
@@ -226,17 +379,22 @@ export default function ProyectoDetalle() {
 
       {mostrarModal && (
         <div className="modal-overlay" onClick={() => setMostrarModal(false)}>
-          <div className="modal-contenido" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-contenido modal-postular" onClick={(e) => e.stopPropagation()}>
             <button className="modal-cerrar" type="button" onClick={() => setMostrarModal(false)}>
               <X size={18} />
             </button>
             <div className="modal-icono">
-              <AlertTriangle size={28} />
+              <Send size={28} />
             </div>
-            <h2 className="modal-titulo">Confirmar postulación</h2>
+            <h2 className="modal-titulo">
+              {modoEdicion ? t(`${T_NS}.editarPostulacion`) : t(`${T_NS}.modalPostularme`)}
+            </h2>
             <p className="modal-desc">
-              ¿Estás seguro de que deseas postularte a este proyecto?
+              {modoEdicion
+                ? t(`${T_NS}.modalEditarMsg`)
+                : t(`${T_NS}.modalPostularMsg`)}
             </p>
+
             <div className="modal-resumen">
               <div className="modal-resumenItem">
                 <span className="modal-resumenLabel">Proyecto</span>
@@ -255,6 +413,43 @@ export default function ProyectoDetalle() {
                 <span className="modal-resumenValor">{proyecto.plazo_dias} días</span>
               </div>
             </div>
+
+            <div className="modal-divisor" />
+
+            <div className="modal-form">
+              <div className="modal-campo">
+                <label className="modal-label">
+                  <Mail size={14} /> {t(`${T_NS}.campoMensaje`)}
+                </label>
+                <textarea
+                  className="modal-textarea"
+                  placeholder="Ej: Tengo experiencia en React y Node.js, he trabajado en proyectos similares..."
+                  rows={4}
+                  value={mensaje}
+                  onChange={(e) => setMensaje(e.target.value)}
+                />
+              </div>
+              <div className="modal-campo">
+                <label className="modal-label">
+                  <DollarSign size={14} /> {t(`${T_NS}.campoPropuesta`)}
+                </label>
+                <input
+                  className="modal-input"
+                  type="number"
+                  min="0"
+                  max="9999999"
+                  step="100"
+                  placeholder="Ej: 2500"
+                  value={presupuesto}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val.length <= 7) setPresupuesto(val);
+                  }}
+                />
+                <span className="modal-ayuda">{t(`${T_NS}.campoPropuestaHint`)}</span>
+              </div>
+            </div>
+
             <div className="modal-acciones">
               <button
                 type="button"
@@ -262,15 +457,21 @@ export default function ProyectoDetalle() {
                 onClick={() => setMostrarModal(false)}
                 disabled={enviando}
               >
-                Cancelar
+                {t(`${T_NS}.cancelar`)}
               </button>
               <button
                 type="button"
                 className="modal-btn modal-btn-primary"
                 onClick={confirmarPostulacion}
-                disabled={enviando}
+                disabled={enviando || (modoEdicion && !hayCambios)}
               >
-                {enviando ? 'Enviando...' : 'Sí, postularme'}
+                {enviando ? (
+                  <>{t(`${T_NS}.guardando`)}</>
+                ) : modoEdicion && !hayCambios ? (
+                  <><Send size={16} /> {t(`${T_NS}.sinCambios`)}</>
+                ) : (
+                  <><Send size={16} /> {modoEdicion ? t(`${T_NS}.guardarCambios`) : t(`${T_NS}.postularmeBtn`)}</>
+                )}
               </button>
             </div>
           </div>

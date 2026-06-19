@@ -28,7 +28,7 @@ function RutaProtegida({ children, rolPermitido }) {
 
   if (REQUERIR_SESION && !isAuthenticated) {
     // Si intentan acceder al admin sin sesión, redirigir al login de admin
-    const destino = ubicacion.pathname.startsWith('/admin') ? RUTAS.loginAdmin : RUTAS.login;
+    const destino = ubicacion.pathname.toLowerCase().startsWith('/admin') ? RUTAS.loginAdmin : RUTAS.login;
     return <Navigate to={destino} state={{ desde: ubicacion.pathname }} replace />;
   }
 
