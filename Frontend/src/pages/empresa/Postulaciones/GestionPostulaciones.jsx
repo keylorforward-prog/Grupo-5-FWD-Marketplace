@@ -1,12 +1,11 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../services/dashboardEmpresarioService';
 import Aside from '../../../components/sidebar/Aside';
 import FilaCandidato from '../../../components/postulaciones/FilaCandidato';
 import AccionesMasivas from '../../../components/postulaciones/AccionesMasivas';
 import PerfilEgresadoModal from '../DashboardEmpresario/components/PerfilEgresadoModal';
-import { useDashboardEmpresarioRequest } from '../DashboardEmpresario/hooks/useDashboardEmpresarioRequest';
-import { formatearPostulacion } from '../DashboardEmpresario/utils/dashboardEmpresarioFormatters';
+import { formatearPostulacion, formatearPostulacionEmpleo } from '../DashboardEmpresario/utils/dashboardEmpresarioFormatters';
 
 const OPCIONES_POR_PAGINA = [3, 10, 15, 25];
 
@@ -77,11 +76,38 @@ const ETIQUETAS_ESTADO = {
 };
 
 export default function GestionPostulaciones() {
-  const { data, loading, error } = useDashboardEmpresarioRequest(
-    () => dashboardEmpresarioService.obtenerPostulaciones(),
-    [],
-    []
-  );
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let activo = true;
+    setLoading(true);
+    setError(null);
+
+    Promise.all([
+      dashboardEmpresarioService.obtenerPostulaciones().catch(() => []),
+      dashboardEmpresarioService.obtenerPostulacionesEmpleo().catch(() => []),
+    ]).then(([proyectos, empleos]) => {
+      if (!activo) return;
+      const formateadas = [
+        ...proyectos.map(formatearPostulacion),
+        ...empleos.map(formatearPostulacionEmpleo),
+      ];
+      formateadas.sort((a, b) => {
+        if (a.status === 'nuevo' && b.status !== 'nuevo') return -1;
+        if (a.status !== 'nuevo' && b.status === 'nuevo') return 1;
+        return 0;
+      });
+      setData(formateadas);
+    }).catch(() => {
+      if (activo) setError('Error al cargar postulaciones.');
+    }).finally(() => {
+      if (activo) setLoading(false);
+    });
+
+    return () => { activo = false; };
+  }, []);
   const [cambiosLocales, setCambiosLocales] = useState({});
   const [idsSeleccionados, setIdsSeleccionados] = useState(new Set());
   const [paginaActual, setPaginaActual] = useState(1);
@@ -89,13 +115,13 @@ export default function GestionPostulaciones() {
   const [filtroEstado, setFiltroEstado] = useState(null);
   const [perfilSeleccionado, setPerfilSeleccionado] = useState(null);
   const candidatos = useMemo(
-    () => data.map(formatearPostulacion).map((c) => ({ ...c, ...cambiosLocales[c.id] })),
+    () => data.map((c) => ({ ...c, ...cambiosLocales[c.id] })),
     [data, cambiosLocales]
   );
   const nombreProyecto = candidatos.find((c) => c.proyecto)?.proyecto || 'proyecto seleccionado';
 
   const filtrados = useMemo(
-    () => (!filtroEstado ? candidatos : candidatos.filter((c) => c.estado === filtroEstado)),
+    () => (!filtroEstado ? candidatos : candidatos.filter((c) => c.status === filtroEstado)),
     [candidatos, filtroEstado]
   );
 
@@ -107,11 +133,11 @@ export default function GestionPostulaciones() {
 
   const estadisticas = useMemo(() => ({
     total:         candidatos.length,
-    nuevos:        candidatos.filter((c) => c.estado === 'nuevo').length,
-    pendientes:    candidatos.filter((c) => c.estado === 'pendiente').length,
-    enRevision:    candidatos.filter((c) => c.estado === 'en_revision').length,
-    entrevistados: candidatos.filter((c) => c.estado === 'entrevistado').length,
-    aceptados:     candidatos.filter((c) => c.estado === 'aceptado').length,
+    nuevos:        candidatos.filter((c) => c.status === 'nuevo').length,
+    pendientes:    candidatos.filter((c) => c.status === 'pendiente').length,
+    enRevision:    candidatos.filter((c) => c.status === 'en_revision').length,
+    entrevistados: candidatos.filter((c) => c.status === 'entrevistado').length,
+    aceptados:     candidatos.filter((c) => c.status === 'aceptado').length,
   }), [candidatos]);
 
   const tarjetasEstadistica = construirTarjetasEstadistica(estadisticas);
@@ -136,10 +162,24 @@ export default function GestionPostulaciones() {
 
   const [accionCargando, setAccionCargando] = useState(null);
 
+  const esbozoCandidato = useMemo(() => {
+    const mapa = new Map();
+    candidatos.forEach((c) => mapa.set(c.id, c));
+    return mapa;
+  }, [candidatos]);
+
+  const actualizarEstado = useCallback(async (id, estado, mensaje = '') => {
+    const candidato = esbozoCandidato.get(id);
+    if (candidato?.esEmpleo) {
+      return dashboardEmpresarioService.actualizarEstadoPostulacionEmpleo(id, estado, mensaje);
+    }
+    return dashboardEmpresarioService.actualizarEstadoPostulacion(id, estado, mensaje);
+  }, [esbozoCandidato]);
+
   const manejarInvitacion = useCallback(async (id, _date, _time, _msg) => {
     setAccionCargando(id);
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'PRESSELECCIONADA');
+      await actualizarEstado(id, 'PRESSELECCIONADA');
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), estaInvitado: true, status: 'entrevistado' },
@@ -149,12 +189,12 @@ export default function GestionPostulaciones() {
     } finally {
       setAccionCargando(null);
     }
-  }, []);
+  }, [actualizarEstado]);
 
   const manejarRechazo = useCallback(async (id, mensaje = '') => {
     setAccionCargando(id);
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'RECHAZADA', mensaje);
+      await actualizarEstado(id, 'RECHAZADA', mensaje);
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), status: 'rechazado' },
@@ -164,12 +204,12 @@ export default function GestionPostulaciones() {
     } finally {
       setAccionCargando(null);
     }
-  }, []);
+  }, [actualizarEstado]);
 
   const manejarAceptacion = useCallback(async (id, mensaje = '') => {
     setAccionCargando(id);
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'ACEPTADO', mensaje);
+      await actualizarEstado(id, 'ACEPTADO', mensaje);
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), status: 'aceptado', estaInvitado: true },
@@ -179,11 +219,11 @@ export default function GestionPostulaciones() {
     } finally {
       setAccionCargando(null);
     }
-  }, []);
+  }, [actualizarEstado]);
 
   const manejarVerPerfil = useCallback(async (id, perfil) => {
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'EN_REVISION');
+      await actualizarEstado(id, 'EN_REVISION');
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), status: 'en_revision' },
@@ -192,7 +232,7 @@ export default function GestionPostulaciones() {
       // If it fails, still open the profile
     }
     setPerfilSeleccionado(perfil);
-  }, []);
+  }, [actualizarEstado]);
 
   const manejarExportacion = useCallback((formato, soloSeleccionados) => {
     const data = soloSeleccionados ? candidatos.filter((c) => idsSeleccionados.has(c.id)) : candidatos;
@@ -213,10 +253,6 @@ export default function GestionPostulaciones() {
             <div className="flex items-start justify-between">
               <div className="max-w-3xl">
                 <nav className="text-xs text-gray-500 mb-2 flex items-center gap-1.5 tracking-wide">
-                  <span className="hover:text-gray-900 cursor-pointer transition-colors">Proyectos</span>
-                  <span className="text-gray-400">/</span>
-                  <span className="hover:text-gray-900 cursor-pointer transition-colors">E-commerce Refactor</span>
-                  <span className="text-gray-400">/</span>
                   <span className="text-[#1868D5] font-semibold">Postulaciones</span>
                 </nav>
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">

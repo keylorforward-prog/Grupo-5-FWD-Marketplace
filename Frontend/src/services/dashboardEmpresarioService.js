@@ -88,8 +88,16 @@ export const dashboardEmpresarioService = {
     return get('/dashboard-empresario/postulaciones', params);
   },
 
+  obtenerPostulacionesEmpleo(params) {
+    return get('/dashboard-empresario/postulaciones-empleo', params);
+  },
+
   actualizarEstadoPostulacion(id, estado, mensaje = '') {
     return apiClient.put(`/dashboard-empresario/postulaciones/${id}/estado`, { estado, mensaje }).then(extraerData);
+  },
+
+  actualizarEstadoPostulacionEmpleo(id, estado, mensaje = '') {
+    return apiClient.put(`/dashboard-empresario/postulaciones-empleo/${id}/estado`, { estado, mensaje }).then(extraerData);
   },
 
   obtenerTalentoRecomendado(params) {

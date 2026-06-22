@@ -13,6 +13,7 @@ const {
   PerfilEmpresario,
   PerfilEstudiante,
   Postulacion,
+  PostulacionEmpleo,
   Propuesta,
   ProyectoPlataforma,
   sequelize,
@@ -160,6 +161,19 @@ const actualizarPerfil = async (req, res) => {
     }
 
     await perfil.update(cambios);
+
+    if (Object.prototype.hasOwnProperty.call(req.body, 'nombre') || Object.prototype.hasOwnProperty.call(req.body, 'correo')) {
+      const cambiosUsuario = {};
+      if (Object.prototype.hasOwnProperty.call(req.body, 'nombre')) {
+        cambiosUsuario.nombre = req.body.nombre;
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, 'correo')) {
+        cambiosUsuario.correo = req.body.correo;
+      }
+      if (Object.keys(cambiosUsuario).length) {
+        await Usuario.update(cambiosUsuario, { where: { id_usuario: perfil.id_usuario } });
+      }
+    }
     const actualizado = await PerfilEmpresario.findByPk(perfil.id_perfil_empresario, {
       include: [{ model: Usuario, as: 'usuario' }],
     });
@@ -775,6 +789,38 @@ const listarPostulaciones = async (req, res) => {
   }
 };
 
+const listarPostulacionesEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const postulaciones = await PostulacionEmpleo.findAll({
+      include: [
+        {
+          model: OfertaEmpleo,
+          as: 'oferta',
+          required: true,
+          where: { id_perfil_empresario: perfil.id_perfil_empresario },
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'estudiante',
+          include: [
+            { model: Usuario, as: 'usuario' },
+            { model: Curriculum, as: 'curriculum' },
+          ],
+        },
+      ],
+      order: [['fecha_postulacion', 'DESC']],
+      limit: obtenerLimite(req.query.limit),
+    });
+
+    res.json({ success: true, data: postulaciones });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener las postulaciones de empleo.');
+  }
+};
+
 const listarMensajesRecientes = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEmpresario(req, res);
@@ -1208,9 +1254,92 @@ const actualizarEstadoPostulacion = async (req, res) => {
   }
 };
 
+const actualizarEstadoPostulacionEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { id } = req.params;
+    const { estado, mensaje } = req.body;
+
+    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO', 'ACEPTADO'];
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({ success: false, message: `Estado invalido. Validos: ${estadosValidos.join(', ')}` });
+    }
+
+    const postulacion = await PostulacionEmpleo.findByPk(id, {
+      include: [
+        {
+          model: OfertaEmpleo,
+          as: 'oferta',
+          required: true,
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'estudiante',
+          include: [{ model: Usuario, as: 'usuario' }],
+        },
+      ],
+    });
+
+    if (!postulacion) {
+      return res.status(404).json({ success: false, message: 'Postulacion de empleo no encontrada.' });
+    }
+
+    if (postulacion.oferta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      return res.status(403).json({ success: false, message: 'No tienes permiso para modificar esta postulacion.' });
+    }
+
+    const estadoAnterior = postulacion.estado;
+
+    const mapaEstadoDB = {
+      EN_REVISION: 'vista',
+      PRESSELECCIONADA: 'vista',
+      PRESELECCIONADA: 'vista',
+      RECHAZADA: 'rechazada',
+      CONTRATADO: 'aceptada',
+      ACEPTADO: 'aceptada',
+    };
+    await postulacion.update({ estado: mapaEstadoDB[estado] || estado.toLowerCase() });
+
+    const tituloOferta = postulacion.oferta.titulo;
+    const usuarioEstudiante = postulacion.estudiante?.usuario;
+
+    if (usuarioEstudiante) {
+      const mapaMensajes = {
+        EN_REVISION: `Tu postulacion para "${tituloOferta}" ha pasado a estar en revision.`,
+        PRESSELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloOferta}".`,
+        PRESELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloOferta}".`,
+        RECHAZADA: mensaje || `Tu postulacion para "${tituloOferta}" no ha sido seleccionada.`,
+        CONTRATADO: mensaje || `¡Felicidades! Has sido contratado para "${tituloOferta}".`,
+        ACEPTADO: mensaje || `¡Felicidades! Has sido aceptado para "${tituloOferta}".`,
+      };
+      const notifMensaje = mapaMensajes[estado];
+      if (notifMensaje) {
+        await Notificacion.create({
+          id_usuario: usuarioEstudiante.id_usuario,
+          tipo: `POSTULACION_${estado}`,
+          mensaje: notifMensaje,
+          leido: false,
+          fecha: new Date(),
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Estado actualizado a "${estado}".`,
+      data: { id: postulacion.id_postulacion_empleo, estadoAnterior, estadoActual: estado },
+    });
+  } catch (error) {
+    responderError(res, error, 'Error al actualizar el estado de la postulacion de empleo.');
+  }
+};
+
 module.exports = {
   aceptarOferta,
   actualizarEstadoPostulacion,
+  actualizarEstadoPostulacionEmpleo,
   actualizarHistorial,
   crearHistorial,
   eliminarHistorial,
@@ -1230,6 +1359,7 @@ module.exports = {
   listarPagos,
   listarPerfil,
   listarPostulaciones,
+  listarPostulacionesEmpleo,
   listarPropuestas,
   listarTalento,
   marcarLeidos,
