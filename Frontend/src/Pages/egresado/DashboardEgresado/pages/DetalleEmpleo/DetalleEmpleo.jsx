@@ -9,18 +9,29 @@ import { egresadoService } from '../../../../../services/egresadoService';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 
 const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
+
+const etiquetaJornada = {
+  tiempo_completo: 'Tiempo completo',
+  medio_tiempo:    'Medio tiempo',
+  por_horas:       'Por horas',
+  practica:        'Práctica profesional',
+};
+
 const T_NS = 'egresadoEmpleoDetalle';
 
-const formatoSalario = new Intl.NumberFormat('es-CR', {
-  style: 'currency', currency: 'CRC', maximumFractionDigits: 0,
-});
+const formatoSalario = (min, max) => {
+  if (min == null && max == null) return '—';
+  const fmt = (n) => `$${Number(n).toLocaleString('es-AR')}`;
+  if (min != null && max != null && min !== max) return `${fmt(min)} - ${fmt(max)}`;
+  if (min != null) return `Desde ${fmt(min)}`;
+  return `Hasta ${fmt(max)}`;
+};
 
 const ETQ_ESTADO = {
-  ENVIADA: 'egresadoPostulaciones.flujoEnviada',
-  EN_REVISION: 'egresadoPostulaciones.flujoRevision',
-  PRESELECCIONADA: 'egresadoPostulaciones.flujoPreseleccionada',
-  RECHAZADA: 'egresadoPostulaciones.flujoRechazada',
-  CONTRATADO: 'egresadoPostulaciones.flujoAceptada',
+  enviada: 'egresadoPostulaciones.flujoEnviada',
+  vista: 'egresadoPostulaciones.flujoRevision',
+  aceptada: 'egresadoPostulaciones.flujoAceptada',
+  rechazada: 'egresadoPostulaciones.flujoRechazada',
 };
 
 export default function DetalleEmpleo() {
@@ -29,55 +40,60 @@ export default function DetalleEmpleo() {
   const navigate = useNavigate();
   const location = useLocation();
   const rutaVolver = location.state?.desde === 'postulaciones' ? '/egresado/dashboard/postulaciones' : '/egresado/dashboard/explorar-empleos';
+
   const [empleo, setEmpleo] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [postulacion, setPostulacion] = useState(null);
+
+  const [perfilCvUrl, setPerfilCvUrl] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [mensaje, setMensaje] = useState('');
-  const [presupuesto, setPresupuesto] = useState('');
-  const [originalMensaje, setOriginalMensaje] = useState('');
-  const [originalPresupuesto, setOriginalPresupuesto] = useState('');
+  const [carta, setCarta] = useState('');
+  const [cvUrl, setCvUrl] = useState('');
+  const [pretension, setPretension] = useState('');
+  const [originalCarta, setOriginalCarta] = useState('');
+  const [originalCvUrl, setOriginalCvUrl] = useState('');
+  const [originalPretension, setOriginalPretension] = useState('');
   const [confirmarCancelar, setConfirmarCancelar] = useState(false);
   const [cancelando, setCancelando] = useState(false);
 
   useEffect(() => {
     let activo = true;
     Promise.all([
-      egresadoService.obtenerPropuestaPorId(id),
-      egresadoDashboardService.obtenerPostulaciones(),
+      egresadoService.obtenerOfertaEmpleo(id),
+      egresadoDashboardService.obtenerPerfil().catch(() => ({ documento_cv: '' })),
     ])
-      .then(([empleoData, postulaciones]) => {
+      .then(([empleoData, perfilData]) => {
         if (!activo) return;
         setEmpleo(empleoData);
-        const match = (postulaciones || []).find(
-          (p) => p.id_propuesta === Number(id) || p.propuesta?.id_propuesta === Number(id)
-        );
-        if (match) setPostulacion(match);
+        setPostulacion(empleoData.postulacion);
+        if (perfilData.documento_cv) setPerfilCvUrl(perfilData.documento_cv);
       })
       .catch((err) => { if (activo) setError(err.message); })
       .finally(() => { if (activo) setCargando(false); });
     return () => { activo = false; };
   }, [id]);
 
+  const cvRequerido = !modoEdicion && !cvUrl.trim();
   const confirmarPostulacion = async () => {
+    if (cvRequerido) return;
     setEnviando(true);
     try {
-      const datos = {};
-      if (mensaje.trim()) datos.mensaje_presentacion = mensaje.trim();
-      if (presupuesto) datos.presupuesto_max = Number(presupuesto);
-
+      const payload = {
+        carta_presentacion: carta.trim() || null,
+        cv_url: cvUrl.trim() || null,
+        pretension_salarial: pretension ? Number(pretension) : null,
+      };
       if (modoEdicion && postulacion) {
-        const resp = await egresadoService.actualizarPostulacion(postulacion.id_postulacion, datos);
-        const updated = resp?.data ?? resp;
-        setPostulacion((prev) => ({ ...prev, ...updated }));
+        await egresadoService.actualizarPostulacionEmpleo(postulacion.id_postulacion_empleo, payload);
       } else {
-        const resp = await egresadoService.postularse(Number(id), datos);
-        const created = resp?.data ?? resp;
-        setPostulacion((prev) => ({ ...prev, ...created, id_postulacion: created.id_postulacion }));
+        await egresadoService.postularOfertaEmpleo({ id_oferta_empleo: empleo.id, ...payload });
       }
+      const refrescado = await egresadoService.obtenerOfertaEmpleo(id);
+      setEmpleo(refrescado);
+      setPostulacion(refrescado.postulacion);
       setMostrarModal(false);
       setModoEdicion(false);
       setError(null);
@@ -92,7 +108,7 @@ export default function DetalleEmpleo() {
     if (!postulacion) return;
     setCancelando(true);
     try {
-      await egresadoService.eliminarPostulacion(postulacion.id_postulacion);
+      await egresadoService.eliminarPostulacionEmpleo(postulacion.id_postulacion_empleo);
       setPostulacion(null);
       setConfirmarCancelar(false);
       setError(null);
@@ -104,21 +120,22 @@ export default function DetalleEmpleo() {
   };
 
   const hayCambios = modoEdicion
-    ? mensaje !== originalMensaje || presupuesto !== originalPresupuesto
+    ? carta !== originalCarta || cvUrl !== originalCvUrl || pretension !== originalPretension
     : true;
 
   const abrirModal = (editando = false) => {
     if (editando && postulacion) {
-      const msg = postulacion.mensaje_presentacion || '';
-      const pre = postulacion.presupuesto_max ? String(postulacion.presupuesto_max) : '';
-      setMensaje(msg);
-      setPresupuesto(pre);
-      setOriginalMensaje(msg);
-      setOriginalPresupuesto(pre);
+      setCarta(postulacion.carta_presentacion || '');
+      setCvUrl(postulacion.cv_url || '');
+      setPretension(postulacion.pretension_salarial ? String(postulacion.pretension_salarial) : '');
+      setOriginalCarta(postulacion.carta_presentacion || '');
+      setOriginalCvUrl(postulacion.cv_url || '');
+      setOriginalPretension(postulacion.pretension_salarial ? String(postulacion.pretension_salarial) : '');
       setModoEdicion(true);
     } else {
-      setMensaje('');
-      setPresupuesto('');
+      setCarta('');
+      setCvUrl(perfilCvUrl);
+      setPretension('');
       setModoEdicion(false);
     }
     setMostrarModal(true);
@@ -146,9 +163,7 @@ export default function DetalleEmpleo() {
 
   const empresa = empleo.perfilEmpresario ?? {};
   const usuarioEmpresa = empresa.usuario ?? {};
-  const tecnologias = (typeof empleo.tecnologias_requeridas === 'string' ? empleo.tecnologias_requeridas : '').split(',').map((t) => t.trim()).filter(Boolean);
-  const salarioMin = Number(empleo.presupuesto_min) || 0;
-  const salarioMax = Number(empleo.presupuesto_max) || salarioMin;
+  const tecnologias = (empleo.tecnologias || []).filter(Boolean);
 
   return (
     <div className="detalle-container fwd-animar-entrada">
@@ -177,6 +192,12 @@ export default function DetalleEmpleo() {
                   <Globe size={13} />
                   {etiquetaModalidad[empleo.modalidad] ? t(etiquetaModalidad[empleo.modalidad]) : empleo.modalidad}
                 </span>
+                {empleo.tipo_jornada && (
+                  <span className="detalle-badge detalle-badgeCategoria">
+                    <Briefcase size={13} />
+                    {etiquetaJornada[empleo.tipo_jornada] ?? empleo.tipo_jornada}
+                  </span>
+                )}
                 <span className={`detalle-badge detalle-badgeEstado ${(empleo.estado || '').toLowerCase()}`}>
                   {empleo.estado}
                 </span>
@@ -190,7 +211,7 @@ export default function DetalleEmpleo() {
               <div>
                 <span className="detalle-metaLabel">{t(`${T_NS}.salarioMensual`)}</span>
                 <span className="detalle-metaValor">
-                  {formatoSalario.format(salarioMin)} – {formatoSalario.format(salarioMax)}
+                  {formatoSalario(empleo.salario_min, empleo.salario_max)}
                 </span>
               </div>
             </div>
@@ -206,8 +227,8 @@ export default function DetalleEmpleo() {
               <div>
                 <span className="detalle-metaLabel">{t(`${T_NS}.publicado`)}</span>
                 <span className="detalle-metaValor">
-                  {empleo.fecha_publicacion
-                    ? new Date(empleo.fecha_publicacion).toLocaleDateString('es-CR')
+                  {empleo.publicado
+                    ? new Date(empleo.publicado).toLocaleDateString()
                     : '—'}
                 </span>
               </div>
@@ -237,31 +258,44 @@ export default function DetalleEmpleo() {
                   <CheckCircle size={18} />
                   <span>{t(`${T_NS}.tuPostulacion`)}</span>
                 </div>
-                <span className={`etiquetaEstadoPostulacion ${(postulacion.estado || 'ENVIADA').toLowerCase()}`}>
+                <span className={`etiquetaEstadoPostulacion ${(postulacion.estado || 'enviada').toLowerCase()}`}>
                   {t(ETQ_ESTADO[postulacion.estado] || postulacion.estado)}
                 </span>
               </div>
 
-              {postulacion.mensaje_presentacion && (
+              {postulacion.carta_presentacion && (
                 <div className="detalle-postulacion-campo">
                   <span className="detalle-postulacion-label">
                     <Mail size={14} /> {t(`${T_NS}.mensajePresentacion`)}
                   </span>
-                  <p className="detalle-postulacion-valor">{postulacion.mensaje_presentacion}</p>
+                  <p className="detalle-postulacion-valor">{postulacion.carta_presentacion}</p>
                 </div>
               )}
 
-              {postulacion.presupuesto_max != null && (
+              {postulacion.cv_url && (
                 <div className="detalle-postulacion-campo">
                   <span className="detalle-postulacion-label">
-                    <DollarSign size={14} /> {t(`${T_NS}.expectativaSalarial`)}
+                    <DollarSign size={14} /> {t(`${T_NS}.cvAdjunto`)}
                   </span>
-                  <p className="detalle-postulacion-valor">{formatoSalario.format(postulacion.presupuesto_max)}</p>
+                  <a href={postulacion.cv_url} target="_blank" rel="noopener noreferrer" className="detalle-postulacion-valor enlace">
+                    {postulacion.cv_url}
+                  </a>
+                </div>
+              )}
+
+              {postulacion.pretension_salarial != null && (
+                <div className="detalle-postulacion-campo">
+                  <span className="detalle-postulacion-label">
+                    <DollarSign size={14} /> {t(`${T_NS}.pretensionLabel`)}
+                  </span>
+                  <p className="detalle-postulacion-valor">
+                    {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(postulacion.pretension_salarial)}
+                  </p>
                 </div>
               )}
 
               <div className="detalle-postulacion-fecha">
-                {t(`${T_NS}.postulasteEl`)} {new Date(postulacion.fecha_postulacion).toLocaleDateString('es-CR')}
+                {t(`${T_NS}.postulasteEl`)} {new Date(postulacion.fecha_postulacion).toLocaleDateString()}
               </div>
 
               <div className="detalle-postulacion-acciones">
@@ -362,14 +396,20 @@ export default function DetalleEmpleo() {
             <dl className="detalle-dl">
               <dt>{t(`${T_NS}.modalidad`)}</dt>
               <dd>{etiquetaModalidad[empleo.modalidad] ? t(etiquetaModalidad[empleo.modalidad]) : empleo.modalidad}</dd>
+              <dt>{t(`${T_NS}.tipoJornada`)}</dt>
+              <dd>{(etiquetaJornada[empleo.tipo_jornada] ?? empleo.tipo_jornada) || '—'}</dd>
               <dt>{t(`${T_NS}.salarioMin`)}</dt>
-              <dd>{formatoSalario.format(salarioMin)}</dd>
+              <dd>{empleo.salario_min != null ? formatoSalario(empleo.salario_min) : '—'}</dd>
               <dt>{t(`${T_NS}.salarioMax`)}</dt>
-              <dd>{formatoSalario.format(salarioMax)}</dd>
-              <dt>{t(`${T_NS}.plazoEntrega`)}</dt>
-              <dd>{empleo.plazo_dias} días</dd>
+              <dd>{empleo.salario_max != null ? formatoSalario(empleo.salario_max) : '—'}</dd>
+              {empleo.ubicacion && (
+                <>
+                  <dt>{t(`${T_NS}.ubicacion`)}</dt>
+                  <dd>{empleo.ubicacion}</dd>
+                </>
+              )}
               <dt>{t(`${T_NS}.publicado`)}</dt>
-              <dd>{empleo.fecha_publicacion ? new Date(empleo.fecha_publicacion).toLocaleDateString('es-CR') : '—'}</dd>
+              <dd>{empleo.publicado ? new Date(empleo.publicado).toLocaleDateString() : '—'}</dd>
             </dl>
           </div>
         </aside>
@@ -382,7 +422,7 @@ export default function DetalleEmpleo() {
               <X size={18} />
             </button>
             <div className="modal-icono">
-              <Send size={28} />
+              <Briefcase size={28} />
             </div>
             <h2 className="modal-titulo">
               {modoEdicion ? t(`${T_NS}.editarPostulacion`) : t(`${T_NS}.modalPostularme`)}
@@ -395,19 +435,19 @@ export default function DetalleEmpleo() {
 
             <div className="modal-resumen">
               <div className="modal-resumenItem">
-                <span className="modal-resumenLabel">Empleo</span>
+                <span className="modal-resumenLabel">{t(`${T_NS}.puesto`)}</span>
                 <span className="modal-resumenValor">{empleo.titulo}</span>
               </div>
               <div className="modal-resumenItem">
-                <span className="modal-resumenLabel">Empresa</span>
+                <span className="modal-resumenLabel">{t(`${T_NS}.empresa`)}</span>
                 <span className="modal-resumenValor">{usuarioEmpresa.nombre || '—'}</span>
               </div>
               <div className="modal-resumenItem">
-                <span className="modal-resumenLabel">Salario</span>
-                <span className="modal-resumenValor">{formatoSalario.format(salarioMin)} – {formatoSalario.format(salarioMax)}</span>
+                <span className="modal-resumenLabel">{t(`${T_NS}.salario`)}</span>
+                <span className="modal-resumenValor">{formatoSalario(empleo.salario_min, empleo.salario_max)}</span>
               </div>
               <div className="modal-resumenItem">
-                <span className="modal-resumenLabel">Modalidad</span>
+                <span className="modal-resumenLabel">{t(`${T_NS}.modalidad`)}</span>
                 <span className="modal-resumenValor">{etiquetaModalidad[empleo.modalidad] ? t(etiquetaModalidad[empleo.modalidad]) : empleo.modalidad}</span>
               </div>
             </div>
@@ -417,34 +457,50 @@ export default function DetalleEmpleo() {
             <div className="modal-form">
               <div className="modal-campo">
                 <label className="modal-label">
-                  <Mail size={14} /> {t(`${T_NS}.campoMensaje`)}
+                  <Mail size={14} /> {t(`${T_NS}.campoCarta`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
                 </label>
                 <textarea
                   className="modal-textarea"
-                  placeholder="Ej: Tengo experiencia en React y Node.js, me apasiona el desarrollo web..."
-                  rows={4}
-                  value={mensaje}
-                  onChange={(e) => setMensaje(e.target.value)}
+                  placeholder={t(`${T_NS}.cartaPlaceholder`)}
+                  rows={3}
+                  value={carta}
+                  onChange={(e) => setCarta(e.target.value)}
                 />
               </div>
               <div className="modal-campo">
                 <label className="modal-label">
-                  <DollarSign size={14} /> {t(`${T_NS}.campoSalario`)}
+                  <DollarSign size={14} /> {t(`${T_NS}.campoCv`)}
+                </label>
+                <input
+                  className="modal-input"
+                  type="url"
+                  required
+                  placeholder={t(`${T_NS}.cvPlaceholder`)}
+                  value={cvUrl}
+                  onChange={(e) => setCvUrl(e.target.value)}
+                />
+                <span className="modal-ayuda">{t(`${T_NS}.cvHint`)}</span>
+                {perfilCvUrl && cvUrl !== perfilCvUrl && (
+                  <button type="button" className="modal-usarCv" onClick={() => setCvUrl(perfilCvUrl)}>
+                    {t(`${T_NS}.usarCvPerfil`)}
+                  </button>
+                )}
+              </div>
+              <div className="modal-campo">
+                <label className="modal-label">
+                  <DollarSign size={14} /> {t(`${T_NS}.campoPretension`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
                 </label>
                 <input
                   className="modal-input"
                   type="number"
                   min="0"
                   max="9999999"
-                  step="100000"
-                  placeholder="Ej: 80000"
-                  value={presupuesto}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val.length <= 7) setPresupuesto(val);
-                  }}
+                  step="1000"
+                  placeholder={t(`${T_NS}.pretensionPlaceholder`)}
+                  value={pretension}
+                  onChange={(e) => { const v = e.target.value; if (v.length <= 7) setPretension(v); }}
                 />
-                <span className="modal-ayuda">{t(`${T_NS}.campoSalarioHint`)}</span>
+                <span className="modal-ayuda">{t(`${T_NS}.pretensionHint`)}</span>
               </div>
             </div>
 
@@ -461,10 +517,12 @@ export default function DetalleEmpleo() {
                 type="button"
                 className="modal-btn modal-btn-primary"
                 onClick={confirmarPostulacion}
-                disabled={enviando || (modoEdicion && !hayCambios)}
+                disabled={enviando || cvRequerido || (modoEdicion && !hayCambios)}
               >
                 {enviando ? (
                   <>{t(`${T_NS}.guardando`)}</>
+                ) : cvRequerido ? (
+                  <><Send size={16} /> {t(`${T_NS}.cvRequerido`)}</>
                 ) : modoEdicion && !hayCambios ? (
                   <><Send size={16} /> {t(`${T_NS}.sinCambios`)}</>
                 ) : (

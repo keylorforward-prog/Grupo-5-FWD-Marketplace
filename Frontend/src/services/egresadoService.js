@@ -88,8 +88,29 @@ export const egresadoService = {
     return extraerData(respuesta).map(normalizarOfertaEmpleo);
   },
 
+  async obtenerOfertaEmpleo(id) {
+    const respuesta = await apiClient.get(`/dashboard-egresado/ofertas-empleo/${id}`);
+    const raw = extraerData(respuesta);
+    return {
+      ...normalizarOfertaEmpleo(raw),
+      postulacion: raw.postulacion || null,
+      ya_postulado: !!raw.postulacion,
+      perfilEmpresario: raw.perfilEmpresario || null,
+    };
+  },
+
   async postularOfertaEmpleo(datos) {
     const respuesta = await apiClient.post('/dashboard-egresado/ofertas-empleo/postular', datos);
+    return respuesta.data;
+  },
+
+  async actualizarPostulacionEmpleo(id, datos) {
+    const respuesta = await apiClient.put(`/dashboard-egresado/ofertas-empleo/postulacion/${id}`, datos);
+    return respuesta.data;
+  },
+
+  async eliminarPostulacionEmpleo(id) {
+    const respuesta = await apiClient.delete(`/dashboard-egresado/ofertas-empleo/postulacion/${id}`);
     return respuesta.data;
   },
 

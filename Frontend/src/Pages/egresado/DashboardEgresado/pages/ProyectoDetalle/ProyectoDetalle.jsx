@@ -425,7 +425,7 @@ export default function ProyectoDetalle() {
             <div className="modal-form">
               <div className="modal-campo">
                 <label className="modal-label">
-                  <Mail size={14} /> {t(`${T_NS}.campoMensaje`)}
+                  <Mail size={14} /> {t(`${T_NS}.campoMensaje`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
                 </label>
                 <textarea
                   className="modal-textarea"
@@ -437,7 +437,7 @@ export default function ProyectoDetalle() {
               </div>
               <div className="modal-campo">
                 <label className="modal-label">
-                  <DollarSign size={14} /> {t(`${T_NS}.campoPropuesta`)}
+                  <DollarSign size={14} /> {t(`${T_NS}.campoPropuesta`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
                 </label>
                 <input
                   className="modal-input"

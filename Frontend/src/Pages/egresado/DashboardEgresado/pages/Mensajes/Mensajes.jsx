@@ -5,6 +5,7 @@ import { ArrowLeft, MessageSquare, Search, SearchX, Mail, MailOpen, Inbox, Send,
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useAuth } from '../../../../../context/AuthContext';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
+import '../../styles/DashboardEgresado.css';
 
 const ROLE_ICONS = {
   admin: Shield,
@@ -14,7 +15,7 @@ const ROLE_ICONS = {
 
 const formatearConversacion = (c, userId) => {
   const propuesta = c.postulacion?.propuesta ?? {};
-  const contacto = c.contacto || c.emisor || {};
+  const contactoData = c.contacto || c.emisor || {};
   const esPropio = c.id_usuario_emisor === userId;
   return {
     idPostulacion: c.id_postulacion,
@@ -23,8 +24,8 @@ const formatearConversacion = (c, userId) => {
     ultimoMensaje: c.mensaje || 'Sin mensajes',
     tiempo: formatearFechaRelativa(c.fecha_envio),
     leido: c.leido || esPropio,
-    contacto,
-    cedula: contacto?.cedula || '',
+    contacto: contactoData,
+    cedula: contactoData?.cedula || '',
     esPropio,
   };
 };

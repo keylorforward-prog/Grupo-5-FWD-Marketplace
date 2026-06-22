@@ -1799,6 +1799,28 @@
   font-size: 0.9rem;
 }
 
+@media (max-width: 800px) {
+  .mensajes-flex {
+    flex-direction: column;
+  }
+  .mensajes-sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .mensajes-flex:has(.chat-view) .mensajes-sidebar {
+    display: none;
+  }
+  .mensajes-flex:has(.chat-view) .mensajes-chat-panel {
+    display: flex;
+  }
+  .mensajes-chat-panel {
+    display: none;
+    flex: 1;
+  }
+}
+
 .tarjetaProyecto.postulado {
   border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
   background: color-mix(in srgb, var(--accent) 4%, transparent);
@@ -2719,10 +2741,10 @@
   inset: 0;
   background: rgba(0,0,0,0.45);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 2rem 0.75rem 1rem;
+  padding: 1rem;
   animation: modalFadeIn 0.2s ease-out;
   overflow-y: auto;
 }
@@ -2735,9 +2757,10 @@
 .modal-contenido {
   background: var(--surface);
   border-radius: 20px;
-  padding: 0.95rem;
-  max-width: 640px;
-  width: min(100%, 640px);
+  padding: 0.75rem;
+  max-width: 700px;
+  max-height: 90vh;
+  width: min(100%, 700px);
   position: relative;
   box-shadow: 0 18px 50px rgba(0,0,0,0.16);
   animation: modalSlideIn 0.25s ease-out;
@@ -2750,10 +2773,10 @@
 
 .modal-cerrar {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  width: 32px;
-  height: 32px;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: none;
   background: var(--surface-sunken);
@@ -2773,34 +2796,39 @@
 .modal-icono {
   display: flex;
   justify-content: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
   color: var(--warning);
 }
 
+.modal-icono svg {
+  width: 22px;
+  height: 22px;
+}
+
 .modal-titulo {
-  margin: 0 0 0.35rem;
-  font-size: 1.2rem;
+  margin: 0 0 0.2rem;
+  font-size: 1.1rem;
   font-weight: 800;
   text-align: center;
   color: var(--ink-strong);
 }
 
 .modal-desc {
-  margin: 0 0 0.85rem;
-  font-size: 0.88rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.84rem;
   color: var(--ink-muted);
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .modal-resumen {
   background: var(--surface-sunken);
   border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 0.7rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.35rem;
 }
 
 .modal-resumenItem {
@@ -2829,7 +2857,7 @@
 }
 
 .modal-postular .modal-acciones {
-  gap: 0.6rem;
+  gap: 0.5rem;
 }
 
 .modal-btn {
@@ -2838,9 +2866,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  padding: 0.7rem 0.75rem;
+  padding: 0.5rem 0.65rem;
   border-radius: 10px;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
@@ -2848,8 +2876,8 @@
 }
 
 .modal-postular .modal-btn {
-  padding: 0.55rem 0.7rem;
-  font-size: 0.82rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8rem;
 }
 
 .modal-btn:disabled {
@@ -2878,33 +2906,33 @@
 
 /* Modal con formulario de postulación */
 .modal-postular {
-  max-width: 640px;
-  padding: 1.1rem 0.9rem;
+  max-width: 700px;
+  padding: 0.7rem 0.75rem;
 }
 
 .modal-postular .modal-icono {
   color: var(--primary);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
 }
 
 .modal-postular .modal-titulo {
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.2rem;
 }
 
 .modal-postular .modal-desc {
-  margin-bottom: 0.8rem;
-  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
 }
 
 .modal-postular .modal-resumen {
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 0.9rem;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 0.65rem;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem 1rem;
+  gap: 0.35rem 1rem;
 }
 
 .modal-postular .modal-resumenItem {
@@ -2929,14 +2957,14 @@
 .modal-divisor {
   height: 1px;
   background: var(--border);
-  margin: 0 0 1.25rem;
+  margin: 0 0 0.7rem;
 }
 
 .modal-form {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
-  margin-bottom: 0.7rem;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .modal-campo {
@@ -2969,8 +2997,8 @@
   width: 100%;
   border: 1.5px solid var(--border);
   border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 0.84rem;
+  padding: 8px 12px;
+  font-size: 0.82rem;
   font-family: inherit;
   background: var(--surface);
   color: var(--ink-strong);
@@ -2978,7 +3006,7 @@
   resize: vertical;
   transition: all var(--duration-fast);
   box-sizing: border-box;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .modal-textarea::placeholder {
@@ -2994,8 +3022,8 @@
   width: 100%;
   border: 1.5px solid var(--border);
   border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 1rem;
+  padding: 8px 12px;
+  font-size: 0.85rem;
   font-family: inherit;
   background: var(--surface);
   color: var(--ink-strong);
@@ -3018,6 +3046,24 @@
   font-size: 0.76rem;
   color: var(--ink-subtle);
   padding-left: 2px;
+}
+
+.modal-usarCv {
+  margin-top: 6px;
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.modal-usarCv:hover {
+  opacity: 0.8;
 }
 
 @media (max-width: 800px) {

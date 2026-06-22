@@ -780,30 +780,43 @@ const listarMensajesRecientes = async (req, res) => {
     const perfil = await obtenerPerfilEmpresario(req, res);
     if (!perfil) return;
 
+    const includePostulacion = {
+      model: Postulacion,
+      as: 'postulacion',
+      required: true,
+      include: [
+        {
+          model: Propuesta,
+          as: 'propuesta',
+          required: true,
+          where: { id_perfil_empresario: perfil.id_perfil_empresario },
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'perfilEstudiante',
+          include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }],
+        },
+      ],
+    };
+
     const conversaciones = await Conversacion.findAll({
-      include: [{
-        model: Postulacion,
-        as: 'postulacion',
-        required: true,
-        include: [
-          {
-            model: Propuesta,
-            as: 'propuesta',
-            required: true,
-            where: { id_perfil_empresario: perfil.id_perfil_empresario },
-          },
-          {
-            model: PerfilEstudiante,
-            as: 'perfilEstudiante',
-            include: [{ model: Usuario, as: 'usuario' }],
-          },
-        ],
-      }],
+      include: [includePostulacion],
       order: [['fecha_envio', 'DESC']],
-      limit: obtenerLimite(req.query.limit),
     });
 
-    res.json({ success: true, data: conversaciones });
+    const agrupadas = Object.values(
+      conversaciones.reduce((acc, c) => {
+        const key = c.id_postulacion;
+        if (!acc[key] || new Date(c.fecha_envio) > new Date(acc[key].fecha_envio)) {
+          const estudiante = c.postulacion?.perfilEstudiante?.usuario || null;
+          if (estudiante) estudiante.rol = 'estudiante';
+          acc[key] = { ...(c.toJSON ? c.toJSON() : c), contacto: estudiante };
+        }
+        return acc;
+      }, {})
+    ).slice(0, obtenerLimite(req.query.limit));
+
+    res.json({ success: true, data: agrupadas });
   } catch (error) {
     responderError(res, error, 'Error al obtener mensajes recientes.');
   }
