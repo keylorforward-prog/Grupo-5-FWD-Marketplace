@@ -56,6 +56,7 @@ export default function DashboardLayout({ activePage, children }) {
   const navigate = useNavigate();
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
+  const [confirmandoCerrarSesion, setConfirmandoCerrarSesion] = useState(false);
   const [tema, setTema] = useState(() => {
     if (typeof document === 'undefined') return 'light';
     return document.documentElement.dataset.theme || localStorage.getItem('tema') || 'light';
@@ -100,16 +101,19 @@ export default function DashboardLayout({ activePage, children }) {
     };
   }, [menuPerfilAbierto]);
 
-  const manejarCerrarSesion = async () => {
+  const ejecutarCierre = async () => {
+    setConfirmandoCerrarSesion(false);
+    setMenuPerfilAbierto(false);
     setCerrandoSesion(true);
     try {
       await logout();
     } finally {
-      setMenuPerfilAbierto(false);
       setCerrandoSesion(false);
       navigate('/login', { replace: true });
     }
   };
+
+  const manejarCerrarSesion = () => setConfirmandoCerrarSesion(true);
 
   const navegarDesdeMenuPerfil = (ruta) => {
     setMenuPerfilAbierto(false);
@@ -314,6 +318,24 @@ export default function DashboardLayout({ activePage, children }) {
           <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/contacto')}>{t('empresaLayout.footer.contact')}</button>
         </div>
       </footer>
+
+      {confirmandoCerrarSesion && (
+        <div className="de-confirm-overlay" onClick={() => setConfirmandoCerrarSesion(false)}>
+          <div className="de-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="de-confirm-icon"><LogOut size={28} /></div>
+            <p>{t('empresaLayout.profile.confirmTitle')}</p>
+            <p className="de-confirm-sub">{t('empresaLayout.profile.confirmDesc')}</p>
+            <div className="de-confirm-actions">
+              <button className="de-btn-outline" type="button" onClick={() => setConfirmandoCerrarSesion(false)}>
+                {t('empresaLayout.profile.cancel')}
+              </button>
+              <button className="de-btn-primary danger" type="button" onClick={ejecutarCierre} disabled={cerrandoSesion}>
+                {cerrandoSesion ? t('empresaLayout.profile.loggingOut') : t('empresaLayout.profile.confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

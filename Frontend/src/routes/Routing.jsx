@@ -52,6 +52,7 @@ import DetalleEmpleo from '../Pages/egresado/DashboardEgresado/pages/DetalleEmpl
 import ProyectoDetalle from '../Pages/egresado/DashboardEgresado/pages/ProyectoDetalle/ProyectoDetalle';
 import PerfilEgresado from '../Pages/egresado/PerfilEgresado/PerfilEgresado';
 import ConfiguracionEgresado from '../Pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
+import Soporte from '../Pages/egresado/Soporte/Soporte';
 
 
 // Comunes
@@ -124,6 +125,14 @@ export default function Routing() {
           element={
             <RutaProtegida rolPermitido="estudiante">
               <ConfiguracionEgresado />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path={RUTAS.egresadoSoporte}
+          element={
+            <RutaProtegida rolPermitido="estudiante">
+              <Soporte />
             </RutaProtegida>
           }
         />
