@@ -76,6 +76,11 @@ export const adminService = {
     return response.data;
   },
 
+  getProyectos: async (params = {}) => {
+    const response = await apiClient.get('/admin/proyectos', { params });
+    return response.data;
+  },
+
   updateEstadoEmpresa: async (id_usuario, accion, motivo = null) => {
     const response = await apiClient.post(`/admin/empresas/${id_usuario}/estado`, { accion, motivo });
     return response.data;

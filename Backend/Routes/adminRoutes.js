@@ -34,6 +34,8 @@ router.post('/usuarios/:id_usuario/suspender', adminController.suspendUsuario);
 router.get('/empresas', adminController.getEmpresas);
 router.post('/empresas/:id_usuario/estado', adminController.updateEstadoEmpresa);
 
+router.get('/proyectos', adminController.getProyectos);
+
 router.get('/egresados/pendientes', adminController.getEgresadosPendientes);
 router.post('/egresados/:id_usuario/verificar', adminController.verifyEstudiante);
 

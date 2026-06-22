@@ -10,6 +10,7 @@ const {
   Notificacion,
   Postulacion,
   Oferta,
+  CatalogoTecnologia,
   sequelize 
 } = require('../Models');
 const { Op } = require('sequelize');
@@ -612,6 +613,87 @@ exports.updateEstadoEmpresa = async (req, res) => {
     await t.rollback();
     console.error('Error en updateEstadoEmpresa:', error);
     res.status(500).json({ success: false, message: 'Error actualizando empresa' });
+  }
+};
+
+exports.getProyectos = async (req, res) => {
+  try {
+    const { page, limit, offset } = obtenerPaginacion(req.query, 25);
+    const search = String(req.query.search || '').trim();
+    const where = {};
+
+    if (search) {
+      where[Op.or] = [
+        { titulo: { [Op.iLike]: `%${search}%` } }
+      ];
+    }
+
+    const propuestas = await Propuesta.findAndCountAll({
+      where,
+      include: [
+        {
+          model: PerfilEmpresario,
+          as: 'perfilEmpresario',
+          required: true,
+          include: [
+            {
+              model: Usuario,
+              as: 'usuario',
+              attributes: ['nombre', 'correo']
+            }
+          ]
+        },
+        {
+          model: Postulacion,
+          as: 'postulaciones',
+          required: false,
+          attributes: ['id_postulacion']
+        },
+        {
+          model: CatalogoTecnologia,
+          as: 'tecnologias',
+          required: false,
+          attributes: ['nombre']
+        }
+      ],
+      order: [['fecha_publicacion', 'DESC']],
+      limit,
+      offset,
+      distinct: true
+    });
+
+    const proyectos = propuestas.rows.map(p => {
+      let tecs = [];
+      if (p.tecnologias && p.tecnologias.length > 0) {
+        tecs = p.tecnologias.map(t => t.nombre);
+      } else if (p.tecnologias_requeridas) {
+        tecs = p.tecnologias_requeridas.split(',').map(t => t.trim()).filter(Boolean);
+      }
+
+      return {
+        id_proyecto: p.id_propuesta,
+        titulo: p.titulo,
+        creador: p.perfilEmpresario?.usuario?.nombre || 'Desconocido',
+        fecha_creacion: p.fecha_publicacion,
+        cantidad_egresados: p.postulaciones ? p.postulaciones.length : 0,
+        estado: p.estado,
+        tecnologias: tecs
+      };
+    });
+
+    res.json({
+      success: true,
+      data: proyectos,
+      meta: {
+        page,
+        limit,
+        total: propuestas.count,
+        hasMore: offset + proyectos.length < propuestas.count
+      }
+    });
+  } catch (error) {
+    console.error('Error obteniendo proyectos:', error);
+    res.status(500).json({ success: false, message: 'Error obteniendo proyectos' });
   }
 };
 

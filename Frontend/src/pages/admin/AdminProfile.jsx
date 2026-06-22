@@ -9,6 +9,7 @@ const AdminUsuarios = lazy(() => import('./AdminUsuarios'));
 const AdminEgresados = lazy(() => import('./AdminEgresados'));
 const AdminConfiguracion = lazy(() => import('./AdminConfiguracion'));
 const AdminEmpresas = lazy(() => import('./AdminEmpresas'));
+const AdminProyectos = lazy(() => import('./AdminProyectos'));
 const AdminReportes = lazy(() => import('./AdminReportes'));
 const AdminAuditoria = lazy(() => import('./AdminAuditoria'));
 const AdminSistema = lazy(() => import('./AdminSistema'));
@@ -20,6 +21,7 @@ import {
   LayoutDashboard,
   Users,
   Building,
+  FolderKanban,
   GraduationCap,
   Settings,
   LogOut,
@@ -88,6 +90,10 @@ export default function AdminProfile() {
     empresas: {
       title: t('admin.companies.menuTitle'),
       subtitle: t('admin.companies.subtitle')
+    },
+    proyectos: {
+      title: 'Proyectos',
+      subtitle: 'Visualiza y gestiona los proyectos publicados por las empresas.'
     },
     egresados: {
       title: t('admin.graduates.menuTitle'),
@@ -208,6 +214,7 @@ export default function AdminProfile() {
             <nav className="admin-sidebar-nav" aria-label="Secciones de administracion">
               <ElementoBarraLateral icon={LayoutDashboard} label={t('sidebar.dashboard')} isActive={activeMenu === 'dashboard'} onClick={() => setActiveMenu('dashboard')} />
               <ElementoBarraLateral icon={Building} label={t('admin.companies.menuTitle')} isActive={activeMenu === 'empresas'} onClick={() => setActiveMenu('empresas')} />
+              <ElementoBarraLateral icon={FolderKanban} label="Proyectos" isActive={activeMenu === 'proyectos'} onClick={() => setActiveMenu('proyectos')} />
               <ElementoBarraLateral icon={GraduationCap} label={t('admin.graduates.tableGraduate') + 's'} isActive={activeMenu === 'egresados'} onClick={() => setActiveMenu('egresados')} />
               <ElementoBarraLateral icon={Users} label={t('admin.users.tableUser') + 's'} isActive={activeMenu === 'usuarios'} onClick={() => setActiveMenu('usuarios')} />
               <ElementoBarraLateral icon={ShieldAlert} label="Reportes" isActive={activeMenu === 'reportes'} onClick={() => setActiveMenu('reportes')} />
@@ -336,6 +343,7 @@ export default function AdminProfile() {
             {activeMenu === 'usuarios' && <AdminUsuarios onAdminChange={cargarOverview} />}
             {activeMenu === 'egresados' && <AdminEgresados onAdminChange={cargarOverview} />}
             {activeMenu === 'empresas' && <AdminEmpresas onAdminChange={cargarOverview} />}
+            {activeMenu === 'proyectos' && <AdminProyectos onAdminChange={cargarOverview} />}
             {activeMenu === 'reportes' && <AdminReportes onAdminChange={cargarOverview} />}
             {activeMenu === 'auditoria' && <AdminAuditoria />}
             {activeMenu === 'sistema' && <AdminSistema />}
