@@ -38,6 +38,7 @@ export const normalizarPropuestaEgresado = (propuesta, indice = 0) => {
   const presupuestoMin = numero(propuesta.presupuesto_min ?? propuesta.presupuestoMin, 0);
   const presupuestoMax = numero(propuesta.presupuesto_max ?? propuesta.presupuestoMax, presupuestoMin);
   const empresa = propuesta.perfilEmpresario?.usuario;
+  const perfilEmp = propuesta.perfilEmpresario;
 
   return {
     id: propuesta.id_propuesta ?? propuesta.id,
@@ -53,6 +54,7 @@ export const normalizarPropuestaEgresado = (propuesta, indice = 0) => {
     publicado: (propuesta.fecha_publicacion ?? propuesta.publicado ?? '').toString().slice(0, 10),
     colorAcento: coloresAcento[indice % coloresAcento.length],
     empresa: empresa?.nombre || null,
+    empresaLogo: perfilEmp?.logo || null,
     ...estadoVisual(propuesta.estado),
   };
 };
@@ -86,8 +88,29 @@ export const egresadoService = {
     return extraerData(respuesta).map(normalizarOfertaEmpleo);
   },
 
+  async obtenerOfertaEmpleo(id) {
+    const respuesta = await apiClient.get(`/dashboard-egresado/ofertas-empleo/${id}`);
+    const raw = extraerData(respuesta);
+    return {
+      ...normalizarOfertaEmpleo(raw),
+      postulacion: raw.postulacion || null,
+      ya_postulado: !!raw.postulacion,
+      perfilEmpresario: raw.perfilEmpresario || null,
+    };
+  },
+
   async postularOfertaEmpleo(datos) {
     const respuesta = await apiClient.post('/dashboard-egresado/ofertas-empleo/postular', datos);
+    return respuesta.data;
+  },
+
+  async actualizarPostulacionEmpleo(id, datos) {
+    const respuesta = await apiClient.put(`/dashboard-egresado/ofertas-empleo/postulacion/${id}`, datos);
+    return respuesta.data;
+  },
+
+  async eliminarPostulacionEmpleo(id) {
+    const respuesta = await apiClient.delete(`/dashboard-egresado/ofertas-empleo/postulacion/${id}`);
     return respuesta.data;
   },
 

@@ -56,6 +56,10 @@ export default function Inicio() {
               <Compass size={16} />
               {t('egresadoDashboardInicio.hero.btnExplore')}
             </button>
+            <button className="de-btn-outline" type="button" onClick={() => navigate('/egresado/dashboard/explorar-empleos')}>
+              <Briefcase size={16} />
+              {t('egresadoDashboardInicio.hero.btnExploreEmpleos')}
+            </button>
           </div>
         </div>
         <div className="de-hero-illustration">

@@ -1,17 +1,22 @@
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { CheckCircle2, ChevronLeft, ChevronRight, Eye, Search, X } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
+import { catalogoTecnologias } from '../../../../../data/proyectosEgresado';
 import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
-import PerfilEgresadoModal from '../../components/PerfilEgresadoModal';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
 import { formatearTalento } from '../../utils/dashboardEmpresarioFormatters';
 import { useDebounce } from '../../../../../hooks/useDebounce';
+
+const PerfilEgresadoModal = lazy(() => import('../../components/PerfilEgresadoModal'));
 
 export default function Talento() {
   const [perfilSeleccionado, setPerfilSeleccionado] = useState(null);
   const [paginaActual, setPaginaActual] = useState(1);
   const [busqueda, setBusqueda] = useState('');
+  const [tecnologia, setTecnologia] = useState('');
+  const [sede, setSede] = useState('');
+  const [orden, setOrden] = useState('match');
   const itemsPorPagina = 10;
   const busquedaDebounced = useDebounce(busqueda, 350);
   const busquedaLimpia = busquedaDebounced.trim();
@@ -32,6 +37,24 @@ export default function Talento() {
   ), [data, items.length, paginaActual]);
   const totalPaginas = Math.max(1, Number(meta.totalPages || 1));
   const talento = useMemo(() => items.map(formatearTalento), [items]);
+  const sedesDisponibles = useMemo(() => (
+    Array.from(new Set(talento.map((talent) => talent.location).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'es-CR'))
+  ), [talento]);
+  const talentoFiltrado = useMemo(() => {
+    const tecnologiaNormalizada = tecnologia.toLowerCase();
+    const filtrado = talento.filter((talent) => {
+      const coincideTecnologia = !tecnologiaNormalizada || talent.skills.toLowerCase().includes(tecnologiaNormalizada);
+      const coincideSede = !sede || talent.location === sede;
+      return coincideTecnologia && coincideSede;
+    });
+
+    return [...filtrado].sort((a, b) => {
+      if (orden === 'nombre') return a.name.localeCompare(b.name, 'es-CR');
+      if (orden === 'proyectos') return b.projects - a.projects;
+      if (orden === 'rating') return Number(b.rating) - Number(a.rating);
+      return b.match - a.match;
+    });
+  }, [orden, sede, talento, tecnologia]);
   const paginaInicial = meta.total > 0 ? (paginaActual - 1) * itemsPorPagina + 1 : 0;
   const paginaFinal = Math.min(paginaActual * itemsPorPagina, meta.total || talento.length);
   const paginasVisibles = useMemo(() => {
@@ -39,6 +62,14 @@ export default function Talento() {
     const fin = Math.min(totalPaginas, inicio + 4);
     return Array.from({ length: fin - inicio + 1 }, (_, index) => inicio + index);
   }, [paginaActual, totalPaginas]);
+  const hayFiltros = Boolean(busqueda || tecnologia || sede || orden !== 'match');
+  const limpiarFiltros = () => {
+    setBusqueda('');
+    setTecnologia('');
+    setSede('');
+    setOrden('match');
+    setPaginaActual(1);
+  };
 
   return (
     <DashboardLayout activePage="talento">
@@ -73,9 +104,43 @@ export default function Talento() {
               </button>
             )}
           </label>
+
+          <label className="de-talent-filter">
+            <span>Tecnología</span>
+            <select value={tecnologia} onChange={(event) => setTecnologia(event.target.value)}>
+              <option value="">Todas</option>
+              {catalogoTecnologias.map((tech) => (
+                <option key={tech} value={tech}>{tech}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="de-talent-filter">
+            <span>Sede</span>
+            <select value={sede} onChange={(event) => setSede(event.target.value)}>
+              <option value="">Todas</option>
+              {sedesDisponibles.map((location) => (
+                <option key={location} value={location}>{location}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="de-talent-filter">
+            <span>Ordenar</span>
+            <select value={orden} onChange={(event) => setOrden(event.target.value)}>
+              <option value="match">Mejor coincidencia</option>
+              <option value="rating">Calificación</option>
+              <option value="proyectos">Más proyectos</option>
+              <option value="nombre">Nombre A-Z</option>
+            </select>
+          </label>
+
+          <button className="de-panel-action" type="button" onClick={limpiarFiltros} disabled={!hayFiltros}>
+            Limpiar
+          </button>
         </div>
-        <EstadoDatos loading={loading} error={error} empty={!talento.length} emptyText="No hay talento recomendado disponible." />
-        {!loading && !error && talento.map((talent) => (
+        <EstadoDatos loading={loading} error={error} empty={!talentoFiltrado.length} emptyText="No hay talento recomendado disponible." />
+        {!loading && !error && talentoFiltrado.map((talent) => (
           <div key={talent.id} className="de-talent-item">
             <img src={talent.avatar} alt={talent.name} className="de-talent-avatar" />
             <div className="de-talent-info">
@@ -96,10 +161,10 @@ export default function Talento() {
             </div>
           </div>
         ))}
-        {!loading && !error && talento.length > 0 && (
+        {!loading && !error && talentoFiltrado.length > 0 && (
           <div className="de-talent-pagination">
             <span>
-              Mostrando {paginaInicial}-{paginaFinal} de {meta.total || talento.length}
+              Mostrando {paginaInicial}-{paginaFinal} de {meta.total || talentoFiltrado.length}
             </span>
             <div className="de-talent-pagination-controls">
               <button
@@ -133,7 +198,11 @@ export default function Talento() {
           </div>
         )}
       </div>
-      <PerfilEgresadoModal perfil={perfilSeleccionado} onClose={() => setPerfilSeleccionado(null)} />
+      {perfilSeleccionado && (
+        <Suspense fallback={null}>
+          <PerfilEgresadoModal perfil={perfilSeleccionado} onClose={() => setPerfilSeleccionado(null)} />
+        </Suspense>
+      )}
     </DashboardLayout>
   );
 }

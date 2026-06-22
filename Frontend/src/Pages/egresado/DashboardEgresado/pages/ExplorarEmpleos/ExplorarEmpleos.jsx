@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Briefcase, X, SlidersHorizontal } from 'lucide-react';
+import { Briefcase, Search, SlidersHorizontal, X } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
 import TarjetaEmpleo from '../../components/TarjetaEmpleo';
 
@@ -12,97 +12,25 @@ const MODALIDADES = [
   { valor: 'presencial', key: 'egresadoExplorar.components.presencial' },
 ];
 
+const FILTROS_INICIALES = {
+  busqueda: '',
+  busquedaReal: '',
+  modalidad: '',
+  salarioMin: '',
+  salarioMax: '',
+};
+
+const OPCIONES_ORDEN = [
+  { valor: 'recientes', key: 'egresadoExplorarEmpleos.ordenRecientes' },
+  { valor: 'salarioDesc', key: 'egresadoExplorarEmpleos.ordenSalarioDesc' },
+  { valor: 'salarioAsc', key: 'egresadoExplorarEmpleos.ordenSalarioAsc' },
+];
+
 function generarRangoPaginas(actual, total) {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
   if (actual <= 4) return [1, 2, 3, 4, 5, '...', total];
   if (actual >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
   return [1, '...', actual - 1, actual, actual + 1, '...', total];
-}
-
-function ModalPostular({ oferta, onCerrar, onExito }) {
-  const [carta, setCarta]       = useState('');
-  const [cvUrl, setCvUrl]       = useState('');
-  const [enviando, setEnviando] = useState(false);
-  const [error, setError]       = useState('');
-
-  const enviar = async () => {
-    setEnviando(true);
-    setError('');
-    try {
-      await egresadoService.postularOfertaEmpleo({
-        id_oferta_empleo:   oferta.id,
-        carta_presentacion: carta.trim() || null,
-        cv_url:             cvUrl.trim() || null,
-      });
-      onExito(oferta.id);
-    } catch (err) {
-      setError(err.response?.data?.message || 'No se pudo enviar la postulación. Intentá de nuevo.');
-    } finally {
-      setEnviando(false);
-    }
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-      onClick={(e) => { if (e.target === e.currentTarget) onCerrar(); }}
-    >
-      <div className="bg-surface rounded-2xl shadow-soft w-full max-w-lg mx-4 p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-heading font-bold text-lg text-ink">Postular a {oferta.titulo}</h2>
-          <button type="button" onClick={onCerrar} className="text-ink-muted hover:text-ink">
-            <X size={20} />
-          </button>
-        </div>
-
-        <label className="block space-y-1">
-          <span className="text-sm font-medium text-ink">Carta de presentación</span>
-          <textarea
-            className="w-full bg-surface-sunken rounded-xl px-4 py-3 text-sm text-ink outline-none focus:ring-2 focus:ring-primary/30 resize-none"
-            rows={5}
-            placeholder="Contale al empresario por qué sos el candidato ideal para este puesto..."
-            value={carta}
-            onChange={(e) => setCarta(e.target.value)}
-          />
-        </label>
-
-        <label className="block space-y-1">
-          <span className="text-sm font-medium text-ink">
-            Enlace a tu CV <span className="text-ink-subtle">(opcional)</span>
-          </span>
-          <input
-            type="url"
-            className="w-full bg-surface-sunken rounded-xl px-4 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-primary/30"
-            placeholder="https://drive.google.com/..."
-            value={cvUrl}
-            onChange={(e) => setCvUrl(e.target.value)}
-          />
-        </label>
-
-        {error && (
-          <p className="text-sm text-destructive bg-destructive/10 rounded-xl px-4 py-2.5">{error}</p>
-        )}
-
-        <div className="flex gap-3 pt-1">
-          <button
-            type="button"
-            onClick={onCerrar}
-            className="flex-1 rounded-full py-2.5 text-sm font-medium border border-border text-ink-muted hover:text-ink transition"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={enviar}
-            disabled={enviando}
-            className="flex-1 rounded-full py-2.5 text-sm font-medium bg-primary text-primary-foreground disabled:opacity-50 hover:opacity-90 transition"
-          >
-            {enviando ? 'Enviando...' : 'Enviar postulación'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 
@@ -112,13 +40,13 @@ export default function ExplorarEmpleos() {
   const [busqueda, setBusqueda] = useState('');
   const [busquedaReal, setBusquedaReal] = useState('');
   const [modalidad, setModalidad] = useState('');
+  const [salarioMin, setSalarioMin] = useState('');
+  const [salarioMax, setSalarioMax] = useState('');
+  const [tecnologia, setTecnologia] = useState('');
+  const [orden, setOrden] = useState('recientes');
   const [paginaActual, setPaginaActual] = useState(1);
   const [empleos, setEmpleos] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [salarioMin, setSalarioMin] = useState('');
-  const [salarioMax, setSalarioMax] = useState('');
-  const [ofertaPostulando, setOfertaPostulando] = useState(null);
-  const [exitoId, setExitoId] = useState(null);
   const debounceRef = useRef(null);
 
   const cambiarModalidad = useCallback((m) => {
@@ -141,21 +69,22 @@ export default function ExplorarEmpleos() {
     debounceRef.current = setTimeout(() => { setBusquedaReal(valor); setPaginaActual(1); }, 300);
   }, []);
 
-  const manejarExito = useCallback((idOferta) => {
-    setEmpleos((prev) => prev.map((e) => e.id === idOferta ? { ...e, ya_postulado: true } : e));
-    setExitoId(idOferta);
-    setOfertaPostulando(null);
-    setTimeout(() => setExitoId(null), 4000);
-  }, []);
-
   const limpiarFiltros = useCallback(() => {
     setBusqueda('');
     setBusquedaReal('');
     setModalidad('');
+    setTecnologia('');
     setSalarioMin('');
     setSalarioMax('');
+    setOrden('recientes');
     setPaginaActual(1);
   }, []);
+
+  const listaTecnologias = useMemo(() => {
+    const set = new Set();
+    empleos.forEach((e) => (e.tecnologias || []).forEach((t) => set.add(t)));
+    return [...set].sort();
+  }, [empleos]);
 
   const filtradas = useMemo(() => {
     let resultado = empleos;
@@ -172,14 +101,24 @@ export default function ExplorarEmpleos() {
     if (modalidad) {
       resultado = resultado.filter((e) => e.modalidad === modalidad);
     }
+    if (tecnologia) {
+      resultado = resultado.filter((e) => (e.tecnologias || []).includes(tecnologia));
+    }
     if (salarioMin) {
       resultado = resultado.filter((e) => e.salario_max == null || e.salario_max >= Number(salarioMin));
     }
     if (salarioMax) {
       resultado = resultado.filter((e) => e.salario_min == null || e.salario_min <= Number(salarioMax));
     }
+    if (orden === 'salarioDesc') {
+      resultado = [...resultado].sort((a, b) => (b.presupuestoMin || 0) - (a.presupuestoMin || 0));
+    } else if (orden === 'salarioAsc') {
+      resultado = [...resultado].sort((a, b) => (a.presupuestoMin || 0) - (b.presupuestoMin || 0));
+    } else {
+      resultado = [...resultado].sort((a, b) => new Date(b.publicado) - new Date(a.publicado));
+    }
     return resultado;
-  }, [empleos, busquedaReal, modalidad, salarioMin, salarioMax]);
+  }, [empleos, busquedaReal, modalidad, tecnologia, salarioMin, salarioMax, orden]);
 
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / ITEMS_POR_PAGINA));
   const pagina       = Math.min(paginaActual, totalPaginas);
@@ -188,7 +127,7 @@ export default function ExplorarEmpleos() {
     [filtradas, pagina]
   );
   const rangoPaginas = generarRangoPaginas(pagina, totalPaginas);
-  const hayFiltros = busquedaReal.trim() || modalidad;
+  const hayFiltros = busquedaReal.trim() || modalidad || tecnologia || salarioMin || salarioMax;
 
   return (
     <div className="contenidoPrincipal">
@@ -240,12 +179,12 @@ export default function ExplorarEmpleos() {
       <div className="filtrosModalidad fwd-animar-entrada" style={{ animationDelay: '0.15s' }}>
         {MODALIDADES.map((m) => (
           <button
-            key={m.key}
+            key={m.valor}
             type="button"
-            className={`chipModalidad${modalidad === m.key ? ' activo' : ''}`}
-            onClick={() => cambiarModalidad(m.key)}
+            className={`chipModalidad${modalidad === m.valor ? ' activo' : ''}`}
+            onClick={() => cambiarModalidad(m.valor)}
           >
-            {m.label}
+            {t(m.key)}
           </button>
         ))}
       </div>
@@ -277,6 +216,21 @@ export default function ExplorarEmpleos() {
                 </label>
               ))}
             </div>
+          </div>
+
+          <div className="grupoFiltro">
+            <label className="etiquetaFiltro" htmlFor="filtroTecnologia">{t('egresadoExplorarEmpleos.filters.tecnologias')}</label>
+            <select
+              id="filtroTecnologia"
+              className="seleccionadorFiltro"
+              value={tecnologia}
+              onChange={(e) => { setTecnologia(e.target.value); setPaginaActual(1); }}
+            >
+              <option value="">{t('egresadoExplorarEmpleos.filters.todasTecnologias')}</option>
+              {listaTecnologias.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
           </div>
 
           <div className="grupoFiltro">
@@ -330,8 +284,23 @@ export default function ExplorarEmpleos() {
             <div className="contenedorResultados">
               <div className="encabezadoResultados">
                 <span className="conteoProyectos">
-                  {filtradas.length} {t('egresadoExplorarEmpleos.resultados')}
+                  {t('egresadoExplorarEmpleos.resultados', { count: filtradas.length })}
                 </span>
+                <div className="ordenarResultados">
+                  <label htmlFor="ordenSelect" className="etiquetaOrdenar">
+                    {t('egresadoExplorar.grid.ordenarPor')}:
+                  </label>
+                  <select
+                    id="ordenSelect"
+                    className="seleccionadorOrdenar"
+                    value={orden}
+                    onChange={(e) => { setOrden(e.target.value); setPaginaActual(1); }}
+                  >
+                    {OPCIONES_ORDEN.map((o) => (
+                      <option key={o.valor} value={o.valor}>{t(o.key)}</option>
+                    ))}
+                  </select>
+                </div>
                 {hayFiltros && (
                   <button type="button" className="btnLimpiarFiltros" onClick={limpiarFiltros}>
                     <X size={14} />
@@ -345,7 +314,6 @@ export default function ExplorarEmpleos() {
                   <TarjetaEmpleo
                     key={e.id}
                     empleo={e}
-                    onPostular={() => setOfertaPostulando(e)}
                     yaPostulado={e.ya_postulado}
                   />
                 ))}
@@ -392,19 +360,6 @@ export default function ExplorarEmpleos() {
         </div>
       </div>
 
-      {ofertaPostulando && (
-        <ModalPostular
-          oferta={ofertaPostulando}
-          onCerrar={() => setOfertaPostulando(null)}
-          onExito={manejarExito}
-        />
-      )}
-
-      {exitoId && (
-        <div className="fixed bottom-6 right-6 z-50 bg-surface border border-border rounded-2xl shadow-soft px-5 py-3 text-sm text-ink">
-          Postulación enviada con éxito.
-        </div>
-      )}
     </div>
   );
 }

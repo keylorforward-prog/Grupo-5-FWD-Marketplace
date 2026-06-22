@@ -10,7 +10,15 @@ const {
   Notificacion,
   Postulacion,
   Oferta,
+<<<<<<< HEAD
   CatalogoTecnologia,
+=======
+  Conversacion,
+  Mensaje,
+  CatalogoTecnologia,
+  Entregable,
+  Evaluacion,
+>>>>>>> ab5d112dc3a81c30ca408b6007a0f09997c267f4
   sequelize 
 } = require('../Models');
 const { Op } = require('sequelize');
@@ -126,6 +134,24 @@ const obtenerPaginacion = (query, defecto = 25) => {
     offset: (page - 1) * limit
   };
 };
+
+const fechaEvento = (valor) => {
+  const fecha = new Date(valor);
+  return Number.isNaN(fecha.getTime()) ? new Date(0) : fecha;
+};
+
+const ordenarEventosDesc = (eventos) => eventos.sort((a, b) => fechaEvento(b.fecha) - fechaEvento(a.fecha));
+
+const crearEventoProyecto = ({ tipo, titulo, actor, fecha, detalle, metadata = {}, severidad = 'info' }) => ({
+  id: `${tipo}-${metadata.id || fechaEvento(fecha).getTime()}`,
+  tipo,
+  titulo,
+  actor: actor || 'Sistema',
+  fecha,
+  detalle,
+  metadata,
+  severidad
+});
 
 const esEvidenciaFwdS3Valida = (valor) => {
   if (typeof valor !== 'string') return false;
@@ -903,16 +929,30 @@ exports.updateUsuario = async (req, res) => {
 
 exports.getEgresadosPendientes = async (req, res) => {
   try {
-    const pendientes = await PerfilEstudiante.findAll({
+    const { page, limit, offset } = obtenerPaginacion(req.query, 100);
+    const pendientes = await PerfilEstudiante.findAndCountAll({
       where: { estado_verificacion: 'PENDIENTE' },
       include: [{
         model: Usuario,
         as: 'usuario',
         attributes: ['id_usuario', 'nombre', 'cedula', 'correo', 'telefono_whatsapp', 'estado_cuenta', 'fecha_registro']
       }],
-      order: [[{ model: Usuario, as: 'usuario' }, 'fecha_registro', 'ASC']]
+      order: [[{ model: Usuario, as: 'usuario' }, 'fecha_registro', 'ASC']],
+      limit,
+      offset,
+      distinct: true
     });
-    res.json({ success: true, data: pendientes });
+
+    res.json({
+      success: true,
+      data: pendientes.rows,
+      meta: {
+        page,
+        limit,
+        total: pendientes.count,
+        hasMore: offset + pendientes.rows.length < pendientes.count
+      }
+    });
   } catch (error) {
     console.error('Error en getEgresadosPendientes:', error);
     res.status(500).json({ success: false, message: 'Error obteniendo pendientes' });
@@ -1298,4 +1338,452 @@ exports.healthSistema = async (req, res) => {
       }
     }
   });
+};
+
+// ========================
+// SUPERVISIÓN DE PROYECTOS
+// ========================
+
+exports.getProyectos = async (req, res) => {
+  try {
+    const { page, limit, offset } = obtenerPaginacion(req.query, 25);
+    const search = String(req.query.search || '').trim();
+    const estado = String(req.query.estado || '').trim();
+
+    const where = {};
+    if (estado && estado !== 'TODOS') {
+      where.estado = estado;
+    }
+
+    if (search) {
+      where[Op.or] = [
+        { titulo: { [Op.iLike]: `%${search}%` } }
+      ];
+    }
+
+    const proyectos = await Propuesta.findAndCountAll({
+      where,
+      include: [
+        {
+          model: PerfilEmpresario,
+          as: 'perfilEmpresario',
+          include: [{
+            model: Usuario,
+            as: 'usuario',
+            attributes: ['id_usuario', 'nombre', 'correo']
+          }]
+        },
+        {
+          model: Oferta,
+          as: 'ofertas',
+          attributes: ['id_oferta']
+        }
+      ],
+      order: [['fecha_publicacion', 'DESC']],
+      limit,
+      offset,
+      distinct: true
+    });
+
+    const data = proyectos.rows.map(p => {
+      const pJson = p.toJSON();
+      pJson.cantidad_ofertas = pJson.ofertas ? pJson.ofertas.length : 0;
+      delete pJson.ofertas;
+      return pJson;
+    });
+
+    res.json({
+      success: true,
+      data,
+      meta: {
+        page,
+        limit,
+        total: proyectos.count,
+        hasMore: offset + proyectos.rows.length < proyectos.count
+      }
+    });
+
+  } catch (error) {
+    console.error('Error en getProyectos:', error);
+    res.status(500).json({ success: false, message: 'Error obteniendo los proyectos' });
+  }
+};
+
+exports.getProyectoDetalle = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const proyecto = await Propuesta.findByPk(id, {
+      include: [
+        {
+          model: PerfilEmpresario,
+          as: 'perfilEmpresario',
+          include: [{
+            model: Usuario,
+            as: 'usuario',
+            attributes: ['id_usuario', 'nombre', 'correo', 'telefono_whatsapp']
+          }]
+        },
+        {
+          model: CatalogoTecnologia,
+          as: 'tecnologias'
+        },
+        {
+          model: ProyectoPlataforma,
+          as: 'proyecto',
+          include: [
+            {
+              model: Entregable,
+              as: 'entregables',
+              include: [{
+                model: Evaluacion,
+                as: 'evaluaciones'
+              }]
+            },
+            {
+              model: Reporte,
+              as: 'reportes',
+              include: [{
+                model: Usuario,
+                as: 'usuario',
+                attributes: ['id_usuario', 'nombre', 'correo', 'rol']
+              }]
+            }
+          ]
+        },
+        {
+          model: Oferta,
+          as: 'ofertas',
+          include: [{
+            model: PerfilEstudiante,
+            as: 'perfilEstudiante',
+            include: [{
+              model: Usuario,
+              as: 'usuario',
+              attributes: ['id_usuario', 'nombre', 'correo', 'telefono_whatsapp']
+            }]
+          }]
+        },
+        {
+          model: Postulacion,
+          as: 'postulaciones',
+          include: [
+            {
+              model: PerfilEstudiante,
+              as: 'perfilEstudiante',
+              include: [{
+                model: Usuario,
+                as: 'usuario',
+                attributes: ['id_usuario', 'nombre', 'correo']
+              }]
+            },
+            {
+              model: Conversacion,
+              as: 'conversaciones',
+              include: [
+                {
+                  model: Usuario,
+                  as: 'emisor',
+                  attributes: ['id_usuario', 'nombre', 'correo', 'rol']
+                },
+                {
+                  model: Mensaje,
+                  as: 'mensajes',
+                  include: [{
+                    model: Usuario,
+                    as: 'emisor',
+                    attributes: ['id_usuario', 'nombre', 'correo', 'rol']
+                  }]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!proyecto) {
+      return res.status(404).json({ success: false, message: 'Proyecto no encontrado' });
+    }
+
+    const auditoriasRecientes = await Auditoria.findAll({
+      include: [{ model: Usuario, as: 'actor', attributes: ['id_usuario', 'nombre', 'correo', 'rol'], required: false }],
+      where: {
+        entidad: { [Op.in]: ['Propuesta', 'Proyecto', 'ProyectoPlataforma', 'Postulacion', 'Oferta', 'Mensaje', 'Entregable'] }
+      },
+      order: [['fecha', 'DESC']],
+      limit: 300
+    });
+
+    const proyectoJson = proyecto.toJSON();
+    const empresaUsuario = proyectoJson.perfilEmpresario?.usuario || null;
+    const postulaciones = proyectoJson.postulaciones || [];
+    const ofertas = proyectoJson.ofertas || [];
+    const entregables = proyectoJson.proyecto?.entregables || [];
+    const reportes = proyectoJson.proyecto?.reportes || [];
+    const participantesMap = new Map();
+
+    if (empresaUsuario) {
+      participantesMap.set(`usuario-${empresaUsuario.id_usuario}`, {
+        id_usuario: empresaUsuario.id_usuario,
+        nombre: empresaUsuario.nombre,
+        correo: empresaUsuario.correo,
+        rol: 'EMPRESARIO',
+        tipo: 'Empresa',
+        proyectosRelacionados: 1,
+        postulaciones: 0,
+        ofertas: 0,
+        mensajes: 0,
+        archivos: 0,
+        accionesRecientes: []
+      });
+    }
+
+    const registrarParticipante = (usuario, extras = {}) => {
+      if (!usuario?.id_usuario) return null;
+      const key = `usuario-${usuario.id_usuario}`;
+      const existente = participantesMap.get(key) || {
+        id_usuario: usuario.id_usuario,
+        nombre: usuario.nombre,
+        correo: usuario.correo,
+        rol: usuario.rol || 'ESTUDIANTE',
+        tipo: usuario.rol === 'EMPRESARIO' ? 'Empresa' : 'Egresado',
+        proyectosRelacionados: 1,
+        postulaciones: 0,
+        ofertas: 0,
+        mensajes: 0,
+        archivos: 0,
+        accionesRecientes: []
+      };
+
+      participantesMap.set(key, { ...existente, ...extras });
+      return participantesMap.get(key);
+    };
+
+    postulaciones.forEach((postulacion) => {
+      const usuario = postulacion.perfilEstudiante?.usuario;
+      const participante = registrarParticipante(usuario);
+      if (participante) {
+        participante.postulaciones += 1;
+        participante.accionesRecientes.push({
+          tipo: 'POSTULACION',
+          fecha: postulacion.fecha_postulacion,
+          detalle: `Postulacion ${postulacion.estado}`
+        });
+      }
+    });
+
+    ofertas.forEach((oferta) => {
+      const usuario = oferta.perfilEstudiante?.usuario;
+      const participante = registrarParticipante(usuario);
+      if (participante) {
+        participante.ofertas += 1;
+        participante.accionesRecientes.push({
+          tipo: 'OFERTA',
+          fecha: oferta.fecha_oferta,
+          detalle: `Oferta por $${oferta.cantidad}`
+        });
+      }
+    });
+
+    const mensajesAdmin = postulaciones
+      .flatMap((postulacion) => (postulacion.conversaciones || []).flatMap((conversacion) => {
+        const mensajes = (conversacion.mensajes || []).map((mensaje) => ({
+          id_mensaje: mensaje.id_mensaje,
+          id_conversacion: mensaje.id_conversacion,
+          id_postulacion: postulacion.id_postulacion,
+          usuario: mensaje.emisor || null,
+          contenido: mensaje.contenido,
+          archivo_url: mensaje.archivo_url || null,
+          fecha_envio: mensaje.fecha_envio,
+          editado: Boolean(mensaje.fecha_edicion),
+          eliminado: Boolean(mensaje.fecha_eliminacion),
+          fecha_edicion: mensaje.fecha_edicion || null,
+          fecha_eliminacion: mensaje.fecha_eliminacion || null,
+          estado: mensaje.fecha_eliminacion ? 'ELIMINADO' : mensaje.fecha_edicion ? 'EDITADO' : 'ENVIADO'
+        }));
+
+        const mensajeInicial = conversacion.mensaje ? [{
+          id_mensaje: `conversacion-${conversacion.id_conversacion}`,
+          id_conversacion: conversacion.id_conversacion,
+          id_postulacion: postulacion.id_postulacion,
+          usuario: conversacion.emisor || null,
+          contenido: conversacion.mensaje,
+          archivo_url: null,
+          fecha_envio: conversacion.fecha_envio,
+          editado: false,
+          eliminado: false,
+          fecha_edicion: null,
+          fecha_eliminacion: null,
+          estado: conversacion.leido ? 'LEIDO' : 'NO_LEIDO'
+        }] : [];
+
+        return [...mensajeInicial, ...mensajes];
+      }))
+      .sort((a, b) => fechaEvento(a.fecha_envio) - fechaEvento(b.fecha_envio));
+
+    mensajesAdmin.forEach((mensaje) => {
+      const participante = registrarParticipante(mensaje.usuario);
+      if (participante) {
+        participante.mensajes += 1;
+        if (mensaje.archivo_url) participante.archivos += 1;
+        participante.accionesRecientes.push({
+          tipo: mensaje.archivo_url ? 'MENSAJE_ARCHIVO' : 'MENSAJE',
+          fecha: mensaje.fecha_envio,
+          detalle: mensaje.archivo_url ? 'Envio mensaje con archivo adjunto' : 'Envio mensaje'
+        });
+      }
+    });
+
+    const actividadAdmin = [
+      crearEventoProyecto({
+        tipo: 'PROYECTO_CREADO',
+        titulo: 'Proyecto publicado',
+        actor: empresaUsuario?.nombre || 'Empresa',
+        fecha: proyectoJson.fecha_publicacion,
+        detalle: proyectoJson.titulo,
+        metadata: { id: proyectoJson.id_propuesta, estado: proyectoJson.estado }
+      }),
+      ...postulaciones.map((postulacion) => crearEventoProyecto({
+        tipo: 'POSTULACION',
+        titulo: 'Postulacion recibida',
+        actor: postulacion.perfilEstudiante?.usuario?.nombre || 'Egresado',
+        fecha: postulacion.fecha_postulacion,
+        detalle: `Estado: ${postulacion.estado}`,
+        metadata: { id: postulacion.id_postulacion, cv_url: postulacion.cv_url },
+        severidad: postulacion.estado === 'RECHAZADA' ? 'warning' : 'info'
+      })),
+      ...ofertas.map((oferta) => crearEventoProyecto({
+        tipo: 'OFERTA',
+        titulo: 'Oferta registrada',
+        actor: oferta.perfilEstudiante?.usuario?.nombre || 'Egresado',
+        fecha: oferta.fecha_oferta,
+        detalle: `$${oferta.cantidad} - ${oferta.estado || 'SIN_ESTADO'}`,
+        metadata: { id: oferta.id_oferta, estado: oferta.estado }
+      })),
+      ...mensajesAdmin.map((mensaje) => crearEventoProyecto({
+        tipo: mensaje.archivo_url ? 'MENSAJE_ARCHIVO' : 'MENSAJE',
+        titulo: mensaje.archivo_url ? 'Mensaje con archivo' : 'Mensaje enviado',
+        actor: mensaje.usuario?.nombre || 'Usuario',
+        fecha: mensaje.fecha_envio,
+        detalle: mensaje.eliminado ? 'Mensaje eliminado' : mensaje.contenido,
+        metadata: { id: mensaje.id_mensaje, archivo_url: mensaje.archivo_url, estado: mensaje.estado },
+        severidad: mensaje.eliminado ? 'danger' : mensaje.editado ? 'warning' : 'info'
+      })),
+      ...entregables.map((entregable) => crearEventoProyecto({
+        tipo: 'ENTREGABLE',
+        titulo: 'Archivo entregable cargado',
+        actor: 'Egresado',
+        fecha: entregable.fecha_creacion,
+        detalle: `${entregable.titulo} - ${entregable.estado}`,
+        metadata: { id: entregable.id_entregable, archivo_url: entregable.archivo_url, tipo: entregable.tipo }
+      })),
+      ...entregables.flatMap((entregable) => (entregable.evaluaciones || []).map((evaluacion) => crearEventoProyecto({
+        tipo: 'EVALUACION',
+        titulo: 'Evaluacion registrada',
+        actor: empresaUsuario?.nombre || 'Empresa',
+        fecha: evaluacion.fecha_evaluacion,
+        detalle: `${evaluacion.puntuacion}/5 ${evaluacion.comentario || ''}`.trim(),
+        metadata: { id: evaluacion.id_evaluacion, id_entregable: entregable.id_entregable }
+      }))),
+      ...reportes.map((reporte) => crearEventoProyecto({
+        tipo: 'REPORTE',
+        titulo: 'Reporte abierto',
+        actor: reporte.usuario?.nombre || 'Usuario',
+        fecha: reporte.fecha_reporte,
+        detalle: `${reporte.motivo} - ${reporte.estado}`,
+        metadata: { id: reporte.id_reporte, tipo: reporte.tipo },
+        severidad: reporte.estado === 'PENDIENTE' ? 'warning' : 'info'
+      })),
+      ...auditoriasRecientes
+        .filter((auditoria) => {
+          const metadataTexto = JSON.stringify(auditoria.metadata || {});
+          return metadataTexto.includes(`"id_propuesta":${Number(id)}`)
+            || metadataTexto.includes(`"id_propuesta":"${id}"`)
+            || metadataTexto.includes(`"id_proyecto":${Number(id)}`)
+            || metadataTexto.includes(`"id_proyecto":"${id}"`);
+        })
+        .map((auditoria) => crearEventoProyecto({
+          tipo: 'AUDITORIA',
+          titulo: auditoria.accion,
+          actor: auditoria.actor?.nombre || 'Administrador',
+          fecha: auditoria.fecha,
+          detalle: auditoria.entidad,
+          metadata: { id: auditoria.id_auditoria, ...auditoria.metadata },
+          severidad: 'warning'
+        }))
+    ];
+
+    const seguimientoUsuarios = Array.from(participantesMap.values()).map((participante) => ({
+      ...participante,
+      accionesRecientes: ordenarEventosDesc(participante.accionesRecientes).slice(0, 8)
+    }));
+
+    proyectoJson.mensajesAdmin = mensajesAdmin;
+    proyectoJson.actividadAdmin = ordenarEventosDesc(actividadAdmin);
+    proyectoJson.seguimientoUsuarios = seguimientoUsuarios;
+    proyectoJson.indicadoresAdmin = {
+      totalParticipantes: seguimientoUsuarios.length,
+      totalMensajes: mensajesAdmin.length,
+      mensajesConArchivos: mensajesAdmin.filter((mensaje) => mensaje.archivo_url).length,
+      mensajesUltimas24h: mensajesAdmin.filter((mensaje) => Date.now() - fechaEvento(mensaje.fecha_envio).getTime() <= 86400000).length,
+      eventosUltimas24h: actividadAdmin.filter((evento) => Date.now() - fechaEvento(evento.fecha).getTime() <= 86400000).length,
+      reportesPendientes: reportes.filter((reporte) => reporte.estado === 'PENDIENTE').length
+    };
+
+    res.json({
+      success: true,
+      data: proyectoJson
+    });
+
+  } catch (error) {
+    console.error('Error en getProyectoDetalle:', error);
+    res.status(500).json({ success: false, message: 'Error obteniendo el detalle del proyecto' });
+  }
+};
+
+exports.updateEstadoProyecto = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { id } = req.params;
+    const { estado, nota } = req.body;
+    const adminId = req.user.id_usuario;
+    const estadosPermitidos = new Set(['ACTIVA', 'PAUSADA', 'CANCELADA', 'CERRADA']);
+
+    if (!estado || !estadosPermitidos.has(estado)) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'Estado de proyecto no permitido' });
+    }
+
+    const proyecto = await Propuesta.findByPk(id, { transaction: t });
+    if (!proyecto) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Proyecto no encontrado' });
+    }
+
+    const estadoAnterior = proyecto.estado;
+    await proyecto.update({ estado }, { transaction: t });
+
+    await Auditoria.create({
+      actor_id: adminId,
+      accion: 'PROYECTO_ESTADO_MODIFICADO',
+      entidad: 'Propuesta',
+      metadata: {
+        id_propuesta: id,
+        estado_anterior: estadoAnterior,
+        nuevo_estado: estado,
+        nota_administrativa: nota
+      },
+      ip: req.ip,
+      user_agent: req.headers['user-agent']
+    }, { transaction: t });
+
+    await t.commit();
+    res.json({ success: true, message: 'Estado del proyecto actualizado correctamente' });
+
+  } catch (error) {
+    await t.rollback();
+    console.error('Error en updateEstadoProyecto:', error);
+    res.status(500).json({ success: false, message: 'Error al actualizar el estado del proyecto' });
+  }
 };
