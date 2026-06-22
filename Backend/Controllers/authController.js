@@ -6,11 +6,11 @@ const { uploadFileToS3 } = require('../Config/aws');
 const { sendRecoveryEmail } = require('../Services/emailService');
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-const generateToken = (user) => {
+const generateToken = (user, customExpiresIn) => {
   return jwt.sign(
     { id: user.id_usuario, email: user.correo, rol: user.rol },
     config.jwt.secret,
-    { expiresIn: config.jwt.expiresIn }
+    { expiresIn: customExpiresIn || config.jwt.expiresIn }
   );
 };
 const generateRecoveryCode = () => {
@@ -25,6 +25,13 @@ const cookieOptions = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días en ms
+};
+
+const adminCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 2 * 60 * 60 * 1000, // 2 horas en ms
 };
 
 const TIPOS_EVIDENCIA_FWD = new Set([
@@ -233,8 +240,8 @@ const adminLogin = async (req, res) => {
     }
 
     await user.update({ ultimo_acceso: new Date() });
-    const token = generateToken(user);
-    res.cookie('token', token, cookieOptions);
+    const token = generateToken(user, '2h');
+    res.cookie('token', token, adminCookieOptions);
 
     return res.status(200).json({
       success: true,

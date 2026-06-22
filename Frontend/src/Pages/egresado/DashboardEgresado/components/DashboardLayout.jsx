@@ -23,27 +23,8 @@ import {
 import LanguageSwitcher from '../../../../components/comun/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { RUTAS } from '../../../../routes/rutas';
-import '../../../../Pages/empresa/DashboardEmpresario/DashboardEmpresario.css';
+import '../../../empresa/DashboardEmpresario/DashboardEmpresario.css';
 import '../styles/DashboardEgresado.css';
-
-const sidebarItems = [
-  { key: 'inicio', label: 'Inicio', icon: Home, path: '/egresado/dashboard' },
-  { key: 'explorar', label: 'Explorar Proyectos', icon: Compass, path: '/egresado/dashboard/explorar' },
-  { key: 'explorar-empleos', label: 'Explorar Empleos', icon: Briefcase, path: '/egresado/dashboard/explorar-empleos' },
-  {
-    key: 'postulaciones', label: 'Mis Postulaciones', icon: FileText,
-    children: [
-      { key: 'postulaciones-proyectos', label: 'Proyectos', path: '/egresado/dashboard/postulaciones/proyectos' },
-      { key: 'postulaciones-empleos', label: 'Empleos', path: '/egresado/dashboard/postulaciones/empleos' },
-    ],
-  },
-  { key: 'proyectos', label: 'Mis Proyectos', icon: FolderOpen, path: '/egresado/dashboard/proyectos' },
-  { key: 'historial', label: 'Historial', icon: History, path: '/egresado/dashboard/historial' },
-  { key: 'mensajes', label: 'Mensajes', icon: MessageSquare, path: '/egresado/dashboard/mensajes' },
-  { key: 'notificaciones', label: 'Notificaciones', icon: Bell, path: '/egresado/dashboard/notificaciones' },
-  { key: 'perfil', label: 'Mi Perfil', icon: User, path: RUTAS.egresadoPerfil },
-  { key: 'configuracion', label: 'Configuración', icon: Settings, path: RUTAS.egresadoConfiguracion },
-];
 
 export default function DashboardLayout({ children }) {
   const { t } = useTranslation();
@@ -76,10 +57,10 @@ export default function DashboardLayout({ children }) {
     if (typeof document === 'undefined') return 'light';
     return document.documentElement.dataset.theme || localStorage.getItem('tema') || 'light';
   });
-  const [postulacionesExpandido, setPostulacionesExpandido] = useState(false);
   const menuPerfilRef = useRef(null);
 
   const rutaActual = location.pathname;
+  const [postulacionesExpandido, setPostulacionesExpandido] = useState(() => rutaActual.includes('/postulaciones'));
 
   const empiezaCon = (path, prefix) =>
     path === prefix || path.startsWith(prefix + '/') || path.startsWith(prefix + '?');
@@ -101,6 +82,14 @@ export default function DashboardLayout({ children }) {
   };
 
   const activePage = encontrarActivo(sidebarItems);
+  const navLinks = [
+    { key: 'inicio', label: t('egresadoLayout.sidebar.inicio'), icon: Home, path: '/egresado/dashboard' },
+    { key: 'explorar', label: t('egresadoLayout.sidebar.explorar'), icon: Compass, path: '/egresado/dashboard/explorar' },
+    { key: 'postulaciones', label: t('egresadoLayout.sidebar.postulaciones'), icon: FileText, path: '/egresado/dashboard/postulaciones/proyectos' },
+    { key: 'proyectos', label: t('egresadoLayout.sidebar.proyectos'), icon: FolderOpen, path: '/egresado/dashboard/proyectos' },
+    { key: 'mensajes', label: t('egresadoLayout.sidebar.mensajes'), icon: MessageSquare, path: '/egresado/dashboard/mensajes' },
+    { key: 'notificaciones', label: t('egresadoLayout.sidebar.notificaciones'), icon: Bell, path: '/egresado/dashboard/notificaciones' },
+  ];
 
   const perfilEgresadoCache = (() => {
     try { return JSON.parse(localStorage.getItem('perfilEgresado')); }
@@ -177,6 +166,24 @@ export default function DashboardLayout({ children }) {
                 fetchPriority="high"
               />
             </button>
+
+            <nav className="de-nav">
+              {navLinks.map((item) => {
+                const Icon = item.icon;
+                const activo = activePage === item.key || (item.key === 'postulaciones' && activePage.startsWith('postulaciones'));
+                return (
+                  <button
+                    key={item.key}
+                    className={`de-nav-link de-link-button ${activo ? 'active' : ''}`}
+                    type="button"
+                    onClick={() => navigate(item.path)}
+                  >
+                    <Icon size={16} />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
           <div className="de-header-right">
@@ -301,6 +308,7 @@ export default function DashboardLayout({ children }) {
                   const Icon = item.icon;
                   if (item.children) {
                     const algunaActiva = item.children.some((h) => h.key === activePage);
+                    const mostrarSublista = postulacionesExpandido || algunaActiva;
                     return (
                       <div key={item.key} className="de-sidebar-group">
                         <button
@@ -310,11 +318,11 @@ export default function DashboardLayout({ children }) {
                         >
                           <Icon size={18} className="de-sidebar-icon" />
                           {item.label}
-                          <span className={`de-sidebar-chevron ${postulacionesExpandido ? 'open' : ''}`}>
+                          <span className={`de-sidebar-chevron ${mostrarSublista ? 'open' : ''}`}>
                             <ChevronRight size={14} />
                           </span>
                         </button>
-                        {postulacionesExpandido && (
+                        {mostrarSublista && (
                           <div className="de-sidebar-sublist">
                             {item.children.map((hijo) => {
                               const ChildIcon = hijo.icon || FileText;

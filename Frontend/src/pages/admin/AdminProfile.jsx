@@ -12,6 +12,7 @@ const AdminEmpresas = lazy(() => import('./AdminEmpresas'));
 const AdminReportes = lazy(() => import('./AdminReportes'));
 const AdminAuditoria = lazy(() => import('./AdminAuditoria'));
 const AdminSistema = lazy(() => import('./AdminSistema'));
+const AdminProyectos = lazy(() => import('./AdminProyectos'));
 import AdminDetalleAuditoriaModal from './components/AdminDetalleAuditoriaModal';
 import AdminBusquedaGlobal from './components/AdminBusquedaGlobal';
 import AdminCampanaNotificaciones from './components/AdminCampanaNotificaciones';
@@ -20,6 +21,7 @@ import {
   LayoutDashboard,
   Users,
   Building,
+  Briefcase,
   GraduationCap,
   Settings,
   LogOut,
@@ -90,12 +92,16 @@ export default function AdminProfile() {
       subtitle: t('admin.companies.subtitle')
     },
     egresados: {
-      title: t('admin.graduates.menuTitle'),
-      subtitle: t('admin.graduates.subtitle')
+      title: 'Verificación de Usuarios',
+      subtitle: 'Aprueba o rechaza empresas y egresados desde una sola cola.'
     },
     usuarios: {
       title: t('admin.users.menuTitle'),
       subtitle: t('admin.users.subtitle')
+    },
+    proyectos: {
+      title: t('admin.proyectos.menuTitle', 'Supervisión de proyectos'),
+      subtitle: t('admin.proyectos.subtitle', 'Supervisa, audita y modera proyectos, ofertas y mensajes.')
     },
     reportes: {
       title: 'Reportes y denuncias',
@@ -132,13 +138,8 @@ export default function AdminProfile() {
   );
 
   const irAAlertas = useCallback(() => {
-    if (overviewData.verifiPendientes > 0) {
+    if (overviewData.verifiPendientes > 0 || overviewData.empresasPendientes > 0) {
       setActiveMenu('egresados');
-      return;
-    }
-
-    if (overviewData.empresasPendientes > 0) {
-      setActiveMenu('empresas');
       return;
     }
 
@@ -171,11 +172,11 @@ export default function AdminProfile() {
             </button>
             <button className={`admin-nav-link ${activeMenu === 'egresados' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('egresados')}>
               <GraduationCap size={16} />
-              {t('admin.graduates.tableGraduate')}s
+              Verificación
             </button>
-            <button className={`admin-nav-link ${activeMenu === 'empresas' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('empresas')}>
-              <Building size={16} />
-              {t('admin.companies.menuTitle')}
+            <button className={`admin-nav-link ${activeMenu === 'proyectos' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('proyectos')}>
+              <Briefcase size={16} />
+              {t('admin.proyectos.menuTitle', 'Proyectos')}
             </button>
             <button className={`admin-nav-link ${activeMenu === 'config' ? 'active' : ''}`} type="button" onClick={() => setActiveMenu('config')}>
               <Settings size={16} />
@@ -207,8 +208,8 @@ export default function AdminProfile() {
 
             <nav className="admin-sidebar-nav" aria-label="Secciones de administracion">
               <ElementoBarraLateral icon={LayoutDashboard} label={t('sidebar.dashboard')} isActive={activeMenu === 'dashboard'} onClick={() => setActiveMenu('dashboard')} />
-              <ElementoBarraLateral icon={Building} label={t('admin.companies.menuTitle')} isActive={activeMenu === 'empresas'} onClick={() => setActiveMenu('empresas')} />
-              <ElementoBarraLateral icon={GraduationCap} label={t('admin.graduates.tableGraduate') + 's'} isActive={activeMenu === 'egresados'} onClick={() => setActiveMenu('egresados')} />
+              <ElementoBarraLateral icon={GraduationCap} label="Verificación de Usuarios" isActive={activeMenu === 'egresados'} onClick={() => setActiveMenu('egresados')} />
+              <ElementoBarraLateral icon={Briefcase} label={t('admin.proyectos.menuTitle', 'Supervisión de Proyectos')} isActive={activeMenu === 'proyectos'} onClick={() => setActiveMenu('proyectos')} />
               <ElementoBarraLateral icon={Users} label={t('admin.users.tableUser') + 's'} isActive={activeMenu === 'usuarios'} onClick={() => setActiveMenu('usuarios')} />
               <ElementoBarraLateral icon={ShieldAlert} label="Reportes" isActive={activeMenu === 'reportes'} onClick={() => setActiveMenu('reportes')} />
               <ElementoBarraLateral icon={ClipboardList} label="Auditoría" isActive={activeMenu === 'auditoria'} onClick={() => setActiveMenu('auditoria')} />
@@ -336,6 +337,7 @@ export default function AdminProfile() {
             {activeMenu === 'usuarios' && <AdminUsuarios onAdminChange={cargarOverview} />}
             {activeMenu === 'egresados' && <AdminEgresados onAdminChange={cargarOverview} />}
             {activeMenu === 'empresas' && <AdminEmpresas onAdminChange={cargarOverview} />}
+            {activeMenu === 'proyectos' && <AdminProyectos onAdminChange={cargarOverview} />}
             {activeMenu === 'reportes' && <AdminReportes onAdminChange={cargarOverview} />}
             {activeMenu === 'auditoria' && <AdminAuditoria />}
             {activeMenu === 'sistema' && <AdminSistema />}

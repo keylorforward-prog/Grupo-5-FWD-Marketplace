@@ -1,15 +1,29 @@
-import { useState, useRef, useEffect } from 'react';
+import { memo, useCallback, useState, useRef, useEffect } from 'react';
 
-export default function Emergente({ trigger, children, align = 'right' }) {
+function Emergente({ trigger, children, align = 'right' }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
+    if (!open) return undefined;
+
     const handleClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+
     document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open]);
+
+  const toggleOpen = useCallback(() => {
+    setOpen((actual) => !actual);
   }, []);
 
   const alignClasses = {
@@ -20,7 +34,7 @@ export default function Emergente({ trigger, children, align = 'right' }) {
 
   return (
     <div ref={ref} className="relative inline-flex">
-      <div onClick={() => setOpen(!open)}>{trigger}</div>
+      <div onClick={toggleOpen}>{trigger}</div>
       {open && (
         <div
           className={`absolute top-full mt-2 z-50
@@ -36,3 +50,5 @@ export default function Emergente({ trigger, children, align = 'right' }) {
     </div>
   );
 }
+
+export default memo(Emergente);
