@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
 
-export default function AdminMotivoModal({
+function AdminMotivoModal({
   open,
   title,
   description,
@@ -21,10 +21,21 @@ export default function AdminMotivoModal({
   const defaultConfirmLabel = t('admin.modal.confirm');
   const defaultCancelLabel = t('admin.modal.cancel');
 
-  const finalLabel = label === 'Motivo' ? defaultLabel : label;
-  const finalPlaceholder = placeholder === 'Describe brevemente el motivo...' ? defaultPlaceholder : placeholder;
-  const finalConfirmLabel = confirmLabel === 'Confirmar' ? defaultConfirmLabel : confirmLabel;
-  const finalCancelLabel = cancelLabel === 'Cancelar' ? defaultCancelLabel : cancelLabel;
+  const textos = useMemo(() => ({
+    label: label === 'Motivo' ? defaultLabel : label,
+    placeholder: placeholder === 'Describe brevemente el motivo...' ? defaultPlaceholder : placeholder,
+    confirmLabel: confirmLabel === 'Confirmar' ? defaultConfirmLabel : confirmLabel,
+    cancelLabel: cancelLabel === 'Cancelar' ? defaultCancelLabel : cancelLabel,
+  }), [
+    cancelLabel,
+    confirmLabel,
+    defaultCancelLabel,
+    defaultConfirmLabel,
+    defaultLabel,
+    defaultPlaceholder,
+    label,
+    placeholder,
+  ]);
 
   const [motivo, setMotivo] = useState('');
   const textareaRef = useRef(null);
@@ -45,14 +56,14 @@ export default function AdminMotivoModal({
   }, [loading, onCancel, open]);
 
   const motivoLimpio = motivo.trim();
-  const cancelar = () => {
+  const cancelar = useCallback(() => {
     setMotivo('');
     onCancel();
-  };
+  }, [onCancel]);
 
-  const confirmar = () => {
+  const confirmar = useCallback(() => {
     onConfirm(motivoLimpio);
-  };
+  }, [motivoLimpio, onConfirm]);
 
   return (
     <AnimatePresence>
@@ -92,12 +103,12 @@ export default function AdminMotivoModal({
         </div>
 
         <label className="admin-modal-field">
-          <span>{finalLabel}</span>
+          <span>{textos.label}</span>
           <textarea
             ref={textareaRef}
             value={motivo}
             onChange={(event) => setMotivo(event.target.value)}
-            placeholder={finalPlaceholder}
+            placeholder={textos.placeholder}
             rows={4}
             maxLength={500}
           />
@@ -110,7 +121,7 @@ export default function AdminMotivoModal({
 
         <div className="admin-modal-actions">
           <button className="admin-action-button neutral" type="button" onClick={cancelar} disabled={loading}>
-            {finalCancelLabel}
+            {textos.cancelLabel}
           </button>
           <button
             className="admin-action-button danger"
@@ -118,7 +129,7 @@ export default function AdminMotivoModal({
             onClick={confirmar}
             disabled={loading || !motivoLimpio}
           >
-            {loading ? t('admin.modal.processing') : finalConfirmLabel}
+            {loading ? t('admin.modal.processing') : textos.confirmLabel}
           </button>
         </div>
       </motion.div>
@@ -127,3 +138,5 @@ export default function AdminMotivoModal({
     </AnimatePresence>
   );
 }
+
+export default memo(AdminMotivoModal);

@@ -48,7 +48,7 @@ export default function MisProyectos() {
           </button>
           <h1>{t('egresadoProyectos.titulo')}</h1>
         </div>
-        <span className="conteoProyectos">{proyectos.length} {t('egresadoProyectos.total')}</span>
+        <span className="conteoProyectos">{t('egresadoProyectos.total', { count: proyectos.length })}</span>
       </div>
 
       {loading && <p className="de-data-state">{t('egresadoProyectos.loading')}</p>}

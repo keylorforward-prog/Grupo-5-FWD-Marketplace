@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft, DollarSign, Tag, Globe, Building2,
   Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, Mail, Pencil, Trash2,
@@ -31,6 +31,8 @@ export default function ProyectoDetalle() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const rutaVolver = location.state?.desde === 'postulaciones' ? '/egresado/dashboard/postulaciones' : '/egresado/dashboard/explorar';
   const [proyecto, setProyecto] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -138,7 +140,7 @@ export default function ProyectoDetalle() {
     return (
       <div className="detalle-container">
         <div className="de-data-state error">{error}</div>
-        <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar')}>
+        <button className="detalle-volver" type="button" onClick={() => navigate(rutaVolver)}>
           <ArrowLeft size={16} /> {t(`${T_NS}.volver`)}
         </button>
       </div>
@@ -154,7 +156,7 @@ export default function ProyectoDetalle() {
 
   return (
     <div className="detalle-container fwd-animar-entrada">
-      <button className="detalle-volver" type="button" onClick={() => navigate('/egresado/dashboard/explorar')}>
+      <button className="detalle-volver" type="button" onClick={() => navigate(rutaVolver)}>
         <ArrowLeft size={16} /> {t(`${T_NS}.volver`)}
       </button>
 
@@ -181,7 +183,7 @@ export default function ProyectoDetalle() {
                 </span>
                 <span className="detalle-badge detalle-badgeModalidad">
                   <Globe size={13} />
-                  {etiquetaModalidad[proyecto.modalidad] ?? proyecto.modalidad}
+                  {etiquetaModalidad[proyecto.modalidad] ? t(etiquetaModalidad[proyecto.modalidad]) : proyecto.modalidad}
                 </span>
                 <span className={`detalle-badge detalle-badgeEstado ${(proyecto.estado || '').toLowerCase()}`}>
                   {proyecto.estado}
@@ -329,7 +331,11 @@ export default function ProyectoDetalle() {
             </div>
             <div className="detalle-empresaInfo">
               <div className="detalle-empresaAvatar">
-                {usuarioEmpresa.nombre?.charAt(0) || 'E'}
+                {empresa.logo ? (
+                  <img src={empresa.logo} alt="" className="detalle-empresaLogo" />
+                ) : (
+                  usuarioEmpresa.nombre?.charAt(0) || 'E'
+                )}
               </div>
               <div>
                 <h4 className="detalle-empresaNombre">{usuarioEmpresa.nombre || 'Empresa'}</h4>
@@ -419,7 +425,7 @@ export default function ProyectoDetalle() {
             <div className="modal-form">
               <div className="modal-campo">
                 <label className="modal-label">
-                  <Mail size={14} /> {t(`${T_NS}.campoMensaje`)}
+                  <Mail size={14} /> {t(`${T_NS}.campoMensaje`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
                 </label>
                 <textarea
                   className="modal-textarea"
@@ -431,7 +437,7 @@ export default function ProyectoDetalle() {
               </div>
               <div className="modal-campo">
                 <label className="modal-label">
-                  <DollarSign size={14} /> {t(`${T_NS}.campoPropuesta`)}
+                  <DollarSign size={14} /> {t(`${T_NS}.campoPropuesta`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
                 </label>
                 <input
                   className="modal-input"

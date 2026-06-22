@@ -37,4 +37,9 @@ router.post('/empresas/:id_usuario/estado', adminController.updateEstadoEmpresa)
 router.get('/egresados/pendientes', adminController.getEgresadosPendientes);
 router.post('/egresados/:id_usuario/verificar', adminController.verifyEstudiante);
 
+// Rutas para supervisión de proyectos
+router.get('/proyectos', adminController.getProyectos);
+router.get('/proyectos/:id/detalle', adminController.getProyectoDetalle);
+router.put('/proyectos/:id/estado', adminController.updateEstadoProyecto);
+
 module.exports = router;

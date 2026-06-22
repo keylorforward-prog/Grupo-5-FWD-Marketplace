@@ -157,17 +157,7 @@ export default function DashboardLayout({ activePage, children }) {
 
           <div className="de-header-right">
             <LanguageSwitcher />
-            
-            <button
-              className="de-header-bell de-link-button"
-              type="button"
-              onClick={() => navigate('/DashboardEmpresario/notificaciones')}
-              aria-label="Notificaciones"
-              title="Notificaciones"
-            >
-              <Bell size={20} />
-              <span className="de-header-bell-dot" aria-hidden="true" />
-            </button>
+            <CampanaNotificaciones rutaNotificaciones="/DashboardEmpresario/notificaciones" />
 
             <div className="de-header-profile-wrapper" ref={menuPerfilRef}>
               <button
@@ -274,6 +264,14 @@ export default function DashboardLayout({ activePage, children }) {
 
       <div className="de-body">
         <aside className="de-sidebar">
+          <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
+            <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
+            <div className="de-sidebar-profile-info">
+              <span className="de-sidebar-name">{displayName}</span>
+              <span className="de-sidebar-role">{profileRole}</span>
+            </div>
+          </div>
+
           <div>
             <nav className="de-sidebar-nav">
               {sidebarItems.map((item) => {
@@ -303,19 +301,20 @@ export default function DashboardLayout({ activePage, children }) {
           </div>
         </aside>
 
-        <main className="de-main fwd-fondo-decorativo">{children}</main>
+        <main className="de-main fwd-fondo-decorativo">
+          <div className="de-main-content">{children}</div>
+          <footer className="de-footer">
+            <span className="de-footer-copy">
+              {t('empresaLayout.footer.copy').replace('{{year}}', new Date().getFullYear())}
+            </span>
+            <div className="de-footer-links">
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/terminos')}>{t('empresaLayout.footer.terms')}</button>
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/privacidad')}>{t('empresaLayout.footer.privacy')}</button>
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/contacto')}>{t('empresaLayout.footer.contact')}</button>
+            </div>
+          </footer>
+        </main>
       </div>
-
-      <footer className="de-footer">
-        <span className="de-footer-copy">
-          {t('empresaLayout.footer.copy').replace('{{year}}', new Date().getFullYear())}
-        </span>
-        <div className="de-footer-links">
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/terminos')}>{t('empresaLayout.footer.terms')}</button>
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/privacidad')}>{t('empresaLayout.footer.privacy')}</button>
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/contacto')}>{t('empresaLayout.footer.contact')}</button>
-        </div>
-      </footer>
     </div>
   );
 }

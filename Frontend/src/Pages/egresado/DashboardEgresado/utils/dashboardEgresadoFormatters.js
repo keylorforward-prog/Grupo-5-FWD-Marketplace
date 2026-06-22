@@ -12,10 +12,13 @@ const formatearFechaRelativa = (fecha) => {
 const estadoPostulacion = (estado) => {
   const mapa = {
     ENVIADA: ['Enviada', 'nueva'],
+    PENDIENTE: ['Pendiente', 'pendiente'],
     EN_REVISION: ['En Revisión', 'revision'],
     PRESSELECCIONADA: ['Preseleccionada', 'recepcion'],
+    PRESELECCIONADA: ['Preseleccionada', 'recepcion'],
     RECHAZADA: ['Rechazada', 'rechazado'],
-    CONTRATADO: ['Contratado', 'finalizado'],
+    CONTRATADO: ['Aceptado', 'finalizado'],
+    ACEPTADO: ['Aceptado', 'finalizado'],
   };
   return mapa[estado] ?? [estado || 'Sin estado', 'pendiente'];
 };
@@ -50,6 +53,7 @@ export const formatearPostulacion = (postulacion) => {
     fecha: formatearFechaRelativa(postulacion.fecha_postulacion),
     mensaje: postulacion.mensaje_presentacion,
     empresa: usuarioEmpresa.nombre || 'Empresa',
+    empresaLogo: perfilEmpresario.logo || null,
   };
 };
 
