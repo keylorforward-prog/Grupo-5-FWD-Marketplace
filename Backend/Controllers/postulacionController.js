@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 const { Postulacion, PerfilEstudiante, Propuesta, PerfilEmpresario, Notificacion } = require('../Models');
-=======
-const { Postulacion, PerfilEstudiante } = require('../Models');
 const { Op } = require('sequelize');
 
 const DOS_MINUTOS = 2 * 60 * 1000;
@@ -12,7 +9,6 @@ const actualizarPendiente = async (postulacion) => {
     await postulacion.save();
   }
 };
->>>>>>> 99a3745c68006558a20d95005207ed4573e929c1
 
 exports.getAll = async (req, res) => {
   try {

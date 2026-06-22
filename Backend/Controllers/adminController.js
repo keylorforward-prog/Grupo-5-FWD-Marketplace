@@ -10,15 +10,7 @@ const {
   Notificacion,
   Postulacion,
   Oferta,
-<<<<<<< HEAD
   CatalogoTecnologia,
-=======
-  Conversacion,
-  Mensaje,
-  CatalogoTecnologia,
-  Entregable,
-  Evaluacion,
->>>>>>> ab5d112dc3a81c30ca408b6007a0f09997c267f4
   sequelize 
 } = require('../Models');
 const { Op } = require('sequelize');
