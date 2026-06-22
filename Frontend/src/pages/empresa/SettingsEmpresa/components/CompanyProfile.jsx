@@ -16,6 +16,7 @@ const CompanyProfile = () => {
     nombre: '',
     sitio_web: '',
     cedula: '',
+    telefono_whatsapp: '',
     sector: '',
     descripcion: ''
   });
@@ -33,6 +34,7 @@ const CompanyProfile = () => {
             nombre: result.data.nombre || '',
             sitio_web: result.data.sitio_web || '',
             cedula: result.data.cedula || '',
+            telefono_whatsapp: result.data.telefono_whatsapp || '',
             sector: result.data.sector || '',
             descripcion: result.data.descripcion || ''
           });
@@ -152,6 +154,11 @@ const CompanyProfile = () => {
             <div className="se-input-group">
               <label className="se-label-bold">{t('companyProfile.legalId')}</label>
               <input type="text" className="se-input se-body-md" name="cedula" value={formData.cedula} onChange={handleInputChange} placeholder={t('companyProfile.legalId')} />
+            </div>
+
+            <div className="se-input-group">
+              <label className="se-label-bold">{t('companyProfile.contactNumber', 'Número de Contacto')}</label>
+              <input type="text" className="se-input se-body-md" name="telefono_whatsapp" value={formData.telefono_whatsapp} onChange={handleInputChange} placeholder={t('companyProfile.contactNumber', 'Número de Contacto')} />
             </div>
             
             <div className="se-input-group">

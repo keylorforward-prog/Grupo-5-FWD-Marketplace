@@ -1,9 +1,9 @@
 import type { AgentMessage, InterviewState } from './types';
 
+const TOKEN_COMPLETA = /\[\s*ENTREVISTA_COMPLETA\s*\]/i;
+
 export function detectState(lastAssistantMessage: string): InterviewState {
-  if (lastAssistantMessage.includes('[ENTREVISTA_COMPLETA]')) {
-    return 'confirming';
-  }
+  if (TOKEN_COMPLETA.test(lastAssistantMessage)) return 'confirming';
   return 'interviewing';
 }
 
@@ -34,5 +34,5 @@ export function buildMessages(
 }
 
 export function cleanMessage(message: string): string {
-  return message.replace('[ENTREVISTA_COMPLETA]', '').trim();
+  return message.replace(TOKEN_COMPLETA, '').trim();
 }

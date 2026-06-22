@@ -12,7 +12,7 @@ const client = new OpenAI({
   baseURL: 'https://api.groq.com/openai/v1',
 });
 
-async function callWithRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> {
+async function callWithRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
   let lastError: unknown;
   for (let intento = 0; intento <= maxRetries; intento++) {
     try {
@@ -20,15 +20,19 @@ async function callWithRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T
     } catch (e) {
       lastError = e;
       if (intento < maxRetries) {
-        await new Promise((r) => setTimeout(r, 500 * (intento + 1)));
+        await new Promise((r) => setTimeout(r, 2000 * (intento + 1)));
       }
     }
   }
   throw lastError;
 }
 
-function stripMarkdown(text: string): string {
-  return text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+function extraerJSON(texto: string): string {
+  const limpio = texto.replace(/```json/gi, '').replace(/```/g, '').trim();
+  const inicio = limpio.indexOf('{');
+  const fin = limpio.lastIndexOf('}');
+  if (inicio === -1 || fin === -1) return limpio;
+  return limpio.slice(inicio, fin + 1);
 }
 
 export async function sendInterviewMessage(
@@ -39,7 +43,7 @@ export async function sendInterviewMessage(
     const response = await callWithRetry(() =>
       client.chat.completions.create({
         model: 'llama-3.1-8b-instant',
-        max_tokens: 300,
+        max_tokens: 200,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           ...history.map((m) => ({
@@ -97,6 +101,7 @@ export async function sendInterviewMessage(
 export async function extractProjectData(
   history: AgentMessage[],
 ): Promise<Result<ExtractedProject>> {
+  let text = '';
   try {
     const historialTexto = history
       .map((m) => `${m.role === 'user' ? 'Empresario' : 'Agente'}: ${m.content}`)
@@ -104,16 +109,36 @@ export async function extractProjectData(
 
     const response = await callWithRetry(() =>
       client.chat.completions.create({
-        model: 'llama-3.1-8b-instant',
-        max_tokens: 800,
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 2000,
+        response_format: { type: 'json_object' },
         messages: [{ role: 'user', content: EXTRACTION_PROMPT + '\n' + historialTexto }],
       }),
     );
-    const text = response.choices[0].message.content ?? '';
-    const data = JSON.parse(stripMarkdown(text)) as ExtractedProject;
-    return ok(data);
+    text = response.choices[0].message.content ?? '';
+
+    try {
+      const data = JSON.parse(extraerJSON(text)) as ExtractedProject;
+      return ok(data);
+    } catch {
+      const retryResp = await callWithRetry(() =>
+        client.chat.completions.create({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 2000,
+          response_format: { type: 'json_object' },
+          messages: [{
+            role: 'user',
+            content: 'Devolvé SOLO este contenido como JSON válido, sin texto adicional:\n' + text,
+          }],
+        }),
+      );
+      const retryText = retryResp.choices[0]?.message?.content ?? '';
+      const data = JSON.parse(extraerJSON(retryText)) as ExtractedProject;
+      return ok(data);
+    }
   } catch (e) {
-    console.error('Agent error:', e);
+    console.error('Extract error:', e);
+    console.error('Texto recibido:', text);
     const mensaje = e instanceof Error ? e.message.toLowerCase() : '';
     if (mensaje.includes('rate') || mensaje.includes('429')) {
       return err('El agente está recibiendo muchas consultas. Esperá unos segundos.');
@@ -148,7 +173,7 @@ export async function correctProjectData(
       }),
     );
     const text = response.choices[0].message.content ?? '';
-    const data = JSON.parse(stripMarkdown(text)) as ExtractedProject;
+    const data = JSON.parse(extraerJSON(text)) as ExtractedProject;
     return ok(data);
   } catch (e) {
     console.error('Agent error:', e);

@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+const { Postulacion, PerfilEstudiante, Propuesta, PerfilEmpresario, Notificacion } = require('../Models');
+=======
 const { Postulacion, PerfilEstudiante } = require('../Models');
 const { Op } = require('sequelize');
 
@@ -9,6 +12,7 @@ const actualizarPendiente = async (postulacion) => {
     await postulacion.save();
   }
 };
+>>>>>>> 99a3745c68006558a20d95005207ed4573e929c1
 
 exports.getAll = async (req, res) => {
   try {
@@ -42,6 +46,21 @@ exports.create = async (req, res) => {
       mensaje_presentacion: req.body.mensaje_presentacion || null,
       presupuesto_max: req.body.presupuesto_max || null,
     });
+
+    // Check notification preferences
+    const propuesta = await Propuesta.findByPk(req.body.id_propuesta);
+    if (propuesta) {
+      const perfilEmpresario = await PerfilEmpresario.findByPk(propuesta.id_perfil_empresario);
+      if (perfilEmpresario && perfilEmpresario.notif_postulaciones) {
+        await Notificacion.create({
+          id_usuario: perfilEmpresario.id_usuario,
+          tipo: 'NUEVA_POSTULACION',
+          mensaje: `Un estudiante se ha postulado a tu propuesta.`,
+          leido: false,
+          fecha: new Date(),
+        });
+      }
+    }
 
     res.status(201).json({ success: true, data });
   } catch (error) {
