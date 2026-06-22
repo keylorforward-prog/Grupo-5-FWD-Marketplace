@@ -7,14 +7,14 @@ import { RUTAS } from './rutas';
 // ==========================================
 // VISTA PRINCIPAL (NUEVA LANDING PAGE)
 // ==========================================
-import LandingPage from '../pages/landing/Landing.jsx';
+import LandingPage from '../Pages/landing/Landing.jsx';
 // Autenticación
-import LoginPage from '../pages/auth/Login/LoginPage';
-import RegisterPage from '../pages/auth/Registro/RegisterPage';
-import AdminLogin from '../pages/auth/AdminLogin/AdminLogin';
-import GoogleCallback from '../pages/auth/GoogleCallback';
-import CompletarPerfil from '../pages/auth/CompletarPerfil/CompletarPerfil';
-import ForgotPasswordPage from '../pages/RecuperacionContra/ForgotPasswordPage';
+import LoginPage from '../Pages/auth/Login/LoginPage';
+import RegisterPage from '../Pages/auth/Registro/RegisterPage';
+import AdminLogin from '../Pages/auth/AdminLogin/AdminLogin';
+import GoogleCallback from '../Pages/auth/GoogleCallback';
+import CompletarPerfil from '../Pages/auth/CompletarPerfil/CompletarPerfil';
+import ForgotPasswordPage from '../Pages/RecuperacionContra/ForgotPasswordPage';
 
 // Empresa
 import DashboardEmpresario from '../Pages/empresa/DashboardEmpresario/DashboardEmpresario';

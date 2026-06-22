@@ -137,31 +137,6 @@ export const authService = {
 
 
 };
-const forgotPassword = async (email) => {
-  const { data } = await api.post('/auth/forgot-password', {
-    email,
-  });
 
-  return data;
-};
-
-const verifyRecoveryCode = async (email, code) => {
-  const { data } = await api.post('/auth/verify-code', {
-    email,
-    code,
-  });
-
-  return data;
-};
-
-const resetPassword = async (email, code, newPassword) => {
-  const { data } = await api.post('/auth/reset-password', {
-    email,
-    code,
-    newPassword,
-  });
-
-  return data;
-};
 
 

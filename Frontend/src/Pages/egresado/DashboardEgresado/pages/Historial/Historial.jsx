@@ -107,7 +107,7 @@ export default function Historial() {
           <h1>{t('egresadoHistorial.titulo')}</h1>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          {!loading && !error && <span className="conteoProyectos">{historiales.length} {t('egresadoHistorial.total')}</span>}
+          {!loading && !error && <span className="conteoProyectos">{t('egresadoHistorial.total', { count: historiales.length })}</span>}
           <button className="de-btn-primary" type="button" onClick={() => iniciarEdit(null)} disabled={guardando}>
             <Plus size={15} /> {t('egresadoHistorial.agregar')}
           </button>
