@@ -14,14 +14,7 @@ const RegisterPage = lazy(() => import('../Pages/auth/Registro/RegisterPage'));
 const AdminLogin = lazy(() => import('../Pages/auth/AdminLogin/AdminLogin'));
 const GoogleCallback = lazy(() => import('../Pages/auth/GoogleCallback'));
 const CompletarPerfil = lazy(() => import('../Pages/auth/CompletarPerfil/CompletarPerfil'));
-import LandingPage from '../Pages/landing/Landing.jsx';
-// Autenticación
-import LoginPage from '../Pages/auth/Login/LoginPage';
-import RegisterPage from '../Pages/auth/Registro/RegisterPage';
-import AdminLogin from '../Pages/auth/AdminLogin/AdminLogin';
-import GoogleCallback from '../Pages/auth/GoogleCallback';
-import CompletarPerfil from '../Pages/auth/CompletarPerfil/CompletarPerfil';
-import ForgotPasswordPage from '../Pages/RecuperacionContra/ForgotPasswordPage';
+const ForgotPasswordPage = lazy(() => import('../Pages/RecuperacionContra/ForgotPasswordPage'));
 
 // Empresa
 const DashboardEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/DashboardEmpresario'));

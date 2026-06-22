@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config(); //SI 
 const { S3Client, ListBucketsCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
