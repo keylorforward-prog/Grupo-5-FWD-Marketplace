@@ -36,7 +36,6 @@ export default function BotonesAccion({
   return (
     <>
       <div className="de-row-actions">
-      <div className="flex items-center gap-1.5">
         {/* Ver perfil → Azul (also sets EN_REVISION) */}
         <Tooltip content="Ver perfil completo">
           <button
@@ -109,7 +108,7 @@ export default function BotonesAccion({
           </button>
         </Tooltip>
       </div>
-      </div>
+
 
       {/* Reject dialog with message */}
       <DialogoConfirmacion

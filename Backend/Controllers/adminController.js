@@ -16,6 +16,7 @@ const {
 const { Op } = require('sequelize');
 const { HeadBucketCommand } = require('@aws-sdk/client-s3');
 const { s3Client } = require('../Config/aws');
+const { activityBus, publishAdminActivity } = require('../Services/adminActivityService');
 
 const CONFIGURACION_DEFAULTS = [
   {
@@ -231,6 +232,75 @@ exports.getOverview = async (req, res) => {
   }
 };
 
+exports.getMetricasVerificacion = async (req, res) => {
+  try {
+    const inicioHoy = new Date();
+    inicioHoy.setHours(0, 0, 0, 0);
+    const finHoy = new Date(inicioHoy);
+    finHoy.setDate(finHoy.getDate() + 1);
+    const accionesAprobacion = ['VERIFICACION_APROBAR', 'EMPRESA_APROBAR'];
+    const accionesRechazo = ['VERIFICACION_RECHAZAR', 'EMPRESA_SUSPENDER'];
+
+    const [empresasPendientes, egresadosPendientes, aprobadasHoy, rechazadasHoy, revisiones] = await Promise.all([
+      Usuario.count({ where: { rol: 'EMPRESARIO', estado_cuenta: 'PENDIENTE' } }),
+      PerfilEstudiante.count({ where: { estado_verificacion: 'PENDIENTE' } }),
+      Auditoria.count({ where: { accion: { [Op.in]: accionesAprobacion }, fecha: { [Op.gte]: inicioHoy, [Op.lt]: finHoy } } }),
+      Auditoria.count({ where: { accion: { [Op.in]: accionesRechazo }, fecha: { [Op.gte]: inicioHoy, [Op.lt]: finHoy } } }),
+      Auditoria.findAll({
+        where: { accion: { [Op.in]: [...accionesAprobacion, ...accionesRechazo] } },
+        attributes: ['fecha', 'metadata'],
+        order: [['fecha', 'DESC']],
+        limit: 200,
+      }),
+    ]);
+
+    const idsUsuarios = [...new Set(revisiones.map((item) => Number(item.metadata?.id_usuario)).filter(Boolean))];
+    const usuarios = idsUsuarios.length ? await Usuario.findAll({
+      where: { id_usuario: { [Op.in]: idsUsuarios } },
+      attributes: ['id_usuario', 'fecha_registro'],
+    }) : [];
+    const fechasRegistro = new Map(usuarios.map((usuario) => [Number(usuario.id_usuario), new Date(usuario.fecha_registro)]));
+    const duraciones = revisiones.map((revision) => {
+      const registro = fechasRegistro.get(Number(revision.metadata?.id_usuario));
+      return registro ? Math.max(0, new Date(revision.fecha) - registro) : null;
+    }).filter((valor) => valor !== null);
+    const promedioMs = duraciones.length ? duraciones.reduce((total, valor) => total + valor, 0) / duraciones.length : 0;
+
+    res.json({
+      success: true,
+      data: {
+        totalSolicitudes: empresasPendientes + egresadosPendientes,
+        empresasPendientes,
+        egresadosPendientes,
+        aprobadasHoy,
+        rechazadasHoy,
+        tiempoPromedioHoras: Math.round((promedioMs / 3600000) * 10) / 10,
+        actualizadoEn: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('Error en métricas de verificación:', error);
+    res.status(500).json({ success: false, message: 'Error obteniendo métricas de verificación' });
+  }
+};
+
+exports.streamActividad = (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders?.();
+
+  const enviar = (evento) => res.write(`event: activity\ndata: ${JSON.stringify(evento)}\n\n`);
+  const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 25000);
+  activityBus.on('activity', enviar);
+  enviar({ tipo: 'CONECTADO', fecha: new Date().toISOString() });
+
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    activityBus.off('activity', enviar);
+  });
+};
+
 exports.getConfiguracion = async (req, res) => {
   try {
     const registros = await Configuracion.findAll();
@@ -388,10 +458,14 @@ exports.verifyEstudiante = async (req, res) => {
       );
     }
 
-    await Auditoria.create({
+    const eventoAuditoria = await Auditoria.create({
       actor_id: adminId,
+      actor_tipo: req.user.rol,
       accion: `VERIFICACION_${accion}`,
       entidad: 'PerfilEstudiante',
+      entidad_id: String(perfil.id_perfil_estudiante),
+      valor_anterior: { estado_verificacion: estadoAnterior },
+      valor_nuevo: { estado_verificacion: nuevoEstado },
       metadata: {
         id_usuario,
         estado_anterior: estadoAnterior,
@@ -413,6 +487,7 @@ exports.verifyEstudiante = async (req, res) => {
     }, { transaction: t });
 
     await t.commit();
+    publishAdminActivity(eventoAuditoria.toJSON());
     res.json({ success: true, message: `Estudiante ${accion === 'APROBAR' ? 'verificado' : 'rechazado'} correctamente` });
   } catch (error) {
     await t.rollback();
@@ -445,6 +520,7 @@ exports.suspendUsuario = async (req, res) => {
     }
 
     const nuevoEstado = accion === 'SUSPENDER' ? 'SUSPENDIDA' : 'ACTIVA';
+    const estadoAnterior = usuario.estado_cuenta;
 
     await usuario.update({
       estado_cuenta: nuevoEstado,
@@ -455,9 +531,13 @@ exports.suspendUsuario = async (req, res) => {
 
     await Auditoria.create({
       actor_id: adminId,
+      actor_tipo: req.user.rol,
       accion: `CUENTA_${accion}`,
       entidad: 'Usuario',
-      metadata: { id_usuario, motivo, estado_anterior: usuario.estado_cuenta, nuevo_estado: nuevoEstado },
+      entidad_id: String(id_usuario),
+      valor_anterior: { estado_cuenta: estadoAnterior },
+      valor_nuevo: { estado_cuenta: nuevoEstado },
+      metadata: { id_usuario, motivo, estado_anterior: estadoAnterior, nuevo_estado: nuevoEstado },
       ip: req.ip,
       user_agent: req.headers['user-agent']
     }, { transaction: t });
@@ -603,6 +683,7 @@ exports.updateEstadoEmpresa = async (req, res) => {
     }
 
     const nuevoEstado = accion === 'SUSPENDER' ? 'SUSPENDIDA' : 'ACTIVA';
+    const estadoAnterior = usuario.estado_cuenta;
 
     await usuario.update({
       estado_cuenta: nuevoEstado,
@@ -611,14 +692,18 @@ exports.updateEstadoEmpresa = async (req, res) => {
       fecha_suspension: accion === 'SUSPENDER' ? new Date() : null
     }, { transaction: t });
 
-    await Auditoria.create({
+    const eventoAuditoria = await Auditoria.create({
       actor_id: adminId,
+      actor_tipo: req.user.rol,
       accion: `EMPRESA_${accion}`,
       entidad: 'Usuario',
+      entidad_id: String(id_usuario),
+      valor_anterior: { estado_cuenta: estadoAnterior },
+      valor_nuevo: { estado_cuenta: nuevoEstado },
       metadata: {
         id_usuario,
         motivo,
-        estado_anterior: usuario.estado_cuenta,
+        estado_anterior: estadoAnterior,
         nuevo_estado: nuevoEstado
       },
       ip: req.ip,
@@ -626,6 +711,7 @@ exports.updateEstadoEmpresa = async (req, res) => {
     }, { transaction: t });
 
     await t.commit();
+    publishAdminActivity(eventoAuditoria.toJSON());
     res.json({ success: true, message: `Empresa ${nuevoEstado.toLowerCase()} correctamente` });
   } catch (error) {
     await t.rollback();
@@ -964,7 +1050,9 @@ exports.getUsuarioDetalle = async (req, res) => {
 
     if (!usuario) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
 
-    const [auditoria, notificaciones, reportes, postulaciones, ofertas] = await Promise.all([
+    const perfilEstudianteId = usuario.perfilEstudiante?.id_perfil_estudiante;
+    const perfilEmpresarioId = usuario.perfilEmpresario?.id_perfil_empresario;
+    const [auditoria, notificaciones, reportes, postulaciones, ofertas, mensajes, archivos, proyectosCreados, proyectosActivos, evaluaciones] = await Promise.all([
       Auditoria.findAll({
         where: { actor_id: id_usuario },
         order: [['fecha', 'DESC']],
@@ -977,7 +1065,12 @@ exports.getUsuarioDetalle = async (req, res) => {
         : 0,
       usuario.perfilEstudiante
         ? Oferta.count({ where: { id_perfil_estudiante: usuario.perfilEstudiante.id_perfil_estudiante } })
-        : 0
+        : 0,
+      Mensaje.count({ where: { id_usuario_emisor: id_usuario } }),
+      Mensaje.count({ where: { id_usuario_emisor: id_usuario, archivo_url: { [Op.ne]: null } } }),
+      perfilEmpresarioId ? Propuesta.count({ where: { id_perfil_empresario: perfilEmpresarioId } }) : 0,
+      perfilEmpresarioId ? Propuesta.count({ where: { id_perfil_empresario: perfilEmpresarioId, estado: 'ACTIVA' } }) : 0,
+      perfilEmpresarioId ? Evaluacion.count({ where: { id_perfil_empresario: perfilEmpresarioId } }) : 0,
     ]);
 
     res.json({
@@ -989,7 +1082,15 @@ exports.getUsuarioDetalle = async (req, res) => {
         reportes,
         actividad: {
           postulaciones,
-          ofertas
+          ofertas,
+          mensajes,
+          archivos,
+          proyectosCreados,
+          proyectosActivos,
+          proyectosRelacionados: perfilEstudianteId ? postulaciones : proyectosCreados,
+          entregables: 0,
+          evaluaciones,
+          reportes: reportes.length,
         }
       }
     });
@@ -1002,24 +1103,39 @@ exports.getUsuarioDetalle = async (req, res) => {
 exports.getAuditoria = async (req, res) => {
   try {
     const { page, limit, offset } = obtenerPaginacion(req.query, 25);
-    const { accion, entidad, actor, desde, hasta } = req.query;
+    const { accion, entidad, actor, usuario, desde, hasta, severidad, resultado } = req.query;
     const where = {};
 
     if (accion) where.accion = { [Op.iLike]: `%${accion}%` };
     if (entidad) where.entidad = entidad;
     if (actor) where.actor_id = actor;
+    if (severidad) where.severidad = severidad;
+    if (resultado) where.resultado = resultado;
     if (desde || hasta) {
       where.fecha = {};
       if (desde) where.fecha[Op.gte] = new Date(desde);
       if (hasta) where.fecha[Op.lte] = new Date(hasta);
     }
 
+    const actorWhere = usuario ? {
+      [Op.or]: [
+        { nombre: { [Op.iLike]: `%${usuario}%` } },
+        { correo: { [Op.iLike]: `%${usuario}%` } },
+      ],
+    } : undefined;
     const auditoria = await Auditoria.findAndCountAll({
       where,
-      include: [{ model: Usuario, as: 'actor', attributes: ['id_usuario', 'nombre', 'correo'], required: false }],
+      include: [{
+        model: Usuario,
+        as: 'actor',
+        attributes: ['id_usuario', 'nombre', 'correo', 'rol'],
+        where: actorWhere,
+        required: Boolean(actorWhere),
+      }],
       order: [['fecha', 'DESC']],
       limit,
-      offset
+      offset,
+      distinct: true,
     });
 
     res.json({

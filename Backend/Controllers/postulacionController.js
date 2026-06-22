@@ -1,6 +1,7 @@
 const { Postulacion, PerfilEstudiante, Propuesta, PerfilEmpresario, Notificacion } = require('../Models');
 const { Op } = require('sequelize');
 
+
 const DOS_MINUTOS = 2 * 60 * 1000;
 
 const actualizarPendiente = async (postulacion) => {

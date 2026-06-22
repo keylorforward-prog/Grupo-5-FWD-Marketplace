@@ -6,6 +6,11 @@ export const adminService = {
     return response.data;
   },
 
+  getMetricasVerificacion: async () => {
+    const response = await apiClient.get('/admin/verificacion/metricas');
+    return response.data;
+  },
+
   buscarGlobal: async (q) => {
     const response = await apiClient.get('/admin/busqueda', { params: { q } });
     return response.data;
