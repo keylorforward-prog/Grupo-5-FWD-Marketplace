@@ -24,6 +24,15 @@ const construirTarjetasEstadistica = (estadisticas) => [
     filter: 'nuevo',
   },
   {
+    label: 'PENDIENTES',
+    value: estadisticas.pendientes,
+    bg: 'bg-white',
+    textValue: 'text-[#92400e]',
+    textLabel: 'text-gray-500',
+    border: 'border-gray-200',
+    filter: 'pendiente',
+  },
+  {
     label: 'EN REVISIÓN',
     value: estadisticas.enRevision,
     iconClass: 'purple',
@@ -35,12 +44,23 @@ const construirTarjetasEstadistica = (estadisticas) => [
     iconClass: 'green',
     filter: 'entrevistado',
   },
+  {
+    label: 'ACEPTADOS',
+    value: estadisticas.aceptados,
+    bg: 'bg-white',
+    textValue: 'text-[#047857]',
+    textLabel: 'text-gray-500',
+    border: 'border-gray-200',
+    filter: 'aceptado',
+  },
 ];
 
 const ETIQUETAS_ESTADO = {
   nuevo: 'Nuevos',
+  pendiente: 'Pendientes',
   en_revision: 'En revisión',
   entrevistado: 'Entrevistados',
+  aceptado: 'Aceptados',
 };
 
 export default function GestionPostulaciones() {
@@ -75,8 +95,10 @@ export default function GestionPostulaciones() {
   const estadisticas = useMemo(() => ({
     total:         candidatos.length,
     nuevos:        candidatos.filter((c) => c.estado === 'nuevo').length,
+    pendientes:    candidatos.filter((c) => c.estado === 'pendiente').length,
     enRevision:    candidatos.filter((c) => c.estado === 'en_revision').length,
     entrevistados: candidatos.filter((c) => c.estado === 'entrevistado').length,
+    aceptados:     candidatos.filter((c) => c.estado === 'aceptado').length,
   }), [candidatos]);
 
   const tarjetasEstadistica = construirTarjetasEstadistica(estadisticas);
@@ -100,6 +122,10 @@ export default function GestionPostulaciones() {
   }, [paginados, idsSeleccionados]);
 
   const manejarInvitacion = useCallback(async (id) => {
+  const [accionCargando, setAccionCargando] = useState(null);
+
+  const manejarInvitacion = useCallback(async (id, _date, _time, _msg) => {
+    setAccionCargando(id);
     try {
       await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'PRESSELECCIONADA');
       setCambiosLocales((prev) => ({
@@ -112,8 +138,10 @@ export default function GestionPostulaciones() {
   }, []);
 
   const manejarRechazo = useCallback(async (id) => {
+  const manejarRechazo = useCallback(async (id, mensaje = '') => {
+    setAccionCargando(id);
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'RECHAZADA');
+      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'RECHAZADA', mensaje);
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), status: 'rechazado' },
@@ -121,6 +149,34 @@ export default function GestionPostulaciones() {
     } catch (err) {
       alert(err.response?.data?.message || 'Error al rechazar la postulacion.');
     }
+  }, []);
+
+  const manejarAceptacion = useCallback(async (id, mensaje = '') => {
+    setAccionCargando(id);
+    try {
+      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'ACEPTADO', mensaje);
+      setCambiosLocales((prev) => ({
+        ...prev,
+        [id]: { ...(prev[id] ?? {}), status: 'aceptado', estaInvitado: true },
+      }));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al aceptar la postulacion.');
+    } finally {
+      setAccionCargando(null);
+    }
+  }, []);
+
+  const manejarVerPerfil = useCallback(async (id, perfil) => {
+    try {
+      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'EN_REVISION');
+      setCambiosLocales((prev) => ({
+        ...prev,
+        [id]: { ...(prev[id] ?? {}), status: 'en_revision' },
+      }));
+    } catch {
+      // If it fails, still open the profile
+    }
+    setPerfilSeleccionado(perfil);
   }, []);
 
   const manejarExportacion = useCallback((formato, soloSeleccionados) => {
@@ -182,6 +238,22 @@ export default function GestionPostulaciones() {
             <div className="de-active-filters">
               <span className="de-filter-chip">
                 Filtro: {ETIQUETAS_ESTADO[filtroEstado] ?? filtroEstado}
+        <div className="px-8 py-7">
+          {loading && (
+            <div className="mb-6 rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm text-gray-500">
+              Cargando postulaciones...
+            </div>
+          )}
+          {error && (
+            <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+          {/* ── Stat Cards (Staggered Fade-in) ── */}
+          <div className="grid grid-cols-6 gap-4 mb-8">
+            {tarjetasEstadistica.map((card, i) => {
+              const isActive = filtroEstado === card.filter;
+              return (
                 <button
                   type="button"
                   onClick={() => { setFiltroEstado(null); setPaginaActual(1); }}
@@ -226,9 +298,10 @@ export default function GestionPostulaciones() {
                       index={i}
                       estaSeleccionado={idsSeleccionados.has(candidate.id)}
                       alSeleccionar={alternarSeleccion}
-                      alVer={() => setPerfilSeleccionado(candidate.perfil)}
+                      alVer={(id) => manejarVerPerfil(id, candidate.perfil)}
                       alInvitar={manejarInvitacion}
                       alRechazar={manejarRechazo}
+                      alAceptar={manejarAceptacion}
                     />
                   ))}
                   {!loading && !error && paginados.length === 0 && (

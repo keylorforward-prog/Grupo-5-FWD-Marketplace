@@ -9,6 +9,7 @@ function DialogoConfirmacion({
   variant = 'default',
   onConfirm,
   onCancel,
+  children,
 }) {
   const dialogRef = useRef(null);
 
@@ -56,6 +57,8 @@ function DialogoConfirmacion({
       >
         <h3 id="dialogo-confirmacion-title" className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
         <p id="dialogo-confirmacion-message" className="text-sm text-gray-600 mb-6">{message}</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+        {children ? children : <p className="text-sm text-gray-600 mb-6">{message}</p>}
         <div className="flex gap-3 justify-end">
           <button
             onClick={onCancel}

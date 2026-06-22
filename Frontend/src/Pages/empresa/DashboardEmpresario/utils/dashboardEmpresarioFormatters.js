@@ -178,10 +178,13 @@ export const formatearPago = (pago) => ({
 const estadoPostulacion = (estado) => {
   const mapa = {
     ENVIADA: 'nuevo',
+    PENDIENTE: 'pendiente',
     EN_REVISION: 'en_revision',
     PRESSELECCIONADA: 'entrevistado',
+    PRESELECCIONADA: 'entrevistado',
     RECHAZADA: 'rechazado',
     CONTRATADO: 'entrevistado',
+    ACEPTADO: 'aceptado',
   };
   return mapa[estado] ?? 'nuevo';
 };
@@ -203,7 +206,7 @@ export const formatearPostulacion = (postulacion) => {
     stacks: tecnologias,
     coverLetter: postulacion.mensaje_presentacion || 'Sin carta de presentacion registrada.',
     status: estadoPostulacion(postulacion.estado),
-    estaInvitado: postulacion.estado === 'PRESSELECCIONADA' || postulacion.estado === 'CONTRATADO',
+    estaInvitado: postulacion.estado === 'PRESSELECCIONADA' || postulacion.estado === 'PRESELECCIONADA' || postulacion.estado === 'CONTRATADO' || postulacion.estado === 'ACEPTADO',
     proyecto: postulacion.propuesta?.titulo || '',
     perfil: formatearTalento(perfil),
   };

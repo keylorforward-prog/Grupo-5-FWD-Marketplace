@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import DashboardLayout from '../DashboardEgresado/components/DashboardLayout';
 import TarjetaUsuario from './components/TarjetaUsuario';
 import TarjetaStack from './components/TarjetaStack';
@@ -9,6 +10,7 @@ import { usePerfilEgresado } from './hooks/usePerfilEgresado';
 import './styles/PerfilEgresado.css';
 
 function PerfilEgresado() {
+  const { t } = useTranslation();
   const perfilApi = usePerfilEgresado();
 
   return (
@@ -16,11 +18,10 @@ function PerfilEgresado() {
       <div className="contenedorPerfil">
         <div className="bannerSuperior fwd-animar-fade">
           <div className="contenidoBanner">
-            <span className="etiquetaBanner">DASHBOARD DE TALENTO</span>
-            <h1 className="tituloBanner">Mi Perfil Estudiantil</h1>
+            <span className="etiquetaBanner">{t('egresadoPerfil.banner.kicker')}</span>
+            <h1 className="tituloBanner">{t('egresadoPerfil.banner.title')}</h1>
             <p className="subtituloBanner">
-              Tu identidad profesional en FWD. Mantén tu información al día para
-              destacar ante empresas.
+              {t('egresadoPerfil.banner.subtitle')}
             </p>
           </div>
 

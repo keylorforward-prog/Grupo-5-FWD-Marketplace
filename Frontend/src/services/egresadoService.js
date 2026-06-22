@@ -38,6 +38,7 @@ export const normalizarPropuestaEgresado = (propuesta, indice = 0) => {
   const presupuestoMin = numero(propuesta.presupuesto_min ?? propuesta.presupuestoMin, 0);
   const presupuestoMax = numero(propuesta.presupuesto_max ?? propuesta.presupuestoMax, presupuestoMin);
   const empresa = propuesta.perfilEmpresario?.usuario;
+  const perfilEmp = propuesta.perfilEmpresario;
 
   return {
     id: propuesta.id_propuesta ?? propuesta.id,
@@ -53,13 +54,66 @@ export const normalizarPropuestaEgresado = (propuesta, indice = 0) => {
     publicado: (propuesta.fecha_publicacion ?? propuesta.publicado ?? '').toString().slice(0, 10),
     colorAcento: coloresAcento[indice % coloresAcento.length],
     empresa: empresa?.nombre || null,
+    empresaLogo: perfilEmp?.logo || null,
     ...estadoVisual(propuesta.estado),
   };
 };
 
 const extraerData = (respuesta) => respuesta.data?.data ?? respuesta.data ?? [];
 
+const normalizarOfertaEmpleo = (oferta) => {
+  const tecnologias = normalizarTecnologias(oferta.tecnologias_requeridas);
+  const estado = oferta.estado ?? 'ACTIVA';
+  return {
+    id:           oferta.id_oferta_empleo,
+    titulo:       oferta.titulo,
+    descripcion:  oferta.descripcion,
+    empresa:      oferta.perfilEmpresario?.usuario?.nombre || null,
+    tecnologias,
+    modalidad:    oferta.modalidad    ?? 'remoto',
+    tipo_jornada: oferta.tipo_jornada ?? null,
+    salario_min:  oferta.salario_min  != null ? Number(oferta.salario_min)  : null,
+    salario_max:  oferta.salario_max  != null ? Number(oferta.salario_max)  : null,
+    ubicacion:    oferta.ubicacion    ?? null,
+    publicado:    (oferta.fecha_publicacion ?? '').toString().slice(0, 10),
+    estado,
+    tipoEstado:   estado === 'ACTIVA' ? 'activo' : 'pendiente',
+    ya_postulado: oferta.ya_postulado ?? false,
+  };
+};
+
 export const egresadoService = {
+  async listarOfertasEmpleo() {
+    const respuesta = await apiClient.get('/dashboard-egresado/ofertas-empleo');
+    return extraerData(respuesta).map(normalizarOfertaEmpleo);
+  },
+
+  async obtenerOfertaEmpleo(id) {
+    const respuesta = await apiClient.get(`/dashboard-egresado/ofertas-empleo/${id}`);
+    const raw = extraerData(respuesta);
+    return {
+      ...normalizarOfertaEmpleo(raw),
+      postulacion: raw.postulacion || null,
+      ya_postulado: !!raw.postulacion,
+      perfilEmpresario: raw.perfilEmpresario || null,
+    };
+  },
+
+  async postularOfertaEmpleo(datos) {
+    const respuesta = await apiClient.post('/dashboard-egresado/ofertas-empleo/postular', datos);
+    return respuesta.data;
+  },
+
+  async actualizarPostulacionEmpleo(id, datos) {
+    const respuesta = await apiClient.put(`/dashboard-egresado/ofertas-empleo/postulacion/${id}`, datos);
+    return respuesta.data;
+  },
+
+  async eliminarPostulacionEmpleo(id) {
+    const respuesta = await apiClient.delete(`/dashboard-egresado/ofertas-empleo/postulacion/${id}`);
+    return respuesta.data;
+  },
+
   async listarPropuestas() {
     const respuesta = await apiClient.get('/propuestas');
     return extraerData(respuesta).map(normalizarPropuestaEgresado);

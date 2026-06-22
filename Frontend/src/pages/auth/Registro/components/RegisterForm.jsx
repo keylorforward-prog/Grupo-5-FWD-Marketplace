@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { User, Mail, CreditCard, Tag, Smartphone, GraduationCap, Building2, Factory, FileText, Lock, LockKeyhole, Eye, EyeOff, AlertCircle, Clock } from 'lucide-react';
+import { User, Mail, CreditCard, Tag, Smartphone, GraduationCap, Building2, Factory, FileText, Lock, LockKeyhole, Eye, EyeOff, AlertCircle, Clock, Link as LinkIcon } from 'lucide-react';
 import { authService } from '../../../../services/authService';
 import { RUTAS } from '../../../../routes/rutas';
 import '../../AuthPages.css';
-
+import { useTranslation } from 'react-i18next';
 const RegisterForm = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmPassword: '', cedula: '', rol: 'ESTUDIANTE', telefono_whatsapp: '', titulo_fwd_file: null, tipo_empresa: '', sector: '', cedula_juridica_file: null });
+  const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmPassword: '', cedula: '', rol: 'ESTUDIANTE', telefono_whatsapp: '', linkedin: '', titulo_fwd_file: null, tipo_empresa: '', sector: '', cedula_juridica_file: null });
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,19 +34,20 @@ const RegisterForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { nombre, email, password, confirmPassword, cedula, rol, telefono_whatsapp, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file } = form;
+    const { nombre, email, password, confirmPassword, cedula, rol, telefono_whatsapp, linkedin, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file } = form;
 
     if (!nombre || !email || !password || !confirmPassword || !cedula || !rol) {
       setError(t('auth.register.errFields'));
       return;
     }
-    
-    // Validación de formato de cédula: debe contener guion
-    if (!cedula.includes('-')) {
-      setError(t('auth.register.errCedula'));
+
+    // Validación cédula costarricense: formato X-XXXX-XXXX (física) o XX-XXXXXXX-XXX (jurídica)
+    const cedulaRegex = /^\d{1,2}-\d{3,4}-\d{3,4}$/;
+    if (!cedulaRegex.test(cedula)) {
+      setError('Formato de cédula inválido. Ejemplos: 1-1231-8232 o 12-3456789-123');
       return;
     }
-    
+
     if (password.length < 6) {
       setError(t('auth.register.errPasswordLen'));
       return;
@@ -69,7 +69,7 @@ const RegisterForm = () => {
     setSuccessMsg('');
 
     try {
-      const data = await authService.register({ nombre, email, password, cedula, rol, telefono_whatsapp, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file });
+      const data = await authService.register({ nombre, email, password, cedula, rol, telefono_whatsapp, linkedin, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file });
       if (data.success && data.pendingApproval) {
         setSuccessMsg(data.message);
         // Redirigir al login después de 4 segundos
@@ -95,7 +95,7 @@ const RegisterForm = () => {
         {/* Error banner */}
         {error && (
           <div className="auth-error" role="alert">
-            <AlertCircle size={16} style={{flexShrink: 0}} />
+            <AlertCircle size={16} style={{ flexShrink: 0 }} />
             {error}
           </div>
         )}
@@ -135,7 +135,7 @@ const RegisterForm = () => {
         <div className="form-group">
           <label htmlFor="reg-nombre" className="form-label">{t('auth.register.name')}</label>
           <div className="input-wrapper">
-            <User size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+            <User size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               id="reg-nombre"
               type="text"
@@ -154,7 +154,7 @@ const RegisterForm = () => {
         <div className="form-group">
           <label htmlFor="reg-email" className="form-label">{t('auth.login.email')}</label>
           <div className="input-wrapper">
-            <Mail size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+            <Mail size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               id="reg-email"
               type="email"
@@ -173,7 +173,7 @@ const RegisterForm = () => {
         <div className="form-group">
           <label htmlFor="reg-cedula" className="form-label">{t('auth.register.cedula')}<span style={{ color: '#1B6CA8', fontWeight: 500 }}>{t('auth.register.cedulaHint')}</span></label>
           <div className="input-wrapper">
-            <CreditCard size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+            <CreditCard size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               id="reg-cedula"
               type="text"
@@ -189,7 +189,7 @@ const RegisterForm = () => {
 
         {/* Rol */}
         <div className="form-group">
-          <label htmlFor="reg-rol" className="form-label"><Tag size={18} style={{display: 'inline-block', marginRight: '0.5em', verticalAlign: 'text-bottom'}} /> {t('auth.register.role')}</label>
+          <label htmlFor="reg-rol" className="form-label"><Tag size={18} style={{ display: 'inline-block', marginRight: '0.5em', verticalAlign: 'text-bottom' }} /> {t('auth.register.role')}</label>
           <div className="input-wrapper">
             <select
               id="reg-rol"
@@ -209,7 +209,7 @@ const RegisterForm = () => {
         <div className="form-group">
           <label htmlFor="reg-telefono" className="form-label">{t('auth.register.phone')}</label>
           <div className="input-wrapper">
-            <Smartphone size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+            <Smartphone size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               id="reg-telefono"
               type="tel"
@@ -223,12 +223,29 @@ const RegisterForm = () => {
           </div>
         </div>
 
+        {/* LinkedIn */}
+        <div className="form-group">
+          <label htmlFor="reg-linkedin" className="form-label">Perfil de LinkedIn <span style={{ fontSize: '0.85em', color: '#888' }}>- Opcional</span></label>
+          <div className="input-wrapper">
+            <LinkIcon size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              id="reg-linkedin"
+              type="url"
+              name="linkedin"
+              value={form.linkedin}
+              onChange={handleChange}
+              placeholder="https://linkedin.com/in/tu-perfil"
+              className="form-input has-icon"
+            />
+          </div>
+        </div>
+
         {/* Campos condicionales Estudiante */}
         {form.rol === 'ESTUDIANTE' && (
           <div className="form-group">
             <label htmlFor="reg-titulo" className="form-label">{t('auth.register.fileStudent')}</label>
             <div className="input-wrapper">
-              <GraduationCap size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+              <GraduationCap size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 id="reg-titulo"
                 type="file"
@@ -248,7 +265,7 @@ const RegisterForm = () => {
             <div className="form-group">
               <label htmlFor="reg-tipo-empresa" className="form-label">{t('auth.register.companyType')}</label>
               <div className="input-wrapper">
-                <Building2 size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+                <Building2 size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   id="reg-tipo-empresa"
                   type="text"
@@ -264,7 +281,7 @@ const RegisterForm = () => {
             <div className="form-group">
               <label htmlFor="reg-sector" className="form-label">{t('auth.register.sector')}</label>
               <div className="input-wrapper">
-                <Factory size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+                <Factory size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   id="reg-sector"
                   type="text"
@@ -282,7 +299,7 @@ const RegisterForm = () => {
                 {t('auth.register.fileCompany')} <span style={{ fontSize: '0.85em', color: '#888' }}>{t('auth.register.optional')}</span>
               </label>
               <div className="input-wrapper">
-                <FileText size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+                <FileText size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   id="reg-cedula-juridica"
                   type="file"
@@ -300,7 +317,7 @@ const RegisterForm = () => {
         <div className="form-group">
           <label htmlFor="reg-password" className="form-label">{t('auth.login.password')}</label>
           <div className="input-wrapper">
-            <Lock size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+            <Lock size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               id="reg-password"
               type={showPassword ? 'text' : 'password'}
@@ -317,7 +334,7 @@ const RegisterForm = () => {
               className="toggle-password"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              style={{background: 'none', border: 'none', cursor: 'pointer', padding: 0}}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -328,7 +345,7 @@ const RegisterForm = () => {
         <div className="form-group">
           <label htmlFor="reg-confirm" className="form-label">{t('auth.register.confirmPassword')}</label>
           <div className="input-wrapper">
-            <LockKeyhole size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+            <LockKeyhole size={20} className="input-icon" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               id="reg-confirm"
               type={showPassword ? 'text' : 'password'}

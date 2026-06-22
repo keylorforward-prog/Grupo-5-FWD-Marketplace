@@ -3,16 +3,27 @@ const {
   PerfilEstudiante,
   PerfilEmpresario,
   Postulacion,
+  PostulacionEmpleo,
   Propuesta,
   ProyectoPlataforma,
   Entregable,
   HistorialProyectoEstudiante,
   Notificacion,
   Oferta,
+  OfertaEmpleo,
   Usuario,
   Conversacion,
   Curriculum,
 } = require('../Models');
+
+const DOS_MINUTOS = 2 * 60 * 1000;
+
+const actualizarPendiente = async (postulacion) => {
+  if (postulacion.estado === 'ENVIADA' && Date.now() - new Date(postulacion.fecha_postulacion).getTime() >= DOS_MINUTOS) {
+    postulacion.estado = 'PENDIENTE';
+    await postulacion.save();
+  }
+};
 
 const obtenerLimite = (valor, defecto = 20) => {
   const numero = Number.parseInt(valor, 10);
@@ -209,7 +220,7 @@ const obtenerResumen = async (req, res) => {
       Postulacion.count({
         where: {
           id_perfil_estudiante: perfil.id_perfil_estudiante,
-          estado: { [Op.in]: ['ENVIADA', 'EN_REVISION', 'PRESSELECCIONADA'] },
+          estado: { [Op.in]: ['ENVIADA', 'EN_REVISION', 'PRESELECCIONADA'] },
         },
       }),
       Postulacion.count({ where: { id_perfil_estudiante: perfil.id_perfil_estudiante } }),
@@ -287,6 +298,8 @@ const listarPostulaciones = async (req, res) => {
       order: [['fecha_postulacion', 'DESC']],
       limit: obtenerLimite(req.query.limit),
     });
+
+    await Promise.all(postulaciones.map(actualizarPendiente));
 
     res.json({ success: true, data: postulaciones });
   } catch (error) {
@@ -661,6 +674,171 @@ const listarOfertas = async (req, res) => {
   }
 };
 
+const listarOfertasEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const ofertas = await OfertaEmpleo.findAll({
+      where: { estado: 'ACTIVA' },
+      include: [{
+        model: PerfilEmpresario,
+        as: 'perfilEmpresario',
+        attributes: ['id_perfil_empresario', 'sector', 'logo'],
+        include: [{ model: Usuario, as: 'usuario', attributes: ['nombre'] }],
+      }],
+      order: [['fecha_publicacion', 'DESC']],
+    });
+
+    const postulaciones = await PostulacionEmpleo.findAll({
+      where: { id_perfil_estudiante: perfil.id_perfil_estudiante },
+      attributes: ['id_oferta_empleo'],
+    });
+    const idsPostulados = postulaciones.map((p) => p.id_oferta_empleo);
+
+    const data = ofertas.map((o) => ({
+      ...o.toJSON(),
+      ya_postulado: idsPostulados.includes(o.id_oferta_empleo),
+    }));
+
+    res.json({ success: true, data });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener las ofertas de empleo.');
+  }
+};
+
+const obtenerOfertaEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const oferta = await OfertaEmpleo.findByPk(req.params.id, {
+      include: [{
+        model: PerfilEmpresario,
+        as: 'perfilEmpresario',
+        attributes: ['id_perfil_empresario', 'sector', 'logo', 'descripcion', 'sitio_web'],
+        include: [{ model: Usuario, as: 'usuario', attributes: ['nombre', 'correo'] }],
+      }],
+    });
+
+    if (!oferta) {
+      return res.status(404).json({ success: false, message: 'La oferta de empleo no existe.' });
+    }
+
+    const postulacion = await PostulacionEmpleo.findOne({
+      where: {
+        id_oferta_empleo: oferta.id_oferta_empleo,
+        id_perfil_estudiante: perfil.id_perfil_estudiante,
+      },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        ...oferta.toJSON(),
+        ya_postulado: !!postulacion,
+        postulacion: postulacion || null,
+      },
+    });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener la oferta de empleo.');
+  }
+};
+
+const postularOfertaEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const { id_oferta_empleo, carta_presentacion, cv_url, pretension_salarial } = req.body;
+
+    if (!id_oferta_empleo) {
+      return res.status(400).json({ success: false, message: 'id_oferta_empleo es requerido.' });
+    }
+
+    const oferta = await OfertaEmpleo.findByPk(id_oferta_empleo);
+    if (!oferta) {
+      return res.status(404).json({ success: false, message: 'La oferta de empleo no existe.' });
+    }
+    if (oferta.estado !== 'ACTIVA') {
+      return res.status(400).json({ success: false, message: 'Esta oferta ya no está disponible.' });
+    }
+
+    const yaPostulo = await PostulacionEmpleo.findOne({
+      where: {
+        id_oferta_empleo,
+        id_perfil_estudiante: perfil.id_perfil_estudiante,
+      },
+    });
+    if (yaPostulo) {
+      return res.status(409).json({ success: false, message: 'Ya postulaste a esta oferta.' });
+    }
+
+    const postulacion = await PostulacionEmpleo.create({
+      id_oferta_empleo,
+      id_perfil_estudiante: perfil.id_perfil_estudiante,
+      carta_presentacion:   carta_presentacion ?? null,
+      cv_url:               cv_url ?? null,
+      pretension_salarial:  pretension_salarial != null ? Number(pretension_salarial) : null,
+    });
+
+    res.status(201).json({ success: true, data: postulacion });
+  } catch (error) {
+    responderError(res, error, 'Error al postular a la oferta de empleo.');
+  }
+};
+
+const actualizarPostulacionEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const postulacion = await PostulacionEmpleo.findOne({
+      where: {
+        id_postulacion_empleo: req.params.id,
+        id_perfil_estudiante: perfil.id_perfil_estudiante,
+      },
+    });
+
+    if (!postulacion) {
+      return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+    }
+
+    const { carta_presentacion, cv_url, pretension_salarial } = req.body;
+    if (carta_presentacion !== undefined) postulacion.carta_presentacion = carta_presentacion;
+    if (cv_url !== undefined) postulacion.cv_url = cv_url;
+    if (pretension_salarial !== undefined) postulacion.pretension_salarial = pretension_salarial != null ? Number(pretension_salarial) : null;
+    await postulacion.save();
+
+    res.json({ success: true, data: postulacion });
+  } catch (error) {
+    responderError(res, error, 'Error al actualizar la postulación.');
+  }
+};
+
+const eliminarPostulacionEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const postulacion = await PostulacionEmpleo.findOne({
+      where: {
+        id_postulacion_empleo: req.params.id,
+        id_perfil_estudiante: perfil.id_perfil_estudiante,
+      },
+    });
+
+    if (!postulacion) {
+      return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+    }
+
+    await postulacion.destroy();
+    res.json({ success: true, message: 'Postulación cancelada.' });
+  } catch (error) {
+    responderError(res, error, 'Error al cancelar la postulación.');
+  }
+};
+
 const marcarNotificacionLeida = async (req, res) => {
   try {
     const [updated] = await Notificacion.update(
@@ -693,6 +871,11 @@ module.exports = {
   actualizarHistorial,
   eliminarHistorial,
   listarHistorial,
+  listarOfertasEmpleo,
+  obtenerOfertaEmpleo,
+  postularOfertaEmpleo,
+  actualizarPostulacionEmpleo,
+  eliminarPostulacionEmpleo,
   listarMensajesRecientes,
   listarOfertas,
   obtenerConversacion,

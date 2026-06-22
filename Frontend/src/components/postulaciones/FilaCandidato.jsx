@@ -6,6 +6,12 @@ const configEstado = {
   en_revision: { label: 'En revisión', badge: 'revision' },
   entrevistado: { label: 'Entrevistado', badge: 'recepcion' },
   rechazado: { label: 'Rechazado', badge: 'rechazado' },
+  nuevo: { label: 'Nuevo', bg: 'rgba(37,99,235,0.1)', text: '#2563eb', dot: '#3b82f6' },
+  pendiente: { label: 'Pendiente', bg: 'rgba(245,158,11,0.08)', text: '#92400e', dot: '#d97706' },
+  en_revision: { label: 'En revisión', bg: 'rgba(245,158,11,0.12)', text: '#b45309', dot: '#f59e0b' },
+  entrevistado: { label: 'Entrevistado', bg: 'rgba(124,58,237,0.1)', text: '#7c3aed', dot: '#a78bfa' },
+  aceptado: { label: 'Aceptado', bg: 'rgba(5,150,105,0.1)', text: '#047857', dot: '#10b981' },
+  rechazado: { label: 'Rechazado', bg: 'rgba(107,114,128,0.1)', text: '#6b7280', dot: '#9ca3af' },
 };
 
 // Pastel colors for stacks like in the photo
@@ -40,6 +46,7 @@ export default function FilaCandidato({
   alVer,
   alInvitar,
   alRechazar,
+  alAceptar,
 }) {
   const { id, name, location, stacks, coverLetter, status, estaInvitado, avatar } = candidate;
   const infoEstado = configEstado[status] ?? configEstado.nuevo;
@@ -131,6 +138,7 @@ export default function FilaCandidato({
           alVer={alVer}
           alInvitar={alInvitar}
           alRechazar={alRechazar}
+          alAceptar={alAceptar}
         />
       </td>
     </tr>

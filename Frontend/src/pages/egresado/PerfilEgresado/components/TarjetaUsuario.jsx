@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pencil, Globe, ExternalLink, Check, X, Camera } from 'lucide-react';
 import { useAuth } from '../../../../context/AuthContext';
 
@@ -21,6 +22,7 @@ const OPCIONES_ROL = [
 ];
 
 function TarjetaUsuario({ perfilApi }) {
+  const { t } = useTranslation();
   const { perfil, actualizar } = perfilApi;
   const { user, actualizarUsuario } = useAuth();
   const [editando, setEditando] = useState(false);
@@ -86,7 +88,7 @@ function TarjetaUsuario({ perfilApi }) {
           className="botonEditarAvatar"
           onClick={abrirSelectorArchivo}
           disabled={subiendo}
-          aria-label="Cambiar foto"
+          aria-label={t('egresadoPerfil.userCard.cambiarFoto')}
         >
           <Camera size={14} />
         </button>
@@ -105,13 +107,13 @@ function TarjetaUsuario({ perfilApi }) {
             className="entradaPerfil"
             value={borrador.nombre}
             onChange={(e) => setBorrador((b) => ({ ...b, nombre: e.target.value }))}
-            placeholder="Nombre completo"
+            placeholder={t('egresadoPerfil.userCard.nombrePlaceholder')}
           />
           <input
             className="entradaPerfil"
             value={borrador.rol}
             onChange={(e) => setBorrador((b) => ({ ...b, rol: e.target.value }))}
-            placeholder="Tu rol o título"
+            placeholder={t('egresadoPerfil.userCard.rolPlaceholder')}
             list="listaRoles"
           />
           <datalist id="listaRoles">
@@ -123,21 +125,21 @@ function TarjetaUsuario({ perfilApi }) {
             className="entradaPerfil"
             value={borrador.portfolio}
             onChange={(e) => setBorrador((b) => ({ ...b, portfolio: e.target.value }))}
-            placeholder="URL portfolio"
+            placeholder={t('egresadoPerfil.userCard.portfolioPlaceholder')}
           />
           <input
             className="entradaPerfil"
             value={borrador.linkedin}
             onChange={(e) => setBorrador((b) => ({ ...b, linkedin: e.target.value }))}
-            placeholder="URL LinkedIn"
+            placeholder={t('egresadoPerfil.userCard.linkedinPlaceholder')}
           />
 
           <div className="accionesEdicionPerfil">
             <button type="button" className="botonGuardarPerfil" onClick={guardar}>
-              <Check size={14} /> Guardar
+              <Check size={14} /> {t('egresadoPerfil.userCard.guardar')}
             </button>
             <button type="button" className="botonCancelarPerfil" onClick={cancelar}>
-              <X size={14} /> Cancelar
+              <X size={14} /> {t('egresadoPerfil.userCard.cancelar')}
             </button>
           </div>
         </div>
@@ -152,7 +154,7 @@ function TarjetaUsuario({ perfilApi }) {
               type="button"
               className="botonEditarPerfil"
               onClick={iniciarEdicion}
-              aria-label="Editar perfil"
+              aria-label={t('egresadoPerfil.userCard.editarPerfil')}
             >
               <Pencil size={14} />
             </button>
@@ -166,7 +168,7 @@ function TarjetaUsuario({ perfilApi }) {
               className="botonEnlacePerfil"
             >
               <Globe size={16} />
-              Portfolio
+              {t('egresadoPerfil.userCard.portfolio')}
             </a>
             <a
               href={perfil.linkedin}
@@ -175,7 +177,7 @@ function TarjetaUsuario({ perfilApi }) {
               className="botonEnlacePerfil"
             >
               <ExternalLink size={16} />
-              LinkedIn
+              {t('egresadoPerfil.userCard.linkedin')}
             </a>
           </div>
         </>

@@ -32,12 +32,12 @@ export default function DashboardLayout({ children }) {
   const sidebarItems = [
     { key: 'inicio', label: t('egresadoLayout.sidebar.inicio'), icon: Home, path: '/egresado/dashboard' },
     { key: 'explorar', label: t('egresadoLayout.sidebar.explorar'), icon: Compass, path: '/egresado/dashboard/explorar' },
-    { key: 'explorar-empleos', label: 'Explorar Empleos', icon: Briefcase, path: '/egresado/dashboard/explorar-empleos' },
+    { key: 'explorar-empleos', label: t('egresadoLayout.sidebar.explorarEmpleos'), icon: Briefcase, path: '/egresado/dashboard/explorar-empleos' },
     {
       key: 'postulaciones', label: t('egresadoLayout.sidebar.postulaciones'), icon: FileText,
       children: [
-        { key: 'postulaciones-proyectos', label: 'Proyectos', path: '/egresado/dashboard/postulaciones/proyectos' },
-        { key: 'postulaciones-empleos', label: 'Empleos', path: '/egresado/dashboard/postulaciones/empleos' },
+        { key: 'postulaciones-proyectos', label: t('egresadoLayout.sidebar.postulacionesProyectos'), path: '/egresado/dashboard/postulaciones/proyectos' },
+        { key: 'postulaciones-empleos', label: t('egresadoLayout.sidebar.postulacionesEmpleos'), path: '/egresado/dashboard/postulaciones/empleos' },
       ],
     },
     { key: 'proyectos', label: t('egresadoLayout.sidebar.proyectos'), icon: FolderOpen, path: '/egresado/dashboard/proyectos' },
