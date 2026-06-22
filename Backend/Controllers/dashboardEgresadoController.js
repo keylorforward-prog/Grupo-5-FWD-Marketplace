@@ -596,6 +596,23 @@ const enviarMensaje = async (req, res) => {
       include: [{ model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] }],
     });
 
+    // Notificación al Empresario si el emisor es Estudiante
+    if (esEstudiante) {
+      const { PerfilEmpresario, Notificacion } = require('../Models');
+      const empresarioUserId = postulacion.propuesta.id_usuario;
+      
+      const perfilEmpresario = await PerfilEmpresario.findOne({ where: { id_usuario: empresarioUserId } });
+      if (perfilEmpresario && perfilEmpresario.notif_mensajes_directos) {
+        await Notificacion.create({
+          id_usuario: empresarioUserId,
+          tipo: 'NUEVO_MENSAJE',
+          mensaje: `Has recibido un nuevo mensaje directo sobre tu propuesta.`,
+          leido: false,
+          fecha: new Date(),
+        });
+      }
+    }
+
     res.status(201).json({ success: true, data: creado });
   } catch (error) {
     responderError(res, error, 'Error al enviar el mensaje.');

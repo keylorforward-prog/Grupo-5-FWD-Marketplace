@@ -66,6 +66,10 @@ exports.getProfileByUserId = async (req, res) => {
         sitio_web: perfil?.sitio_web || '',
         sector: perfil?.sector || '',
         descripcion: perfil?.descripcion || '',
+        notif_postulaciones: perfil?.notif_postulaciones ?? true,
+        notif_resumen_semanal: perfil?.notif_resumen_semanal ?? true,
+        notif_mensajes_directos: perfil?.notif_mensajes_directos ?? true,
+        cedula_juridica_archivo: perfil?.cedula_juridica_archivo || null
       } 
     });
   } catch (error) {
@@ -75,17 +79,23 @@ exports.getProfileByUserId = async (req, res) => {
 
 exports.updateProfileByUserId = async (req, res) => {
   try {
-    const { nombre, cedula, telefono_whatsapp, sitio_web, sector, descripcion } = req.body;
+    const { 
+      nombre, cedula, telefono_whatsapp, sitio_web, sector, descripcion,
+      notif_postulaciones, notif_resumen_semanal, notif_mensajes_directos 
+    } = req.body;
     const id_usuario = req.params.id_usuario;
 
     // Actualizamos Usuario
     await Usuario.update({ nombre, cedula, telefono_whatsapp }, { where: { id_usuario } });
 
+    // Preparamos objeto de actualización para PerfilEmpresario
+    const updateData = { sitio_web, sector, descripcion, telefono_whatsapp };
+    if (notif_postulaciones !== undefined) updateData.notif_postulaciones = notif_postulaciones;
+    if (notif_resumen_semanal !== undefined) updateData.notif_resumen_semanal = notif_resumen_semanal;
+    if (notif_mensajes_directos !== undefined) updateData.notif_mensajes_directos = notif_mensajes_directos;
+
     // Actualizamos PerfilEmpresario
-    await PerfilEmpresario.update(
-      { sitio_web, sector, descripcion, telefono_whatsapp },
-      { where: { id_usuario } }
-    );
+    await PerfilEmpresario.update(updateData, { where: { id_usuario } });
 
     res.status(200).json({ success: true, message: 'Perfil de empresa actualizado correctamente' });
   } catch (error) {

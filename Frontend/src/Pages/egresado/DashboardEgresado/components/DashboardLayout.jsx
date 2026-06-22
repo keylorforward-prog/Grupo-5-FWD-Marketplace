@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { RUTAS } from '../../../../routes/rutas';
 import '../../../../Pages/empresa/DashboardEmpresario/DashboardEmpresario.css';
 import '../styles/DashboardEgresado.css';
+import fwdDarkLogo from '../../../../assets/fwdcrdark.png';
 
 const sidebarItems = [
   { key: 'inicio', label: 'Inicio', icon: Home, path: '/egresado/dashboard' },
@@ -169,7 +170,7 @@ export default function DashboardLayout({ children }) {
             <button className="de-brand de-link-button" type="button" onClick={() => navigate('/egresado/dashboard')}>
               <img
                 className="de-brand-logo"
-                src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"
+                src={tema === 'dark' ? fwdDarkLogo : "/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"}
                 alt="FWD"
                 width="104"
                 height="53"
