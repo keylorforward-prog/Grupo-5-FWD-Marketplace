@@ -1,15 +1,9 @@
 import { useState } from 'react';
-import { Eye, X, CheckCircle2 } from 'lucide-react';
+import { Eye, X, CheckCircle2, Send } from 'lucide-react';
 import Tooltip from '../ui/Tooltip';
 import Emergente from '../ui/Emergente';
 import DialogoConfirmacion from '../ui/DialogoConfirmacion';
 import MiniCalendario from './MiniCalendario';
-
-const btnBase = `
-  w-8 h-8 flex items-center justify-center flex-shrink-0
-  transition-all duration-200 bg-transparent
-  hover:scale-110 active:scale-95
-`;
 
 export default function BotonesAccion({
   idCandidato,
@@ -25,38 +19,39 @@ export default function BotonesAccion({
 
   return (
     <>
-      <div className="flex items-center gap-1.5">
-        {/* Ver perfil → Azul */}
+      <div className="de-row-actions">
         <Tooltip content="Ver perfil completo">
           <button
+            type="button"
             onClick={() => alVer(idCandidato)}
             aria-label={`Ver perfil de ${nombreCandidato}`}
-            className={`${btnBase} text-[#1868D5] hover:text-blue-700`}
+            className="de-project-icon-button"
           >
-            <Eye className="w-5 h-5" />
+            <Eye size={17} />
           </button>
         </Tooltip>
 
-        {/* Agendar → Morado (Arrow) */}
         <Tooltip content={estaInvitado ? 'Invitación enviada' : 'Agendar entrevista'}>
           <div>
             {estaInvitado ? (
               <button
+                type="button"
                 disabled
                 aria-label="Invitación ya enviada"
-                className={`${btnBase} text-emerald-500 cursor-default`}
+                className="de-project-icon-button success"
               >
-                <CheckCircle2 className="w-5 h-5" />
+                <CheckCircle2 size={17} />
               </button>
             ) : (
               <Emergente
                 align="right"
                 trigger={
                   <button
+                    type="button"
                     aria-label={`Agendar entrevista con ${nombreCandidato}`}
-                    className={`${btnBase} text-[#7C3AED] hover:text-purple-700`}
+                    className="de-project-icon-button"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    <Send size={17} />
                   </button>
                 }
               >
@@ -70,16 +65,15 @@ export default function BotonesAccion({
           </div>
         </Tooltip>
 
-        {/* Rechazar → Rojo */}
         <Tooltip content={isRejected ? 'Candidato rechazado' : 'Rechazar candidato'}>
           <button
+            type="button"
             onClick={() => !isRejected && setShowConfirm(true)}
             disabled={isRejected}
             aria-label={`Rechazar a ${nombreCandidato}`}
-            className={`${btnBase}
-              ${isRejected ? 'text-gray-300 cursor-not-allowed' : 'text-[#DC2626] hover:text-red-700'}`}
+            className="de-project-icon-button danger"
           >
-            <X className="w-5 h-5" />
+            <X size={17} />
           </button>
         </Tooltip>
       </div>

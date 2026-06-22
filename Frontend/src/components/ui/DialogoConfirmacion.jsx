@@ -1,5 +1,6 @@
-import { useRef, useEffect } from 'react';
-export default function DialogoConfirmacion({
+import { memo, useCallback, useRef, useEffect } from 'react';
+
+function DialogoConfirmacion({
   open,
   title,
   message,
@@ -12,10 +13,26 @@ export default function DialogoConfirmacion({
   const dialogRef = useRef(null);
 
   useEffect(() => {
-    if (open) {
-      dialogRef.current?.focus();
-    }
-  }, [open]);
+    if (!open) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onCancel?.();
+    };
+
+    dialogRef.current?.focus();
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onCancel, open]);
+
+  const detenerPropagacion = useCallback((event) => {
+    event.stopPropagation();
+  }, []);
 
   if (!open) return null;
 
@@ -31,13 +48,14 @@ export default function DialogoConfirmacion({
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-labelledby="dialogo-confirmacion-title"
+        aria-describedby="dialogo-confirmacion-message"
         className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4"
-        onClick={(e) => e.stopPropagation()}
+        onClick={detenerPropagacion}
         style={{ animation: 'popIn 0.2s ease-out' }}
       >
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-        <p className="text-sm text-gray-600 mb-6">{message}</p>
+        <h3 id="dialogo-confirmacion-title" className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+        <p id="dialogo-confirmacion-message" className="text-sm text-gray-600 mb-6">{message}</p>
         <div className="flex gap-3 justify-end">
           <button
             onClick={onCancel}
@@ -56,3 +74,5 @@ export default function DialogoConfirmacion({
     </div>
   );
 }
+
+export default memo(DialogoConfirmacion);

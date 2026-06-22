@@ -6,6 +6,8 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+let redirectingToLogin = false;
+
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -21,10 +23,13 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !redirectingToLogin) {
+      redirectingToLogin = true;
       // Token expirado o inválido
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login');
+      }
     }
     return Promise.reject(error);
   }

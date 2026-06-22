@@ -1,4 +1,3 @@
-import React from 'react';
 import DashboardLayout from '../DashboardEmpresario/components/DashboardLayout';
 import CompanyProfile from './components/CompanyProfile';
 import RecruitmentTeam from './components/RecruitmentTeam';
