@@ -24,6 +24,7 @@ export const RUTAS = {
   egresadoNotificaciones: '/egresado/dashboard/notificaciones',
   egresadoPerfil: '/egresado/perfil',
   egresadoConfiguracion: '/egresado/configuracion',
+  egresadoSoporte: '/egresado/soporte',
 
   // Empresa
   empresa: '/empresa',

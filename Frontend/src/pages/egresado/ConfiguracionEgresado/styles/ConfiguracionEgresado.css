@@ -712,12 +712,31 @@ input:checked + .deslizador::before {
 
 .modalConfirmacion {
   background: var(--surface);
-  border-radius: 18px;
-  padding: 28px;
-  max-width: 420px;
-  width: 90%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 0;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.2s ease-out;
+  overflow-y: auto;
+}
+
+.modalConfirmacion .encabezadoModal {
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.modalConfirmacion .grupoFormulario,
+.modalConfirmacion .entradaFormulario,
+.modalConfirmacion .accionesModal {
+  max-width: 400px;
+  width: 100%;
 }
 
 .encabezadoModal {
@@ -793,4 +812,219 @@ input:checked + .deslizador::before {
 
 .botonEliminarConfirmacion:not(:disabled):hover {
   opacity: 0.9;
+}
+
+/* ============================================
+   SEGURIDAD LATERAL (compacto · suave)
+   ============================================ */
+.seguridadLateral {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.seguridadLateral .tarjetaFormulario {
+  padding: 16px;
+  box-shadow: none;
+  background: color-mix(in srgb, var(--surface-sunken) 60%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  scroll-margin-top: 0;
+}
+
+.seguridadLateral .cabeceraFormulario {
+  margin-bottom: 12px;
+}
+
+.seguridadLateral .tituloFormulario {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  letter-spacing: 0.2px;
+}
+
+.seguridadLateral .itemSeguridad {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  gap: 10px;
+}
+
+.seguridadLateral .textoSeguridad {
+  flex: 1;
+  min-width: 0;
+}
+
+.seguridadLateral .textoSeguridad h4 {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink-strong);
+  margin: 0 0 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.seguridadLateral .textoSeguridad p {
+  font-size: 11px;
+  color: var(--ink-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.seguridadLateral .botonContorno {
+  padding: 6px 12px;
+  font-size: 11px;
+  border-radius: 8px;
+  white-space: nowrap;
+  background: var(--surface);
+}
+
+.seguridadLateral .botonContorno:hover {
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+}
+
+.seguridadLateral .pieSeguridad {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: none;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.seguridadLateral .botonPeligro {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  color: var(--destructive);
+  background: color-mix(in srgb, var(--destructive) 8%, var(--surface));
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--destructive) 20%, transparent);
+}
+
+.seguridadLateral .botonPeligro:hover {
+  background: color-mix(in srgb, var(--destructive) 18%, var(--surface));
+}
+
+.seguridadLateral .formularioPassword {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: var(--surface);
+}
+
+.seguridadLateral .filaFormulario {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.seguridadLateral .grupoFormulario {
+  margin-bottom: 12px;
+}
+
+.seguridadLateral .grupoFormulario label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.seguridadLateral .entradaFormulario {
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 10px;
+}
+
+.seguridadLateral .campoPassword {
+  position: relative;
+}
+
+.seguridadLateral .botonOjoPassword {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--ink-subtle);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+
+.seguridadLateral .mensajeError {
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.seguridadLateral .mensajeExito {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+.seguridadLateral .accionesPassword {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.seguridadLateral .botonPrimario {
+  padding: 7px 16px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.seguridadLateral .badgeActivo {
+  font-size: 9px;
+  padding: 1px 6px;
+}
+
+.seguridadLateral .iconoModalPeligro {
+  width: 48px;
+  height: 48px;
+}
+
+.seguridadLateral .iconoModalPeligro svg {
+  width: 24px;
+  height: 24px;
+}
+
+.seguridadLateral .encabezadoModal h3 {
+  font-size: 20px;
+}
+
+.seguridadLateral .encabezadoModal p {
+  font-size: 14px;
+}
+
+.soporteLateralBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  border-radius: 10px;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.soporteLateralBtn:hover {
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+  border-color: var(--primary);
 }

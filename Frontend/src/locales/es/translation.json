@@ -277,7 +277,11 @@
       "themeDark": "Tema claro",
       "support": "Soporte y ayuda",
       "logout": "Cerrar sesión",
-      "loggingOut": "Cerrando sesión..."
+      "loggingOut": "Cerrando sesión...",
+      "confirmTitle": "¿Cerrar sesión?",
+      "confirmDesc": "Se cerrará tu sesión actual y volverás a la pantalla de inicio.",
+      "confirm": "Sí, cerrar sesión",
+      "cancel": "Cancelar"
     },
     "help": {
       "title": "¿Necesitas ayuda?",
@@ -304,7 +308,8 @@
       "mensajes": "Mensajes",
       "notificaciones": "Notificaciones",
       "perfil": "Mi Perfil",
-      "configuracion": "Configuración"
+      "configuracion": "Configuración",
+      "soporte": "Soporte y Ayuda"
     },
     "profile": {
       "perfil": "Mi Perfil",
@@ -876,7 +881,10 @@
       "expectativaSalarial": "Expectativa Salarial (Anual)",
       "tecnologiasPrincipales": "Tecnologías Principales",
       "nuevaTech": "Nueva tech...",
-      "anadir": "Añadir"
+      "anadir": "Añadir",
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "fullstack": "Full Stack"
     },
     "notifications": {
       "titulo": "Notificaciones",
@@ -909,6 +917,84 @@
       "eliminarBtn": "Eliminar cuenta",
       "ocultar": "Ocultar",
       "mostrar": "Mostrar"
+    }
+  },
+  "egresadoSoporte": {
+    "kicker": "Centro de Ayuda",
+    "titulo": "Soporte y Ayuda",
+    "subtitulo": "Encuentra respuestas a tus preguntas o contacta con nuestro equipo.",
+    "buscarPlaceholder": "Buscar en el centro de ayuda...",
+    "canales": {
+      "correo": {
+        "titulo": "Correo Electrónico",
+        "desc": "Escríbenos a soporte@fwd.com y te responderemos en 24h."
+      },
+      "chat": {
+        "titulo": "Chat con Empresas",
+        "desc": "Comunícate directamente con las empresas desde tus postulaciones."
+      },
+      "terminos": {
+        "titulo": "Términos y Condiciones",
+        "desc": "Consulta nuestras políticas de uso, privacidad y más."
+      }
+    },
+    "accionesRapidas": {
+      "titulo": "Acciones rápidas",
+      "perfil": "Mi Perfil",
+      "mensajes": "Mis Mensajes",
+      "configuracion": "Configuración"
+    },
+    "faq": {
+      "titulo": "Preguntas Frecuentes",
+      "expandirTodo": "Expandir todo",
+      "colapsarTodo": "Colapsar todo",
+      "sinResultados": "No encontramos resultados para tu búsqueda. Intenta con otras palabras.",
+      "postulaciones": {
+        "pregunta": "¿Cómo puedo postularme a un proyecto?",
+        "respuesta": "Explora los proyectos disponibles en la sección 'Explorar Proyectos', selecciona el que te interese y haz clic en 'Postularme'. Completa el formulario con tu CV y una breve carta de presentación."
+      },
+      "proyectos": {
+        "pregunta": "¿Qué pasa después de postularme?",
+        "respuesta": "La empresa revisará tu perfil y te notificará cualquier cambio en el estado de tu postulación. Puedes dar seguimiento desde la sección 'Mis Postulaciones'."
+      },
+      "perfil": {
+        "pregunta": "¿Cómo actualizo mi perfil?",
+        "respuesta": "Ve a 'Mi Perfil' desde el menú lateral. Ahí puedes editar tu foto, biografía, tecnologías y más. Todos los cambios se guardan automáticamente."
+      },
+      "mensajes": {
+        "pregunta": "¿Cómo funciona el sistema de mensajes?",
+        "respuesta": "Cuando una empresa se interesa en tu perfil, pueden iniciar una conversación contigo desde la sección 'Mensajes'. Recibirás una notificación cuando tengas un nuevo mensaje."
+      },
+      "cuenta": {
+        "pregunta": "¿Cómo puedo eliminar mi cuenta?",
+        "respuesta": "Ve a 'Configuración' > 'Seguridad' y selecciona 'Eliminar Cuenta'. Deberás confirmar tu identidad en dos pasos para completar el proceso."
+      },
+      "notificaciones": {
+        "pregunta": "¿Cómo configuro mis notificaciones?",
+        "respuesta": "Ve a la sección 'Notificaciones' desde el menú lateral. Puedes activar o desactivar alertas de postulación, nuevos mensajes y proyectos recomendados."
+      },
+      "privacidad": {
+        "pregunta": "¿Cómo se protege mi información personal?",
+        "respuesta": "Tus datos están protegidos bajo los estándares de seguridad de FWD. Puedes revisar nuestra política de privacidad en la sección de Términos y Condiciones."
+      }
+    },
+    "formulario": {
+      "titulo": "Enviar mensaje",
+      "nombre": "Nombre completo",
+      "nombrePlaceholder": "Tu nombre",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "tu@correo.com",
+      "asunto": "Asunto",
+      "asuntoPlaceholder": "¿En qué podemos ayudarte?",
+      "mensaje": "Mensaje",
+      "mensajePlaceholder": "Describe tu consulta o problema...",
+      "cancelar": "Cancelar",
+      "enviar": "Enviar mensaje",
+      "exito": "¡Mensaje enviado!",
+      "exitoDesc": "Se abrirá tu cliente de correo para completar el envío."
+    },
+    "pie": {
+      "texto": "¿No encontraste lo que buscabas? Contáctanos por cualquiera de nuestros canales."
     }
   },
   "auth": {

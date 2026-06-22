@@ -85,7 +85,7 @@ function PreferenciasProfesionales() {
 
       <div className="filaFormulario">
         <div className="grupoFormulario">
-          <label>{t('egresadoConfiguracion.preferences.rol')}</label>
+          <label>{t('egresadoConfiguracion.preferences.interesRol')}</label>
           <select
             name="rol"
             className="seleccionFormulario"
@@ -98,7 +98,7 @@ function PreferenciasProfesionales() {
           </select>
         </div>
         <div className="grupoFormulario">
-          <label>{t('egresadoConfiguracion.preferences.salario')}</label>
+          <label>{t('egresadoConfiguracion.preferences.expectativaSalarial')}</label>
           <input
             type="text"
             name="salario"
@@ -110,7 +110,7 @@ function PreferenciasProfesionales() {
       </div>
 
       <div className="grupoFormulario">
-        <label>{t('egresadoConfiguracion.preferences.tecnologias')}</label>
+        <label>{t('egresadoConfiguracion.preferences.tecnologiasPrincipales')}</label>
         <div className="contenedorEtiquetasConfiguracion">
           {datosFormulario.tecnologias.map((tech) => (
             <div className="etiquetaConfiguracion" key={tech}>
