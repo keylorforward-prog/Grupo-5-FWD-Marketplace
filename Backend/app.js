@@ -8,6 +8,7 @@ const sequelize = require('./Config/db');
 const config = require('./Config/config');
 const session = require('express-session');
 const passport = require('./Config/passport');
+const { auditContextMiddleware } = require('./Services/auditContext');
 
 const { ConversacionIA } = require('./Models');
 // ── Rutas ──────────────────────────────────────────────────────────────────────
@@ -50,6 +51,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(auditContextMiddleware);
 
 // ── Logger de requests ────────────────────────────────────────────────────────
 app.use((req, res, next) => {

@@ -16,6 +16,8 @@ router.use(verifyToken, isAdmin);
 
 // Endpoints
 router.get('/overview', adminController.getOverview);
+router.get('/verificacion/metricas', adminController.getMetricasVerificacion);
+router.get('/actividad/stream', adminController.streamActividad);
 router.get('/busqueda', adminController.busquedaGlobal);
 router.get('/notificaciones', adminController.getAdminNotificaciones);
 router.get('/auditoria', adminController.getAuditoria);

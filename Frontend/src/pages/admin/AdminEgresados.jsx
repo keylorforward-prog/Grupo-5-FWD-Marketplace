@@ -3,11 +3,18 @@ import { adminService } from '../../services/adminService';
 import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
+  Activity,
   Building2,
   Check,
   CheckCircle,
   FileText,
+  Eye,
   GraduationCap,
+  Clock3,
+  ThumbsDown,
+  ThumbsUp,
+  Wifi,
+  WifiOff,
   RotateCcw,
   Search,
   ShieldCheck,
@@ -15,7 +22,9 @@ import {
   X,
 } from 'lucide-react';
 import AdminMotivoModal from './components/AdminMotivoModal';
+import AdminSeguimientoUsuarioModal from './components/AdminSeguimientoUsuarioModal';
 import { useDebounce } from '../../hooks/useDebounce';
+import './AdminVerificacion.css';
 
 const esUrlDocumento = (valor) => typeof valor === 'string' && /^https?:\/\//i.test(valor);
 const esEvidenciaS3Fwd = (valor) => {
@@ -124,33 +133,69 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
   const [mensaje, setMensaje] = useState(null);
   const [modalRechazo, setModalRechazo] = useState({ open: false, solicitud: null });
   const [procesandoAccion, setProcesandoAccion] = useState(false);
+  const [seguimiento, setSeguimiento] = useState({ open: false, loading: false, detalle: null });
   const [tipoActivo, setTipoActivo] = useState('todos');
   const [filtros, setFiltros] = useState({ busqueda: '', fechaDesde: '', fechaHasta: '' });
   const [orden, setOrden] = useState('oldest');
+  const [metricasServidor, setMetricasServidor] = useState(null);
+  const [estadoTiempoReal, setEstadoTiempoReal] = useState('conectando');
+  const [ultimaActualizacion, setUltimaActualizacion] = useState(null);
   const filtrosDebounced = useDebounce(filtros, 220);
 
-  const cargarSolicitudes = useCallback(async () => {
-    setLoading(true);
-    setMensaje(null);
+  const cargarSolicitudes = useCallback(async ({ silencioso = false } = {}) => {
+    if (!silencioso) {
+      setLoading(true);
+      setMensaje(null);
+    }
 
     try {
-      const [resEgresados, resEmpresas] = await Promise.all([
+      const [resEgresados, resEmpresas, resMetricas] = await Promise.all([
         adminService.getEgresadosPendientes({ page: 1, limit: 100 }),
         adminService.getEmpresas({ estado: 'PENDIENTE', limit: 100 }),
+        adminService.getMetricasVerificacion(),
       ]);
 
       if (resEgresados.success) setEgresados(resEgresados.data || []);
       if (resEmpresas.success) setEmpresas(resEmpresas.data || []);
+      if (resMetricas.success) setMetricasServidor(resMetricas.data);
+      setUltimaActualizacion(new Date());
     } catch (error) {
       console.error('Error cargando verificaciones pendientes', error);
       setMensaje({ tipo: 'error', texto: t('admin.messages.loadVerificationsError') });
     } finally {
-      setLoading(false);
+      if (!silencioso) setLoading(false);
     }
   }, [t]);
 
   useEffect(() => {
     cargarSolicitudes();
+  }, [cargarSolicitudes]);
+
+  useEffect(() => {
+    let eventSource;
+    const actualizarSilenciosamente = () => {
+      if (document.visibilityState === 'visible') cargarSolicitudes({ silencioso: true });
+    };
+    const intervalo = window.setInterval(actualizarSilenciosamente, 30000);
+
+    try {
+      eventSource = new EventSource('/api/admin/actividad/stream', { withCredentials: true });
+      eventSource.addEventListener('activity', () => {
+        setEstadoTiempoReal('conectado');
+        actualizarSilenciosamente();
+      });
+      eventSource.onopen = () => setEstadoTiempoReal('conectado');
+      eventSource.onerror = () => setEstadoTiempoReal('polling');
+    } catch {
+      setEstadoTiempoReal('polling');
+    }
+
+    document.addEventListener('visibilitychange', actualizarSilenciosamente);
+    return () => {
+      window.clearInterval(intervalo);
+      eventSource?.close();
+      document.removeEventListener('visibilitychange', actualizarSilenciosamente);
+    };
   }, [cargarSolicitudes]);
 
   const solicitudes = useMemo(() => ([
@@ -159,10 +204,13 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
   ]), [egresados, empresas]);
 
   const metricas = useMemo(() => ({
-    total: solicitudes.length,
-    empresas: solicitudes.filter((solicitud) => solicitud.tipo === 'empresa').length,
-    egresados: solicitudes.filter((solicitud) => solicitud.tipo === 'egresado').length,
-  }), [solicitudes]);
+    total: metricasServidor?.totalSolicitudes ?? solicitudes.length,
+    empresas: metricasServidor?.empresasPendientes ?? solicitudes.filter((solicitud) => solicitud.tipo === 'empresa').length,
+    egresados: metricasServidor?.egresadosPendientes ?? solicitudes.filter((solicitud) => solicitud.tipo === 'egresado').length,
+    aprobadasHoy: metricasServidor?.aprobadasHoy ?? 0,
+    rechazadasHoy: metricasServidor?.rechazadasHoy ?? 0,
+    tiempoPromedio: metricasServidor?.tiempoPromedioHoras ?? 0,
+  }), [metricasServidor, solicitudes]);
 
   const cambiarFiltro = (campo, valor) => {
     setFiltros((actuales) => ({ ...actuales, [campo]: valor }));
@@ -240,6 +288,16 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
     }
   };
 
+  const abrirSeguimiento = async (solicitud) => {
+    setSeguimiento({ open: true, loading: true, detalle: null });
+    try {
+      const res = await adminService.getUsuarioDetalle(solicitud.idUsuario);
+      setSeguimiento({ open: true, loading: false, detalle: res.success ? res.data : null });
+    } catch {
+      setSeguimiento({ open: true, loading: false, detalle: null });
+    }
+  };
+
   const confirmarRechazo = async (motivo) => {
     if (!modalRechazo.solicitud) return;
     setProcesandoAccion(true);
@@ -272,23 +330,34 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
 
   return (
     <div className="admin-content admin-verification-page animate-in">
-      <section className="admin-kpi-strip">
-        <div className="admin-kpi-item">
-          <span>Total pendientes</span>
-          <strong>{metricas.total}</strong>
+      <header className="admin-verification-hero">
+        <div className="admin-verification-hero-copy">
+          <span className="admin-eyebrow"><ShieldCheck size={15} /> Confianza y cumplimiento</span>
+          <h2>Centro de verificación</h2>
+          <p>Revisa identidades, evidencia y actividad desde una cola priorizada y trazable.</p>
         </div>
-        <div className="admin-kpi-item">
-          <span>Empresas</span>
-          <strong>{metricas.empresas}</strong>
+        <div className={`admin-live-status ${estadoTiempoReal}`}>
+          {estadoTiempoReal === 'conectado' ? <Wifi size={16} /> : <WifiOff size={16} />}
+          <span>{estadoTiempoReal === 'conectado' ? 'Actividad en tiempo real' : 'Polling inteligente activo'}</span>
+          {ultimaActualizacion && <small>Actualizado {ultimaActualizacion.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' })}</small>}
         </div>
-        <div className="admin-kpi-item">
-          <span>Egresados</span>
-          <strong>{metricas.egresados}</strong>
-        </div>
-        <div className="admin-kpi-item">
-          <span>Vista activa</span>
-          <strong>{solicitudesVisibles.length}</strong>
-        </div>
+      </header>
+
+      <section className="admin-verification-metrics" aria-label="Resumen de verificaciones">
+        {[
+          { label: 'Total solicitudes', value: metricas.total, icon: Activity, tone: 'primary' },
+          { label: 'Empresas pendientes', value: metricas.empresas, icon: Building2, tone: 'magenta' },
+          { label: 'Egresados pendientes', value: metricas.egresados, icon: GraduationCap, tone: 'warning' },
+          { label: 'Aprobadas hoy', value: metricas.aprobadasHoy, icon: ThumbsUp, tone: 'success' },
+          { label: 'Rechazadas hoy', value: metricas.rechazadasHoy, icon: ThumbsDown, tone: 'danger' },
+          { label: 'Tiempo promedio', value: `${metricas.tiempoPromedio} h`, icon: Clock3, tone: 'neutral' },
+        ].map(({ label, value, icon: MetricIcon, tone }) => (
+          <article className={`admin-verification-metric ${tone}`} key={label}>
+            <span className="admin-verification-metric-icon"><MetricIcon size={19} /></span>
+            <span>{label}</span>
+            <strong>{loading ? '—' : value}</strong>
+          </article>
+        ))}
       </section>
 
       {mensaje && (
@@ -460,6 +529,9 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
                       </td>
                       <td className="admin-table-actions">
                         <div className="admin-action-group">
+                          <button onClick={() => abrirSeguimiento(solicitud)} className="admin-action-button neutral" type="button" title="Ver seguimiento completo">
+                            <Eye size={14} /> Detalle
+                          </button>
                           <button
                             onClick={() => aprobarSolicitud(solicitud)}
                             className="admin-action-button success"
@@ -497,6 +569,12 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
         loading={procesandoAccion}
         onCancel={() => setModalRechazo({ open: false, solicitud: null })}
         onConfirm={confirmarRechazo}
+      />
+      <AdminSeguimientoUsuarioModal
+        open={seguimiento.open}
+        loading={seguimiento.loading}
+        detalle={seguimiento.detalle}
+        onClose={() => setSeguimiento({ open: false, loading: false, detalle: null })}
       />
     </div>
   );
