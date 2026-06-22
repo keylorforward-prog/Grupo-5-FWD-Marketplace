@@ -178,13 +178,17 @@ export const formatearPago = (pago) => ({
 const estadoPostulacion = (estado) => {
   const mapa = {
     ENVIADA: 'nuevo',
+    enviada: 'nuevo',
+    vista: 'nuevo',
     PENDIENTE: 'pendiente',
     EN_REVISION: 'en_revision',
     PRESSELECCIONADA: 'entrevistado',
     PRESELECCIONADA: 'entrevistado',
     RECHAZADA: 'rechazado',
+    rechazada: 'rechazado',
     CONTRATADO: 'entrevistado',
     ACEPTADO: 'aceptado',
+    aceptada: 'aceptado',
   };
   return mapa[estado] ?? 'nuevo';
 };
@@ -209,5 +213,29 @@ export const formatearPostulacion = (postulacion) => {
     estaInvitado: postulacion.estado === 'PRESSELECCIONADA' || postulacion.estado === 'PRESELECCIONADA' || postulacion.estado === 'CONTRATADO' || postulacion.estado === 'ACEPTADO',
     proyecto: postulacion.propuesta?.titulo || '',
     perfil: formatearTalento(perfil),
+  };
+};
+
+export const formatearPostulacionEmpleo = (postulacion) => {
+  const estudiante = postulacion.estudiante ?? {};
+  const usuario = estudiante.usuario ?? {};
+  const curriculum = estudiante.curriculum ?? {};
+  const tecnologias = (curriculum.habilidades || postulacion.oferta?.tecnologias_requeridas || '')
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  return {
+    id: postulacion.id_postulacion_empleo,
+    name: usuario.nombre || 'Candidato FWD',
+    avatar: usuario.foto_perfil || AVATAR_DEFECTO,
+    location: estudiante.sede_graduacion || 'Ubicacion no registrada',
+    stacks: tecnologias,
+    coverLetter: postulacion.carta_presentacion || 'Sin carta de presentacion registrada.',
+    status: estadoPostulacion(postulacion.estado),
+    estaInvitado: ['entrevistado', 'ACEPTADO', 'aceptada', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'CONTRATADO'].includes(postulacion.estado),
+    proyecto: postulacion.oferta?.titulo || postulacion.oferta?.cargo || '',
+    perfil: formatearTalento(estudiante),
+    esEmpleo: true,
   };
 };
