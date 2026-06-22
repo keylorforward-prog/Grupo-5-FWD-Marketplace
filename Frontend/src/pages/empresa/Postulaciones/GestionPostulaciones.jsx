@@ -1,58 +1,21 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../services/dashboardEmpresarioService';
 import FilaCandidato from '../../../components/postulaciones/FilaCandidato';
 import AccionesMasivas from '../../../components/postulaciones/AccionesMasivas';
 import PerfilEgresadoModal from '../DashboardEmpresario/components/PerfilEgresadoModal';
 import DashboardLayout from '../DashboardEmpresario/components/DashboardLayout';
-import { useDashboardEmpresarioRequest } from '../DashboardEmpresario/hooks/useDashboardEmpresarioRequest';
-import { formatearPostulacion } from '../DashboardEmpresario/utils/dashboardEmpresarioFormatters';
+import { formatearPostulacion, formatearPostulacionEmpleo } from '../DashboardEmpresario/utils/dashboardEmpresarioFormatters';
 
 const OPCIONES_POR_PAGINA = [3, 10, 15, 25];
 
 const construirTarjetasEstadistica = (estadisticas) => [
-  {
-    label: 'TOTAL POSTULADOS',
-    value: estadisticas.total,
-    iconClass: 'blue',
-    filter: null,
-  },
-  {
-    label: 'NUEVOS (HOY)',
-    value: estadisticas.nuevos,
-    iconClass: 'orange',
-    filter: 'nuevo',
-  },
-  {
-    label: 'PENDIENTES',
-    value: estadisticas.pendientes,
-    bg: 'bg-white',
-    textValue: 'text-[#92400e]',
-    textLabel: 'text-gray-500',
-    border: 'border-gray-200',
-    filter: 'pendiente',
-  },
-  {
-    label: 'EN REVISIÓN',
-    value: estadisticas.enRevision,
-    iconClass: 'purple',
-    filter: 'en_revision',
-  },
-  {
-    label: 'ENTREVISTADOS',
-    value: estadisticas.entrevistados,
-    iconClass: 'green',
-    filter: 'entrevistado',
-  },
-  {
-    label: 'ACEPTADOS',
-    value: estadisticas.aceptados,
-    bg: 'bg-white',
-    textValue: 'text-[#047857]',
-    textLabel: 'text-gray-500',
-    border: 'border-gray-200',
-    filter: 'aceptado',
-  },
+  { label: 'TOTAL POSTULADOS', value: estadisticas.total, iconClass: 'blue', filter: null },
+  { label: 'NUEVOS (HOY)', value: estadisticas.nuevos, iconClass: 'orange', filter: 'nuevo' },
+  { label: 'PENDIENTES', value: estadisticas.pendientes, iconClass: 'orange-light', filter: 'pendiente' },
+  { label: 'EN REVISIÓN', value: estadisticas.enRevision, iconClass: 'purple', filter: 'en_revision' },
+  { label: 'ENTREVISTADOS', value: estadisticas.entrevistados, iconClass: 'green', filter: 'entrevistado' },
+  { label: 'ACEPTADOS', value: estadisticas.aceptados, iconClass: 'teal', filter: 'aceptado' },
 ];
 
 const ETIQUETAS_ESTADO = {
@@ -64,25 +27,54 @@ const ETIQUETAS_ESTADO = {
 };
 
 export default function GestionPostulaciones() {
-  const { data, loading, error } = useDashboardEmpresarioRequest(
-    () => dashboardEmpresarioService.obtenerPostulaciones(),
-    [],
-    []
-  );
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let activo = true;
+    setLoading(true);
+    setError(null);
+
+    Promise.all([
+      dashboardEmpresarioService.obtenerPostulaciones().catch(() => []),
+      dashboardEmpresarioService.obtenerPostulacionesEmpleo().catch(() => []),
+    ]).then(([proyectos, empleos]) => {
+      if (!activo) return;
+      const formateadas = [
+        ...proyectos.map(formatearPostulacion),
+        ...empleos.map(formatearPostulacionEmpleo),
+      ];
+      formateadas.sort((a, b) => {
+        if (a.status === 'nuevo' && b.status !== 'nuevo') return -1;
+        if (a.status !== 'nuevo' && b.status === 'nuevo') return 1;
+        return 0;
+      });
+      setData(formateadas);
+    }).catch(() => {
+      if (activo) setError('Error al cargar postulaciones.');
+    }).finally(() => {
+      if (activo) setLoading(false);
+    });
+
+    return () => { activo = false; };
+  }, []);
+
   const [cambiosLocales, setCambiosLocales] = useState({});
   const [idsSeleccionados, setIdsSeleccionados] = useState(new Set());
   const [paginaActual, setPaginaActual] = useState(1);
   const [itemsPorPagina, setItemsPorPagina] = useState(3);
   const [filtroEstado, setFiltroEstado] = useState(null);
   const [perfilSeleccionado, setPerfilSeleccionado] = useState(null);
+
   const candidatos = useMemo(
-    () => data.map(formatearPostulacion).map((c) => ({ ...c, ...cambiosLocales[c.id] })),
+    () => data.map((c) => ({ ...c, ...cambiosLocales[c.id] })),
     [data, cambiosLocales]
   );
   const nombreProyecto = candidatos.find((c) => c.proyecto)?.proyecto || 'proyecto seleccionado';
 
   const filtrados = useMemo(
-    () => (!filtroEstado ? candidatos : candidatos.filter((c) => c.estado === filtroEstado)),
+    () => (!filtroEstado ? candidatos : candidatos.filter((c) => c.status === filtroEstado)),
     [candidatos, filtroEstado]
   );
 
@@ -94,11 +86,11 @@ export default function GestionPostulaciones() {
 
   const estadisticas = useMemo(() => ({
     total:         candidatos.length,
-    nuevos:        candidatos.filter((c) => c.estado === 'nuevo').length,
-    pendientes:    candidatos.filter((c) => c.estado === 'pendiente').length,
-    enRevision:    candidatos.filter((c) => c.estado === 'en_revision').length,
-    entrevistados: candidatos.filter((c) => c.estado === 'entrevistado').length,
-    aceptados:     candidatos.filter((c) => c.estado === 'aceptado').length,
+    nuevos:        candidatos.filter((c) => c.status === 'nuevo').length,
+    pendientes:    candidatos.filter((c) => c.status === 'pendiente').length,
+    enRevision:    candidatos.filter((c) => c.status === 'en_revision').length,
+    entrevistados: candidatos.filter((c) => c.status === 'entrevistado').length,
+    aceptados:     candidatos.filter((c) => c.status === 'aceptado').length,
   }), [candidatos]);
 
   const tarjetasEstadistica = construirTarjetasEstadistica(estadisticas);
@@ -121,45 +113,70 @@ export default function GestionPostulaciones() {
     });
   }, [paginados, idsSeleccionados]);
 
+  const [accionCargando, setAccionCargando] = useState(null);
+
+  const esbozoCandidato = useMemo(() => {
+    const mapa = new Map();
+    candidatos.forEach((c) => mapa.set(c.id, c));
+    return mapa;
+  }, [candidatos]);
+
+  const actualizarEstado = useCallback(async (id, estado, mensaje = '') => {
+    const candidato = esbozoCandidato.get(id);
+    if (candidato?.esEmpleo) {
+      return dashboardEmpresarioService.actualizarEstadoPostulacionEmpleo(id, estado, mensaje);
+    }
+    return dashboardEmpresarioService.actualizarEstadoPostulacion(id, estado, mensaje);
+  }, [esbozoCandidato]);
+
   const manejarInvitacion = useCallback(async (id, _date, _time, _msg) => {
+    setAccionCargando(id);
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'PRESSELECCIONADA');
+      await actualizarEstado(id, 'PRESSELECCIONADA');
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), estaInvitado: true, status: 'entrevistado' },
       }));
     } catch (err) {
       alert(err.response?.data?.message || 'Error al actualizar la postulacion.');
+    } finally {
+      setAccionCargando(null);
     }
-  }, []);
+  }, [actualizarEstado]);
 
   const manejarRechazo = useCallback(async (id, mensaje = '') => {
+    setAccionCargando(id);
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'RECHAZADA', mensaje);
+      await actualizarEstado(id, 'RECHAZADA', mensaje);
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), status: 'rechazado' },
       }));
     } catch (err) {
       alert(err.response?.data?.message || 'Error al rechazar la postulacion.');
+    } finally {
+      setAccionCargando(null);
     }
-  }, []);
+  }, [actualizarEstado]);
 
   const manejarAceptacion = useCallback(async (id, mensaje = '') => {
+    setAccionCargando(id);
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'ACEPTADO', mensaje);
+      await actualizarEstado(id, 'ACEPTADO', mensaje);
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), status: 'aceptado', estaInvitado: true },
       }));
     } catch (err) {
       alert(err.response?.data?.message || 'Error al aceptar la postulacion.');
+    } finally {
+      setAccionCargando(null);
     }
-  }, []);
+  }, [actualizarEstado]);
 
   const manejarVerPerfil = useCallback(async (id, perfil) => {
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacion(id, 'EN_REVISION');
+      await actualizarEstado(id, 'EN_REVISION');
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), status: 'en_revision' },
@@ -168,7 +185,7 @@ export default function GestionPostulaciones() {
       // If it fails, still open the profile
     }
     setPerfilSeleccionado(perfil);
-  }, []);
+  }, [actualizarEstado]);
 
   const manejarExportacion = useCallback((formato, soloSeleccionados) => {
     const data = soloSeleccionados ? candidatos.filter((c) => idsSeleccionados.has(c.id)) : candidatos;

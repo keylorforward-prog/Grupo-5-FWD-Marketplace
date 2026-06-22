@@ -48,8 +48,7 @@ const HeaderEmpresa = () => {
     });
   };
   
-  const defaultAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuDCyAeBVTU758T9W0t9G3fdkFAAzMTtUbJCLVy42xIgEsi7SF_RG-_Syzi7lmzQMWbFd6Nox8IcvB2IWEFo_I_Ie1o9eXon1PpEg_dTVl1QCxFUxAojDAZKHnClRyJ5NKPtw6qzihmMCW0bK1afkwxi9CycTamheR--seBnvQRLKiPhs9vPJRbWezZKhLUaTrpkLWNEs-3bS50gyX6CGQjrJ-e8oY4vl4ihX6yL6cWMxrUnIZyyYTYJg0tFTmqQIsA2RhGqO3MxsbU";
-  const avatarUrl = user?.foto_perfil || defaultAvatar;
+  const avatarUrl = user?.foto_perfil;
   const userName = user?.nombre || t('header.adminUser');
   const userRole = user?.rol || t('header.administrator');
 
@@ -205,11 +204,17 @@ const HeaderEmpresa = () => {
             <p style={{ margin: 0, fontSize: '10px', color: 'var(--color-vibrant-blue)', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em' }}>{userRole}</p>
           </div>
           <div className="se-user-avatar" style={{ overflow: 'hidden' }}>
-            <img 
-              src={avatarUrl} 
-              alt="User profile" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="User profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{
+                width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                backgroundColor: `hsl(${userName.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % 360}, 62%, 52%)`,
+                color: '#fff', fontWeight: 'bold', fontSize: '16px',
+              }}>
+                {userName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()}
+              </div>
+            )}
           </div>
           
           {showProfileMenu && (
