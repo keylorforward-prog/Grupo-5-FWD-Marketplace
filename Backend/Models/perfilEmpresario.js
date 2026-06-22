@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
     sitio_web: { type: DataTypes.STRING(255), allowNull: true },
     fecha_registro: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
     telefono_whatsapp: { type: DataTypes.STRING(30), allowNull: true },
-    cedula_juridica_archivo: { type: DataTypes.STRING(500), allowNull: true }
+    cedula_juridica_archivo: { type: DataTypes.STRING(500), allowNull: true },
+    notif_postulaciones: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+    notif_resumen_semanal: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+    notif_mensajes_directos: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
   }, { tableName: 'perfil_empresario', timestamps: false, underscored: true, freezeTableName: true });
 };

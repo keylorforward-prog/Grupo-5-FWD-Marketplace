@@ -24,8 +24,10 @@ export default function AgentNewPage() {
   const [loading, setLoading] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState('');
+  const [errorExtraccion, setErrorExtraccion] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const historialParaReintentar = useRef<AgentMessage[]>([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,17 +47,37 @@ export default function AgentNewPage() {
     const result = await sendInterviewMessage(historySnapshot, input);
 
     if (!result.success) {
-      setHistory((prev) => [...prev, { role: 'assistant', content: result.error }]);
+      // Show error as a temporary bubble that auto-removes after 5s
+      const errorMsg: AgentMessage = { role: 'assistant', content: result.error };
+      setHistory((prev) => [...prev, errorMsg]);
       setLoading(false);
+      setTimeout(() => {
+        setHistory((prev) => prev.filter((m) => m !== errorMsg));
+      }, 5000);
       return;
     }
 
-    const agentMsg: AgentMessage = { role: 'assistant', content: result.data.message };
-    const updatedHistory = [...newHistory, agentMsg];
-    setHistory(updatedHistory);
+    const isConfirming = result.data.state === 'confirming';
 
-    if (result.data.state === 'confirming') {
+    // When confirming, skip the assistant bubble entirely (avoids the empty/echo bubble)
+    const mensajeLimpio = (result.data.message || '')
+      .replace(/\[\s*ENTREVISTA_COMPLETA\s*\]/i, '')
+      .trim();
+
+    if (!isConfirming && mensajeLimpio.length > 0) {
+      setHistory((prev: AgentMessage[]) => [...prev, { role: 'assistant', content: mensajeLimpio }]);
+    }
+
+    const updatedHistory: AgentMessage[] = mensajeLimpio.length > 0
+      ? [...newHistory, { role: 'assistant', content: mensajeLimpio }]
+      : newHistory;
+
+    if (isConfirming) {
       setState('confirming');
+      historialParaReintentar.current = updatedHistory;
+
+      // Wait before extraction to avoid Groq rate limits (back-to-back calls)
+      await new Promise((r) => setTimeout(r, 3000));
 
       const extraction = await extractProjectData(updatedHistory);
 
@@ -63,7 +85,7 @@ export default function AgentNewPage() {
         setExtracted(extraction.data);
         setState('done');
       } else {
-        setHistory((prev) => [...prev, { role: 'assistant', content: extraction.error }]);
+        setErrorExtraccion('No pudimos armar el resumen. Tocá reintentar.');
       }
     }
 
@@ -72,6 +94,19 @@ export default function AgentNewPage() {
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') handleSend();
+  }
+
+  async function reintentarExtraccion() {
+    setErrorExtraccion('');
+    setLoading(true);
+    const extraction = await extractProjectData(historialParaReintentar.current);
+    if (extraction.success) {
+      setExtracted(extraction.data);
+      setState('done');
+    } else {
+      setErrorExtraccion('No pudimos armar el resumen. Intentá de nuevo.');
+    }
+    setLoading(false);
   }
 
   async function handlePublish() {
@@ -90,7 +125,7 @@ export default function AgentNewPage() {
     const minColones = convertirAColones(extracted.budget_min, extracted.budget_currency);
     const maxColones = convertirAColones(extracted.budget_max, extracted.budget_currency);
 
-    const presupuestoMin = minColones > 0 ? Math.max(minColones, 100_000) : 100_000;
+    const presupuestoMin = minColones > 0 ? minColones : 100_000;
     const presupuestoMax = maxColones > 0 ? maxColones : 0;
 
     const result = await publishProjectFromAgent({
@@ -191,6 +226,21 @@ export default function AgentNewPage() {
           </div>
         )}
 
+        {/* Error de extracción con reintento */}
+        {errorExtraccion && (
+          <div className="m-4 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-center justify-between gap-3">
+            <p className="text-sm text-destructive">{errorExtraccion}</p>
+            <button
+              type="button"
+              onClick={reintentarExtraccion}
+              disabled={loading}
+              className="shrink-0 rounded-full bg-destructive text-white px-4 py-2 text-sm font-medium disabled:opacity-50 hover:opacity-90 transition"
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+
         {/* Result panel */}
         {state === 'done' && extracted !== null && (
           <div className="border border-border bg-surface shadow-soft rounded-2xl p-5 m-4 space-y-3">
@@ -198,7 +248,16 @@ export default function AgentNewPage() {
               Tu proyecto quedó así
             </p>
             <p className="font-heading font-bold text-lg text-ink">{extracted.title}</p>
-            <p className="text-sm text-ink-muted">{extracted.description}</p>
+            <p className="text-sm text-ink-muted whitespace-pre-wrap">{extracted.description}</p>
+
+            {extracted.budget_min > 0 && (
+              <p className="text-sm text-ink-muted">
+                Presupuesto:{' '}
+                {extracted.budget_max > 0
+                  ? `${extracted.budget_currency === 'USD' ? '$' : '₡'}${extracted.budget_min.toLocaleString('es-CR')} – ${extracted.budget_currency === 'USD' ? '$' : '₡'}${extracted.budget_max.toLocaleString('es-CR')}`
+                  : `${extracted.budget_currency === 'USD' ? '$' : '₡'}${extracted.budget_min.toLocaleString('es-CR')}`}
+              </p>
+            )}
 
             {extracted.stack.length > 0 && (
               <div className="flex flex-wrap gap-1.5">

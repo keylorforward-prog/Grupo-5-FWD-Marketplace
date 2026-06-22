@@ -15,6 +15,7 @@ router.get('/resumen', dashboardEmpresarioController.obtenerResumen);
 router.get('/perfil', dashboardEmpresarioController.listarPerfil);
 router.put('/perfil', dashboardEmpresarioController.actualizarPerfil);
 router.post('/perfil/foto', upload.single('foto_perfil'), dashboardEmpresarioController.subirFotoPerfil);
+router.post('/perfil/cedula-juridica-archivo', upload.single('cedula_juridica_file'), dashboardEmpresarioController.subirArchivoCedulaJuridica);
 router.get('/propuestas', dashboardEmpresarioController.listarPropuestas);
 router.post('/propuestas', upload.single('documento_adjunto'), dashboardEmpresarioController.crearPropuesta);
 router.put('/propuestas/:id', dashboardEmpresarioController.actualizarPropuesta);

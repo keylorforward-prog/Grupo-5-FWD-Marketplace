@@ -223,6 +223,38 @@ const subirFotoPerfil = async (req, res) => {
   }
 };
 
+const subirArchivoCedulaJuridica = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        message: 'Debes enviar un archivo PDF en el campo cedula_juridica_file.',
+      });
+      return;
+    }
+
+    if (req.file.mimetype !== 'application/pdf' && !req.file.mimetype.startsWith('image/')) {
+      res.status(400).json({
+        success: false,
+        message: 'El archivo debe ser un PDF o una imagen.',
+      });
+      return;
+    }
+
+    const { uploadFileToS3 } = require('../Config/aws');
+    const archivoUrl = await uploadFileToS3(req.file, 'cedulas_juridicas');
+
+    await perfil.update({ cedula_juridica_archivo: archivoUrl });
+
+    res.json({ success: true, data: { cedula_juridica_archivo: archivoUrl } });
+  } catch (error) {
+    responderError(res, error, 'Error al subir el archivo de cédula jurídica.');
+  }
+};
+
 const listarPropuestas = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEmpresario(req, res);
@@ -1358,6 +1390,7 @@ module.exports = {
   listarOfertasEmpleo,
   listarPagos,
   listarPerfil,
+  subirArchivoCedulaJuridica,
   listarPostulaciones,
   listarPostulacionesEmpleo,
   listarPropuestas,

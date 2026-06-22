@@ -2,6 +2,10 @@ import { MapPin } from 'lucide-react';
 import BotonesAccion from './BotonesAccion';
 
 const configEstado = {
+  nuevo: { label: 'Nuevo', badge: 'nueva' },
+  en_revision: { label: 'En revisión', badge: 'revision' },
+  entrevistado: { label: 'Entrevistado', badge: 'recepcion' },
+  rechazado: { label: 'Rechazado', badge: 'rechazado' },
   nuevo: { label: 'Nuevo', bg: 'rgba(37,99,235,0.1)', text: '#2563eb', dot: '#3b82f6' },
   pendiente: { label: 'Pendiente', bg: 'rgba(245,158,11,0.08)', text: '#92400e', dot: '#d97706' },
   en_revision: { label: 'En revisión', bg: 'rgba(245,158,11,0.12)', text: '#b45309', dot: '#f59e0b' },
@@ -91,11 +95,7 @@ export default function FilaCandidato({
               <MapPin className="w-3 h-3 flex-shrink-0 text-gray-400" />
               {location}
             </p>
-            <span
-              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold mt-2"
-              style={{ backgroundColor: infoEstado.bg, color: infoEstado.text }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: infoEstado.dot }} />
+            <span className={`de-badge ${infoEstado.badge} mt-2`}>
               {infoEstado.label}
             </span>
           </div>
