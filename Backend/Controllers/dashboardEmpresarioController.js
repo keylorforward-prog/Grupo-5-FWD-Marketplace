@@ -1543,23 +1543,20 @@ const completarProyecto = async (req, res) => {
     const perfil = await obtenerPerfilEmpresario(req, res);
     if (!perfil) return;
 
-    const { id_proyecto } = req.params;
-
-    const proyecto = await ProyectoPlataforma.findByPk(id_proyecto, {
-      include: [{ model: Propuesta, as: 'propuesta' }]
+    const proyecto = await ProyectoPlataforma.findByPk(req.params.id_proyecto, {
+      include: [{ model: Propuesta, as: 'propuesta' }],
     });
-
     if (!proyecto) {
-      return res.status(404).json({ success: false, message: 'Proyecto no encontrado' });
+      res.status(404).json({ success: false, message: 'Proyecto no encontrado.' });
+      return;
     }
-
-    if (proyecto.propuesta.id_perfil_empresario !== perfil.id_perfil_empresario) {
-      return res.status(403).json({ success: false, message: 'No tienes permiso para completar este proyecto.' });
+    if (proyecto.propuesta?.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      res.status(403).json({ success: false, message: 'No tienes permisos sobre este proyecto.' });
+      return;
     }
 
     await proyecto.update({ estado: 'COMPLETADO' });
-
-    res.json({ success: true, message: 'Proyecto completado exitosamente.' });
+    res.json({ success: true, data: proyecto });
   } catch (error) {
     responderError(res, error, 'Error al completar el proyecto.');
   }
