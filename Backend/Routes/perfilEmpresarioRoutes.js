@@ -25,6 +25,10 @@ router.get('/', controller.getAll);
 router.get('/perfil/:id_usuario', controller.getProfileByUserId);
 router.put('/perfil/:id_usuario', controller.updateProfileByUserId);
 
+// Rutas para cambio de contraseña con código
+router.post('/perfil/:id_usuario/request-password-change', controller.requestPasswordChange);
+router.post('/perfil/:id_usuario/confirm-password-change', controller.confirmPasswordChange);
+
 /**
  * @swagger
  * /api/perfiles-empresario/{id}:
