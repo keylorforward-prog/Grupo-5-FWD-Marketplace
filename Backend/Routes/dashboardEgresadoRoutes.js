@@ -16,6 +16,7 @@ router.put('/perfil', controller.actualizarPerfil);
 router.post('/perfil/cv-documento', upload.single('documento_cv'), controller.subirDocumentoCv);
 router.get('/resumen', controller.obtenerResumen);
 router.get('/postulaciones', controller.listarPostulaciones);
+router.get('/postulaciones-empleo', controller.listarPostulacionesEmpleo);
 router.get('/proyectos', controller.listarProyectos);
 router.get('/historial', controller.listarHistorial);
 router.post('/historial', controller.crearHistorial);

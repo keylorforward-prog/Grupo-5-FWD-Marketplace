@@ -307,6 +307,46 @@ const listarPostulaciones = async (req, res) => {
   }
 };
 
+const normalizarEstadoEmpleo = async (postulacion) => {
+  const mapa = { enviada: 'ENVIADA', vista: 'EN_REVISION', aceptada: 'ACEPTADO', rechazada: 'RECHAZADA' };
+  if (mapa[postulacion.estado]) {
+    postulacion.estado = mapa[postulacion.estado];
+    await postulacion.save();
+  }
+};
+
+const listarPostulacionesEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const postulaciones = await PostulacionEmpleo.findAll({
+      where: { id_perfil_estudiante: perfil.id_perfil_estudiante },
+      include: [
+        {
+          model: OfertaEmpleo,
+          as: 'oferta',
+          include: [{
+            model: PerfilEmpresario,
+            as: 'perfilEmpresario',
+            attributes: ['id_perfil_empresario', 'sector', 'logo'],
+            include: [{ model: Usuario, as: 'usuario', attributes: ['nombre'] }],
+          }],
+        },
+      ],
+      order: [['fecha_postulacion', 'DESC']],
+      limit: obtenerLimite(req.query.limit),
+    });
+
+    await Promise.all(postulaciones.map(actualizarPendiente));
+    await Promise.all(postulaciones.map(normalizarEstadoEmpleo));
+
+    res.json({ success: true, data: postulaciones });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener las postulaciones a empleo.');
+  }
+};
+
 const listarProyectos = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEstudiante(req, res);
@@ -903,6 +943,7 @@ module.exports = {
   listarNotificaciones,
   listarPerfil,
   listarPostulaciones,
+  listarPostulacionesEmpleo,
   listarProyectos,
   obtenerResumen,
 };

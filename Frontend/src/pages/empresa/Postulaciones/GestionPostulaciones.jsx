@@ -1,11 +1,12 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Filter, ChevronLeft, ChevronRight, UserCheck, X, Send } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../services/dashboardEmpresarioService';
 import FilaCandidato from '../../../components/postulaciones/FilaCandidato';
 import AccionesMasivas from '../../../components/postulaciones/AccionesMasivas';
 import PerfilEgresadoModal from '../DashboardEmpresario/components/PerfilEgresadoModal';
 import DashboardLayout from '../DashboardEmpresario/components/DashboardLayout';
 import { formatearPostulacion, formatearPostulacionEmpleo } from '../DashboardEmpresario/utils/dashboardEmpresarioFormatters';
+import '../../egresado/DashboardEgresado/styles/DashboardEgresado.css';
 
 const OPCIONES_POR_PAGINA = [3, 10, 15, 25];
 
@@ -187,6 +188,48 @@ export default function GestionPostulaciones() {
     setPerfilSeleccionado(perfil);
   }, [actualizarEstado]);
 
+  const manejarBatchPreseleccionar = useCallback(async () => {
+    const ids = Array.from(idsSeleccionados);
+    if (ids.length === 0) return;
+    setAccionCargando('batch');
+    try {
+      await dashboardEmpresarioService.actualizarEstadoPostulacionBatch(ids, 'PRESSELECCIONADA');
+      setCambiosLocales((prev) => {
+        const next = { ...prev };
+        ids.forEach((id) => {
+          next[id] = { ...(next[id] ?? {}), estaInvitado: true, status: 'entrevistado' };
+        });
+        return next;
+      });
+      setIdsSeleccionados(new Set());
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al preseleccionar candidatos.');
+    } finally {
+      setAccionCargando(null);
+    }
+  }, [idsSeleccionados]);
+
+  const manejarBatchRechazar = useCallback(async () => {
+    const ids = Array.from(idsSeleccionados);
+    if (ids.length === 0) return;
+    setAccionCargando('batch');
+    try {
+      await dashboardEmpresarioService.actualizarEstadoPostulacionBatch(ids, 'RECHAZADA');
+      setCambiosLocales((prev) => {
+        const next = { ...prev };
+        ids.forEach((id) => {
+          next[id] = { ...(next[id] ?? {}), status: 'rechazado' };
+        });
+        return next;
+      });
+      setIdsSeleccionados(new Set());
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al rechazar candidatos.');
+    } finally {
+      setAccionCargando(null);
+    }
+  }, [idsSeleccionados]);
+
   const manejarExportacion = useCallback((formato, soloSeleccionados) => {
     const data = soloSeleccionados ? candidatos.filter((c) => idsSeleccionados.has(c.id)) : candidatos;
     alert(`Exportando ${data.length} candidatos en formato ${formato.toUpperCase()}`);
@@ -211,6 +254,28 @@ export default function GestionPostulaciones() {
               <Filter size={15} />
               Filtrar
             </button>
+            {idsSeleccionados.size > 0 && (
+              <>
+                <button
+                  className="de-panel-action batch-action preseleccionar"
+                  type="button"
+                  onClick={manejarBatchPreseleccionar}
+                  disabled={accionCargando === 'batch'}
+                >
+                  <UserCheck size={15} />
+                  Preseleccionar ({idsSeleccionados.size})
+                </button>
+                <button
+                  className="de-panel-action batch-action rechazar"
+                  type="button"
+                  onClick={manejarBatchRechazar}
+                  disabled={accionCargando === 'batch'}
+                >
+                  <X size={15} />
+                  Rechazar ({idsSeleccionados.size})
+                </button>
+              </>
+            )}
             <AccionesMasivas
               cantidadSeleccionada={idsSeleccionados.size}
               cantidadTotal={candidatos.length}
@@ -279,6 +344,7 @@ export default function GestionPostulaciones() {
                     </th>
                     <th>Stack Principal</th>
                     <th>Carta de Presentación</th>
+                    <th className="text-center">Flujo</th>
                     <th className="de-table-actions">Acciones</th>
                   </tr>
                 </thead>
@@ -298,7 +364,7 @@ export default function GestionPostulaciones() {
                   ))}
                   {!loading && !error && paginados.length === 0 && (
                     <tr>
-                      <td className="de-empty-table-cell" colSpan="4">
+                      <td className="de-empty-table-cell" colSpan="5">
                         No hay postulaciones para mostrar.
                       </td>
                     </tr>

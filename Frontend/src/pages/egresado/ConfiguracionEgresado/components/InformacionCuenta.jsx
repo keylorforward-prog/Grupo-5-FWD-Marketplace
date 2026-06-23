@@ -2,21 +2,14 @@ import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../../context/AuthContext';
 
-const ESTADO_INICIAL = {
-  nombre: 'Alex Rivera',
-  email: 'alex.rivera@fwd.dev',
-  bio: 'Desarrollador Junior apasionado por React y el diseño UX. Buscando mi primera oportunidad para impactar el ecosistema tech.',
-};
-
-const CLAVE_ALMACENAMIENTO = 'informacionCuenta';
-
 function InformacionCuenta() {
   const { t } = useTranslation();
   const { user, actualizarUsuario } = useAuth();
-  const [datosFormulario, setDatosFormulario] = useState(() => {
-    const datosGuardados = localStorage.getItem(CLAVE_ALMACENAMIENTO);
-    return datosGuardados ? JSON.parse(datosGuardados) : ESTADO_INICIAL;
-  });
+  const [datosFormulario, setDatosFormulario] = useState(() => ({
+    nombre: user?.nombre || '',
+    email: user?.correo || user?.email || '',
+    bio: '',
+  }));
   const [mensajeExito, setMensajeExito] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
   const refArchivo = useRef(null);
@@ -29,7 +22,9 @@ function InformacionCuenta() {
   };
 
   const manejarGuardar = () => {
-    localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify(datosFormulario));
+    if (datosFormulario.nombre && user) {
+      actualizarUsuario({ nombre: datosFormulario.nombre });
+    }
     setMensajeExito(true);
     setTimeout(() => setMensajeExito(false), 3000);
   };

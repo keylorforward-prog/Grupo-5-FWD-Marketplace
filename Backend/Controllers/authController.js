@@ -271,12 +271,23 @@ const logout = async (req, res) => {
 };
 
 const me = async (req, res) => {
+  let nombreEmpresa = null;
+  if (req.user.rol === 'empresa') {
+    try {
+      const perfil = await PerfilEmpresario.findOne({
+        where: { id_usuario: req.user.id_usuario },
+        attributes: ['nombre_empresa'],
+      });
+      if (perfil) nombreEmpresa = perfil.nombre_empresa;
+    } catch { /* silent fallback */ }
+  }
   return res.status(200).json({
     success: true,
     user: {
       id: req.user.id_usuario,
       id_usuario: req.user.id_usuario,
       nombre: req.user.nombre,
+      nombre_empresa: nombreEmpresa,
       email: req.user.correo,
       rol: req.user.rol,
       foto_perfil: req.user.foto_perfil,

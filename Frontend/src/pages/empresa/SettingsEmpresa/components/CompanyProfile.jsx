@@ -12,6 +12,7 @@ const CompanyProfile = () => {
   const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
+    nombre_empresa: '',
     nombre: '',
     sitio_web: '',
     cedula: '',
@@ -38,6 +39,7 @@ const CompanyProfile = () => {
         const result = res.data;
         if (result.success && result.data) {
           setFormData({
+            nombre_empresa: result.data.nombre_empresa || '',
             nombre: result.data.nombre || '',
             sitio_web: result.data.sitio_web || '',
             cedula: result.data.cedula || '',
@@ -164,8 +166,12 @@ const CompanyProfile = () => {
 
           <div className="se-form-grid">
             <div className="se-input-group">
-              <label className="se-label-bold">{t('companyProfile.commercialName')}</label>
-              <input type="text" className="se-input se-body-md" name="nombre" value={formData.nombre} onChange={handleInputChange} />
+              <label className="se-label-bold">Nombre de la empresa</label>
+              <input type="text" className="se-input se-body-md" name="nombre_empresa" value={formData.nombre_empresa} onChange={handleInputChange} placeholder="Nombre de la empresa" />
+            </div>
+            <div className="se-input-group">
+              <label className="se-label-bold">Nombre del representante</label>
+              <input type="text" className="se-input se-body-md" name="nombre" value={formData.nombre} onChange={handleInputChange} placeholder="Nombre del representante" />
             </div>
             
             <div className="se-input-group">

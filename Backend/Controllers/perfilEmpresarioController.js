@@ -60,6 +60,7 @@ exports.getProfileByUserId = async (req, res) => {
     res.status(200).json({ 
       success: true, 
       data: {
+        nombre_empresa: perfil?.nombre_empresa || '',
         nombre: usuario.nombre,
         cedula: usuario.cedula,
         telefono_whatsapp: usuario.telefono_whatsapp || perfil?.telefono_whatsapp || '',
@@ -80,7 +81,7 @@ exports.getProfileByUserId = async (req, res) => {
 exports.updateProfileByUserId = async (req, res) => {
   try {
     const { 
-      nombre, cedula, telefono_whatsapp, sitio_web, sector, descripcion,
+      nombre_empresa, nombre, cedula, telefono_whatsapp, sitio_web, sector, descripcion,
       notif_postulaciones, notif_resumen_semanal, notif_mensajes_directos 
     } = req.body;
     const id_usuario = req.params.id_usuario;
@@ -89,7 +90,7 @@ exports.updateProfileByUserId = async (req, res) => {
     await Usuario.update({ nombre, cedula, telefono_whatsapp }, { where: { id_usuario } });
 
     // Preparamos objeto de actualización para PerfilEmpresario
-    const updateData = { sitio_web, sector, descripcion, telefono_whatsapp };
+    const updateData = { nombre_empresa, sitio_web, sector, descripcion, telefono_whatsapp };
     if (notif_postulaciones !== undefined) updateData.notif_postulaciones = notif_postulaciones;
     if (notif_resumen_semanal !== undefined) updateData.notif_resumen_semanal = notif_resumen_semanal;
     if (notif_mensajes_directos !== undefined) updateData.notif_mensajes_directos = notif_mensajes_directos;

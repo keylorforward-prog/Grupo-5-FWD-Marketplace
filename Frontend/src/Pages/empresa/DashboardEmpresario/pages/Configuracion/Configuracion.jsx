@@ -4,6 +4,7 @@ import EstadoDatos from '../../components/EstadoDatos';
 import DashboardLayout from '../../components/DashboardLayout';
 
 const ESTADO_INICIAL = {
+  nombre_empresa: '',
   nombre: '',
   correo: '',
   sector: '',
@@ -35,6 +36,7 @@ export default function Configuracion() {
         const usuario = perfil.usuario ?? {};
         setForm((prev) => ({
           ...prev,
+          nombre_empresa: perfil.nombre_empresa || '',
           nombre: usuario.nombre || '',
           correo: usuario.correo || '',
           sector: perfil.sector || '',
@@ -62,6 +64,7 @@ export default function Configuracion() {
     setMensaje(null);
     try {
       await dashboardEmpresarioService.actualizarPerfil({
+        nombre_empresa: form.nombre_empresa,
         nombre: form.nombre,
         correo: form.correo,
         sector: form.sector,
@@ -138,7 +141,8 @@ export default function Configuracion() {
             <h3 className="de-panel-title">Empresa</h3>
           </div>
           <div className="de-form-grid">
-            <input className="de-form-control" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre de empresa" aria-label="Nombre de empresa" />
+            <input className="de-form-control" name="nombre_empresa" value={form.nombre_empresa} onChange={handleChange} placeholder="Nombre de la empresa" aria-label="Nombre de la empresa" />
+            <input className="de-form-control" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre del representante" aria-label="Nombre del representante" />
             <input className="de-form-control" name="correo" value={form.correo} onChange={handleChange} placeholder="Correo de empresa" aria-label="Correo de empresa" type="email" />
             <input className="de-form-control" name="sector" value={form.sector} onChange={handleChange} placeholder="Sector" aria-label="Sector" />
             <input className="de-form-control" name="sitio_web" value={form.sitio_web} onChange={handleChange} placeholder="Sitio web" aria-label="Sitio web" />

@@ -9,9 +9,9 @@ import { RUTAS } from '../../routes/rutas';
 import './MenuUsuario.css';
 
 const usuarioInvitado = {
-  nombre: 'Alex Rivera',
-  rol: 'Junior Developer',
-  correo: 'alex.rivera@fwd.dev',
+  nombre: 'Invitado',
+  rol: 'Visitante',
+  correo: 'invitado@fwd.dev',
   avatar: '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png',
 };
 

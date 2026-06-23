@@ -122,6 +122,30 @@ export const formatearMensaje = (conversacion) => {
   };
 };
 
+export const formatearPostulacionEmpleo = (postulacion) => {
+  const oferta = postulacion.oferta ?? {};
+  const perfilEmpresario = oferta.perfilEmpresario ?? {};
+  const usuarioEmpresa = perfilEmpresario.usuario ?? {};
+  const [status, statusType] = estadoPostulacion(postulacion.estado);
+
+  return {
+    id: postulacion.id_postulacion_empleo,
+    idOferta: oferta.id_oferta_empleo || postulacion.id_oferta_empleo,
+    titulo: oferta.cargo || oferta.titulo || 'Oferta de empleo',
+    descripcion: oferta.descripcion || '',
+    tecnologias: (oferta.tecnologias_requeridas || '').split(',').map((t) => t.trim()).filter(Boolean),
+    presupuesto: oferta.rango_salarial_max || oferta.rango_salarial_min || null,
+    estado: status,
+    estadoRaw: postulacion.estado,
+    tipoEstado: statusType,
+    fecha: formatearFechaRelativa(postulacion.fecha_postulacion),
+    mensaje: postulacion.carta_presentacion,
+    empresa: usuarioEmpresa.nombre || 'Empresa',
+    empresaLogo: perfilEmpresario.logo || null,
+    esEmpleo: true,
+  };
+};
+
 export const formatearHistorial = (historial) => ({
   id: historial.id_historial_estudiante,
   titulo: historial.titulo_proyecto,
