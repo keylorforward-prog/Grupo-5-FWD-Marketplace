@@ -16,6 +16,8 @@ router.use(verifyToken, isAdmin);
 
 // Endpoints
 router.get('/overview', adminController.getOverview);
+router.get('/verificacion/metricas', adminController.getMetricasVerificacion);
+router.get('/actividad/stream', adminController.streamActividad);
 router.get('/busqueda', adminController.busquedaGlobal);
 router.get('/notificaciones', adminController.getAdminNotificaciones);
 router.get('/auditoria', adminController.getAuditoria);
@@ -36,5 +38,10 @@ router.post('/empresas/:id_usuario/estado', adminController.updateEstadoEmpresa)
 
 router.get('/egresados/pendientes', adminController.getEgresadosPendientes);
 router.post('/egresados/:id_usuario/verificar', adminController.verifyEstudiante);
+
+// Rutas para supervisión de proyectos
+router.get('/proyectos', adminController.getProyectos);
+router.get('/proyectos/:id/detalle', adminController.getProyectoDetalle);
+router.put('/proyectos/:id/estado', adminController.updateEstadoProyecto);
 
 module.exports = router;

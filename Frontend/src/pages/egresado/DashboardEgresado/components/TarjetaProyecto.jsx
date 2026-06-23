@@ -1,9 +1,17 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Send, Clock, DollarSign, Tag, Globe } from 'lucide-react';
+import { Bookmark, Send, Eye, Clock, DollarSign, Tag, Globe } from 'lucide-react';
 import { categoriasProyecto } from '../../../../data/proyectosEgresado';
 
-const etiquetaModalidad = { remoto: 'Remoto', hibrido: 'Híbrido', presencial: 'Presencial' };
+const FLECHAS = Array.from({ length: 8 }, (_, i) => `/Imgs/FLECHAS/Flechas-${String(i + 1).padStart(2, '0')}.png`);
+
+const indiceFlecha = (id) => {
+  if (typeof id === 'number') return id % FLECHAS.length;
+  return Array.from(String(id ?? '')).reduce((acc, c) => acc + c.charCodeAt(0), 0) % FLECHAS.length;
+};
+
+const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
 const etiquetaCategoria = Object.fromEntries(
   categoriasProyecto.filter((c) => c.valor !== 'todas').map((c) => [c.valor, c.etiqueta])
 );
@@ -19,7 +27,8 @@ const formatearPresupuesto = (min, max) =>
 
 const formatearEntrega = (min, max) => `${min} – ${max} días`;
 
-function TarjetaProyecto({ proyecto }) {
+function TarjetaProyecto({ proyecto, postulado }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [guardado, setGuardado] = useState(false);
 
@@ -28,20 +37,17 @@ function TarjetaProyecto({ proyecto }) {
   };
 
   return (
-    <article
-      className={`tarjetaProyecto acento-${proyecto.colorAcento}`}
-      onClick={irAlDetalle}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter') irAlDetalle(); }}
-    >
+    <article className={`tarjetaProyecto acento-${proyecto.colorAcento}`}>
       <div className="encabezadoTarjeta">
         <div className={`iconoProyectoContenedor acento-${proyecto.colorAcento}`}>
-          <span className="iconoProyectoLetra">
-            {proyecto.titulo.charAt(0)}
-          </span>
+          {proyecto.empresaLogo ? (
+            <img src={proyecto.empresaLogo} alt="" className="iconoProyectoLogo" />
+          ) : (
+            <img src={FLECHAS[indiceFlecha(proyecto.id)]} alt="" className="iconoProyectoLogo" />
+          )}
         </div>
         <div className="tituloTarjetaContenedor">
+          {proyecto.empresa && <span className="tp-empresa">{proyecto.empresa}</span>}
           <h3 className="tituloProyecto">{proyecto.titulo}</h3>
           <span className={`etiquetaEstado ${proyecto.tipoEstado}`}>
             {proyecto.estado}
@@ -51,7 +57,7 @@ function TarjetaProyecto({ proyecto }) {
           type="button"
           className={`botonGuardar ${guardado ? 'activo' : ''}`}
           onClick={() => setGuardado((g) => !g)}
-          aria-label={guardado ? 'Quitar de guardados' : 'Guardar proyecto'}
+          aria-label={guardado ? t('egresadoExplorar.components.quitarGuardados') : t('egresadoExplorar.components.guardarProyecto')}
         >
           <Bookmark size={18} fill={guardado ? 'currentColor' : 'none'} />
         </button>
@@ -64,7 +70,7 @@ function TarjetaProyecto({ proyecto }) {
         </span>
         <span className="metaBadge metaModalidad">
           <Globe size={12} />
-          {etiquetaModalidad[proyecto.modalidad] ?? proyecto.modalidad}
+          {etiquetaModalidad[proyecto.modalidad] ? t(etiquetaModalidad[proyecto.modalidad]) : proyecto.modalidad}
         </span>
       </div>
 
@@ -81,7 +87,7 @@ function TarjetaProyecto({ proyecto }) {
           <div className="datoPie">
             <span className="etiquetaDato">
               <DollarSign size={12} />
-              Presupuesto
+              {t('egresadoExplorar.components.presupuesto')}
             </span>
             <span className="valorDato">
               {formatearPresupuesto(proyecto.presupuestoMin, proyecto.presupuestoMax)}
@@ -90,7 +96,7 @@ function TarjetaProyecto({ proyecto }) {
           <div className="datoPie">
             <span className="etiquetaDato">
               <Clock size={12} />
-              Entrega
+              {t('egresadoExplorar.components.entrega')}
             </span>
             <span className="valorDato">
               {formatearEntrega(proyecto.diasMin, proyecto.diasMax)}
@@ -99,11 +105,11 @@ function TarjetaProyecto({ proyecto }) {
         </div>
         <button
           type="button"
-          className="botonDetalle"
-          onClick={(e) => { e.stopPropagation(); irAlDetalle(); }}
+          className={`botonDetalle${postulado ? ' postulado' : ''}`}
+          onClick={irAlDetalle}
         >
-          <Send size={14} />
-          Ver detalle
+          {postulado ? <Eye size={14} /> : <Send size={14} />}
+          {postulado ? t('egresadoExplorar.components.verDetalle') : t('egresadoExplorar.components.postularme')}
         </button>
       </div>
     </article>

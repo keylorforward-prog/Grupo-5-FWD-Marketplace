@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import apiClient from '../../../../../services/apiClient';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -131,9 +132,14 @@ export default function PublicarProyecto() {
   return (
     <DashboardLayout activePage="proyectos">
       <div className="de-page-heading">
-        <p className="de-eyebrow">Empresa</p>
-        <h1>Publicar Proyecto</h1>
-        <p className="de-page-subtitle">Revisá los datos y publicá tu propuesta.</p>
+        <div>
+          <p className="de-eyebrow">Empresa</p>
+          <h1>Publicar Proyecto</h1>
+          <p className="de-page-subtitle">Revisá los datos y publicá tu propuesta.</p>
+        </div>
+        <button className="de-btn-outline" type="button" onClick={() => navigate('/DashboardEmpresario/proyectos')} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <ArrowLeft size={16} /> Cancelar
+        </button>
       </div>
 
       <div className="de-panel">

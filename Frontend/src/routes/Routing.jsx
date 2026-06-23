@@ -1,41 +1,42 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import RutaProtegida from './RutaProtegida';
-import RedirectorRaiz from './RedirectorRaiz';
 import { RUTAS } from './rutas';
 
 // ==========================================
 // VISTA PRINCIPAL (NUEVA LANDING PAGE)
 // ==========================================
-import LandingPage from '../pages/landing/Landing.jsx';
+const LandingPage = lazy(() => import('../pages/landing/Landing.jsx'));
 // Autenticación
-import LoginPage from '../Pages/auth/Login/LoginPage';
-import RegisterPage from '../Pages/auth/Registro/RegisterPage';
-import AdminLogin from '../Pages/auth/AdminLogin/AdminLogin';
-import GoogleCallback from '../Pages/auth/GoogleCallback';
-import CompletarPerfil from '../Pages/auth/CompletarPerfil/CompletarPerfil';
+const LoginPage = lazy(() => import('../Pages/auth/Login/LoginPage'));
+const RegisterPage = lazy(() => import('../Pages/auth/Registro/RegisterPage'));
+const AdminLogin = lazy(() => import('../Pages/auth/AdminLogin/AdminLogin'));
+const GoogleCallback = lazy(() => import('../Pages/auth/GoogleCallback'));
+const CompletarPerfil = lazy(() => import('../Pages/auth/CompletarPerfil/CompletarPerfil'));
+const ForgotPasswordPage = lazy(() => import('../Pages/RecuperacionContra/ForgotPasswordPage'));
 
 // Empresa
-import DashboardEmpresario from '../Pages/empresa/DashboardEmpresario/DashboardEmpresario';
-import ProyectosEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Proyectos/Proyectos';
-import OfertasEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Ofertas/Ofertas';
-import EntregablesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Entregables/Entregables';
-import MensajesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Mensajes/Mensajes';
-import TalentoEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Talento/Talento';
-import HistorialEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Historial/Historial';
-import EvaluacionesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Evaluaciones/Evaluaciones';
-import FacturacionEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Facturacion/Facturacion';
-import NotificacionesEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Notificaciones/Notificaciones';
-import AyudaEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Ayuda/Ayuda';
-import PublicarProyecto from '../Pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto';
-import CrearProyectoIA from '../Pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA';
-import OfertasEmpleo from '../Pages/empresa/DashboardEmpresario/pages/OfertasEmpleo/OfertasEmpleo';
-import PublicarEmpleo from '../Pages/empresa/DashboardEmpresario/pages/PublicarEmpleo/PublicarEmpleo';
-import ConfiguracionEmpresario from '../Pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion';
-import PerfilEmpresa from '../Pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa';
-import GestionPostulaciones from '../Pages/empresa/Postulaciones/GestionPostulaciones';
-import AdminProfile from '../Pages/admin/AdminProfile';
-import SettingsEmpresa from '../Pages/empresa/SettingsEmpresa/SettingsEmpresa';
+const DashboardEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/DashboardEmpresario'));
+const ProyectosEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Proyectos/Proyectos'));
+const OfertasEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Ofertas/Ofertas'));
+const EntregablesEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Entregables/Entregables'));
+const MensajesEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Mensajes/Mensajes'));
+const TalentoEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Talento/Talento'));
+const HistorialEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Historial/Historial'));
+const EvaluacionesEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Evaluaciones/Evaluaciones'));
+const FacturacionEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Facturacion/Facturacion'));
+const NotificacionesEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Notificaciones/Notificaciones'));
+const AyudaEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Ayuda/Ayuda'));
+const PublicarProyecto = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/PublicarProyecto/PublicarProyecto'));
+const CrearProyectoIA = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/CrearProyectoIA/CrearProyectoIA'));
+const OfertasEmpleo = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/OfertasEmpleo/OfertasEmpleo'));
+const PublicarEmpleo = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/PublicarEmpleo/PublicarEmpleo'));
+const ConfiguracionEmpresario = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Configuracion/Configuracion'));
+const PerfilEmpresa = lazy(() => import('../Pages/empresa/DashboardEmpresario/pages/Perfil/PerfilEmpresa'));
+const GestionPostulaciones = lazy(() => import('../Pages/empresa/Postulaciones/GestionPostulaciones'));
+const AdminProfile = lazy(() => import('../Pages/admin/AdminProfile'));
+const SettingsEmpresa = lazy(() => import('../Pages/empresa/SettingsEmpresa/SettingsEmpresa'));
 
 // Egresado
 import DashboardEgresado from '../Pages/egresado/DashboardEgresado/DashboardEgresado';
@@ -51,16 +52,26 @@ import DetalleEmpleo from '../Pages/egresado/DashboardEgresado/pages/DetalleEmpl
 import ProyectoDetalle from '../Pages/egresado/DashboardEgresado/pages/ProyectoDetalle/ProyectoDetalle';
 import PerfilEgresado from '../Pages/egresado/PerfilEgresado/PerfilEgresado';
 import ConfiguracionEgresado from '../Pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
+import Soporte from '../Pages/egresado/Soporte/Soporte';
 
 
 // Comunes
-import Proximamente from '../Pages/comun/Proximamente';
-import PaginaNoEncontrada from '../Pages/comun/PaginaNoEncontrada';
+const Proximamente = lazy(() => import('../Pages/comun/Proximamente'));
+const PaginaNoEncontrada = lazy(() => import('../Pages/comun/PaginaNoEncontrada'));
+
+function RouteFallback() {
+  return (
+    <div className="route-loading" role="status" aria-live="polite">
+      Cargando...
+    </div>
+  );
+}
 
 export default function Routing() {
   return (
     <BrowserRouter>
-      <Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
         {/* ── Raíz: Apunta directamente a tu nueva Landing Page ────────────────────────────── */}
         <Route path={RUTAS.raiz} element={<LandingPage />} />
 
@@ -68,6 +79,7 @@ export default function Routing() {
         <Route path={RUTAS.loginAdmin} element={<AdminLogin />} />
         <Route path={RUTAS.login} element={<LoginPage />} />
         <Route path={RUTAS.registro} element={<RegisterPage />} />
+        <Route path={RUTAS.recuperarContrasena} element={<ForgotPasswordPage />} />
         <Route path={RUTAS.googleCallback} element={<GoogleCallback />} />
         <Route path={RUTAS.completarPerfil} element={
           <RutaProtegida>
@@ -122,6 +134,14 @@ export default function Routing() {
           element={
             <RutaProtegida rolPermitido="estudiante">
               <ConfiguracionEgresado />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path={RUTAS.egresadoSoporte}
+          element={
+            <RutaProtegida rolPermitido="estudiante">
+              <Soporte />
             </RutaProtegida>
           }
         />
@@ -198,7 +218,8 @@ export default function Routing() {
 
         {/* ── 404 ────────────────────────────────────────────────────── */}
         <Route path="*" element={<PaginaNoEncontrada />} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

@@ -1,9 +1,11 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Search, SearchX, Mail, MailOpen, Inbox, Send, Clock, User, ChevronLeft, Building, Shield } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useAuth } from '../../../../../context/AuthContext';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
+import '../../styles/DashboardEgresado.css';
 
 const ROLE_ICONS = {
   admin: Shield,
@@ -13,7 +15,7 @@ const ROLE_ICONS = {
 
 const formatearConversacion = (c, userId) => {
   const propuesta = c.postulacion?.propuesta ?? {};
-  const contacto = c.contacto || c.emisor || {};
+  const contactoData = c.contacto || c.emisor || {};
   const esPropio = c.id_usuario_emisor === userId;
   return {
     idPostulacion: c.id_postulacion,
@@ -22,8 +24,8 @@ const formatearConversacion = (c, userId) => {
     ultimoMensaje: c.mensaje || 'Sin mensajes',
     tiempo: formatearFechaRelativa(c.fecha_envio),
     leido: c.leido || esPropio,
-    contacto,
-    cedula: contacto?.cedula || '',
+    contacto: contactoData,
+    cedula: contactoData?.cedula || '',
     esPropio,
   };
 };
@@ -58,6 +60,7 @@ const formatearFechaChat = (fecha) => {
 };
 
 function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [mensajes, setMensajes] = useState([]);
   const [contacto, setContacto] = useState(contactoProp);
@@ -99,7 +102,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
       setMensajes((prev) => [...prev, creado]);
       setNuevoMensaje('');
     } catch {
-      alert('Error al enviar el mensaje.');
+      alert(t('egresadoMensajes.errorEnvio'));
     } finally {
       setEnviando(false);
     }
@@ -151,7 +154,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
         {!cargando && mensajes.length === 0 && (
           <div className="chat-empty">
             <MessageSquare size={32} />
-            <p>No hay mensajes aún</p>
+            <p>{t('egresadoMensajes.sinMensajesChat')}</p>
           </div>
         )}
 
@@ -187,7 +190,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
         <input
           className="chat-input"
           type="text"
-          placeholder="Escribe un mensaje..."
+          placeholder={t('egresadoMensajes.escribeMensaje')}
           value={nuevoMensaje}
           onChange={(e) => setNuevoMensaje(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -214,6 +217,7 @@ const guardarLeidos = (set) => {
 };
 
 export default function Mensajes() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [conversacionActiva, setConversacionActiva] = useState(null);
@@ -270,10 +274,10 @@ export default function Mensajes() {
           <button className="de-project-icon-button" type="button" onClick={() => navigate('/egresado/dashboard')}>
             <ArrowLeft size={18} />
           </button>
-          <h1>Mensajes</h1>
+          <h1>{t('egresadoMensajes.titulo')}</h1>
         </div>
         {!loading && !error && (
-          <span className="conteoProyectos">{conversacionesFiltradas.length} conversacione{conversacionesFiltradas.length !== 1 ? 's' : ''}</span>
+          <span className="conteoProyectos">{t('egresadoMensajes.total', { count: conversacionesFiltradas.length })}</span>
         )}
       </div>
 
@@ -290,8 +294,8 @@ export default function Mensajes() {
       {!loading && !error && conversaciones.length === 0 && (
         <div className="mensajes-empty">
           <SearchX size={48} />
-          <h4>Sin mensajes</h4>
-          <p>Cuando tengas conversaciones con empresas, aparecerán aquí.</p>
+          <h4>{t('egresadoMensajes.sinMensajes')}</h4>
+          <p>{t('egresadoMensajes.sinMensajesDesc')}</p>
         </div>
       )}
 
@@ -300,17 +304,17 @@ export default function Mensajes() {
           <div className="mensajes-sidebar">
             <div className="mensajes-sidebar-header">
               <Inbox size={16} />
-              <span>Conversaciones</span>
+              <span>{t('egresadoMensajes.conversaciones')}</span>
               <span className="mensajes-sidebar-count">{stats.total}</span>
             </div>
             <div className="mensajes-sidebar-stats">
               <div className="mensajes-sidebar-stat" data-type="unread">
                 <Mail size={13} />
-                {stats.noLeidos} no leídos
+                {stats.noLeidos} {t('egresadoMensajes.noLeidos')}
               </div>
               <div className="mensajes-sidebar-stat" data-type="read">
                 <MailOpen size={13} />
-                {stats.leidos} leídos
+                {stats.leidos} {t('egresadoMensajes.leidos')}
               </div>
             </div>
             <div className="mensajes-sidebar-busqueda">
@@ -318,7 +322,7 @@ export default function Mensajes() {
               <input
                 type="text"
                 className="mensajes-buscar-input"
-                placeholder="Buscar por nombre o identificación..."
+                placeholder={t('egresadoMensajes.buscarPlaceholder')}
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
@@ -336,7 +340,7 @@ export default function Mensajes() {
             {termino && conversacionesFiltradas.length === 0 && (
               <div className="mensajes-sidebar-empty-busqueda">
                 <SearchX size={24} />
-                <p>No se encontraron resultados para "<strong>{busqueda}</strong>"</p>
+                <p>{t('egresadoMensajes.sinResultados')} "<strong>{busqueda}</strong>"</p>
               </div>
             )}
             <div className="mensajes-sidebar-list">
@@ -364,7 +368,7 @@ export default function Mensajes() {
                           {c.contacto?.rol && (
                             <span className="mensajes-item-role-badge" data-rol={c.contacto.rol}>
                               <RoleIcon size={10} />
-                              {c.contacto.rol === 'estudiante' ? 'Egresado' : c.contacto.rol === 'empresa' ? 'Empresa' : 'Admin'}
+                              {c.contacto.rol === 'estudiante' ? t('egresadoMensajes.egresado') : c.contacto.rol === 'empresa' ? t('egresadoMensajes.empresa') : t('egresadoMensajes.admin')}
                             </span>
                           )}
                         </div>
@@ -394,8 +398,8 @@ export default function Mensajes() {
             ) : (
               <div className="mensajes-chat-empty">
                 <MessageSquare size={48} />
-                <h4>Selecciona una conversación</h4>
-                <p>Elige un chat del panel izquierdo para ver los mensajes.</p>
+                <h4>{t('egresadoMensajes.seleccionaConversacion')}</h4>
+                <p>{t('egresadoMensajes.seleccionaDesc')}</p>
               </div>
             )}
           </div>

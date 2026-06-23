@@ -5,6 +5,7 @@ export function useNotificaciones({ marcarAlCargar = false, limit = 10 } = {}) {
   const [notificaciones, setNotificaciones] = useState([]);
   const [noLeidas, setNoLeidas] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -12,8 +13,9 @@ export function useNotificaciones({ marcarAlCargar = false, limit = 10 } = {}) {
       const respuesta = await notificacionService.obtenerMias(limit);
       setNotificaciones(respuesta.data || []);
       setNoLeidas(Number(respuesta.unreadCount || 0));
-    } catch (error) {
-      console.error('Error cargando notificaciones', error);
+    } catch (err) {
+      console.error('Error cargando notificaciones', err);
+      setError(err.response?.data?.message || 'Error al cargar notificaciones.');
       setNotificaciones([]);
       setNoLeidas(0);
     } finally {
@@ -50,9 +52,10 @@ export function useNotificaciones({ marcarAlCargar = false, limit = 10 } = {}) {
           setNoLeidas(0);
           setNotificaciones(data.map((notificacion) => ({ ...notificacion, leido: true })));
         }
-      } catch (error) {
+      } catch (err) {
         if (!activo) return;
-        console.error('Error cargando notificaciones', error);
+        console.error('Error cargando notificaciones', err);
+        setError(err.response?.data?.message || 'Error al cargar notificaciones.');
         setNotificaciones([]);
         setNoLeidas(0);
       } finally {
@@ -67,5 +70,5 @@ export function useNotificaciones({ marcarAlCargar = false, limit = 10 } = {}) {
     };
   }, [limit, marcarAlCargar]);
 
-  return { notificaciones, noLeidas, loading, cargar, marcarComoLeidas };
+  return { notificaciones, noLeidas, loading, error, cargar, marcarComoLeidas };
 }

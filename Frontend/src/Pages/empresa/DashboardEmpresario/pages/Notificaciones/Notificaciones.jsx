@@ -5,7 +5,7 @@ import EstadoDatos from '../../components/EstadoDatos';
 import { formatearNotificacion } from '../../utils/dashboardEmpresarioFormatters';
 
 export default function Notificaciones() {
-  const { notificaciones: data, loading } = useNotificaciones({ marcarAlCargar: true, limit: 50 });
+  const { notificaciones: data, loading, error } = useNotificaciones({ marcarAlCargar: true, limit: 50 });
   const notificaciones = useMemo(() => data.map(formatearNotificacion), [data]);
 
   return (
@@ -14,7 +14,7 @@ export default function Notificaciones() {
         <h1>Notificaciones</h1>
       </div>
       <div className="de-panel">
-        <EstadoDatos loading={loading} error={null} empty={!notificaciones.length} emptyText="No hay notificaciones." />
+        <EstadoDatos loading={loading} error={error} empty={!notificaciones.length} emptyText="No hay notificaciones." />
         {!loading && notificaciones.map((notification) => (
           <div key={notification.id} className="de-notif-item">
             <div className={`de-notif-icon ${notification.iconType}`}>{notification.icon}</div>

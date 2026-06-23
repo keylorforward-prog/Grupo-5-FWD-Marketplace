@@ -13,11 +13,21 @@ const {
   PerfilEmpresario,
   PerfilEstudiante,
   Postulacion,
+  PostulacionEmpleo,
   Propuesta,
   ProyectoPlataforma,
   sequelize,
   Usuario,
 } = require('../Models');
+
+const DOS_MINUTOS = 2 * 60 * 1000;
+
+const actualizarPendiente = async (postulacion) => {
+  if (postulacion.estado === 'ENVIADA' && Date.now() - new Date(postulacion.fecha_postulacion).getTime() >= DOS_MINUTOS) {
+    postulacion.estado = 'PENDIENTE';
+    await postulacion.save();
+  }
+};
 
 const ORDEN_DESC = [['fecha_publicacion', 'DESC']];
 const PRESUPUESTO_MINIMO_PROYECTO = 100000;
@@ -151,6 +161,19 @@ const actualizarPerfil = async (req, res) => {
     }
 
     await perfil.update(cambios);
+
+    if (Object.prototype.hasOwnProperty.call(req.body, 'nombre') || Object.prototype.hasOwnProperty.call(req.body, 'correo')) {
+      const cambiosUsuario = {};
+      if (Object.prototype.hasOwnProperty.call(req.body, 'nombre')) {
+        cambiosUsuario.nombre = req.body.nombre;
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, 'correo')) {
+        cambiosUsuario.correo = req.body.correo;
+      }
+      if (Object.keys(cambiosUsuario).length) {
+        await Usuario.update(cambiosUsuario, { where: { id_usuario: perfil.id_usuario } });
+      }
+    }
     const actualizado = await PerfilEmpresario.findByPk(perfil.id_perfil_empresario, {
       include: [{ model: Usuario, as: 'usuario' }],
     });
@@ -197,6 +220,38 @@ const subirFotoPerfil = async (req, res) => {
     res.json({ success: true, data: actualizado });
   } catch (error) {
     responderError(res, error, 'Error al subir la foto de perfil empresario.');
+  }
+};
+
+const subirArchivoCedulaJuridica = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        message: 'Debes enviar un archivo PDF en el campo cedula_juridica_file.',
+      });
+      return;
+    }
+
+    if (req.file.mimetype !== 'application/pdf' && !req.file.mimetype.startsWith('image/')) {
+      res.status(400).json({
+        success: false,
+        message: 'El archivo debe ser un PDF o una imagen.',
+      });
+      return;
+    }
+
+    const { uploadFileToS3 } = require('../Config/aws');
+    const archivoUrl = await uploadFileToS3(req.file, 'cedulas_juridicas');
+
+    await perfil.update({ cedula_juridica_archivo: archivoUrl });
+
+    res.json({ success: true, data: { cedula_juridica_archivo: archivoUrl } });
+  } catch (error) {
+    responderError(res, error, 'Error al subir el archivo de cédula jurídica.');
   }
 };
 
@@ -758,9 +813,43 @@ const listarPostulaciones = async (req, res) => {
       limit: obtenerLimite(req.query.limit),
     });
 
+    await Promise.all(postulaciones.map(actualizarPendiente));
+
     res.json({ success: true, data: postulaciones });
   } catch (error) {
     responderError(res, error, 'Error al obtener las postulaciones.');
+  }
+};
+
+const listarPostulacionesEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const postulaciones = await PostulacionEmpleo.findAll({
+      include: [
+        {
+          model: OfertaEmpleo,
+          as: 'oferta',
+          required: true,
+          where: { id_perfil_empresario: perfil.id_perfil_empresario },
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'estudiante',
+          include: [
+            { model: Usuario, as: 'usuario' },
+            { model: Curriculum, as: 'curriculum' },
+          ],
+        },
+      ],
+      order: [['fecha_postulacion', 'DESC']],
+      limit: obtenerLimite(req.query.limit),
+    });
+
+    res.json({ success: true, data: postulaciones });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener las postulaciones de empleo.');
   }
 };
 
@@ -769,30 +858,43 @@ const listarMensajesRecientes = async (req, res) => {
     const perfil = await obtenerPerfilEmpresario(req, res);
     if (!perfil) return;
 
+    const includePostulacion = {
+      model: Postulacion,
+      as: 'postulacion',
+      required: true,
+      include: [
+        {
+          model: Propuesta,
+          as: 'propuesta',
+          required: true,
+          where: { id_perfil_empresario: perfil.id_perfil_empresario },
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'perfilEstudiante',
+          include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }],
+        },
+      ],
+    };
+
     const conversaciones = await Conversacion.findAll({
-      include: [{
-        model: Postulacion,
-        as: 'postulacion',
-        required: true,
-        include: [
-          {
-            model: Propuesta,
-            as: 'propuesta',
-            required: true,
-            where: { id_perfil_empresario: perfil.id_perfil_empresario },
-          },
-          {
-            model: PerfilEstudiante,
-            as: 'perfilEstudiante',
-            include: [{ model: Usuario, as: 'usuario' }],
-          },
-        ],
-      }],
+      include: [includePostulacion],
       order: [['fecha_envio', 'DESC']],
-      limit: obtenerLimite(req.query.limit),
     });
 
-    res.json({ success: true, data: conversaciones });
+    const agrupadas = Object.values(
+      conversaciones.reduce((acc, c) => {
+        const key = c.id_postulacion;
+        if (!acc[key] || new Date(c.fecha_envio) > new Date(acc[key].fecha_envio)) {
+          const estudiante = c.postulacion?.perfilEstudiante?.usuario || null;
+          if (estudiante) estudiante.rol = 'estudiante';
+          acc[key] = { ...(c.toJSON ? c.toJSON() : c), contacto: estudiante };
+        }
+        return acc;
+      }, {})
+    ).slice(0, obtenerLimite(req.query.limit));
+
+    res.json({ success: true, data: agrupadas });
   } catch (error) {
     responderError(res, error, 'Error al obtener mensajes recientes.');
   }
@@ -1117,9 +1219,9 @@ const actualizarEstadoPostulacion = async (req, res) => {
     if (!perfil) return;
 
     const { id } = req.params;
-    const { estado } = req.body;
+    const { estado, mensaje } = req.body;
 
-    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'RECHAZADA', 'CONTRATADO'];
+    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO', 'ACEPTADO'];
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ success: false, message: `Estado invalido. Validos: ${estadosValidos.join(', ')}` });
     }
@@ -1156,16 +1258,18 @@ const actualizarEstadoPostulacion = async (req, res) => {
     if (usuarioEstudiante) {
       const mapaMensajes = {
         EN_REVISION: `Tu postulacion para "${tituloPropuesta}" ha pasado a estar en revision.`,
-        PRESSELECCIONADA: `¡Felicidades! Has sido preseleccionado para "${tituloPropuesta}".`,
-        RECHAZADA: `Tu postulacion para "${tituloPropuesta}" no ha sido seleccionada.`,
-        CONTRATADO: `¡Felicidades! Has sido contratado para "${tituloPropuesta}".`,
+        PRESSELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloPropuesta}".`,
+        PRESELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloPropuesta}".`,
+        RECHAZADA: mensaje || `Tu postulacion para "${tituloPropuesta}" no ha sido seleccionada.`,
+        CONTRATADO: mensaje || `¡Felicidades! Has sido contratado para "${tituloPropuesta}".`,
+        ACEPTADO: mensaje || `¡Felicidades! Has sido aceptado para "${tituloPropuesta}".`,
       };
-      const mensaje = mapaMensajes[estado];
-      if (mensaje) {
+      const notifMensaje = mapaMensajes[estado];
+      if (notifMensaje) {
         await Notificacion.create({
           id_usuario: usuarioEstudiante.id_usuario,
           tipo: `POSTULACION_${estado}`,
-          mensaje,
+          mensaje: notifMensaje,
           leido: false,
           fecha: new Date(),
         });
@@ -1182,9 +1286,92 @@ const actualizarEstadoPostulacion = async (req, res) => {
   }
 };
 
+const actualizarEstadoPostulacionEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { id } = req.params;
+    const { estado, mensaje } = req.body;
+
+    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO', 'ACEPTADO'];
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({ success: false, message: `Estado invalido. Validos: ${estadosValidos.join(', ')}` });
+    }
+
+    const postulacion = await PostulacionEmpleo.findByPk(id, {
+      include: [
+        {
+          model: OfertaEmpleo,
+          as: 'oferta',
+          required: true,
+        },
+        {
+          model: PerfilEstudiante,
+          as: 'estudiante',
+          include: [{ model: Usuario, as: 'usuario' }],
+        },
+      ],
+    });
+
+    if (!postulacion) {
+      return res.status(404).json({ success: false, message: 'Postulacion de empleo no encontrada.' });
+    }
+
+    if (postulacion.oferta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      return res.status(403).json({ success: false, message: 'No tienes permiso para modificar esta postulacion.' });
+    }
+
+    const estadoAnterior = postulacion.estado;
+
+    const mapaEstadoDB = {
+      EN_REVISION: 'vista',
+      PRESSELECCIONADA: 'vista',
+      PRESELECCIONADA: 'vista',
+      RECHAZADA: 'rechazada',
+      CONTRATADO: 'aceptada',
+      ACEPTADO: 'aceptada',
+    };
+    await postulacion.update({ estado: mapaEstadoDB[estado] || estado.toLowerCase() });
+
+    const tituloOferta = postulacion.oferta.titulo;
+    const usuarioEstudiante = postulacion.estudiante?.usuario;
+
+    if (usuarioEstudiante) {
+      const mapaMensajes = {
+        EN_REVISION: `Tu postulacion para "${tituloOferta}" ha pasado a estar en revision.`,
+        PRESSELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloOferta}".`,
+        PRESELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloOferta}".`,
+        RECHAZADA: mensaje || `Tu postulacion para "${tituloOferta}" no ha sido seleccionada.`,
+        CONTRATADO: mensaje || `¡Felicidades! Has sido contratado para "${tituloOferta}".`,
+        ACEPTADO: mensaje || `¡Felicidades! Has sido aceptado para "${tituloOferta}".`,
+      };
+      const notifMensaje = mapaMensajes[estado];
+      if (notifMensaje) {
+        await Notificacion.create({
+          id_usuario: usuarioEstudiante.id_usuario,
+          tipo: `POSTULACION_${estado}`,
+          mensaje: notifMensaje,
+          leido: false,
+          fecha: new Date(),
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Estado actualizado a "${estado}".`,
+      data: { id: postulacion.id_postulacion_empleo, estadoAnterior, estadoActual: estado },
+    });
+  } catch (error) {
+    responderError(res, error, 'Error al actualizar el estado de la postulacion de empleo.');
+  }
+};
+
 module.exports = {
   aceptarOferta,
   actualizarEstadoPostulacion,
+  actualizarEstadoPostulacionEmpleo,
   actualizarHistorial,
   crearHistorial,
   eliminarHistorial,
@@ -1203,7 +1390,9 @@ module.exports = {
   listarOfertasEmpleo,
   listarPagos,
   listarPerfil,
+  subirArchivoCedulaJuridica,
   listarPostulaciones,
+  listarPostulacionesEmpleo,
   listarPropuestas,
   listarTalento,
   marcarLeidos,

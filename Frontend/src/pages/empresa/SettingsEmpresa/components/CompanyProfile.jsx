@@ -1,14 +1,13 @@
 import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import apiClient from '../../../../services/apiClient';
 
 const CompanyProfile = () => {
   const { user, login } = useAuth();
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
-
-  const defaultAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuDAG8lvLxhVoKXJ-EnxOLfvfYASr2wMcXn-Ep7yClWOqMikPElWKRZh_OXTLJjFqvhZCjVFOZEzXhuzuVl3QokudQL54fU9zfxrFAOa4CjDu4N5NE7Ly9nJADj8tBS-salgE2ixD_lJvt8k0ZbSTQVx69drGoMTbbiWuKOmBYgll0COcnETyaQVryjX0GJ4giSKq7vIZmryVErXyDy4Ny-UaJE74AnKW38ZBhrm0wpf0eEDFQtrHbWvwsw41C4N343pzk040njET2E";
-  const avatarUrl = user?.foto_perfil || defaultAvatar;
+  const [mensaje, setMensaje] = useState(null);
 
   const { t } = useTranslation();
 
@@ -16,29 +15,41 @@ const CompanyProfile = () => {
     nombre: '',
     sitio_web: '',
     cedula: '',
+    telefono_whatsapp: '',
     sector: '',
     descripcion: ''
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [cargando, setCargando] = useState(true);
+
+  const initials = user?.nombre
+    ? user.nombre.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+    : '';
+  const avatarHue = user?.nombre
+    ? user.nombre.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % 360
+    : 0;
 
   useEffect(() => {
     const fetchProfile = async () => {
       const userId = user?.id || user?.id_usuario;
       if (!userId) return;
       try {
-        const res = await fetch(`/api/perfiles-empresario/perfil/${userId}`);
-        const result = await res.json();
+        const res = await apiClient.get(`/perfiles-empresario/perfil/${userId}`);
+        const result = res.data;
         if (result.success && result.data) {
           setFormData({
             nombre: result.data.nombre || '',
             sitio_web: result.data.sitio_web || '',
             cedula: result.data.cedula || '',
+            telefono_whatsapp: result.data.telefono_whatsapp || '',
             sector: result.data.sector || '',
             descripcion: result.data.descripcion || ''
           });
         }
       } catch (error) {
-        console.error("Error fetching company profile:", error);
+        console.error('Error fetching company profile:', error);
+      } finally {
+        setCargando(false);
       }
     };
     fetchProfile();
@@ -54,23 +65,21 @@ const CompanyProfile = () => {
     if (!userId) return;
     
     setIsSaving(true);
+    setMensaje(null);
     try {
-      const res = await fetch(`/api/perfiles-empresario/perfil/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      const result = await res.json();
+      const res = await apiClient.put(`/perfiles-empresario/perfil/${userId}`, formData);
+      const result = res.data;
       if (result.success) {
-        alert('Cambios guardados correctamente');
+        setMensaje('exito');
       } else {
-        alert('Error al guardar: ' + result.message);
+        setMensaje('error');
       }
     } catch (error) {
-      console.error("Error saving profile:", error);
-      alert('Ocurrió un error al guardar los cambios');
+      console.error('Error saving profile:', error);
+      setMensaje('error');
     } finally {
       setIsSaving(false);
+      setTimeout(() => setMensaje(null), 3000);
     }
   };
 
@@ -83,32 +92,34 @@ const CompanyProfile = () => {
     const userId = user?.id || user?.id_usuario;
     if (!file || !userId) return;
 
-    const formData = new FormData();
-    formData.append('foto', file);
+    const fd = new FormData();
+    fd.append('foto', file);
 
     try {
       setIsUploading(true);
-      const res = await fetch(`/api/usuarios/${userId}/foto-perfil`, {
-        method: 'PUT',
-        body: formData,
-      });
-      const data = await res.json();
+      const res = await apiClient.put(`/usuarios/${userId}/foto-perfil`, fd);
+      const data = res.data;
       if (data.success && data.url) {
-        // Update user context with new photo
         login({ ...user, foto_perfil: data.url }, localStorage.getItem('token'));
       }
     } catch (error) {
-      console.error("Error uploading profile photo", error);
+      console.error('Error uploading profile photo', error);
     } finally {
       setIsUploading(false);
     }
   };
 
+  if (cargando) {
+    return (
+      <section className="se-card se-card-teal hard-edge-shadow" style={{ padding: '24px' }}>
+        <p className="se-body-md">Cargando perfil...</p>
+      </section>
+    );
+  }
+
   return (
     <section className="se-card se-card-teal hard-edge-shadow" style={{ overflow: 'hidden' }}>
       <div className="se-profile-layout">
-        
-        {/* Company Avatar */}
         <div className="se-avatar-container">
           <input 
             type="file" 
@@ -118,11 +129,17 @@ const CompanyProfile = () => {
             style={{ display: 'none' }} 
           />
           <div className="se-avatar-box" style={{ opacity: isUploading ? 0.5 : 1 }}>
-            <img 
-              src={avatarUrl} 
-              alt="Company Logo" 
-              className="se-avatar-img"
-            />
+            {user?.foto_perfil ? (
+              <img src={user.foto_perfil} alt="Company Logo" className="se-avatar-img" />
+            ) : (
+              <div className="se-avatar-img" style={{
+                backgroundColor: `hsl(${avatarHue}, 62%, 52%)`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontWeight: 'bold', fontSize: '24px',
+              }}>
+                {initials}
+              </div>
+            )}
           </div>
           <button className="se-edit-avatar-btn" onClick={handleAvatarClick} disabled={isUploading}>
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
@@ -131,10 +148,20 @@ const CompanyProfile = () => {
           </button>
         </div>
 
-        {/* Fields Grid */}
         <div className="se-form-container">
           <h3 className="se-headline-md" style={{ margin: '0 0 var(--spacing-sm) 0' }}>{t('companyProfile.title')}</h3>
           
+          {mensaje && (
+            <p style={{
+              margin: '0 0 var(--spacing-sm) 0', padding: '8px 12px', borderRadius: '6px',
+              backgroundColor: mensaje === 'exito' ? '#ecfdf5' : '#fef2f2',
+              color: mensaje === 'exito' ? '#065f46' : '#991b1b',
+              fontSize: 'var(--text-label-sm)', fontWeight: 500,
+            }}>
+              {mensaje === 'exito' ? 'Cambios guardados correctamente.' : 'Error al guardar los cambios.'}
+            </p>
+          )}
+
           <div className="se-form-grid">
             <div className="se-input-group">
               <label className="se-label-bold">{t('companyProfile.commercialName')}</label>
@@ -152,6 +179,11 @@ const CompanyProfile = () => {
             <div className="se-input-group">
               <label className="se-label-bold">{t('companyProfile.legalId')}</label>
               <input type="text" className="se-input se-body-md" name="cedula" value={formData.cedula} onChange={handleInputChange} placeholder={t('companyProfile.legalId')} />
+            </div>
+
+            <div className="se-input-group">
+              <label className="se-label-bold">{t('companyProfile.contactNumber', 'Número de Contacto')}</label>
+              <input type="text" className="se-input se-body-md" name="telefono_whatsapp" value={formData.telefono_whatsapp} onChange={handleInputChange} placeholder={t('companyProfile.contactNumber', 'Número de Contacto')} />
             </div>
             
             <div className="se-input-group">
@@ -176,7 +208,6 @@ const CompanyProfile = () => {
             </button>
           </div>
         </div>
-
       </div>
     </section>
   );

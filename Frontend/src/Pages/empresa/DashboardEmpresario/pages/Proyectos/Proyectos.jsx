@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Check, ChevronDown, ChevronUp, Edit3, Eye, ExternalLink, PauseCircle, PlayCircle, Plus, Save, Trash2, X, XCircle } from 'lucide-react';
+import { Check, CheckCircle, ChevronDown, ChevronUp, Clock, Edit3, ExternalLink, Eye, PauseCircle, PlayCircle, Plus, Save, Trash2, XCircle, AlertTriangle } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
-import { formatearPropuesta, formatearHistorial } from '../../utils/dashboardEmpresarioFormatters';
+import { formatearPropuesta } from '../../utils/dashboardEmpresarioFormatters';
 
 const crearFormulario = (propuesta) => ({
   titulo: propuesta.titulo || '',
@@ -19,14 +19,7 @@ const crearFormulario = (propuesta) => ({
   github_url: propuesta.github_url || '',
 });
 
-const historialVacio = () => ({
-  titulo_proyecto: '',
-  descripcion: '',
-  tecnologias_usadas: '',
-  enlace: '',
-  fecha_inicio: '',
-  fecha_fin: '',
-});
+const CONFIRMAR_TEXTO = 'ELIMINAR';
 
 export default function Proyectos() {
   const { t } = useTranslation();
@@ -38,13 +31,9 @@ export default function Proyectos() {
   const [mensaje, setMensaje] = useState('');
   const [detalleId, setDetalleId] = useState(null);
 
-  const [historial, setHistorial] = useState([]);
-  const [historialLoading, setHistorialLoading] = useState(true);
-  const [historialEditId, setHistorialEditId] = useState(null);
-  const [historialForm, setHistorialForm] = useState(null);
-  const [historialDetalleId, setHistorialDetalleId] = useState(null);
-  const [historialConfirmId, setHistorialConfirmId] = useState(null);
-  const [historialSaving, setHistorialSaving] = useState(false);
+  const [eliminarModal, setEliminarModal] = useState({ abierto: false, id: null, nombre: '' });
+  const [confirmText, setConfirmText] = useState('');
+  const [cerrarConfirm, setCerrarConfirm] = useState({ abierto: false, id: null, nombre: '' });
 
   const { data: propuestas, loading, error } = useDashboardEmpresarioRequest(
     () => dashboardEmpresarioService.obtenerPropuestas(),
@@ -55,13 +44,12 @@ export default function Proyectos() {
   const proyectos = propuestas.map(formatearPropuesta);
   const refrescarPropuestas = () => setRefreshKey((key) => key + 1);
 
-  useEffect(() => {
-    setHistorialLoading(true);
-    dashboardEmpresarioService.obtenerHistorial()
-      .then((data) => setHistorial(Array.isArray(data) ? data : []))
-      .catch(() => setHistorial([]))
-      .finally(() => setHistorialLoading(false));
-  }, [refreshKey]);
+  const historialPropuestas = propuestas
+    .filter((p) => p.estado === 'CERRADA' || p.estado === 'CANCELADA')
+    .sort((a, b) => new Date(b.fecha_limite || 0) - new Date(a.fecha_limite || 0))
+    .slice(0, 3);
+
+  const historialProyectos = historialPropuestas.map(formatearPropuesta);
 
   const iniciarEdicion = (propuesta) => {
     setEditandoId(propuesta.id_propuesta);
@@ -116,11 +104,22 @@ export default function Proyectos() {
     }
   };
 
-  const eliminarProyecto = async (id) => {
-    const confirmado = window.confirm(t('empresaProyectos.msgDeleteConfirm'));
-    if (!confirmado) return;
+  const abrirEliminar = useCallback((id, nombre, tipo = 'proyecto') => {
+    setEliminarModal({ abierto: true, id, nombre, tipo });
+    setConfirmText('');
+  }, []);
+
+  const cerrarEliminar = useCallback(() => {
+    setEliminarModal({ abierto: false, id: null, nombre: '', tipo: 'proyecto' });
+    setConfirmText('');
+  }, []);
+
+  const ejecutarEliminar = useCallback(async () => {
+    const { id, tipo } = eliminarModal;
+    if (!id) return;
     setAccionandoId(id);
     setMensaje('');
+    cerrarEliminar();
     try {
       await dashboardEmpresarioService.eliminarPropuesta(id);
       setMensaje(t('empresaProyectos.msgDeleteSuccess'));
@@ -130,76 +129,29 @@ export default function Proyectos() {
     } finally {
       setAccionandoId(null);
     }
-  };
+  }, [eliminarModal, cerrarEliminar, refrescarPropuestas, t]);
 
   const toggleDetalle = (id) => {
     setDetalleId((prev) => (prev === id ? null : id));
   };
 
-  const iniciarHistorialEdit = (item) => {
-    setHistorialEditId(item.id_historial_empresa);
-    setHistorialForm({
-      titulo_proyecto: item.titulo_proyecto || '',
-      descripcion: item.descripcion || '',
-      tecnologias_usadas: item.tecnologias_usadas || '',
-      enlace: item.enlace || '',
-      fecha_inicio: item.fecha_inicio ? item.fecha_inicio.slice(0, 10) : '',
-      fecha_fin: item.fecha_fin ? item.fecha_fin.slice(0, 10) : '',
-    });
-    setHistorialDetalleId(null);
-  };
-
-  const iniciarHistorialNuevo = () => {
-    setHistorialEditId('nuevo');
-    setHistorialForm(historialVacio());
-  };
-
-  const cancelarHistorialEdit = () => {
-    setHistorialEditId(null);
-    setHistorialForm(null);
-  };
-
-  const cambiarHistorialCampo = (e) => {
-    const { name, value } = e.target;
-    setHistorialForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const guardarHistorial = async () => {
-    if (!historialForm?.titulo_proyecto?.trim()) return;
-    setHistorialSaving(true);
-    try {
-      if (historialEditId === 'nuevo') {
-        const creado = await dashboardEmpresarioService.crearHistorial(historialForm);
-        setHistorial((prev) => [creado, ...prev]);
-      } else {
-        const actualizado = await dashboardEmpresarioService.actualizarHistorial(historialEditId, historialForm);
-        setHistorial((prev) => prev.map((h) => (h.id_historial_empresa === historialEditId ? actualizado : h)));
-      }
-      cancelarHistorialEdit();
-      setMensaje(t('empresaProyectos.historySaved'));
-    } catch {
-      setMensaje('Error al guardar el historial.');
-    } finally {
-      setHistorialSaving(false);
-    }
-  };
-
-  const eliminarHistorialItem = async (id) => {
-    setHistorialSaving(true);
-    try {
-      await dashboardEmpresarioService.eliminarHistorial(id);
-      setHistorial((prev) => prev.filter((h) => h.id_historial_empresa !== id));
-      setHistorialConfirmId(null);
-      setMensaje(t('empresaProyectos.historyDeleted'));
-    } catch {
-      setMensaje('Error al eliminar.');
-    } finally {
-      setHistorialSaving(false);
-    }
-  };
-
   const toggleHistorialDetalle = (id) => {
-    setHistorialDetalleId((prev) => (prev === id ? null : id));
+    setDetalleId((prev) => (prev === id ? null : id));
+  };
+
+  const abrirCerrarConfirm = (id, nombre) => {
+    setCerrarConfirm({ abierto: true, id, nombre });
+  };
+
+  const cerrarCerrarConfirm = () => {
+    setCerrarConfirm({ abierto: false, id: null, nombre: '' });
+  };
+
+  const ejecutarCerrar = async () => {
+    const { id } = cerrarConfirm;
+    if (!id) return;
+    cerrarCerrarConfirm();
+    await cambiarEstado(id, 'CERRADA');
   };
 
   const renderDetallePropuesta = (propuesta) => {
@@ -248,56 +200,30 @@ export default function Proyectos() {
     );
   };
 
-  const renderDetalleHistorial = (item) => {
-    if (historialDetalleId !== item.id_historial_empresa) return null;
-    return (
-      <div className="de-project-detail">
-        <div className="de-detail-grid">
-          {item.descripcion && (
-            <div className="de-detail-section">
-              <strong>{t('empresaProyectos.detailDesc')}</strong>
-              <p>{item.descripcion}</p>
-            </div>
-          )}
-          {item.tecnologias_usadas && (
-            <div className="de-detail-section">
-              <strong>{t('empresaProyectos.detailTech')}</strong>
-              <p>{item.tecnologias_usadas}</p>
-            </div>
-          )}
-          {(item.fecha_inicio || item.fecha_fin) && (
-            <div className="de-detail-row">
-              {item.fecha_inicio && <span><strong>{t('empresaProyectos.historyForm.startDate')}:</strong> {new Date(item.fecha_inicio).toLocaleDateString()}</span>}
-              {item.fecha_fin && <span><strong>{t('empresaProyectos.historyForm.endDate')}:</strong> {new Date(item.fecha_fin).toLocaleDateString()}</span>}
-            </div>
-          )}
-          {item.enlace && (
-            <div className="de-detail-section">
-              <strong>URL:</strong>{' '}
-              <a href={item.enlace.startsWith('http') ? item.enlace : `https://${item.enlace}`} target="_blank" rel="noopener noreferrer" className="de-detail-link">
-                {item.enlace} <ExternalLink size={12} />
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <DashboardLayout activePage="proyectos">
       <div className="de-page-heading">
-        <h1>{t('empresaProyectos.title')}</h1>
-        <button className="de-btn-primary" type="button" onClick={() => navigate('/DashboardEmpresario/publicar-proyecto')}>{t('empresaProyectos.btnPublish')}</button>
+        <div>
+          <h1>{t('empresaProyectos.title')}</h1>
+          <p style={{ color: 'var(--ink-muted)', fontSize: '0.85rem', marginTop: '0.15rem' }}>
+            Gestiona tus proyectos activos y el historial de trabajos realizados.
+          </p>
+        </div>
+        <button className="de-btn-primary" type="button" onClick={() => navigate('/DashboardEmpresario/publicar-proyecto')}>
+          <Plus size={18} /> {t('empresaProyectos.btnPublish')}
+        </button>
       </div>
 
       {mensaje && (
-        <p className={`de-data-state ${mensaje.includes('Error') || mensaje.includes('Could not') ? 'error' : ''}`}>
+        <div className={`de-form-message ${mensaje.includes('Error') || mensaje.includes('Could not') ? 'error' : 'success'}`}>
           {mensaje}
-        </p>
+        </div>
       )}
 
       <div className="de-panel">
+        <div className="de-panel-header">
+          <h3 className="de-panel-title">{t('empresaProyectos.activeTitle') || 'Proyectos activos'}</h3>
+        </div>
         <EstadoDatos loading={loading} error={error} empty={!proyectos.length} emptyText={t('empresaProyectos.empty')} />
         {!loading && !error && propuestas.map((propuesta, index) => {
           const p = formatearPropuesta(propuesta, index);
@@ -367,8 +293,8 @@ export default function Proyectos() {
                 <button
                   className="de-project-icon-button"
                   type="button"
-                  onClick={() => cambiarEstado(propuesta.id_propuesta, 'CERRADA')}
-                  disabled={estaOcupado || propuesta.estado === 'CERRADA'}
+                  onClick={() => abrirCerrarConfirm(propuesta.id_propuesta, p.name)}
+                  disabled={estaOcupado || propuesta.estado === 'CERRADA' || propuesta.estado === 'CANCELADA'}
                   aria-label={t('empresaProyectos.aria.close')}
                 >
                   <Check size={16} />
@@ -381,7 +307,7 @@ export default function Proyectos() {
                 >
                   {estaExpandido ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
-                <button className="de-project-icon-button danger" type="button" onClick={() => eliminarProyecto(propuesta.id_propuesta)} disabled={estaOcupado} aria-label={t('empresaProyectos.aria.delete')}>
+                <button className="de-project-icon-button danger" type="button" onClick={() => abrirEliminar(propuesta.id_propuesta, p.name)} disabled={estaOcupado} aria-label={t('empresaProyectos.aria.delete')}>
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -390,56 +316,23 @@ export default function Proyectos() {
         })}
       </div>
 
-      <div className="de-panel de-panel-history" style={{ marginTop: '24px' }}>
-        <div className="de-page-heading" style={{ marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{t('empresaProyectos.historyTitle')}</h2>
-          <button className="de-btn-primary" type="button" onClick={iniciarHistorialNuevo}>
-            <Plus size={15} /> {t('empresaProyectos.historyAdd')}
-          </button>
+      <div className="de-panel de-section-gap" style={{ background: 'color-mix(in srgb, var(--primary) 3%, var(--surface))' }}>
+        <div className="de-panel-header">
+          <h3 className="de-panel-title">
+            <Clock size={16} style={{ marginRight: '0.25rem' }} /> {t('empresaProyectos.historyTitle')} ({historialProyectos.length})
+          </h3>
         </div>
 
-        <EstadoDatos loading={historialLoading} error={null} empty={!historial.length && !historialEditId} emptyText={t('empresaProyectos.historyEmpty')} />
+        <EstadoDatos loading={false} error={null} empty={!historialProyectos.length} emptyText={t('empresaProyectos.historyEmpty')} />
 
-        {historialEditId === 'nuevo' && (
-          <div className="de-project-item de-project-item-managed" style={{ opacity: 0.9 }}>
-            <div className="de-project-icon-wrap blue">
-              <Plus size={20} />
-            </div>
-            <div className="de-project-info">
-              <div className="de-project-edit-form">
-                <input className="de-form-control" name="titulo_proyecto" value={historialForm.titulo_proyecto} onChange={cambiarHistorialCampo} placeholder={t('empresaProyectos.historyForm.title')} autoFocus />
-                <textarea className="de-form-control de-form-textarea" name="descripcion" value={historialForm.descripcion} onChange={cambiarHistorialCampo} placeholder={t('empresaProyectos.historyForm.desc')} rows={2} />
-                <input className="de-form-control" name="tecnologias_usadas" value={historialForm.tecnologias_usadas} onChange={cambiarHistorialCampo} placeholder={t('empresaProyectos.historyForm.techPlaceholder')} />
-                <input className="de-form-control" name="enlace" value={historialForm.enlace} onChange={cambiarHistorialCampo} placeholder={t('empresaProyectos.historyForm.link')} />
-                <div className="de-project-edit-row">
-                  <input className="de-form-control" name="fecha_inicio" value={historialForm.fecha_inicio} onChange={cambiarHistorialCampo} type="date" placeholder={t('empresaProyectos.historyForm.startDate')} />
-                  <input className="de-form-control" name="fecha_fin" value={historialForm.fecha_fin} onChange={cambiarHistorialCampo} type="date" placeholder={t('empresaProyectos.historyForm.endDate')} />
-                </div>
-                <div className="de-project-edit-actions">
-                  <button className="de-btn-primary" type="button" onClick={guardarHistorial} disabled={historialSaving || !historialForm?.titulo_proyecto?.trim()}>
-                    <Save size={15} />
-                    {historialSaving ? t('empresaProyectos.historyForm.saving') : t('empresaProyectos.historyForm.save')}
-                  </button>
-                  <button className="de-btn-outline" type="button" onClick={cancelarHistorialEdit}>
-                    <X size={15} />
-                    {t('empresaProyectos.historyForm.cancel')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {!historialLoading && historial.map((item, index) => {
-          const h = formatearHistorial(item, index);
-          const enEdicion = historialEditId === item.id_historial_empresa;
-          const enConfirmacion = historialConfirmId === item.id_historial_empresa;
-          const expandido = historialDetalleId === item.id_historial_empresa;
+        {historialPropuestas.map((propuesta) => {
+          const h = formatearPropuesta(propuesta);
+          const expandido = detalleId === propuesta.id_propuesta;
 
           return (
             <div key={h.id} className="de-project-item de-project-item-managed">
-              <div className={`de-project-icon-wrap ${h.iconColor}`}>
-                <img src={h.arrowSrc} alt="" className="de-project-arrow" width="24" height="24" loading="lazy" decoding="async" />
+              <div className="de-project-icon-wrap" style={{ background: 'color-mix(in srgb, var(--ink-muted) 10%, transparent)' }}>
+                <Clock size={18} style={{ color: 'var(--ink-muted)' }} />
               </div>
               <div className="de-project-info">
                 <div className="de-project-name">
@@ -447,66 +340,92 @@ export default function Proyectos() {
                   <span className={`de-badge ${h.statusType}`}>{h.status}</span>
                 </div>
                 <p className="de-project-meta">{h.meta}</p>
-
-                {enEdicion && (
-                  <div className="de-project-edit-form">
-                    <input className="de-form-control" name="titulo_proyecto" value={historialForm.titulo_proyecto} onChange={cambiarHistorialCampo} placeholder={t('empresaProyectos.historyForm.title')} autoFocus />
-                    <textarea className="de-form-control de-form-textarea" name="descripcion" value={historialForm.descripcion} onChange={cambiarHistorialCampo} placeholder={t('empresaProyectos.historyForm.desc')} rows={2} />
-                    <input className="de-form-control" name="tecnologias_usadas" value={historialForm.tecnologias_usadas} onChange={cambiarHistorialCampo} placeholder={t('empresaProyectos.historyForm.techPlaceholder')} />
-                    <input className="de-form-control" name="enlace" value={historialForm.enlace} onChange={cambiarHistorialCampo} placeholder={t('empresaProyectos.historyForm.link')} />
-                    <div className="de-project-edit-row">
-                      <input className="de-form-control" name="fecha_inicio" value={historialForm.fecha_inicio} onChange={cambiarHistorialCampo} type="date" />
-                      <input className="de-form-control" name="fecha_fin" value={historialForm.fecha_fin} onChange={cambiarHistorialCampo} type="date" />
-                    </div>
-                    <div className="de-project-edit-actions">
-                      <button className="de-btn-primary" type="button" onClick={guardarHistorial} disabled={historialSaving || !historialForm?.titulo_proyecto?.trim()}>
-                        <Save size={15} />
-                        {historialSaving ? t('empresaProyectos.historyForm.saving') : t('empresaProyectos.historyForm.save')}
-                      </button>
-                      <button className="de-btn-outline" type="button" onClick={cancelarHistorialEdit}>
-                        <XCircle size={15} />
-                        {t('empresaProyectos.historyForm.cancel')}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {enConfirmacion && (
-                  <div className="de-project-edit-form" style={{ border: 'none', padding: 0 }}>
-                    <p>{t('empresaProyectos.historyDeleteConfirm')}</p>
-                    <div className="de-project-edit-actions">
-                      <button className="de-btn-primary" type="button" onClick={() => eliminarHistorialItem(item.id_historial_empresa)} disabled={historialSaving} style={{ background: '#dc2626' }}>
-                        <Trash2 size={15} /> Sí, eliminar
-                      </button>
-                      <button className="de-btn-outline" type="button" onClick={() => setHistorialConfirmId(null)}>
-                        <X size={15} /> Cancelar
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {renderDetalleHistorial(item)}
+                {renderDetallePropuesta(propuesta)}
               </div>
               <div className="de-project-action de-project-action-managed">
-                <button className="de-project-icon-button" type="button" onClick={() => iniciarHistorialEdit(item)} disabled={historialSaving} aria-label={t('empresaProyectos.aria.edit')}>
-                  <Edit3 size={16} />
-                </button>
                 <button
                   className="de-project-icon-button"
                   type="button"
-                  onClick={() => toggleHistorialDetalle(item.id_historial_empresa)}
+                  onClick={() => toggleHistorialDetalle(propuesta.id_propuesta)}
                   aria-label="Detalles"
                 >
                   {expandido ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
-                <button className="de-project-icon-button danger" type="button" onClick={() => setHistorialConfirmId(item.id_historial_empresa)} disabled={historialSaving} aria-label={t('empresaProyectos.aria.delete')}>
-                  <Trash2 size={16} />
                 </button>
               </div>
             </div>
           );
         })}
       </div>
+
+      {cerrarConfirm.abierto && (
+        <div className="de-confirm-overlay" onClick={cerrarCerrarConfirm}>
+          <div className="de-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="de-confirm-icon">
+              <CheckCircle size={32} />
+            </div>
+
+            <p>Cerrar proyecto</p>
+
+            <p className="de-confirm-sub">
+              ¿Estás seguro de cerrar <strong>{cerrarConfirm.nombre}</strong>? Los estudiantes ya no podrán postularse.
+            </p>
+
+            <div className="de-confirm-actions">
+              <button className="de-btn-outline" onClick={cerrarCerrarConfirm}>
+                Cancelar
+              </button>
+              <button className="de-btn-primary" onClick={ejecutarCerrar}>
+                <Check size={15} /> Sí, cerrar proyecto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {eliminarModal.abierto && (
+        <div className="de-confirm-overlay" onClick={cerrarEliminar}>
+          <div className="de-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="de-confirm-icon">
+              <AlertTriangle size={32} />
+            </div>
+
+            <p>Eliminar proyecto</p>
+
+            <p className="de-confirm-sub">
+              ¿Estás seguro de eliminar <strong>{eliminarModal.nombre}</strong>? Esta acción no se puede deshacer.
+            </p>
+
+            <div style={{ margin: '0.75rem 0 1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--ink-strong)', marginBottom: '0.45rem' }}>
+                Escribe <strong style={{ color: '#dc2626' }}>{CONFIRMAR_TEXTO}</strong> para confirmar
+              </label>
+              <input
+                type="text"
+                className="de-form-control"
+                style={{ textAlign: 'center', fontWeight: 700, letterSpacing: '0.05em' }}
+                placeholder={CONFIRMAR_TEXTO}
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && confirmText === CONFIRMAR_TEXTO) {
+                    ejecutarEliminar();
+                  }
+                }}
+              />
+            </div>
+
+            <div className="de-confirm-actions">
+              <button className="de-btn-outline" onClick={cerrarEliminar}>
+                Cancelar
+              </button>
+              <button className="de-btn-primary danger" disabled={confirmText !== CONFIRMAR_TEXTO} onClick={ejecutarEliminar}>
+                {accionandoId === eliminarModal.id ? 'Eliminando...' : <><Trash2 size={15} /> Eliminar</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Star, X, Plus } from 'lucide-react';
 
 const ESTADO_INICIAL = {
@@ -10,6 +11,7 @@ const ESTADO_INICIAL = {
 const CLAVE_ALMACENAMIENTO = 'preferenciasProfesionales';
 
 function PreferenciasProfesionales() {
+  const { t } = useTranslation();
   const [datosFormulario, setDatosFormulario] = useState(() => {
     const datosGuardados = localStorage.getItem(CLAVE_ALMACENAMIENTO);
     return datosGuardados ? JSON.parse(datosGuardados) : ESTADO_INICIAL;
@@ -69,34 +71,34 @@ function PreferenciasProfesionales() {
       <div className="cabeceraFormulario">
         <h2 className="tituloFormulario">
           <Star size={18} className="iconoTituloFormulario" />
-          Preferencias Profesionales
+          {t('egresadoConfiguracion.preferences.titulo')}
         </h2>
         <div className="accionesFormulario">
           {mensajeExito && (
-            <span className="mensajeExito animate-in">¡Cambios guardados!</span>
+            <span className="mensajeExito animate-in">{t('egresadoConfiguracion.preferences.guardado')}</span>
           )}
           <button className="botonPrimario" onClick={manejarGuardar}>
-            Guardar Cambios
+            {t('egresadoConfiguracion.preferences.guardarCambios')}
           </button>
         </div>
       </div>
 
       <div className="filaFormulario">
         <div className="grupoFormulario">
-          <label>Interés de Rol</label>
+          <label>{t('egresadoConfiguracion.preferences.interesRol')}</label>
           <select
             name="rol"
             className="seleccionFormulario"
             value={datosFormulario.rol}
             onChange={manejarCambio}
           >
-            <option value="frontend">Frontend Developer</option>
-            <option value="backend">Backend Developer</option>
-            <option value="fullstack">Fullstack Developer</option>
+            <option value="frontend">{t('egresadoConfiguracion.preferences.frontend')}</option>
+            <option value="backend">{t('egresadoConfiguracion.preferences.backend')}</option>
+            <option value="fullstack">{t('egresadoConfiguracion.preferences.fullstack')}</option>
           </select>
         </div>
         <div className="grupoFormulario">
-          <label>Expectativa Salarial (Anual)</label>
+          <label>{t('egresadoConfiguracion.preferences.expectativaSalarial')}</label>
           <input
             type="text"
             name="salario"
@@ -108,7 +110,7 @@ function PreferenciasProfesionales() {
       </div>
 
       <div className="grupoFormulario">
-        <label>Tecnologías Principales</label>
+        <label>{t('egresadoConfiguracion.preferences.tecnologiasPrincipales')}</label>
         <div className="contenedorEtiquetasConfiguracion">
           {datosFormulario.tecnologias.map((tech) => (
             <div className="etiquetaConfiguracion" key={tech}>
@@ -128,7 +130,7 @@ function PreferenciasProfesionales() {
               onBlur={confirmarNuevaTecnologia}
               onKeyDown={manejarTeclaPresionada}
               className="entradaNuevaTecnologia"
-              placeholder="Nueva tech..."
+              placeholder={t('egresadoConfiguracion.preferences.nuevaTech')}
             />
           ) : (
             <button
@@ -136,7 +138,7 @@ function PreferenciasProfesionales() {
               className="etiquetaAgregar"
               onClick={iniciarAgregarTecnologia}
             >
-              <Plus size={14} /> Añadir
+              <Plus size={14} /> {t('egresadoConfiguracion.preferences.anadir')}
             </button>
           )}
         </div>

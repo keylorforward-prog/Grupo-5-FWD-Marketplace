@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { authService } from '../../../services/authService';
-import { obtenerRol, rutaDashboardDeRol } from '../../../routes/rutas';
-import { Camera, Tag, CreditCard, Smartphone, GraduationCap, Building2, Factory, FileText, AlertCircle, Clock } from 'lucide-react';
+import { RUTAS, obtenerRol, rutaDashboardDeRol } from '../../../routes/rutas';
+import { Camera, Tag, CreditCard, Smartphone, GraduationCap, Building2, Factory, FileText, AlertCircle, Clock, Link as LinkIcon } from 'lucide-react';
 import '../AuthPages.css';
 import './CompletarPerfil.css';
 
@@ -17,6 +17,7 @@ const CompletarPerfil = () => {
     rol: 'ESTUDIANTE',
     cedula: '',
     telefono_whatsapp: '',
+    linkedin: '',
     titulo_fwd_file: null,
     tipo_empresa: '',
     sector: '',
@@ -68,16 +69,17 @@ const CompletarPerfil = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { rol, cedula, tipo_empresa, sector } = form;
+    const { rol, cedula, telefono_whatsapp, linkedin, tipo_empresa, sector } = form;
 
     if (!cedula || !rol) {
       setError('Por favor completa todos los campos obligatorios.');
       return;
     }
     
-    // Validación de formato de cédula: debe contener guion
-    if (!cedula.includes('-') && !cedula.startsWith('GOOGLE_')) {
-      setError('La cédula debe incluir el guion (-). Ejemplo: 1-2342');
+    // Validación cédula costarricense: formato X-XXXX-XXXX (física) o XX-XXXXXXX-XXX (jurídica)
+    const cedulaRegex = /^\d{1,2}-\d{3,4}-\d{3,4}$/;
+    if (!cedula.startsWith('GOOGLE_') && !cedula.startsWith('GITHUB_') && !cedulaRegex.test(cedula)) {
+      setError('Formato de cédula inválido. Ejemplos: 1-1231-8232 o 12-3456789-123');
       return;
     }
 
@@ -285,6 +287,23 @@ const CompletarPerfil = () => {
                     value={form.telefono_whatsapp}
                     onChange={handleChange}
                     placeholder="8888-8888"
+                    className="form-input has-icon"
+                  />
+                </div>
+              </div>
+
+              {/* LinkedIn */}
+              <div className="form-group">
+                <label htmlFor="cp-linkedin" className="form-label">Perfil de LinkedIn <span style={{ fontSize: '0.85em', color: '#888' }}>- Opcional</span></label>
+                <div className="input-wrapper">
+                  <LinkIcon size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
+                  <input
+                    id="cp-linkedin"
+                    type="url"
+                    name="linkedin"
+                    value={form.linkedin}
+                    onChange={handleChange}
+                    placeholder="https://linkedin.com/in/tu-perfil"
                     className="form-input has-icon"
                   />
                 </div>

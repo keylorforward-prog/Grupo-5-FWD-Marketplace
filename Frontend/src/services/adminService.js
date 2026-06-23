@@ -6,6 +6,11 @@ export const adminService = {
     return response.data;
   },
 
+  getMetricasVerificacion: async () => {
+    const response = await apiClient.get('/admin/verificacion/metricas');
+    return response.data;
+  },
+
   buscarGlobal: async (q) => {
     const response = await apiClient.get('/admin/busqueda', { params: { q } });
     return response.data;
@@ -86,13 +91,28 @@ export const adminService = {
     return response.data;
   },
 
-  getEgresadosPendientes: async () => {
-    const response = await apiClient.get('/admin/egresados/pendientes');
+  getEgresadosPendientes: async (params = {}) => {
+    const response = await apiClient.get('/admin/egresados/pendientes', { params });
     return response.data;
   },
 
   verifyEstudiante: async (id_usuario, accion, motivo_rechazo = null) => {
     const response = await apiClient.post(`/admin/egresados/${id_usuario}/verificar`, { accion, motivo_rechazo });
+    return response.data;
+  },
+
+  getProyectos: async (params = {}) => {
+    const response = await apiClient.get('/admin/proyectos', { params });
+    return response.data;
+  },
+
+  getProyectoDetalle: async (id_proyecto) => {
+    const response = await apiClient.get(`/admin/proyectos/${id_proyecto}/detalle`);
+    return response.data;
+  },
+
+  updateProyectoEstado: async (id_proyecto, estado, nota = '') => {
+    const response = await apiClient.put(`/admin/proyectos/${id_proyecto}/estado`, { estado, nota });
     return response.data;
   }
 };

@@ -11,6 +11,7 @@ export const RUTAS = {
   registro: '/registro',
   googleCallback: '/auth/callback',
   completarPerfil: '/completar-perfil',
+  recuperarContrasena: '/forgot-password',
 
   // Egresado
   egresado: '/egresado',
@@ -23,6 +24,7 @@ export const RUTAS = {
   egresadoNotificaciones: '/egresado/dashboard/notificaciones',
   egresadoPerfil: '/egresado/perfil',
   egresadoConfiguracion: '/egresado/configuracion',
+  egresadoSoporte: '/egresado/soporte',
 
   // Empresa
   empresa: '/empresa',
