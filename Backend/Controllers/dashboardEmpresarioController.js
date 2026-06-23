@@ -1538,6 +1538,33 @@ const actualizarEstadoPostulacionBatch = async (req, res) => {
   }
 };
 
+const completarProyecto = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { id_proyecto } = req.params;
+
+    const proyecto = await ProyectoPlataforma.findByPk(id_proyecto, {
+      include: [{ model: Propuesta, as: 'propuesta' }]
+    });
+
+    if (!proyecto) {
+      return res.status(404).json({ success: false, message: 'Proyecto no encontrado' });
+    }
+
+    if (proyecto.propuesta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      return res.status(403).json({ success: false, message: 'No tienes permiso para completar este proyecto.' });
+    }
+
+    await proyecto.update({ estado: 'COMPLETADO' });
+
+    res.json({ success: true, message: 'Proyecto completado exitosamente.' });
+  } catch (error) {
+    responderError(res, error, 'Error al completar el proyecto.');
+  }
+};
+
 module.exports = {
   aceptarOferta,
   actualizarEstadoPostulacion,
