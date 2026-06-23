@@ -22,6 +22,7 @@ const {
 const { sendPostulacionEmail } = require('../Services/emailService');
 
 const DOS_MINUTOS = 2 * 60 * 1000;
+const ESTADOS_ACEPTADOS = ['ACEPTADO', 'CONTRATADO'];
 
 const actualizarPendiente = async (postulacion) => {
   if (postulacion.estado === 'ENVIADA' && Date.now() - new Date(postulacion.fecha_postulacion).getTime() >= DOS_MINUTOS) {
@@ -899,7 +900,7 @@ const listarMensajesRecientes = async (req, res) => {
             { model: PerfilEstudiante, as: 'estudiante', include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }] },
           ],
         });
-        if (postulacion) {
+        if (postulacion && ESTADOS_ACEPTADOS.includes(postulacion.estado?.toUpperCase())) {
           estudiante = postulacion.estudiante?.usuario || null;
         }
       } else {
@@ -909,7 +910,7 @@ const listarMensajesRecientes = async (req, res) => {
             { model: PerfilEstudiante, as: 'perfilEstudiante', include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }] },
           ],
         });
-        if (postulacion) {
+        if (postulacion && ESTADOS_ACEPTADOS.includes(postulacion.estado?.toUpperCase())) {
           estudiante = postulacion.perfilEstudiante?.usuario || null;
         }
       }
@@ -1121,6 +1122,9 @@ const obtenerConversacion = async (req, res) => {
       if (!postulacion || postulacion.oferta.id_perfil_empresario !== perfil.id_perfil_empresario) {
         return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
       }
+      if (!ESTADOS_ACEPTADOS.includes(postulacion.estado?.toUpperCase())) {
+        return res.status(403).json({ success: false, message: 'La postulación debe estar aceptada para acceder a los mensajes.' });
+      }
       const perfilEst = await PerfilEstudiante.findByPk(postulacion.id_perfil_estudiante, {
         include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] }],
       });
@@ -1130,6 +1134,9 @@ const obtenerConversacion = async (req, res) => {
         include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
       });
       if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+      if (!ESTADOS_ACEPTADOS.includes(postulacion.estado?.toUpperCase())) {
+        return res.status(403).json({ success: false, message: 'La postulación debe estar aceptada para acceder a los mensajes.' });
+      }
       const perfilEst = await PerfilEstudiante.findByPk(postulacion.id_perfil_estudiante, {
         include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] }],
       });
@@ -1170,6 +1177,9 @@ const enviarMensaje = async (req, res) => {
     });
 
     if (postulacionProyecto) {
+      if (!ESTADOS_ACEPTADOS.includes(postulacionProyecto.estado?.toUpperCase())) {
+        return res.status(403).json({ success: false, message: 'La postulación debe estar aceptada para enviar mensajes.' });
+      }
       tipoRef = 'postulacion';
     } else {
       const postulacionEmpleo = await PostulacionEmpleo.findByPk(id_postulacion, {
@@ -1177,6 +1187,9 @@ const enviarMensaje = async (req, res) => {
       });
       if (!postulacionEmpleo || postulacionEmpleo.oferta.id_perfil_empresario !== perfil.id_perfil_empresario) {
         return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+      }
+      if (!ESTADOS_ACEPTADOS.includes(postulacionEmpleo.estado?.toUpperCase())) {
+        return res.status(403).json({ success: false, message: 'La postulación debe estar aceptada para enviar mensajes.' });
       }
       tipoRef = 'postulacion_empleo';
     }
@@ -1220,11 +1233,17 @@ const marcarLeidos = async (req, res) => {
       if (!postulacion || postulacion.oferta.id_perfil_empresario !== perfil.id_perfil_empresario) {
         return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
       }
+      if (!ESTADOS_ACEPTADOS.includes(postulacion.estado?.toUpperCase())) {
+        return res.status(403).json({ success: false, message: 'La postulación debe estar aceptada.' });
+      }
     } else {
       const postulacion = await Postulacion.findByPk(idPostulacion, {
         include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
       });
       if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+      if (!ESTADOS_ACEPTADOS.includes(postulacion.estado?.toUpperCase())) {
+        return res.status(403).json({ success: false, message: 'La postulación debe estar aceptada.' });
+      }
     }
 
     await Conversacion.update(

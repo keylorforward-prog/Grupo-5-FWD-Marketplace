@@ -163,7 +163,7 @@ export default function DashboardLayout({ children }) {
             <button className="de-brand de-link-button" type="button" onClick={() => navigate('/egresado/dashboard')}>
               <img
                 className="de-brand-logo"
-                src={tema === 'dark' ? fwdDarkLogo : "/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"}
+                src={tema === 'dark' ? "/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" : "/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"}
                 alt="FWD"
                 width="104"
                 height="53"

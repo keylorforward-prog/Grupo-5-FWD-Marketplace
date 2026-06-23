@@ -26,8 +26,6 @@ import {
 import LanguageSwitcher from '../../../../components/comun/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
-import fwdDarkLogo from '../../../../assets/fwdcrdark.png';
-
 export default function DashboardLayout({ activePage, children }) {
   const { t } = useTranslation();
   const navLinks = [
@@ -132,7 +130,7 @@ export default function DashboardLayout({ activePage, children }) {
             <button className="de-brand de-link-button" type="button" onClick={() => navigate('/DashboardEmpresario')}>
               <img
                 className="de-brand-logo"
-                src={tema === 'dark' ? fwdDarkLogo : "/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"}
+                src={tema === 'dark' ? "/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" : "/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"}
                 alt="FWD"
                 width="104"
                 height="53"
