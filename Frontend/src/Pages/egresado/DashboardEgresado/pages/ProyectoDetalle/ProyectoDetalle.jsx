@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft, DollarSign, Tag, Globe, Building2,
-  Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, Mail, Pencil, Trash2,
+  Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, Mail, Pencil, Trash2, Plus,
 } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
@@ -36,9 +36,12 @@ export default function ProyectoDetalle() {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [mensaje, setMensaje] = useState('');
-  const [presupuesto, setPresupuesto] = useState('');
+  const [tarifaHora, setTarifaHora] = useState(4000);
+  const [tareas, setTareas] = useState([{ nombre: '', horas: '' }]);
   const [originalMensaje, setOriginalMensaje] = useState('');
-  const [originalPresupuesto, setOriginalPresupuesto] = useState('');
+  const [originalTarifaHora, setOriginalTarifaHora] = useState(4000);
+  const [originalTareas, setOriginalTareas] = useState([{ nombre: '', horas: '' }]);
+  const [errorCotizacion, setErrorCotizacion] = useState('');
   const [confirmarCancelar, setConfirmarCancelar] = useState(false);
   const [cancelando, setCancelando] = useState(false);
 
@@ -62,11 +65,28 @@ export default function ProyectoDetalle() {
   }, [id]);
 
   const confirmarPostulacion = async () => {
+    const tareasValidas = tareas.filter((t) => t.nombre.trim() && Number(t.horas) > 0);
+    if (tareasValidas.length === 0) {
+      setErrorCotizacion('Agregá al menos una tarea con nombre y horas estimadas.');
+      return;
+    }
+    if (!tarifaHora || tarifaHora <= 0) {
+      setErrorCotizacion('La tarifa por hora debe ser mayor a 0.');
+      return;
+    }
+    setErrorCotizacion('');
     setEnviando(true);
     try {
-      const datos = {};
-      if (mensaje.trim()) datos.mensaje_presentacion = mensaje.trim();
-      if (presupuesto) datos.presupuesto_max = Number(presupuesto);
+      const datos = {
+        mensaje_presentacion: mensaje.trim() || undefined,
+        presupuesto_max: total,
+        desglose_tareas: tareasValidas,
+        tarifa_hora: tarifaHora,
+        total_horas: totalHoras,
+        subtotal,
+        iva,
+        total,
+      };
 
       if (modoEdicion && postulacion) {
         const resp = await egresadoService.actualizarPostulacion(postulacion.id_postulacion, datos);
@@ -102,24 +122,45 @@ export default function ProyectoDetalle() {
     }
   };
 
+  const totalHoras = tareas.reduce((sum, t) => sum + (Number(t.horas) || 0), 0);
+  const subtotal   = totalHoras * tarifaHora;
+  const iva        = parseFloat((subtotal * 0.13).toFixed(2));
+  const total      = parseFloat((subtotal + iva).toFixed(2));
+
+  const agregarTarea = () =>
+    setTareas((prev) => [...prev, { nombre: '', horas: '' }]);
+  const eliminarTarea = (i) =>
+    setTareas((prev) => prev.filter((_, idx) => idx !== i));
+  const actualizarTarea = (i, campo, valor) =>
+    setTareas((prev) => prev.map((t, idx) => (idx === i ? { ...t, [campo]: valor } : t)));
+
   const hayCambios = modoEdicion
-    ? mensaje !== originalMensaje || presupuesto !== originalPresupuesto
+    ? mensaje !== originalMensaje ||
+      tarifaHora !== originalTarifaHora ||
+      JSON.stringify(tareas) !== JSON.stringify(originalTareas)
     : true;
 
   const abrirModal = (editando = false) => {
     if (editando && postulacion) {
       const msg = postulacion.mensaje_presentacion || '';
-      const pre = postulacion.presupuesto_max ? String(postulacion.presupuesto_max) : '';
+      const tf  = postulacion.tarifa_hora ? Number(postulacion.tarifa_hora) : 4000;
+      const tr  = postulacion.desglose_tareas?.length
+        ? postulacion.desglose_tareas
+        : [{ nombre: '', horas: '' }];
       setMensaje(msg);
-      setPresupuesto(pre);
+      setTarifaHora(tf);
+      setTareas(tr);
       setOriginalMensaje(msg);
-      setOriginalPresupuesto(pre);
+      setOriginalTarifaHora(tf);
+      setOriginalTareas(tr);
       setModoEdicion(true);
     } else {
       setMensaje('');
-      setPresupuesto('');
+      setTarifaHora(4000);
+      setTareas([{ nombre: '', horas: '' }]);
       setModoEdicion(false);
     }
+    setErrorCotizacion('');
     setMostrarModal(true);
   };
 
@@ -414,6 +455,111 @@ export default function ProyectoDetalle() {
             <div className="modal-divisor" />
 
             <div className="modal-form">
+
+              {/* Tarifa por hora */}
+              <div className="modal-campo">
+                <label className="modal-label">
+                  <DollarSign size={14} /> Tu tarifa por hora (₡)
+                </label>
+                <input
+                  className="modal-input"
+                  type="number"
+                  min="1"
+                  step="100"
+                  value={tarifaHora}
+                  onChange={(e) => setTarifaHora(Number(e.target.value))}
+                />
+                <span className="modal-ayuda">Lo que cobrás por hora de trabajo</span>
+              </div>
+
+              {/* Tabla de tareas */}
+              <div className="modal-campo">
+                <label className="modal-label">
+                  <Briefcase size={14} /> Desglose de tareas
+                </label>
+                <div className="modal-tareas">
+                  {tareas.map((tarea, i) => (
+                    <div key={i} className="modal-tarea-fila">
+                      <input
+                        className="modal-input modal-tarea-nombre"
+                        type="text"
+                        placeholder="Nombre de la tarea"
+                        value={tarea.nombre}
+                        onChange={(e) => actualizarTarea(i, 'nombre', e.target.value)}
+                      />
+                      <input
+                        className="modal-input modal-tarea-horas"
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder="Horas"
+                        value={tarea.horas}
+                        onChange={(e) => actualizarTarea(i, 'horas', e.target.value)}
+                      />
+                      <span className="modal-tarea-costo">
+                        ₡{((Number(tarea.horas) || 0) * tarifaHora).toLocaleString('es-CR')}
+                      </span>
+                      <button
+                        type="button"
+                        className="modal-tarea-eliminar"
+                        onClick={() => eliminarTarea(i)}
+                        disabled={tareas.length === 1}
+                        aria-label="Eliminar tarea"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="modal-tarea-agregar" onClick={agregarTarea}>
+                  <Plus size={14} /> Agregar tarea
+                </button>
+              </div>
+
+              {/* Resumen de cotización */}
+              {total > 0 && (
+                <div className="modal-cotizacion-resumen">
+                  <div className="modal-cotizacion-fila">
+                    <span>Total de horas</span>
+                    <span>{totalHoras} h</span>
+                  </div>
+                  <div className="modal-cotizacion-fila">
+                    <span>Subtotal</span>
+                    <span>₡{subtotal.toLocaleString('es-CR')}</span>
+                  </div>
+                  <div className="modal-cotizacion-fila">
+                    <span>IVA (13 %)</span>
+                    <span>₡{iva.toLocaleString('es-CR')}</span>
+                  </div>
+                  <div className="modal-cotizacion-fila modal-cotizacion-total">
+                    <span>Total</span>
+                    <span>₡{total.toLocaleString('es-CR')}</span>
+                  </div>
+
+                  {presupuestoMin > 0 && (
+                    <p className={`modal-presupuesto-alerta ${
+                      total >= presupuestoMin && total <= presupuestoMax
+                        ? 'modal-presupuesto-alerta--dentro'
+                        : total > presupuestoMax
+                          ? 'modal-presupuesto-alerta--supera'
+                          : 'modal-presupuesto-alerta--bajo'
+                    }`}>
+                      {total >= presupuestoMin && total <= presupuestoMax
+                        ? 'Tu cotización está dentro del presupuesto'
+                        : total > presupuestoMax
+                          ? `Tu cotización supera el presupuesto máximo (₡${presupuestoMax.toLocaleString('es-CR')})`
+                          : 'Tu cotización está por debajo del mínimo esperado'}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Error de validación */}
+              {errorCotizacion && (
+                <p className="modal-error-cotizacion">{errorCotizacion}</p>
+              )}
+
+              {/* Mensaje de presentación */}
               <div className="modal-campo">
                 <label className="modal-label">
                   <Mail size={14} /> Mensaje de presentación <span className="modal-opcional">(opcional)</span>
@@ -421,30 +567,12 @@ export default function ProyectoDetalle() {
                 <textarea
                   className="modal-textarea"
                   placeholder="Ej: Tengo experiencia en React y Node.js, he trabajado en proyectos similares..."
-                  rows={4}
+                  rows={3}
                   value={mensaje}
                   onChange={(e) => setMensaje(e.target.value)}
                 />
               </div>
-              <div className="modal-campo">
-                <label className="modal-label">
-                  <DollarSign size={14} /> Tu propuesta económica <span className="modal-opcional">(opcional)</span>
-                </label>
-                <input
-                  className="modal-input"
-                  type="number"
-                  min="0"
-                  max="9999999"
-                  step="100"
-                  placeholder="Ej: 2500"
-                  value={presupuesto}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val.length <= 7) setPresupuesto(val);
-                  }}
-                />
-                <span className="modal-ayuda">¿Cuánto presupuesto estimas para este proyecto? (máx. 7 dígitos)</span>
-              </div>
+
             </div>
 
             <div className="modal-acciones">

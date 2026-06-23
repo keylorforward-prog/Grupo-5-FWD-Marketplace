@@ -1,10 +1,40 @@
 'use client';
 
-import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, type KeyboardEvent, type ReactNode } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import type { AgentMessage, InterviewState, ExtractedProject } from '@/lib/agent/types';
 import { sendInterviewMessage, extractProjectData } from '@/actions/agent';
 import { publishProjectFromAgent } from '@/lib/agent/publish';
+
+function renderPlanteamiento(md: string): ReactNode {
+  const nodes: ReactNode[] = [];
+  let listBuf: string[] = [];
+  let listKey = 0;
+  const flush = () => {
+    if (!listBuf.length) return;
+    nodes.push(
+      <ul key={`ul-${listKey++}`} className="my-1 space-y-0.5">
+        {listBuf.map((item, j) => (
+          <li key={j} className="flex items-start gap-1.5 text-sm text-ink-muted leading-relaxed">
+            <span className="text-primary shrink-0 mt-[3px]">·</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>,
+    );
+    listBuf = [];
+  };
+  md.split('\n').forEach((line, i) => {
+    if (line.startsWith('## '))        { flush(); nodes.push(<h2 key={i} className="text-sm font-bold text-ink mt-5 mb-1 first:mt-0">{line.slice(3)}</h2>); }
+    else if (line.startsWith('### '))  { flush(); nodes.push(<h3 key={i} className="text-sm font-semibold text-ink mt-3 mb-0.5">{line.slice(4)}</h3>); }
+    else if (line.startsWith('#### ')) { flush(); nodes.push(<h4 key={i} className="text-xs font-semibold text-ink-muted uppercase tracking-wide mt-2 mb-0.5">{line.slice(5)}</h4>); }
+    else if (line.startsWith('- '))    { listBuf.push(line.slice(2)); }
+    else if (line.trim())              { flush(); nodes.push(<p key={i} className="text-sm text-ink-muted leading-relaxed">{line}</p>); }
+    else                               { flush(); }
+  });
+  flush();
+  return <>{nodes}</>;
+}
 
 const INITIAL_MESSAGE: AgentMessage = {
   role: 'assistant',
@@ -28,10 +58,17 @@ export default function AgentNewPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const historialParaReintentar = useRef<AgentMessage[]>([]);
+  const errorExtraccionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history, loading]);
+
+  useEffect(() => {
+    if (errorExtraccion) {
+      errorExtraccionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [errorExtraccion]);
 
   async function handleSend() {
     if (!input.trim() || loading) return;
@@ -59,34 +96,49 @@ export default function AgentNewPage() {
 
     const isConfirming = result.data.state === 'confirming';
 
-    // When confirming, skip the assistant bubble entirely (avoids the empty/echo bubble)
     const mensajeLimpio = (result.data.message || '')
       .replace(/\[\s*ENTREVISTA_COMPLETA\s*\]/i, '')
       .trim();
 
-    if (!isConfirming && mensajeLimpio.length > 0) {
-      setHistory((prev: AgentMessage[]) => [...prev, { role: 'assistant', content: mensajeLimpio }]);
+    let updatedHistory = newHistory;
+    if (mensajeLimpio.length > 0) {
+      const agentMsg: AgentMessage = { role: 'assistant', content: mensajeLimpio };
+      updatedHistory = [...newHistory, agentMsg];
+      setHistory(updatedHistory);
     }
-
-    const updatedHistory: AgentMessage[] = mensajeLimpio.length > 0
-      ? [...newHistory, { role: 'assistant', content: mensajeLimpio }]
-      : newHistory;
 
     if (isConfirming) {
       setState('confirming');
+
+      const mensajeTransicion: AgentMessage = {
+        role: 'assistant',
+        content: 'Gracias por toda la información. Estoy armando tu proyecto, dame un momento...',
+      };
+      setHistory([...updatedHistory, mensajeTransicion]);
       historialParaReintentar.current = updatedHistory;
 
-      // Wait before extraction to avoid Groq rate limits (back-to-back calls)
+      setLoading(false);
       await new Promise((r) => setTimeout(r, 3000));
+      setLoading(true);
 
-      const extraction = await extractProjectData(updatedHistory);
-
-      if (extraction.success) {
-        setExtracted(extraction.data);
-        setState('done');
-      } else {
-        setErrorExtraccion('No pudimos armar el resumen. Tocá reintentar.');
+      let exito = false;
+      for (let intento = 0; intento < 3 && !exito; intento++) {
+        const extraction = await extractProjectData(updatedHistory);
+        if (extraction.success) {
+          setExtracted(extraction.data);
+          setState('done');
+          exito = true;
+        } else if (intento < 2) {
+          await new Promise((r) => setTimeout(r, 3000));
+        }
       }
+
+      if (!exito) {
+        setErrorExtraccion('No pudimos armar el resumen automáticamente. Tocá reintentar.');
+      }
+
+      setLoading(false);
+      return;
     }
 
     setLoading(false);
@@ -99,12 +151,21 @@ export default function AgentNewPage() {
   async function reintentarExtraccion() {
     setErrorExtraccion('');
     setLoading(true);
-    const extraction = await extractProjectData(historialParaReintentar.current);
-    if (extraction.success) {
-      setExtracted(extraction.data);
-      setState('done');
-    } else {
-      setErrorExtraccion('No pudimos armar el resumen. Intentá de nuevo.');
+
+    let exito = false;
+    for (let intento = 0; intento < 3 && !exito; intento++) {
+      const extraction = await extractProjectData(historialParaReintentar.current);
+      if (extraction.success) {
+        setExtracted(extraction.data);
+        setState('done');
+        exito = true;
+      } else if (intento < 2) {
+        await new Promise((r) => setTimeout(r, 3000));
+      }
+    }
+
+    if (!exito) {
+      setErrorExtraccion('Seguimos teniendo problemas. Esperá unos segundos y reintentá.');
     }
     setLoading(false);
   }
@@ -144,7 +205,7 @@ export default function AgentNewPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-2xl mx-auto px-4 pt-8 pb-20 sm:pb-8 min-h-screen space-y-6">
       {/* PageTitle */}
       <div className="space-y-1">
         <p className="text-xs font-bold tracking-[0.18em] uppercase text-ink-muted font-heading">
@@ -158,50 +219,50 @@ export default function AgentNewPage() {
         </p>
       </div>
 
-      {/* Chat card */}
-      <div className="bg-surface border border-border rounded-2xl shadow-soft flex flex-col overflow-hidden">
-        {/* Messages */}
-        <div
-          role="log"
-          aria-live="polite"
-          aria-label="Conversación con el agente"
-          className="min-h-[320px] max-h-[480px] overflow-y-auto p-4 space-y-3"
-        >
-          {history.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <span
-                className={`inline-block max-w-[80%] px-4 py-2.5 text-sm leading-relaxed break-words ${
-                  msg.role === 'user'
-                    ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-sm'
-                    : 'bg-surface-sunken text-ink rounded-2xl rounded-bl-sm'
-                }`}
+      {/* Chat card — visible only while the interview is active */}
+      {state !== 'done' && (
+        <div className="bg-surface border border-border rounded-2xl shadow-soft flex flex-col overflow-hidden">
+          {/* Messages */}
+          <div
+            role="log"
+            aria-live="polite"
+            aria-label="Conversación con el agente"
+            className="min-h-[320px] max-h-[480px] overflow-y-auto p-4 space-y-3"
+          >
+            {history.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {msg.content}
-              </span>
-            </div>
-          ))}
-
-          {loading && (
-            <div className="flex justify-start">
-              <span className="inline-flex items-center gap-2 px-4 py-2.5 text-sm bg-surface-sunken text-ink-muted rounded-2xl rounded-bl-sm">
-                Pensando
-                <span className="inline-flex gap-0.5 items-end">
-                  <span className="w-1 h-1 rounded-full bg-ink-muted animate-bounce [animation-delay:0ms]" />
-                  <span className="w-1 h-1 rounded-full bg-ink-muted animate-bounce [animation-delay:150ms]" />
-                  <span className="w-1 h-1 rounded-full bg-ink-muted animate-bounce [animation-delay:300ms]" />
+                <span
+                  className={`inline-block max-w-[80%] px-4 py-2.5 text-sm leading-relaxed break-words ${
+                    msg.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-sm'
+                      : 'bg-surface-sunken text-ink rounded-2xl rounded-bl-sm'
+                  }`}
+                >
+                  {msg.content}
                 </span>
-              </span>
-            </div>
-          )}
+              </div>
+            ))}
 
-          <div ref={messagesEndRef} />
-        </div>
+            {loading && (
+              <div className="flex justify-start">
+                <span className="inline-flex items-center gap-2 px-4 py-2.5 text-sm bg-surface-sunken text-ink-muted rounded-2xl rounded-bl-sm">
+                  {state === 'confirming' ? 'Armando tu proyecto...' : 'Pensando'}
+                  <span className="inline-flex gap-0.5 items-end">
+                    <span className="w-1 h-1 rounded-full bg-ink-muted animate-bounce [animation-delay:0ms]" />
+                    <span className="w-1 h-1 rounded-full bg-ink-muted animate-bounce [animation-delay:150ms]" />
+                    <span className="w-1 h-1 rounded-full bg-ink-muted animate-bounce [animation-delay:300ms]" />
+                  </span>
+                </span>
+              </div>
+            )}
 
-        {/* Input */}
-        {state !== 'done' && (
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
           <div className="border-t border-border p-3 flex gap-2">
             <label htmlFor="agent-input" className="sr-only">
               Tu mensaje
@@ -224,70 +285,79 @@ export default function AgentNewPage() {
               Enviar
             </button>
           </div>
-        )}
 
-        {/* Error de extracción con reintento */}
-        {errorExtraccion && (
-          <div className="m-4 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-center justify-between gap-3">
-            <p className="text-sm text-destructive">{errorExtraccion}</p>
-            <button
-              type="button"
-              onClick={reintentarExtraccion}
-              disabled={loading}
-              className="shrink-0 rounded-full bg-destructive text-white px-4 py-2 text-sm font-medium disabled:opacity-50 hover:opacity-90 transition"
-            >
-              Reintentar
-            </button>
-          </div>
-        )}
+          {/* Error de extracción con reintento */}
+          {errorExtraccion && (
+            <div ref={errorExtraccionRef} className="m-4 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-center justify-between gap-3">
+              <p className="text-sm text-destructive">{errorExtraccion}</p>
+              <button
+                type="button"
+                onClick={reintentarExtraccion}
+                disabled={loading}
+                className="shrink-0 rounded-full bg-destructive text-white px-4 py-2 text-sm font-medium disabled:opacity-50 hover:opacity-90 transition"
+              >
+                Reintentar
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
-        {/* Result panel */}
-        {state === 'done' && extracted !== null && (
-          <div className="border border-border bg-surface shadow-soft rounded-2xl p-5 m-4 space-y-3">
-            <p className="text-xs font-bold tracking-[0.14em] uppercase text-ink-muted font-heading">
-              Tu proyecto quedó así
+      {/* Result panel — standalone card outside the chat container, flows naturally with page scroll */}
+      {state === 'done' && extracted !== null && (
+        <div className="border border-border bg-surface shadow-soft rounded-2xl p-5 space-y-3">
+          <p className="text-xs font-bold tracking-[0.14em] uppercase text-ink-muted font-heading">
+            Tu proyecto quedó así
+          </p>
+          <p className="font-heading font-bold text-lg text-ink">{extracted.title}</p>
+          <p className="text-sm text-ink-muted whitespace-pre-wrap">{extracted.description}</p>
+
+          {extracted.budget_min > 0 && (
+            <p className="text-sm text-ink-muted">
+              Presupuesto:{' '}
+              {extracted.budget_max > 0
+                ? `${extracted.budget_currency === 'USD' ? '$' : '₡'}${extracted.budget_min.toLocaleString('es-CR')} – ${extracted.budget_currency === 'USD' ? '$' : '₡'}${extracted.budget_max.toLocaleString('es-CR')}`
+                : `${extracted.budget_currency === 'USD' ? '$' : '₡'}${extracted.budget_min.toLocaleString('es-CR')}`}
             </p>
-            <p className="font-heading font-bold text-lg text-ink">{extracted.title}</p>
-            <p className="text-sm text-ink-muted whitespace-pre-wrap">{extracted.description}</p>
+          )}
 
-            {extracted.budget_min > 0 && (
-              <p className="text-sm text-ink-muted">
-                Presupuesto:{' '}
-                {extracted.budget_max > 0
-                  ? `${extracted.budget_currency === 'USD' ? '$' : '₡'}${extracted.budget_min.toLocaleString('es-CR')} – ${extracted.budget_currency === 'USD' ? '$' : '₡'}${extracted.budget_max.toLocaleString('es-CR')}`
-                  : `${extracted.budget_currency === 'USD' ? '$' : '₡'}${extracted.budget_min.toLocaleString('es-CR')}`}
+          {extracted.stack.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {extracted.stack.map((tech) => (
+                <span
+                  key={tech}
+                  className="bg-primary/10 text-primary rounded-full text-xs px-2.5 py-1"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {extracted.planteamiento && (
+            <div className="border border-border bg-surface rounded-2xl p-5">
+              <p className="text-xs font-bold tracking-[0.14em] uppercase text-ink-muted font-heading mb-3">
+                Análisis del proyecto
               </p>
-            )}
+              {renderPlanteamiento(extracted.planteamiento)}
+            </div>
+          )}
 
-            {extracted.stack.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {extracted.stack.map((tech) => (
-                  <span
-                    key={tech}
-                    className="bg-primary/10 text-primary rounded-full text-xs px-2.5 py-1"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            )}
+          {publishError && (
+            <p className="text-sm text-destructive bg-destructive/10 rounded-xl px-4 py-2.5">
+              {publishError}
+            </p>
+          )}
 
-            {publishError && (
-              <p className="text-sm text-destructive bg-destructive/10 rounded-xl px-4 py-2.5">
-                {publishError}
-              </p>
-            )}
-
-            <button
-              onClick={handlePublish}
-              disabled={publishing}
-              className="bg-primary text-primary-foreground rounded-full w-full py-2.5 font-medium text-sm transition duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:opacity-90 disabled:opacity-50"
-            >
-              {publishing ? 'Publicando...' : 'Confirmar y publicar'}
-            </button>
-          </div>
-        )}
-      </div>
+          <button
+            onClick={handlePublish}
+            disabled={publishing}
+            className="bg-primary text-primary-foreground rounded-full w-full py-2.5 font-medium text-sm transition duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:opacity-90 disabled:opacity-50"
+          >
+            {publishing ? 'Publicando...' : 'Confirmar y publicar'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

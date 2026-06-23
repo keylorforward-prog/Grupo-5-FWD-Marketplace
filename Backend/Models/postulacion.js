@@ -6,6 +6,12 @@ module.exports = (sequelize, DataTypes) => {
     cv_url: { type: DataTypes.STRING(500), allowNull: true },
     mensaje_presentacion: { type: DataTypes.TEXT, allowNull: true },
     presupuesto_max: { type: DataTypes.DECIMAL(10,2), allowNull: true },
+    desglose_tareas: { type: DataTypes.JSONB, allowNull: true },
+    tarifa_hora:     { type: DataTypes.DECIMAL(10,2), allowNull: true },
+    total_horas:     { type: DataTypes.INTEGER, allowNull: true },
+    subtotal:        { type: DataTypes.DECIMAL(10,2), allowNull: true },
+    iva:             { type: DataTypes.DECIMAL(10,2), allowNull: true },
+    total:           { type: DataTypes.DECIMAL(10,2), allowNull: true },
     estado: { type: DataTypes.ENUM('ENVIADA','EN_REVISION','PRESSELECCIONADA','RECHAZADA','CONTRATADO'), allowNull: false, defaultValue: 'ENVIADA' },
     fecha_postulacion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW }
   }, { 

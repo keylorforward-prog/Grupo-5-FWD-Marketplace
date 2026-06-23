@@ -94,14 +94,14 @@ Si el empresario pide un cambio, aplicá el ajuste, volvé a confirmar brevement
 Nunca emitas [ENTREVISTA_COMPLETA] sin haber hecho el resumen de confirmación primero y recibido el visto bueno del empresario.
 Si el usuario manda texto sin sentido, números sueltos o respuestas vacías, NO cierres. Redirigí amablemente pidiendo que cuente más sobre su proyecto.`;
 
-const EXTRACTION_PROMPT = `Analizá el siguiente historial de conversación y extraé la información del proyecto tecnológico mencionado. Respondé SOLO con un JSON válido, sin texto adicional ni bloques de código markdown.
+const getExtractionPrompt = (nombreEmpresa) => `Analizá el siguiente historial de conversación y extraé la información del proyecto tecnológico mencionado. Respondé SOLO con un JSON válido, sin texto adicional ni bloques de código markdown.
 
 El JSON debe tener exactamente estos campos:
 - title: nombre corto del proyecto
 - description: descripción profesional del proyecto en exactamente 3 párrafos, separados por \\n\\n en el JSON. Estructura obligatoria:
-  Párrafo 1 — Contexto y problema: qué hace el negocio y qué problema concreto enfrenta. Ejemplo: "Pollo Frito Don Carlos es un local de comida rápida que actualmente lleva el control de ventas de forma manual, lo que genera errores en el registro de ingresos y dificulta el seguimiento de las finanzas del negocio."
-  Párrafo 2 — Solución propuesta: qué debe construir el desarrollador y para qué sirve. Ejemplo: "Se requiere desarrollar un sistema web que permita registrar las ventas diarias con distintos medios de pago, llevar el control de ingresos y egresos, y generar informes financieros automáticos."
-  Párrafo 3 — Alcance y usuarios: quiénes usarán el sistema y el alcance esperado para el plazo del proyecto. Ejemplo: "El sistema será utilizado por el dueño y los cajeros del local. El alcance inicial cubre el registro de ventas, el control de caja y la generación de reportes mensuales."
+  Párrafo 1 — Contexto y problema: qué hace el negocio y qué problema concreto enfrenta. Usa SIEMPRE el nombre "${nombreEmpresa || 'La empresa'}" para referirte al negocio en la descripción. NUNCA inventes nombres ficticios como "Pollo Frito Don Carlos".
+  Párrafo 2 — Solución propuesta: qué debe construir el desarrollador y para qué sirve. Ejemplo: "Se requiere desarrollar un sistema web que permita registrar las ventas diarias..."
+  Párrafo 3 — Alcance y usuarios: quiénes usarán el sistema y el alcance esperado para el plazo del proyecto. Ejemplo: "El sistema será utilizado por el dueño y los cajeros del local..."
   Redactá en tercera persona, tono profesional pero claro, sin tecnicismos innecesarios. Basate en lo que el empresario realmente dijo en la conversación, no inventes datos que no mencionó.
 - area_negocio: sector o industria del proyecto
 - stack: array con SIEMPRE entre 3 y 5 tecnologías apropiadas para el proyecto. Elegí según la naturaleza del proyecto:
@@ -190,13 +190,13 @@ exports.interview = async (req, res) => {
 
 exports.extract = async (req, res) => {
   try {
-    const { history } = req.body;
+    const { history, nombreEmpresa } = req.body;
     const historialTexto = historyToPlainText(history || []);
 
     const response = await client.chat.completions.create({
       model: 'llama-3.1-8b-instant',
       max_tokens: 800,
-      messages: [{ role: 'user', content: EXTRACTION_PROMPT + '\n' + historialTexto }],
+      messages: [{ role: 'user', content: getExtractionPrompt(nombreEmpresa) + '\n' + historialTexto }],
     });
 
     const text = response.choices[0].message.content ?? '';

@@ -1,6 +1,6 @@
 import type { AgentMessage, InterviewState } from './types';
 
-const TOKEN_COMPLETA = /\[\s*ENTREVISTA_COMPLETA\s*\]/i;
+const TOKEN_COMPLETA = /\[?\s*ENTREVISTA[_\s]*COMPLETA\s*\]?/i;
 
 export function detectState(lastAssistantMessage: string): InterviewState {
   if (TOKEN_COMPLETA.test(lastAssistantMessage)) return 'confirming';

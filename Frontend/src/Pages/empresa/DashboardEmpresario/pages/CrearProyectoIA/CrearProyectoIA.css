@@ -553,3 +553,29 @@
   }
 }
 
+/* ── Done state: unlock all overflow clipping so result is fully visible ── */
+.de-main:has(.cia-result) {
+  overflow-y: auto;
+}
+
+.de-panel:has(.cia-result) {
+  overflow: visible !important;
+}
+
+.cia-container:has(.cia-result) {
+  height: auto;
+  min-height: 580px;
+  overflow: visible;
+}
+
+.cia-chat-main:has(.cia-result) {
+  overflow: visible;
+  height: auto;
+}
+
+/* Acotar el historial cuando el resultado ya está visible, así el botón queda cerca */
+.cia-chat-main:has(.cia-result) .cia-chat-area {
+  max-height: 200px;
+  flex: none;
+}
+
