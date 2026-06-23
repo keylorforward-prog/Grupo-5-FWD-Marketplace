@@ -26,8 +26,6 @@ import {
 import LanguageSwitcher from '../../../../components/comun/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
-import fwdDarkLogo from '../../../../assets/fwdcrdark.png';
-
 export default function DashboardLayout({ activePage, children }) {
   const { t } = useTranslation();
   const navLinks = [
@@ -58,12 +56,13 @@ export default function DashboardLayout({ activePage, children }) {
   const navigate = useNavigate();
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
+  const [confirmandoCerrarSesion, setConfirmandoCerrarSesion] = useState(false);
   const [tema, setTema] = useState(() => {
     if (typeof document === 'undefined') return 'light';
     return document.documentElement.dataset.theme || localStorage.getItem('tema') || 'light';
   });
   const menuPerfilRef = useRef(null);
-  const displayName = user?.nombre || 'Empresa';
+  const displayName = user?.nombre_empresa || user?.nombre || 'Empresa';
   const profileRole = t('empresaLayout.profile.role');
   const company = profileRole.toUpperCase();
   const email = user?.correo || user?.email || 'empresa@fwd.com';
@@ -102,16 +101,19 @@ export default function DashboardLayout({ activePage, children }) {
     };
   }, [menuPerfilAbierto]);
 
-  const manejarCerrarSesion = async () => {
+  const ejecutarCierre = async () => {
+    setConfirmandoCerrarSesion(false);
+    setMenuPerfilAbierto(false);
     setCerrandoSesion(true);
     try {
       await logout();
     } finally {
-      setMenuPerfilAbierto(false);
       setCerrandoSesion(false);
       navigate('/login', { replace: true });
     }
   };
+
+  const manejarCerrarSesion = () => setConfirmandoCerrarSesion(true);
 
   const navegarDesdeMenuPerfil = (ruta) => {
     setMenuPerfilAbierto(false);
@@ -128,7 +130,7 @@ export default function DashboardLayout({ activePage, children }) {
             <button className="de-brand de-link-button" type="button" onClick={() => navigate('/DashboardEmpresario')}>
               <img
                 className="de-brand-logo"
-                src={tema === 'dark' ? fwdDarkLogo : "/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"}
+                src={tema === 'dark' ? "/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" : "/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"}
                 alt="FWD"
                 width="104"
                 height="53"
@@ -315,6 +317,35 @@ export default function DashboardLayout({ activePage, children }) {
           </footer>
         </main>
       </div>
+
+      <footer className="de-footer">
+        <span className="de-footer-copy">
+          {t('empresaLayout.footer.copy').replace('{{year}}', new Date().getFullYear())}
+        </span>
+        <div className="de-footer-links">
+          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/terminos')}>{t('empresaLayout.footer.terms')}</button>
+          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/privacidad')}>{t('empresaLayout.footer.privacy')}</button>
+          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/contacto')}>{t('empresaLayout.footer.contact')}</button>
+        </div>
+      </footer>
+
+      {confirmandoCerrarSesion && (
+        <div className="de-confirm-overlay" onClick={() => setConfirmandoCerrarSesion(false)}>
+          <div className="de-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="de-confirm-icon"><LogOut size={28} /></div>
+            <p>{t('empresaLayout.profile.confirmTitle')}</p>
+            <p className="de-confirm-sub">{t('empresaLayout.profile.confirmDesc')}</p>
+            <div className="de-confirm-actions">
+              <button className="de-btn-outline" type="button" onClick={() => setConfirmandoCerrarSesion(false)}>
+                {t('empresaLayout.profile.cancel')}
+              </button>
+              <button className="de-btn-primary danger" type="button" onClick={ejecutarCierre} disabled={cerrandoSesion}>
+                {cerrandoSesion ? t('empresaLayout.profile.loggingOut') : t('empresaLayout.profile.confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

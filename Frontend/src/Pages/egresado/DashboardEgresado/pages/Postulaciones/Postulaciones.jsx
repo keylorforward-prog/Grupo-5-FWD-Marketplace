@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Eye, Building2, FolderOpen } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
-import { formatearPostulacion } from '../../utils/dashboardEgresadoFormatters';
+import { formatearPostulacion, formatearPostulacionEmpleo } from '../../utils/dashboardEgresadoFormatters';
 
 const acentos = ['azul', 'aqua', 'naranja', 'morado', 'magenta', 'amarillo'];
 
@@ -100,14 +100,24 @@ export default function Postulaciones() {
   const location = useLocation();
   const tabActivo = location.pathname.includes('/empleos') ? 'empleos' : 'proyectos';
 
-  const { data, loading, error } = useDashboardEgresadoRequest(
+  const { data: dataProyectos, loading: loadingProyectos, error: errorProyectos } = useDashboardEgresadoRequest(
     () => egresadoDashboardService.obtenerPostulaciones(),
     [],
     []
   );
 
-  const postulaciones = useMemo(() => (data || []).map(formatearPostulacion), [data]);
-  const items = postulaciones;
+  const { data: dataEmpleos, loading: loadingEmpleos, error: errorEmpleos } = useDashboardEgresadoRequest(
+    () => egresadoDashboardService.obtenerPostulacionesEmpleo(),
+    [],
+    []
+  );
+
+  const postulacionesProyectos = useMemo(() => (dataProyectos || []).map(formatearPostulacion), [dataProyectos]);
+  const postulacionesEmpleos = useMemo(() => (dataEmpleos || []).map(formatearPostulacionEmpleo), [dataEmpleos]);
+
+  const loading = tabActivo === 'proyectos' ? loadingProyectos : loadingEmpleos;
+  const error = tabActivo === 'proyectos' ? errorProyectos : errorEmpleos;
+  const items = tabActivo === 'proyectos' ? postulacionesProyectos : postulacionesEmpleos;
 
   return (
     <div className="post-layout fwd-animar-entrada">
@@ -166,7 +176,7 @@ export default function Postulaciones() {
 
         {!loading && !error && items.length > 0 && tabActivo === 'proyectos' && (
           <div className="post-list">
-            {postulaciones.map((p, i) => (
+            {postulacionesProyectos.map((p, i) => (
               <div key={p.id} className={`post-card acento-${acentos[i % acentos.length]}`}>
                 <div className="post-cardBody">
                   <div className="post-iconWrap">
@@ -223,7 +233,7 @@ export default function Postulaciones() {
 
         {!loading && !error && items.length > 0 && tabActivo === 'empleos' && (
           <div className="post-list">
-            {postulaciones.map((p, i) => (
+            {postulacionesEmpleos.map((p, i) => (
               <div key={p.id} className={`post-card acento-${acentos[i % acentos.length]}`}>
                 <div className="post-cardBody">
                   <div className="post-iconWrap">
@@ -268,7 +278,7 @@ export default function Postulaciones() {
                   <button
                     className="post-btnDetalle"
                     type="button"
-                    onClick={() => navigate(`/egresado/dashboard/empleo/${p.idPropuesta}`, { state: { desde: 'postulaciones' } })}
+                    onClick={() => navigate(`/egresado/dashboard/empleo/${p.idOferta}`, { state: { desde: 'postulaciones' } })}
                   >
                     <Eye size={15} />
                     {t('egresadoPostulaciones.verEmpleo')}

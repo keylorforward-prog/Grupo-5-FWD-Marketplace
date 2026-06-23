@@ -41,9 +41,10 @@ export default function ProyectoDetalle() {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [mensaje, setMensaje] = useState('');
-  const [presupuesto, setPresupuesto] = useState('');
+  const [monto, setMonto] = useState('');
+  const [aceptaCondiciones, setAceptaCondiciones] = useState(false);
   const [originalMensaje, setOriginalMensaje] = useState('');
-  const [originalPresupuesto, setOriginalPresupuesto] = useState('');
+  const [originalMonto, setOriginalMonto] = useState('');
   const [confirmarCancelar, setConfirmarCancelar] = useState(false);
   const [cancelando, setCancelando] = useState(false);
 
@@ -67,11 +68,16 @@ export default function ProyectoDetalle() {
   }, [id]);
 
   const confirmarPostulacion = async () => {
+    if (!aceptaCondiciones) {
+      alert('Debés aceptar las condiciones del proyecto para continuar.');
+      return;
+    }
     setEnviando(true);
     try {
-      const datos = {};
-      if (mensaje.trim()) datos.mensaje_presentacion = mensaje.trim();
-      if (presupuesto) datos.presupuesto_max = Number(presupuesto);
+      const datos = {
+        mensaje_presentacion: mensaje.trim() || undefined,
+        presupuesto_max: monto ? Number(monto) : undefined,
+      };
 
       if (modoEdicion && postulacion) {
         const resp = await egresadoService.actualizarPostulacion(postulacion.id_postulacion, datos);
@@ -108,21 +114,23 @@ export default function ProyectoDetalle() {
   };
 
   const hayCambios = modoEdicion
-    ? mensaje !== originalMensaje || presupuesto !== originalPresupuesto
+    ? mensaje !== originalMensaje || monto !== originalMonto
     : true;
 
   const abrirModal = (editando = false) => {
     if (editando && postulacion) {
       const msg = postulacion.mensaje_presentacion || '';
-      const pre = postulacion.presupuesto_max ? String(postulacion.presupuesto_max) : '';
+      const mon = postulacion.presupuesto_max ? String(postulacion.presupuesto_max) : '';
       setMensaje(msg);
-      setPresupuesto(pre);
+      setMonto(mon);
+      setAceptaCondiciones(true);
       setOriginalMensaje(msg);
-      setOriginalPresupuesto(pre);
+      setOriginalMonto(mon);
       setModoEdicion(true);
     } else {
       setMensaje('');
-      setPresupuesto('');
+      setMonto('');
+      setAceptaCondiciones(false);
       setModoEdicion(false);
     }
     setMostrarModal(true);
@@ -393,12 +401,12 @@ export default function ProyectoDetalle() {
               <Send size={28} />
             </div>
             <h2 className="modal-titulo">
-              {modoEdicion ? t(`${T_NS}.editarPostulacion`) : t(`${T_NS}.modalPostularme`)}
+              {modoEdicion ? 'Editar postulación' : 'Postularte al proyecto'}
             </h2>
             <p className="modal-desc">
               {modoEdicion
-                ? t(`${T_NS}.modalEditarMsg`)
-                : t(`${T_NS}.modalPostularMsg`)}
+                ? 'Actualizá los campos que quieras modificar.'
+                : 'Completá los datos para enviar tu propuesta al empresario.'}
             </p>
 
             <div className="modal-resumen">
@@ -423,36 +431,49 @@ export default function ProyectoDetalle() {
             <div className="modal-divisor" />
 
             <div className="modal-form">
+
+              {/* Mensaje de presentación */}
               <div className="modal-campo">
                 <label className="modal-label">
-                  <Mail size={14} /> {t(`${T_NS}.campoMensaje`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
+                  <Mail size={14} /> Mensaje de presentación <span className="modal-opcional">(opcional)</span>
                 </label>
                 <textarea
                   className="modal-textarea"
-                  placeholder="Ej: Tengo experiencia en React y Node.js, he trabajado en proyectos similares..."
-                  rows={4}
+                  placeholder="Contale al empresario por qué te interesa el proyecto, tu experiencia, etc."
+                  rows={3}
                   value={mensaje}
                   onChange={(e) => setMensaje(e.target.value)}
                 />
               </div>
+
+              {/* Monto de la propuesta */}
               <div className="modal-campo">
                 <label className="modal-label">
-                  <DollarSign size={14} /> {t(`${T_NS}.campoPropuesta`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
+                  <DollarSign size={14} /> Tu propuesta económica
                 </label>
                 <input
                   className="modal-input"
                   type="number"
                   min="0"
-                  max="9999999"
                   step="100"
-                  placeholder="Ej: 2500"
-                  value={presupuesto}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val.length <= 7) setPresupuesto(val);
-                  }}
+                  placeholder="Ej: 1500"
+                  value={monto}
+                  onChange={(e) => setMonto(e.target.value)}
                 />
-                <span className="modal-ayuda">{t(`${T_NS}.campoPropuestaHint`)}</span>
+                <span className="modal-ayuda">Indicá el monto total que cobrarías por el proyecto.</span>
+              </div>
+
+              {/* Condiciones */}
+              <div className="modal-campo">
+                <label className="modal-label checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={aceptaCondiciones}
+                    onChange={(e) => setAceptaCondiciones(e.target.checked)}
+                    className="modal-checkbox"
+                  />
+                  <span>Acepto las condiciones del proyecto y me comprometo a cumplir con los plazos y entregables acordados.</span>
+                </label>
               </div>
             </div>
 
@@ -463,20 +484,20 @@ export default function ProyectoDetalle() {
                 onClick={() => setMostrarModal(false)}
                 disabled={enviando}
               >
-                {t(`${T_NS}.cancelar`)}
+                Cancelar
               </button>
               <button
                 type="button"
                 className="modal-btn modal-btn-primary"
                 onClick={confirmarPostulacion}
-                disabled={enviando || (modoEdicion && !hayCambios)}
+                disabled={enviando || !aceptaCondiciones || (modoEdicion && !hayCambios)}
               >
                 {enviando ? (
-                  <>{t(`${T_NS}.guardando`)}</>
+                  <>Guardando...</>
                 ) : modoEdicion && !hayCambios ? (
-                  <><Send size={16} /> {t(`${T_NS}.sinCambios`)}</>
+                  <><Send size={16} /> Sin cambios</>
                 ) : (
-                  <><Send size={16} /> {modoEdicion ? t(`${T_NS}.guardarCambios`) : t(`${T_NS}.postularmeBtn`)}</>
+                  <><Send size={16} /> {modoEdicion ? 'Guardar cambios' : 'Enviar propuesta'}</>
                 )}
               </button>
             </div>

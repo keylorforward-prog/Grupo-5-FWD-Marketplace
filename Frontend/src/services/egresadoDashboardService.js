@@ -63,6 +63,10 @@ export const egresadoDashboardService = {
     return get('/dashboard-egresado/postulaciones', params);
   },
 
+  obtenerPostulacionesEmpleo(params) {
+    return get('/dashboard-egresado/postulaciones-empleo', params);
+  },
+
   obtenerProyectos(params) {
     return get('/dashboard-egresado/proyectos', params);
   },

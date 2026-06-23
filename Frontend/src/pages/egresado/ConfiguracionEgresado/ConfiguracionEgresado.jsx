@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Briefcase, Bell, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Briefcase, Bell, HelpCircle } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 import DashboardLayout from '../DashboardEgresado/components/DashboardLayout';
-import InformacionCuenta from './components/InformacionCuenta';
+import { RUTAS } from '../../../routes/rutas';
 import PreferenciasProfesionales from './components/PreferenciasProfesionales';
 import Notificaciones from './components/Notificaciones';
 import Seguridad from './components/Seguridad';
@@ -10,14 +12,14 @@ import { useScrollSpy } from './hooks/useScrollSpy';
 import './styles/ConfiguracionEgresado.css';
 
 const seccionesConfiguracion = [
-  { id: 'cuenta', key: 'sections.cuenta', icono: User },
   { id: 'preferencias', key: 'sections.preferencias', icono: Briefcase },
   { id: 'notificaciones', key: 'sections.notificaciones', icono: Bell },
-  { id: 'seguridad', key: 'sections.seguridad', icono: Lock },
 ];
 
 function ConfiguracionEgresado() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const ids = useMemo(() => seccionesConfiguracion.map((s) => s.id), []);
   const [seccionActiva, setSeccionActiva] = useScrollSpy(ids, { offset: 140 });
 
@@ -43,32 +45,29 @@ function ConfiguracionEgresado() {
           <aside className="tarjetaNavegacionConfiguracion fwd-animar-slide">
             <div className="resumenPerfilConfiguracion">
               <div className="anilloAvatarConfig">
-                <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="Avatar" />
+                <img src={user?.foto_perfil || '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png'} alt="Avatar" />
               </div>
-              <h3>Alex Rivera</h3>
-              <p>Junior Frontend Developer</p>
+              <h3>{user?.nombre || 'Egresado'}</h3>
+              <p>{user?.rol === 'EMPRESARIO' ? 'Empresario' : user?.rol === 'ESTUDIANTE' ? 'Egresado' : user?.rol || 'Usuario'}</p>
             </div>
 
-            <nav className="navegacionInterna">
-              {seccionesConfiguracion.map(({ id, key, icono: Icono }) => (
-                <button
-                  key={id}
-                  type="button"
-                  className={`botonNavegacionInterna ${seccionActiva === id ? 'activo' : ''}`}
-                  onClick={() => desplazarASeccion(id)}
-                >
-                  <span className="iconoBotonNav"><Icono size={18} /></span>
-                  {t(`egresadoConfiguracion.${key}`)}
-                </button>
-              ))}
-            </nav>
+            <div className="seguridadLateral">
+              <Seguridad />
+            </div>
+
+            <button
+              className="soporteLateralBtn"
+              type="button"
+              onClick={() => navigate(RUTAS.egresadoSoporte)}
+            >
+              <HelpCircle size={16} />
+              {t('egresadoLayout.sidebar.soporte')}
+            </button>
           </aside>
 
           <div className="formulariosConfiguracion fwd-stagger">
-            <InformacionCuenta />
             <PreferenciasProfesionales />
             <Notificaciones />
-            <Seguridad />
           </div>
         </div>
       </div>

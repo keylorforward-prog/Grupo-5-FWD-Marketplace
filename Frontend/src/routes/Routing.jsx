@@ -39,19 +39,20 @@ const AdminProfile = lazy(() => import('../Pages/admin/AdminProfile'));
 const SettingsEmpresa = lazy(() => import('../Pages/empresa/SettingsEmpresa/SettingsEmpresa'));
 
 // Egresado
-const DashboardEgresado = lazy(() => import('../Pages/egresado/DashboardEgresado/DashboardEgresado'));
-const InicioEgresado = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/Inicio/Inicio'));
-const PostulacionesEgresado = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/Postulaciones/Postulaciones'));
-const MisProyectosEgresado = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/Proyectos/MisProyectos'));
-const HistorialEgresado = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/Historial/Historial'));
-const MensajesEgresado = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes'));
-const NotificacionesEgresado = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones'));
-const ExplorarProyectos = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos'));
-const ExplorarEmpleos = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/ExplorarEmpleos/ExplorarEmpleos'));
-const DetalleEmpleo = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/DetalleEmpleo/DetalleEmpleo'));
-const ProyectoDetalle = lazy(() => import('../Pages/egresado/DashboardEgresado/pages/ProyectoDetalle/ProyectoDetalle'));
-const PerfilEgresado = lazy(() => import('../Pages/egresado/PerfilEgresado/PerfilEgresado'));
-const ConfiguracionEgresado = lazy(() => import('../Pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado'));
+import DashboardEgresado from '../Pages/egresado/DashboardEgresado/DashboardEgresado';
+import InicioEgresado from '../Pages/egresado/DashboardEgresado/pages/Inicio/Inicio';
+import PostulacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Postulaciones/Postulaciones';
+import MisProyectosEgresado from '../Pages/egresado/DashboardEgresado/pages/Proyectos/MisProyectos';
+import HistorialEgresado from '../Pages/egresado/DashboardEgresado/pages/Historial/Historial';
+import MensajesEgresado from '../Pages/egresado/DashboardEgresado/pages/Mensajes/Mensajes';
+import NotificacionesEgresado from '../Pages/egresado/DashboardEgresado/pages/Notificaciones/Notificaciones';
+import ExplorarProyectos from '../Pages/egresado/DashboardEgresado/pages/Explorar/ExplorarProyectos';
+import ExplorarEmpleos from '../Pages/egresado/DashboardEgresado/pages/ExplorarEmpleos/ExplorarEmpleos';
+import DetalleEmpleo from '../Pages/egresado/DashboardEgresado/pages/DetalleEmpleo/DetalleEmpleo';
+import ProyectoDetalle from '../Pages/egresado/DashboardEgresado/pages/ProyectoDetalle/ProyectoDetalle';
+import PerfilEgresado from '../Pages/egresado/PerfilEgresado/PerfilEgresado';
+import ConfiguracionEgresado from '../Pages/egresado/ConfiguracionEgresado/ConfiguracionEgresado';
+import Soporte from '../Pages/egresado/Soporte/Soporte';
 
 
 // Comunes
@@ -133,6 +134,14 @@ export default function Routing() {
           element={
             <RutaProtegida rolPermitido="estudiante">
               <ConfiguracionEgresado />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path={RUTAS.egresadoSoporte}
+          element={
+            <RutaProtegida rolPermitido="estudiante">
+              <Soporte />
             </RutaProtegida>
           }
         />

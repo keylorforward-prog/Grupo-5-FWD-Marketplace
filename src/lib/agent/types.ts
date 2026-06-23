@@ -8,6 +8,7 @@ export type InterviewState = 'interviewing' | 'confirming' | 'done';
 export type ExtractedProject = {
   title: string;
   description: string;
+  planteamiento: string;
   area_negocio: string;
   stack: string[];
   duration_weeks: number;

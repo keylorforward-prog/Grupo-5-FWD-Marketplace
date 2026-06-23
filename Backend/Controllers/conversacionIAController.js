@@ -56,3 +56,28 @@ exports.getActiveByEmpresario = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+exports.getAllByEmpresario = async (req, res) => {
+  try {
+    const data = await ConversacionIA.findAll({
+      where: { id_perfil_empresario: req.params.id },
+      order: [['fecha_actualizacion', 'DESC']],
+    });
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.delete = async (req, res) => {
+  try {
+    const deleted = await ConversacionIA.destroy({
+      where: { id_conversacion_ia: req.params.id },
+    });
+    if (!deleted) return res.status(404).json({ success: false, message: 'No encontrado' });
+    res.json({ success: true, message: 'Conversación eliminada' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

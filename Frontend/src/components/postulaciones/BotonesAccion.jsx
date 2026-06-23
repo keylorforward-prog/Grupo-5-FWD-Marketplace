@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, X, CheckCircle2, UserCheck, Send } from 'lucide-react';
+import { Eye, X, CheckCircle2, Send, UserCheck } from 'lucide-react';
 import Tooltip from '../ui/Tooltip';
 import Emergente from '../ui/Emergente';
 import MiniCalendario from './MiniCalendario';
@@ -36,7 +36,6 @@ export default function BotonesAccion({
   return (
     <>
       <div className="de-row-actions">
-      <div className="flex items-center gap-1.5">
         {/* Ver perfil → Azul (also sets EN_REVISION) */}
         <Tooltip content="Ver perfil completo">
           <button
@@ -90,9 +89,9 @@ export default function BotonesAccion({
             onClick={() => !isAceptado && setShowAceptar(true)}
             disabled={isAceptado}
             aria-label={`Aceptar a ${nombreCandidato}`}
-            className={`de-project-icon-button success ${isAceptado ? 'cursor-not-allowed opacity-50' : ''}`}
+            className="de-project-icon-button success"
           >
-            <UserCheck className="w-5 h-5" />
+            <UserCheck size={17} />
           </button>
         </Tooltip>
 
@@ -108,7 +107,7 @@ export default function BotonesAccion({
           </button>
         </Tooltip>
       </div>
-      </div>
+
 
       {/* Reject dialog with message */}
       <DialogoConfirmacion

@@ -307,6 +307,46 @@ const listarPostulaciones = async (req, res) => {
   }
 };
 
+const normalizarEstadoEmpleo = async (postulacion) => {
+  const mapa = { enviada: 'ENVIADA', vista: 'EN_REVISION', aceptada: 'ACEPTADO', rechazada: 'RECHAZADA' };
+  if (mapa[postulacion.estado]) {
+    postulacion.estado = mapa[postulacion.estado];
+    await postulacion.save();
+  }
+};
+
+const listarPostulacionesEmpleo = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+
+    const postulaciones = await PostulacionEmpleo.findAll({
+      where: { id_perfil_estudiante: perfil.id_perfil_estudiante },
+      include: [
+        {
+          model: OfertaEmpleo,
+          as: 'oferta',
+          include: [{
+            model: PerfilEmpresario,
+            as: 'perfilEmpresario',
+            attributes: ['id_perfil_empresario', 'sector', 'logo'],
+            include: [{ model: Usuario, as: 'usuario', attributes: ['nombre'] }],
+          }],
+        },
+      ],
+      order: [['fecha_postulacion', 'DESC']],
+      limit: obtenerLimite(req.query.limit),
+    });
+
+    await Promise.all(postulaciones.map(actualizarPendiente));
+    await Promise.all(postulaciones.map(normalizarEstadoEmpleo));
+
+    res.json({ success: true, data: postulaciones });
+  } catch (error) {
+    responderError(res, error, 'Error al obtener las postulaciones a empleo.');
+  }
+};
+
 const listarProyectos = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEstudiante(req, res);
@@ -457,58 +497,137 @@ const listarNotificaciones = async (req, res) => {
   }
 };
 
+const INCLUDE_EMPRESA_CONTACTO = {
+  model: PerfilEmpresario,
+  as: 'perfilEmpresario',
+  include: [{
+    model: Usuario,
+    as: 'usuario',
+    attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'],
+  }],
+};
+
+const AGREGAR_CONTACTO = (c) => {
+  if (!c) return c;
+  const json = c.toJSON ? c.toJSON() : c;
+  const empresario = json.postulacion?.propuesta?.perfilEmpresario?.usuario
+    || json.postulacionEmpleo?.oferta?.perfilEmpresario?.usuario
+    || null;
+  if (empresario) empresario.rol = 'empresa';
+  return { ...json, contacto: empresario };
+};
+
+const ESTADOS_ACEPTADOS = ['ACEPTADO', 'CONTRATADO'];
+
+const INCLUDE_POSTULACION = (extraWhere) => ({
+  model: Postulacion,
+  as: 'postulacion',
+  required: false,
+  where: extraWhere,
+  include: [{
+    model: Propuesta,
+    as: 'propuesta',
+    include: [INCLUDE_EMPRESA_CONTACTO],
+  }],
+});
+
+const INCLUDE_POSTULACION_EMPLEO = (extraWhere) => ({
+  model: PostulacionEmpleo,
+  as: 'postulacionEmpleo',
+  required: false,
+  where: extraWhere,
+  include: [{
+    model: OfertaEmpleo,
+    as: 'oferta',
+    include: [INCLUDE_EMPRESA_CONTACTO],
+  }],
+});
+
 const listarMensajesRecientes = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEstudiante(req, res);
     if (!perfil) return;
     const userId = req.user.id_usuario;
 
-    const includePostulacion = {
-      model: Postulacion,
-      as: 'postulacion',
-      required: true,
-      include: [{
-        model: Propuesta,
-        as: 'propuesta',
-        include: [{
-          model: PerfilEmpresario,
-          as: 'perfilEmpresario',
-          include: [{
-            model: Usuario,
-            as: 'usuario',
-            attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'],
-          }],
-        }],
-      }],
-    };
-
     const recibidos = await Conversacion.findAll({
-      include: [{
-        ...includePostulacion,
-        where: { id_perfil_estudiante: perfil.id_perfil_estudiante },
-      }, {
-        model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'],
-      }],
+      include: [
+        INCLUDE_POSTULACION({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
+        INCLUDE_POSTULACION_EMPLEO({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
+        { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'] },
+      ],
       order: [['fecha_envio', 'DESC']],
     });
 
     const enviados = await Conversacion.findAll({
       where: { id_usuario_emisor: userId },
-      include: [includePostulacion, {
-        model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'],
-      }],
+      include: [
+        INCLUDE_POSTULACION({ estado: ESTADOS_ACEPTADOS }),
+        INCLUDE_POSTULACION_EMPLEO({ estado: ESTADOS_ACEPTADOS }),
+        { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'] },
+      ],
       order: [['fecha_envio', 'DESC']],
     });
 
-    const todas = [...recibidos, ...enviados];
+    const idsConConv = new Set([...recibidos, ...enviados].map(c => c.id_postulacion));
+
+    const postSinConv = await Postulacion.findAll({
+      where: {
+        id_perfil_estudiante: perfil.id_perfil_estudiante,
+        estado: ESTADOS_ACEPTADOS,
+        id_postulacion: { [Op.notIn]: [...idsConConv].filter(Boolean) },
+      },
+    });
+
+    for (const p of postSinConv) {
+      await Conversacion.create({
+        id_postulacion: p.id_postulacion,
+        id_usuario_emisor: userId,
+        mensaje: 'Has sido aceptado. ¡Envía tu primer mensaje!',
+        leido: false,
+        tipo_referencia: 'postulacion',
+      });
+    }
+
+    const postEmpSinConv = await PostulacionEmpleo.findAll({
+      where: {
+        id_perfil_estudiante: perfil.id_perfil_estudiante,
+        estado: ESTADOS_ACEPTADOS,
+        id_postulacion_empleo: { [Op.notIn]: [...idsConConv].filter(Boolean) },
+      },
+    });
+
+    for (const p of postEmpSinConv) {
+      await Conversacion.create({
+        id_postulacion: p.id_postulacion_empleo,
+        id_usuario_emisor: userId,
+        mensaje: 'Has sido aceptado. ¡Envía tu primer mensaje!',
+        leido: false,
+        tipo_referencia: 'postulacion_empleo',
+      });
+    }
+
+    const todas = [
+      ...(await Conversacion.findAll({
+        include: [
+          INCLUDE_POSTULACION({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
+          INCLUDE_POSTULACION_EMPLEO({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
+          { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'] },
+        ],
+        order: [['fecha_envio', 'DESC']],
+      })),
+      ...enviados,
+    ].filter(c => {
+      if (c.tipo_referencia === 'postulacion_empleo') {
+        return ESTADOS_ACEPTADOS.includes(c.postulacionEmpleo?.estado);
+      }
+      return ESTADOS_ACEPTADOS.includes(c.postulacion?.estado);
+    });
+
     const agrupadas = Object.values(
       todas.reduce((acc, c) => {
         const key = c.id_postulacion;
         if (!acc[key] || new Date(c.fecha_envio) > new Date(acc[key].fecha_envio)) {
-          const empresario = c.postulacion?.propuesta?.perfilEmpresario?.usuario || null;
-          if (empresario) empresario.rol = 'empresa';
-          const contacto = empresario || null;
-          acc[key] = { ...c.toJSON ? c.toJSON() : c, contacto };
+          acc[key] = AGREGAR_CONTACTO(c);
         }
         return acc;
       }, {})
@@ -528,45 +647,60 @@ const obtenerConversacion = async (req, res) => {
 
     const { idPostulacion } = req.params;
 
-    const postulacion = await Postulacion.findByPk(idPostulacion, {
-      include: [{ model: Propuesta, as: 'propuesta' }],
+    const primeraConv = await Conversacion.findOne({
+      where: { id_postulacion: idPostulacion },
     });
-    if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+    if (!primeraConv) {
+      return res.status(404).json({ success: false, message: 'Conversación no encontrada.' });
+    }
+    const tipoRef = primeraConv.tipo_referencia || 'postulacion';
+
+    let postulacion, empresario;
+    if (tipoRef === 'postulacion_empleo') {
+      postulacion = await PostulacionEmpleo.findByPk(idPostulacion, {
+        include: [{
+          model: OfertaEmpleo,
+          as: 'oferta',
+          include: [INCLUDE_EMPRESA_CONTACTO],
+        }],
+      });
+      if (postulacion) {
+        empresario = postulacion.oferta?.perfilEmpresario?.usuario || null;
+      }
+    } else {
+      postulacion = await Postulacion.findByPk(idPostulacion, {
+        include: [{ model: Propuesta, as: 'propuesta', include: [INCLUDE_EMPRESA_CONTACTO] }],
+      });
+      if (postulacion) {
+        empresario = postulacion.propuesta?.perfilEmpresario?.usuario || null;
+      }
+    }
+
+    if (!postulacion) {
+      return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+    }
 
     const esEstudiante = postulacion.id_perfil_estudiante === perfil.id_perfil_estudiante;
-    const esEmpresario = postulacion.propuesta?.id_usuario === userId;
-    const participa = await Conversacion.findOne({
-      where: { id_postulacion: idPostulacion, id_usuario_emisor: userId },
-    });
+    const esEmpresario = postulacion.propuesta?.id_usuario === userId
+      || postulacion.oferta?.perfilEmpresario?.id_usuario === userId;
 
-    if (!esEstudiante && !esEmpresario && !participa) {
+    if (!esEstudiante && !esEmpresario) {
       return res.status(403).json({ success: false, message: 'No tienes acceso a esta conversación.' });
     }
 
-    const [mensajes, postulacionCompleta] = await Promise.all([
-      Conversacion.findAll({
-        where: { id_postulacion: idPostulacion },
-        include: [
-          { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] },
-        ],
-        order: [['fecha_envio', 'ASC']],
-      }),
-      Postulacion.findByPk(idPostulacion, {
-        include: [{
-          model: Propuesta,
-          as: 'propuesta',
-          include: [{
-            model: PerfilEmpresario,
-            as: 'perfilEmpresario',
-            include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] }],
-          }],
-        }],
-      }),
-    ]);
+    if (esEstudiante && !ESTADOS_ACEPTADOS.includes(postulacion.estado)) {
+      return res.status(403).json({ success: false, message: 'Solo podés acceder a mensajes si fuiste aceptado.' });
+    }
 
-    const empresario = postulacionCompleta?.propuesta?.perfilEmpresario?.usuario || null;
+    const mensajes = await Conversacion.findAll({
+      where: { id_postulacion: idPostulacion },
+      include: [
+        { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] },
+      ],
+      order: [['fecha_envio', 'ASC']],
+    });
+
     if (empresario) empresario.rol = 'empresa';
-
     res.json({ success: true, data: { mensajes, contacto: empresario } });
   } catch (error) {
     responderError(res, error, 'Error al obtener la conversación.');
@@ -584,16 +718,37 @@ const enviarMensaje = async (req, res) => {
       return res.status(400).json({ success: false, message: 'id_postulacion y mensaje son requeridos.' });
     }
 
-    const postulacion = await Postulacion.findByPk(id_postulacion, {
-      include: [{ model: Propuesta, as: 'propuesta' }],
+    const primeraConv = await Conversacion.findOne({
+      where: { id_postulacion },
     });
+    const tipoRef = primeraConv?.tipo_referencia || 'postulacion';
+
+    let postulacion, empresarioUserId;
+    if (tipoRef === 'postulacion_empleo') {
+      postulacion = await PostulacionEmpleo.findByPk(id_postulacion, {
+        include: [{ model: OfertaEmpleo, as: 'oferta', include: [INCLUDE_EMPRESA_CONTACTO] }],
+      });
+      if (postulacion) empresarioUserId = postulacion.oferta?.perfilEmpresario?.usuario?.id_usuario;
+    } else {
+      postulacion = await Postulacion.findByPk(id_postulacion, {
+        include: [{ model: Propuesta, as: 'propuesta' }],
+      });
+      if (postulacion) empresarioUserId = postulacion.propuesta?.id_usuario;
+    }
+
     if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
 
     const esEstudiante = postulacion.id_perfil_estudiante === perfil.id_perfil_estudiante;
-    const esEmpresario = postulacion.propuesta?.id_usuario === userId;
+    const esEmpresario = tipoRef === 'postulacion_empleo'
+      ? postulacion.oferta?.perfilEmpresario?.id_usuario === userId
+      : postulacion.propuesta?.id_usuario === userId;
 
     if (!esEstudiante && !esEmpresario) {
       return res.status(403).json({ success: false, message: 'No tienes acceso a esta conversación.' });
+    }
+
+    if (esEstudiante && !ESTADOS_ACEPTADOS.includes(postulacion.estado)) {
+      return res.status(403).json({ success: false, message: 'Solo podés enviar mensajes si fuiste aceptado.' });
     }
 
     const nuevo = await Conversacion.create({
@@ -601,6 +756,7 @@ const enviarMensaje = async (req, res) => {
       id_usuario_emisor: userId,
       mensaje: mensaje.trim(),
       leido: false,
+      tipo_referencia: tipoRef,
     });
 
     const creado = await Conversacion.findByPk(nuevo.id_conversacion, {
@@ -608,16 +764,14 @@ const enviarMensaje = async (req, res) => {
     });
 
     // Notificación al Empresario si el emisor es Estudiante
-    if (esEstudiante) {
+    if (esEstudiante && empresarioUserId) {
       const { PerfilEmpresario, Notificacion } = require('../Models');
-      const empresarioUserId = postulacion.propuesta.id_usuario;
-      
-      const perfilEmpresario = await PerfilEmpresario.findOne({ where: { id_usuario: empresarioUserId } });
-      if (perfilEmpresario && perfilEmpresario.notif_mensajes_directos) {
+      const perfilEmp = await PerfilEmpresario.findOne({ where: { id_usuario: empresarioUserId } });
+      if (perfilEmp && perfilEmp.notif_mensajes_directos) {
         await Notificacion.create({
           id_usuario: empresarioUserId,
           tipo: 'NUEVO_MENSAJE',
-          mensaje: `Has recibido un nuevo mensaje directo sobre tu propuesta.`,
+          mensaje: `Has recibido un nuevo mensaje directo.`,
           leido: false,
           fecha: new Date(),
         });
@@ -637,15 +791,37 @@ const marcarLeidos = async (req, res) => {
     const userId = req.user.id_usuario;
     const { idPostulacion } = req.params;
 
-    const postulacion = await Postulacion.findByPk(idPostulacion, {
-      include: [{ model: Propuesta, as: 'propuesta' }],
+    const primeraConv = await Conversacion.findOne({
+      where: { id_postulacion: idPostulacion },
     });
+    if (!primeraConv) return res.status(404).json({ success: false, message: 'Conversación no encontrada.' });
+    const tipoRef = primeraConv.tipo_referencia || 'postulacion';
+
+    let postulacion, esEmpresario;
+    if (tipoRef === 'postulacion_empleo') {
+      postulacion = await PostulacionEmpleo.findByPk(idPostulacion, {
+        include: [{ model: OfertaEmpleo, as: 'oferta', include: [INCLUDE_EMPRESA_CONTACTO] }],
+      });
+      if (postulacion) {
+        esEmpresario = postulacion.oferta?.perfilEmpresario?.usuario?.id_usuario === userId;
+      }
+    } else {
+      postulacion = await Postulacion.findByPk(idPostulacion, {
+        include: [{ model: Propuesta, as: 'propuesta' }],
+      });
+      if (postulacion) {
+        esEmpresario = postulacion.propuesta?.id_usuario === userId;
+      }
+    }
     if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
 
     const esEstudiante = postulacion.id_perfil_estudiante === perfil.id_perfil_estudiante;
-    const esEmpresario = postulacion.propuesta?.id_usuario === userId;
     if (!esEstudiante && !esEmpresario) {
       return res.status(403).json({ success: false, message: 'No tienes acceso a esta conversación.' });
+    }
+
+    if (esEstudiante && !ESTADOS_ACEPTADOS.includes(postulacion.estado)) {
+      return res.status(403).json({ success: false, message: 'Solo podés marcar mensajes si fuiste aceptado.' });
     }
 
     await Conversacion.update(
@@ -903,6 +1079,7 @@ module.exports = {
   listarNotificaciones,
   listarPerfil,
   listarPostulaciones,
+  listarPostulacionesEmpleo,
   listarProyectos,
   obtenerResumen,
 };

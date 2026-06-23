@@ -277,7 +277,11 @@
       "themeDark": "Light theme",
       "support": "Support & Help",
       "logout": "Log Out",
-      "loggingOut": "Logging out..."
+      "loggingOut": "Logging out...",
+      "confirmTitle": "Log out?",
+      "confirmDesc": "Your current session will be closed and you will return to the login screen.",
+      "confirm": "Yes, log out",
+      "cancel": "Cancel"
     },
     "help": {
       "title": "Need help?",
@@ -304,7 +308,8 @@
       "mensajes": "Messages",
       "notificaciones": "Notifications",
       "perfil": "My Profile",
-      "configuracion": "Configuration"
+      "configuracion": "Configuration",
+      "soporte": "Support & Help"
     },
     "profile": {
       "perfil": "My Profile",
@@ -876,7 +881,10 @@
       "expectativaSalarial": "Salary Expectation (Annual)",
       "tecnologiasPrincipales": "Main Technologies",
       "nuevaTech": "New tech...",
-      "anadir": "Add"
+      "anadir": "Add",
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "fullstack": "Full Stack"
     },
     "notifications": {
       "titulo": "Notifications",
@@ -909,6 +917,84 @@
       "eliminarBtn": "Delete account",
       "ocultar": "Hide",
       "mostrar": "Show"
+    }
+  },
+  "egresadoSoporte": {
+    "kicker": "Help Center",
+    "titulo": "Support & Help",
+    "subtitulo": "Find answers to your questions or contact our team.",
+    "buscarPlaceholder": "Search the help center...",
+    "canales": {
+      "correo": {
+        "titulo": "Email",
+        "desc": "Write to us at soporte@fwd.com and we'll respond within 24h."
+      },
+      "chat": {
+        "titulo": "Chat with Companies",
+        "desc": "Communicate directly with companies from your applications."
+      },
+      "terminos": {
+        "titulo": "Terms & Conditions",
+        "desc": "Check our usage policies, privacy and more."
+      }
+    },
+    "accionesRapidas": {
+      "titulo": "Quick actions",
+      "perfil": "My Profile",
+      "mensajes": "My Messages",
+      "configuracion": "Settings"
+    },
+    "faq": {
+      "titulo": "Frequently Asked Questions",
+      "expandirTodo": "Expand all",
+      "colapsarTodo": "Collapse all",
+      "sinResultados": "No results found. Try different keywords.",
+      "postulaciones": {
+        "pregunta": "How do I apply to a project?",
+        "respuesta": "Browse available projects in 'Explore Projects', select the one you like and click 'Apply'. Fill in your CV and a brief cover letter."
+      },
+      "proyectos": {
+        "pregunta": "What happens after I apply?",
+        "respuesta": "The company will review your profile and notify you of any status changes. You can track your applications from 'My Applications'."
+      },
+      "perfil": {
+        "pregunta": "How do I update my profile?",
+        "respuesta": "Go to 'My Profile' from the side menu. You can edit your photo, bio, technologies and more. All changes are saved automatically."
+      },
+      "mensajes": {
+        "pregunta": "How does the messaging system work?",
+        "respuesta": "When a company is interested in your profile, they can start a conversation from the 'Messages' section. You'll receive a notification when you have a new message."
+      },
+      "cuenta": {
+        "pregunta": "How can I delete my account?",
+        "respuesta": "Go to 'Settings' > 'Security' and select 'Delete Account'. You'll need to confirm your identity in two steps to complete the process."
+      },
+      "notificaciones": {
+        "pregunta": "How do I configure my notifications?",
+        "respuesta": "Go to the 'Notifications' section from the side menu. You can enable or disable alerts for applications, new messages and recommended projects."
+      },
+      "privacidad": {
+        "pregunta": "How is my personal information protected?",
+        "respuesta": "Your data is protected under FWD security standards. You can review our privacy policy in the Terms & Conditions section."
+      }
+    },
+    "formulario": {
+      "titulo": "Send a message",
+      "nombre": "Full name",
+      "nombrePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "you@email.com",
+      "asunto": "Subject",
+      "asuntoPlaceholder": "How can we help you?",
+      "mensaje": "Message",
+      "mensajePlaceholder": "Describe your question or issue...",
+      "cancelar": "Cancel",
+      "enviar": "Send message",
+      "exito": "Message sent!",
+      "exitoDesc": "Your email client will open to complete the delivery."
+    },
+    "pie": {
+      "texto": "Didn't find what you were looking for? Contact us through any of our channels."
     }
   },
   "auth": {

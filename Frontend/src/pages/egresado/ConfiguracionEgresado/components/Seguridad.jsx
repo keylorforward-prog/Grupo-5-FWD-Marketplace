@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2, AlertTriangle, Check, X, Eye, EyeOff } from 'lucide-react';
+import { Trash2, AlertTriangle, Check, X, Eye, EyeOff, Lock } from 'lucide-react';
 
 function Seguridad() {
   const { t } = useTranslation();
@@ -14,6 +14,10 @@ function Seguridad() {
 
   const [confirmandoEliminacion, setConfirmandoEliminacion] = useState(false);
   const [textoConfirmacion, setTextoConfirmacion] = useState('');
+  const [confirmandoPassword, setConfirmandoPassword] = useState(false);
+  const [passwordEliminar, setPasswordEliminar] = useState('');
+  const [errorEliminar, setErrorEliminar] = useState('');
+  const [mostrarPasswordEliminar, setMostrarPasswordEliminar] = useState(false);
 
   const manejarPassword = (e) => {
     const { name, value } = e.target;
@@ -38,9 +42,22 @@ function Seguridad() {
 
   const confirmarEliminacion = () => {
     if (textoConfirmacion !== 'ELIMINAR') return;
-    window.alert('Cuenta marcada para eliminación. Te enviaremos un correo de confirmación.');
     setConfirmandoEliminacion(false);
     setTextoConfirmacion('');
+    setPasswordEliminar('');
+    setErrorEliminar('');
+    setConfirmandoPassword(true);
+  };
+
+  const eliminarConPassword = () => {
+    if (!passwordEliminar) {
+      setErrorEliminar('Debes ingresar tu contraseña actual.');
+      return;
+    }
+    window.alert('Cuenta marcada para eliminación. Te enviaremos un correo de confirmación.');
+    setConfirmandoPassword(false);
+    setPasswordEliminar('');
+    setErrorEliminar('');
   };
 
   return (
@@ -164,7 +181,7 @@ function Seguridad() {
       </div>
 
       {confirmandoEliminacion && (
-        <div className="overlayModal" onClick={() => setConfirmandoEliminacion(false)}>
+        <div className="overlayModal" onClick={() => { setConfirmandoEliminacion(false); setTextoConfirmacion(''); }}>
           <div className="modalConfirmacion" onClick={(e) => e.stopPropagation()}>
             <div className="encabezadoModal">
               <div className="iconoModalPeligro">
@@ -201,6 +218,60 @@ function Seguridad() {
                 onClick={confirmarEliminacion}
               >
                 <Check size={14} /> {t('egresadoConfiguracion.security.eliminarBtn')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmandoPassword && (
+        <div className="overlayModal" onClick={() => { setConfirmandoPassword(false); setPasswordEliminar(''); setErrorEliminar(''); }}>
+          <div className="modalConfirmacion" onClick={(e) => e.stopPropagation()}>
+            <div className="encabezadoModal">
+              <div className="iconoModalPeligro">
+                <Lock size={24} />
+              </div>
+              <h3>Verifica tu identidad</h3>
+              <p>Ingresa tu contraseña actual para confirmar la eliminación de la cuenta.</p>
+            </div>
+            <div className="grupoFormulario">
+              <label htmlFor="passwordEliminar">Contraseña actual</label>
+              <div className="campoPassword">
+                <input
+                  id="passwordEliminar"
+                  type={mostrarPasswordEliminar ? 'text' : 'password'}
+                  className="entradaFormulario"
+                  placeholder="Tu contraseña actual"
+                  value={passwordEliminar}
+                  onChange={(e) => { setPasswordEliminar(e.target.value); setErrorEliminar(''); }}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  className="botonOjoPassword"
+                  onClick={() => setMostrarPasswordEliminar((m) => !m)}
+                  aria-label={mostrarPasswordEliminar ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {mostrarPasswordEliminar ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+            {errorEliminar && <div className="mensajeError">{errorEliminar}</div>}
+            <div className="accionesModal">
+              <button
+                type="button"
+                className="botonContorno"
+                onClick={() => { setConfirmandoPassword(false); setPasswordEliminar(''); setErrorEliminar(''); }}
+              >
+                <X size={14} /> Cancelar
+              </button>
+              <button
+                type="button"
+                className="botonEliminarConfirmacion"
+                disabled={!passwordEliminar}
+                onClick={eliminarConPassword}
+              >
+                <Check size={14} /> Confirmar eliminación
               </button>
             </div>
           </div>

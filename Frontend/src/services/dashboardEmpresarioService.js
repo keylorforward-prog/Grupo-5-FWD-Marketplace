@@ -88,8 +88,16 @@ export const dashboardEmpresarioService = {
     return get('/dashboard-empresario/postulaciones', params);
   },
 
+  obtenerPostulacionesEmpleo(params) {
+    return get('/dashboard-empresario/postulaciones-empleo', params);
+  },
+
   actualizarEstadoPostulacion(id, estado, mensaje = '') {
     return apiClient.put(`/dashboard-empresario/postulaciones/${id}/estado`, { estado, mensaje }).then(extraerData);
+  },
+
+  actualizarEstadoPostulacionEmpleo(id, estado, mensaje = '') {
+    return apiClient.put(`/dashboard-empresario/postulaciones-empleo/${id}/estado`, { estado, mensaje }).then(extraerData);
   },
 
   obtenerTalentoRecomendado(params) {
@@ -140,11 +148,27 @@ export const dashboardEmpresarioService = {
     await apiClient.delete(`/dashboard-empresario/historial/${id}`);
   },
 
+  actualizarEstadoPostulacionBatch(ids, estado, mensaje = '') {
+    return apiClient.put('/dashboard-empresario/postulaciones/batch-estado', { ids, estado, mensaje }).then(extraerData);
+  },
+
   obtenerEvaluaciones(params) {
     return get('/dashboard-empresario/evaluaciones', params);
   },
 
   obtenerPagos(params) {
     return get('/dashboard-empresario/pagos', params);
+  },
+
+  completarProyecto(idProyecto) {
+    return apiClient.put(`/dashboard-empresario/proyectos/${idProyecto}/completar`).then(extraerData);
+  },
+
+  crearResena(datos) {
+    return apiClient.post('/resenas', datos).then(extraerData);
+  },
+
+  obtenerResenaPropia(idProyecto, rol) {
+    return get(`/resenas/propia/${idProyecto}/${rol}`);
   },
 };

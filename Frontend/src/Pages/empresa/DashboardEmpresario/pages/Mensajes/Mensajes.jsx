@@ -315,16 +315,6 @@ export default function Mensajes() {
               <span>{t(`${T_NS}.conversaciones`)}</span>
               <span className="mensajes-sidebar-count">{stats.total}</span>
             </div>
-            <div className="mensajes-sidebar-stats">
-              <div className="mensajes-sidebar-stat" data-type="unread">
-                <Mail size={13} />
-                {t(`${T_NS}.noLeidos`, { count: stats.noLeidos })}
-              </div>
-              <div className="mensajes-sidebar-stat" data-type="read">
-                <MailOpen size={13} />
-                {t(`${T_NS}.leidos`, { count: stats.leidos })}
-              </div>
-            </div>
             <div className="mensajes-sidebar-busqueda">
               <Search size={14} />
               <input
