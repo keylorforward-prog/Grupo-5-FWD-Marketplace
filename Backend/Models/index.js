@@ -16,6 +16,7 @@ const TecnologiaPropuesta = require('./tecnologiaPropuesta')(sequelize, DataType
 const Postulacion = require('./postulacion')(sequelize, DataTypes);
 const Conversacion = require('./conversacion')(sequelize, DataTypes);
 const Mensaje = require('./mensaje')(sequelize, DataTypes);
+const MensajeHistorial = require('./mensajeHistorial')(sequelize, DataTypes);
 const ProyectoPlataforma = require('./proyectoPlataforma')(sequelize, DataTypes);
 const Entregable = require('./entregable')(sequelize, DataTypes);
 const Evaluacion = require('./evaluacion')(sequelize, DataTypes);
@@ -98,6 +99,61 @@ Mensaje.belongsTo(Conversacion, { foreignKey: 'id_conversacion', as: 'conversaci
 
 Usuario.hasMany(Mensaje, { foreignKey: 'id_usuario_emisor', as: 'mensajes_enviados' });
 Mensaje.belongsTo(Usuario, { foreignKey: 'id_usuario_emisor', as: 'emisor' });
+Mensaje.hasMany(MensajeHistorial, { foreignKey: 'id_mensaje', as: 'historial' });
+MensajeHistorial.belongsTo(Mensaje, { foreignKey: 'id_mensaje', as: 'mensaje' });
+MensajeHistorial.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'responsable' });
+
+// Auditoría transversal para las entidades operativas más sensibles.
+const { getAuditContext } = require('../Services/auditContext');
+const { publishAdminActivity } = require('../Services/adminActivityService');
+const CAMPOS_SENSIBLES = new Set(['contrasena_hash', 'accessToken', 'refreshToken']);
+const limpiarValores = (valores = {}) => Object.fromEntries(
+  Object.entries(valores).filter(([campo]) => !CAMPOS_SENSIBLES.has(campo))
+);
+
+const instalarAuditoria = (model, entidad) => {
+  const registrar = async (accion, instance, options, anterior, nuevo) => {
+    if (options?.skipAudit) return;
+    const context = getAuditContext();
+    const primaryKey = model.primaryKeyAttribute;
+    try {
+      const evento = await Auditoria.create({
+        ...context,
+        accion,
+        entidad,
+        entidad_id: String(instance.get(primaryKey) ?? ''),
+        valor_anterior: anterior ? limpiarValores(anterior) : null,
+        valor_nuevo: nuevo ? limpiarValores(nuevo) : null,
+        metadata: { ruta: context.actor_id ? 'SOLICITUD_AUTENTICADA' : 'PROCESO_SISTEMA' },
+        severidad: accion.includes('ELIMIN') ? 'ALTA' : 'INFO',
+        resultado: 'EXITOSO',
+      }, { transaction: options?.transaction, skipAudit: true });
+      publishAdminActivity({ id_auditoria: evento.id_auditoria, accion, entidad, fecha: evento.fecha });
+    } catch (error) {
+      console.error(`No se pudo registrar auditoría de ${entidad}:`, error.message);
+    }
+  };
+
+  model.addHook('afterCreate', (instance, options) => registrar(`${entidad.toUpperCase()}_CREADO`, instance, options, null, instance.get({ plain: true })));
+  model.addHook('afterUpdate', (instance, options) => {
+    const campos = instance.changed() || [];
+    const anterior = Object.fromEntries(campos.map((campo) => [campo, instance.previous(campo)]));
+    const nuevo = Object.fromEntries(campos.map((campo) => [campo, instance.get(campo)]));
+    return registrar(`${entidad.toUpperCase()}_ACTUALIZADO`, instance, options, anterior, nuevo);
+  });
+  model.addHook('afterDestroy', (instance, options) => registrar(`${entidad.toUpperCase()}_ELIMINADO`, instance, options, instance.get({ plain: true }), null));
+};
+
+[
+  [Propuesta, 'Propuesta'],
+  [ProyectoPlataforma, 'Proyecto'],
+  [Conversacion, 'Conversacion'],
+  [Mensaje, 'Mensaje'],
+  [Postulacion, 'Postulacion'],
+  [Oferta, 'Oferta'],
+  [Entregable, 'Entregable'],
+  [Evaluacion, 'Evaluacion'],
+].forEach(([model, entidad]) => instalarAuditoria(model, entidad));
 
 ProyectoPlataforma.hasMany(Entregable, { foreignKey: 'id_proyecto', as: 'entregables' });
 Entregable.belongsTo(ProyectoPlataforma, { foreignKey: 'id_proyecto', as: 'proyecto' });
@@ -146,6 +202,7 @@ module.exports = {
   Postulacion,
   Conversacion,
   Mensaje,
+  MensajeHistorial,
   ProyectoPlataforma,
   Entregable,
   Evaluacion,

@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../Controllers/mensajeController');
+const { verifyToken } = require('../Middleware/authMiddleware');
+
+router.use(verifyToken);
 
 /**
  * @swagger
