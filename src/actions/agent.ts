@@ -12,15 +12,20 @@ const client = new OpenAI({
   baseURL: 'https://api.groq.com/openai/v1',
 });
 
-async function callWithRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
+async function callWithRetry<T>(fn: () => Promise<T>, maxRetries = 4): Promise<T> {
   let lastError: unknown;
   for (let intento = 0; intento <= maxRetries; intento++) {
     try {
       return await fn();
     } catch (e) {
       lastError = e;
+      const msg = e instanceof Error ? e.message.toLowerCase() : '';
+      const esRateLimit = msg.includes('rate') || msg.includes('429');
       if (intento < maxRetries) {
-        await new Promise((r) => setTimeout(r, 2000 * (intento + 1)));
+        const espera = esRateLimit
+          ? ([3000, 6000, 12000, 20000][intento] ?? 20000)
+          : 1000 * (intento + 1);
+        await new Promise((r) => setTimeout(r, espera));
       }
     }
   }
@@ -101,53 +106,44 @@ export async function sendInterviewMessage(
 export async function extractProjectData(
   history: AgentMessage[],
 ): Promise<Result<ExtractedProject>> {
-  let text = '';
-  try {
-    const historialTexto = history
-      .map((m) => `${m.role === 'user' ? 'Empresario' : 'Agente'}: ${m.content}`)
-      .join('\n');
+  const historialTexto = history
+    .map((m) => `${m.role === 'user' ? 'Empresario' : 'Agente'}: ${m.content}`)
+    .join('\n');
 
+  async function intentar(modelo: string, usarJsonMode: boolean): Promise<ExtractedProject> {
     const response = await callWithRetry(() =>
       client.chat.completions.create({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 2000,
-        response_format: { type: 'json_object' },
+        model: modelo,
+        max_tokens: 4000,
         messages: [{ role: 'user', content: EXTRACTION_PROMPT + '\n' + historialTexto }],
+        ...(usarJsonMode ? { response_format: { type: 'json_object' as const } } : {}),
       }),
     );
-    text = response.choices[0].message.content ?? '';
-
-    try {
-      const data = JSON.parse(extraerJSON(text)) as ExtractedProject;
-      return ok(data);
-    } catch {
-      const retryResp = await callWithRetry(() =>
-        client.chat.completions.create({
-          model: 'llama-3.3-70b-versatile',
-          max_tokens: 2000,
-          response_format: { type: 'json_object' },
-          messages: [{
-            role: 'user',
-            content: 'Devolvé SOLO este contenido como JSON válido, sin texto adicional:\n' + text,
-          }],
-        }),
-      );
-      const retryText = retryResp.choices[0]?.message?.content ?? '';
-      const data = JSON.parse(extraerJSON(retryText)) as ExtractedProject;
-      return ok(data);
-    }
-  } catch (e) {
-    console.error('Extract error:', e);
-    console.error('Texto recibido:', text);
-    const mensaje = e instanceof Error ? e.message.toLowerCase() : '';
-    if (mensaje.includes('rate') || mensaje.includes('429')) {
-      return err('El agente está recibiendo muchas consultas. Esperá unos segundos.');
-    }
-    if (mensaje.includes('timeout') || mensaje.includes('network')) {
-      return err('Hubo un problema de conexión. Intentá de nuevo.');
-    }
-    return err('No se pudo procesar la información del proyecto.');
+    const txt = response.choices[0]?.message?.content ?? '';
+    return JSON.parse(extraerJSON(txt)) as ExtractedProject;
   }
+
+  const estrategias: Array<() => Promise<ExtractedProject>> = [
+    () => intentar('llama-3.3-70b-versatile', true),
+    () => intentar('llama-3.3-70b-versatile', false),
+    () => intentar('llama-3.1-8b-instant', true),
+    () => intentar('llama-3.1-8b-instant', false),
+  ];
+
+  let ultimoError: unknown;
+  for (const estrategia of estrategias) {
+    try {
+      const data = await estrategia();
+      return ok(data);
+    } catch (e) {
+      ultimoError = e;
+      console.error('Estrategia de extracción falló:', e);
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+  }
+
+  console.error('Todas las estrategias fallaron:', ultimoError);
+  return err('No se pudo procesar la información del proyecto.');
 }
 
 export async function correctProjectData(

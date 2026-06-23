@@ -29,20 +29,51 @@ CIERRE:
 - Si manda texto sin sentido o números sueltos, no cierres: pedile que cuente más sobre su proyecto.
 - Nunca muestres tu razonamiento interno ni cálculos.` as const;
 
-export const EXTRACTION_PROMPT = `Analizá el siguiente historial de conversación y extraé la información del proyecto tecnológico mencionado. Respondé SOLO con un JSON válido, sin texto adicional ni bloques de código markdown.
+export const EXTRACTION_PROMPT = `INSTRUCCIÓN CRÍTICA: lee primero el historial completo e identifica el RUBRO REAL del negocio (barbería, veterinaria, restaurante, etc.). Todo el contenido que generes debe ser sobre ESE rubro. Cualquier dato que no esté en el historial es inválido.
+
+Analizá el siguiente historial de conversación y extraé la información del proyecto tecnológico mencionado. Respondé SOLO con un JSON válido, sin texto adicional ni bloques de código markdown.
 
 El JSON debe tener exactamente estos campos:
 - title: nombre corto del proyecto
-- description: un planteamiento detallado y profesional del proyecto, estructurado en secciones y separado por \\n\\n. El planteamiento debe tener exactamente la siguiente estructura de secciones, incluyendo los títulos numerados:
-  A partir de la información recopilada, el proyecto corresponde a... [Breve resumen introductorio]
-  1. Contexto del negocio: Describe cómo opera actualmente el negocio (según lo mencionado en el chat).
-  2. Problema identificado: Cuál es el principal problema o limitación actual.
-  3. Objetivo del proyecto: Qué sistema o plataforma se va a construir y qué permitirá.
-  4. Alcance funcional del sistema: Lista las funciones clave (ej. Catálogo, Pagos, Administración).
-  5. Usuarios del sistema: Quiénes lo usarán (ej. Clientes, Administrador, Empleados).
-  6. Restricciones y condiciones: Incluye el presupuesto estimado, el tiempo y otras condiciones.
-  7. Resultado esperado: Qué logrará el negocio al finalizar el proyecto.
-  REGLA CRÍTICA: redactá en tercera persona, tono profesional pero claro, sin tecnicismos innecesarios. Basa la descripción ÚNICAMENTE en lo que el empresario dijo en ESTA conversación. NUNCA inventes nombres de negocios o datos no mencionados.
+- description: resumen breve de 2-3 oraciones del proyecto, para mostrar en cards y vistas de lista. Sin secciones ni markdown. description y planteamiento se generan EXCLUSIVAMENTE con la información real de la conversación actual. Está terminantemente prohibido usar nombres de negocios, rubros o datos de ejemplo. Si el empresario NO mencionó un nombre para su negocio, refiérete a él de forma genérica como "El negocio", "La empresa" o "El cliente". ESTÁ ESTRICTAMENTE PROHIBIDO INVENTAR NOMBRES COMO "Pollo Frito Don Carlos" o similares. NUNCA escribas nombres de negocios, locales ni rubros que no hayan aparecido explícitamente en el historial.
+- planteamiento: un documento profesional de análisis del proyecto en formato markdown, basado ÚNICAMENTE en lo que el empresario dijo en la conversación. Debe tener estas secciones con este formato exacto:
+
+## Planteamiento del proyecto
+
+A partir de la información recopilada, el proyecto corresponde a [resumen de una oración de qué es el proyecto].
+
+### 1. Contexto del negocio
+[Describe cómo opera el negocio actualmente, basado en lo que dijo el empresario. Usa viñetas si hay varios puntos.]
+
+### 2. Problema identificado
+[El problema principal que enfrenta el negocio y qué limita. Usa viñetas.]
+
+### 3. Objetivo del proyecto
+[Qué debe lograr la plataforma. Lista de objetivos concretos con viñetas.]
+
+### 4. Alcance funcional del sistema
+[Las funcionalidades organizadas en subsecciones con #### si aplica. Por ejemplo 4.1, 4.2, etc. Detalla cada función que el sistema debe tener.]
+
+### 5. Usuarios del sistema
+[Lista de los tipos de usuario y qué hace cada uno.]
+
+### 6. Propuesta tecnológica
+[El stack sugerido, presentado de forma profesional. Frontend, Backend, Base de datos, Integraciones externas si aplican.]
+
+### 7. Restricciones y condiciones
+[Condiciones del proyecto: si es desde cero, tamaño del negocio, presupuesto estimado en colones, tiempo estimado de desarrollo.]
+
+### 8. Resultado esperado
+[Qué tendrá el negocio al finalizar el proyecto. Lista con viñetas.]
+
+  REGLAS DEL PLANTEAMIENTO:
+  - Todo el contenido sale de la conversación real, nunca inventes datos.
+  - Redacta en tercera persona, tono profesional y técnico pero claro.
+  - Si el empresario no dio detalle para alguna sección, infiere lo más lógico según el tipo de negocio y mantenelo breve.
+  - Usa markdown real: ## para secciones, ### para subsecciones, - para viñetas.
+  - El presupuesto en la sección 7 va en colones.
+  - NUNCA uses nombres de negocios, rubros o datos que no aparezcan en el historial. Si no hay un nombre de negocio en el historial, usa términos genéricos. NUNCA inventes nombres ficticios como "Pollo Frito Don Carlos".
+
 - area_negocio: sector o industria del proyecto
 - stack: array con SIEMPRE entre 3 y 5 tecnologías apropiadas para el proyecto. Elegí según la naturaleza del proyecto:
   - Sistema web con base de datos y usuarios: ["React", "Node.js", "PostgreSQL", "Tailwind CSS"]
@@ -58,11 +89,10 @@ El JSON debe tener exactamente estos campos:
 - budget_currency: 'CRC' si habló en colones, 'USD' si habló en dólares. Si no mencionó presupuesto, dejá el string vacío. NO hagas ninguna conversión. Solo extraé los números y la moneda tal como los dijo.
 - usa_ia: true siempre — porque este proyecto fue creado con asistencia de inteligencia artificial por el agente de FWD Marketplace
 - raw_requirements: lista de requerimientos en viñetas, cada uno en su propia línea con un guion. Al final de cada requerimiento agregá entre paréntesis su nivel de complejidad para un desarrollador junior: (básico), (intermedio) o (avanzado).
-  Ejemplo:
-  - Registrar ventas con distintos medios de pago (intermedio)
-  - Mostrar un listado de las ventas del día (básico)
-  - Generar informes financieros automáticos en PDF (avanzado)
-  - Controlar el inventario de productos (intermedio)
+  Formato de cada ítem (los contenidos son del historial real, no de ejemplo):
+  - [Requerimiento funcional extraído del historial] (básico)
+  - [Requerimiento funcional extraído del historial] (intermedio)
+  - [Requerimiento funcional extraído del historial] (avanzado)
   Esto ayuda al desarrollador a dimensionar el esfuerzo del proyecto. Mantené máximo 8 requerimientos. Priorizá lo que el empresario realmente mencionó. Si la conversación no dio suficiente detalle, completá con los más lógicos para ese negocio y marcalos con (inferido) antes del nivel de complejidad. Incluí si el sistema debe integrarse con herramientas actuales o arranca desde cero.
 
 Si un campo no fue mencionado en la conversación: usá string vacío para textos, array vacío para stack, y 0 para números.

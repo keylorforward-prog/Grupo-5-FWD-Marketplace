@@ -152,7 +152,7 @@ export default function CrearProyectoIA() {
             if (res.data.estado === 'finalizada' || res.data.estado === 'completada') {
               setState('done');
               setLoading(true);
-              const extraction = await apiPost('extract', { history: historial });
+              const extraction = await apiPost('extract', { history: historial, nombreEmpresa: user?.nombre });
               if (extraction.success) {
                 setExtracted(extraction.data);
               }
@@ -194,7 +194,7 @@ export default function CrearProyectoIA() {
       if (conv.estado === 'finalizada' || conv.estado === 'completada') {
         setState('done');
         setLoading(true);
-        const extraction = await apiPost('extract', { history: historial });
+        const extraction = await apiPost('extract', { history: historial, nombreEmpresa: user?.nombre });
         if (extraction.success) {
           setExtracted(extraction.data);
         }
@@ -301,7 +301,7 @@ export default function CrearProyectoIA() {
       if (result.data.state === 'confirming') {
         setState('confirming');
 
-        const extraction = await apiPost('extract', { history: updatedHistory });
+        const extraction = await apiPost('extract', { history: updatedHistory, nombreEmpresa: user?.nombre });
 
         if (extraction.success) {
           setExtracted(extraction.data);
