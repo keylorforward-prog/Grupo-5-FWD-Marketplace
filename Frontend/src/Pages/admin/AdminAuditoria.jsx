@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Activity, CalendarDays, Eye, Filter, RefreshCw, Search, ShieldCheck, UserRound } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import AdminDetalleAuditoriaModal from './components/AdminDetalleAuditoriaModal';
@@ -9,7 +9,7 @@ import './AdminAuditoria.css';
 const PAGE_SIZE = 25;
 const fechaLegible = (fecha) => new Date(fecha).toLocaleString('es-CR', { dateStyle: 'medium', timeStyle: 'short' });
 
-export default function AdminAuditoria() {
+const AdminAuditoria = memo(function AdminAuditoria() {
   const [eventos, setEventos] = useState([]);
   const [meta, setMeta] = useState({ page: 1, total: 0, hasMore: false });
   const [loading, setLoading] = useState(true);
@@ -48,11 +48,14 @@ export default function AdminAuditoria() {
     return () => window.clearInterval(intervalo);
   }, [cargar]);
 
-  const resumen = useMemo(() => ({
-    total: meta.total,
-    alta: eventos.filter((evento) => evento.severidad === 'ALTA').length,
-    hoy: eventos.filter((evento) => new Date(evento.fecha).toDateString() === new Date().toDateString()).length,
-  }), [eventos, meta.total]);
+  const resumen = useMemo(() => {
+    const hoy = new Date().toDateString();
+    return eventos.reduce((acc, evento) => {
+      if (evento.severidad === 'ALTA') acc.alta += 1;
+      if (new Date(evento.fecha).toDateString() === hoy) acc.hoy += 1;
+      return acc;
+    }, { total: meta.total, alta: 0, hoy: 0 });
+  }, [eventos, meta.total]);
 
   const cambiarFiltro = (campo, valor) => setFiltros((actuales) => ({ ...actuales, [campo]: valor }));
   const limpiar = () => setFiltros({ accion: '', usuario: '', entidad: '', severidad: '', desde: '', hasta: '' });
@@ -102,4 +105,6 @@ export default function AdminAuditoria() {
       <AdminDetalleAuditoriaModal open={modal.open} evento={modal.evento} onCancel={() => setModal({ open: false, evento: null })} />
     </div>
   );
-}
+});
+
+export default AdminAuditoria;
