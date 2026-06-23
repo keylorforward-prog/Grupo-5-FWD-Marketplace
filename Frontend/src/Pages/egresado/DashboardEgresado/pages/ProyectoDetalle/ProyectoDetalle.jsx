@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft, DollarSign, Tag, Globe, Building2,
-  Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, Mail, Pencil, Trash2, Plus,
+  Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, Mail, Pencil, Trash2,
 } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
@@ -41,12 +41,10 @@ export default function ProyectoDetalle() {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [mensaje, setMensaje] = useState('');
-  const [tarifaHora, setTarifaHora] = useState(4000);
-  const [tareas, setTareas] = useState([{ nombre: '', horas: '' }]);
+  const [monto, setMonto] = useState('');
+  const [aceptaCondiciones, setAceptaCondiciones] = useState(false);
   const [originalMensaje, setOriginalMensaje] = useState('');
-  const [originalTarifaHora, setOriginalTarifaHora] = useState(4000);
-  const [originalTareas, setOriginalTareas] = useState([{ nombre: '', horas: '' }]);
-  const [errorCotizacion, setErrorCotizacion] = useState('');
+  const [originalMonto, setOriginalMonto] = useState('');
   const [confirmarCancelar, setConfirmarCancelar] = useState(false);
   const [cancelando, setCancelando] = useState(false);
 
@@ -70,27 +68,15 @@ export default function ProyectoDetalle() {
   }, [id]);
 
   const confirmarPostulacion = async () => {
-    const tareasValidas = tareas.filter((t) => t.nombre.trim() && Number(t.horas) > 0);
-    if (tareasValidas.length === 0) {
-      setErrorCotizacion('Agregá al menos una tarea con nombre y horas estimadas.');
+    if (!aceptaCondiciones) {
+      alert('Debés aceptar las condiciones del proyecto para continuar.');
       return;
     }
-    if (!tarifaHora || tarifaHora <= 0) {
-      setErrorCotizacion('La tarifa por hora debe ser mayor a 0.');
-      return;
-    }
-    setErrorCotizacion('');
     setEnviando(true);
     try {
       const datos = {
         mensaje_presentacion: mensaje.trim() || undefined,
-        presupuesto_max: total,
-        desglose_tareas: tareasValidas,
-        tarifa_hora: tarifaHora,
-        total_horas: totalHoras,
-        subtotal,
-        iva,
-        total,
+        presupuesto_max: monto ? Number(monto) : undefined,
       };
 
       if (modoEdicion && postulacion) {
@@ -127,45 +113,26 @@ export default function ProyectoDetalle() {
     }
   };
 
-  const totalHoras = tareas.reduce((sum, t) => sum + (Number(t.horas) || 0), 0);
-  const subtotal   = totalHoras * tarifaHora;
-  const iva        = parseFloat((subtotal * 0.13).toFixed(2));
-  const total      = parseFloat((subtotal + iva).toFixed(2));
-
-  const agregarTarea = () =>
-    setTareas((prev) => [...prev, { nombre: '', horas: '' }]);
-  const eliminarTarea = (i) =>
-    setTareas((prev) => prev.filter((_, idx) => idx !== i));
-  const actualizarTarea = (i, campo, valor) =>
-    setTareas((prev) => prev.map((t, idx) => (idx === i ? { ...t, [campo]: valor } : t)));
-
   const hayCambios = modoEdicion
-    ? mensaje !== originalMensaje ||
-      tarifaHora !== originalTarifaHora ||
-      JSON.stringify(tareas) !== JSON.stringify(originalTareas)
+    ? mensaje !== originalMensaje || monto !== originalMonto
     : true;
 
   const abrirModal = (editando = false) => {
     if (editando && postulacion) {
       const msg = postulacion.mensaje_presentacion || '';
-      const tf  = postulacion.tarifa_hora ? Number(postulacion.tarifa_hora) : 4000;
-      const tr  = postulacion.desglose_tareas?.length
-        ? postulacion.desglose_tareas
-        : [{ nombre: '', horas: '' }];
+      const mon = postulacion.presupuesto_max ? String(postulacion.presupuesto_max) : '';
       setMensaje(msg);
-      setTarifaHora(tf);
-      setTareas(tr);
+      setMonto(mon);
+      setAceptaCondiciones(true);
       setOriginalMensaje(msg);
-      setOriginalTarifaHora(tf);
-      setOriginalTareas(tr);
+      setOriginalMonto(mon);
       setModoEdicion(true);
     } else {
       setMensaje('');
-      setTarifaHora(4000);
-      setTareas([{ nombre: '', horas: '' }]);
+      setMonto('');
+      setAceptaCondiciones(false);
       setModoEdicion(false);
     }
-    setErrorCotizacion('');
     setMostrarModal(true);
   };
 
@@ -434,12 +401,12 @@ export default function ProyectoDetalle() {
               <Send size={28} />
             </div>
             <h2 className="modal-titulo">
-              {modoEdicion ? t(`${T_NS}.editarPostulacion`) : t(`${T_NS}.modalPostularme`)}
+              {modoEdicion ? 'Editar postulación' : 'Postularte al proyecto'}
             </h2>
             <p className="modal-desc">
               {modoEdicion
-                ? t(`${T_NS}.modalEditarMsg`)
-                : t(`${T_NS}.modalPostularMsg`)}
+                ? 'Actualizá los campos que quieras modificar.'
+                : 'Completá los datos para enviar tu propuesta al empresario.'}
             </p>
 
             <div className="modal-resumen">
@@ -465,141 +432,48 @@ export default function ProyectoDetalle() {
 
             <div className="modal-form">
 
-              {/* Tarifa por hora */}
-              <div className="modal-campo">
-                <label className="modal-label">
-                  <DollarSign size={14} /> Tu tarifa por hora (₡)
-                </label>
-                <input
-                  className="modal-input"
-                  type="number"
-                  min="1"
-                  step="100"
-                  value={tarifaHora}
-                  onChange={(e) => setTarifaHora(Number(e.target.value))}
-                />
-                <span className="modal-ayuda">Lo que cobrás por hora de trabajo</span>
-              </div>
-
-              {/* Tabla de tareas */}
-              <div className="modal-campo">
-                <label className="modal-label">
-                  <Briefcase size={14} /> Desglose de tareas
-                </label>
-                <div className="modal-tareas">
-                  {tareas.map((tarea, i) => (
-                    <div key={i} className="modal-tarea-fila">
-                      <input
-                        className="modal-input modal-tarea-nombre"
-                        type="text"
-                        placeholder="Nombre de la tarea"
-                        value={tarea.nombre}
-                        onChange={(e) => actualizarTarea(i, 'nombre', e.target.value)}
-                      />
-                      <input
-                        className="modal-input modal-tarea-horas"
-                        type="number"
-                        min="0"
-                        step="1"
-                        placeholder="Horas"
-                        value={tarea.horas}
-                        onChange={(e) => actualizarTarea(i, 'horas', e.target.value)}
-                      />
-                      <span className="modal-tarea-costo">
-                        ₡{((Number(tarea.horas) || 0) * tarifaHora).toLocaleString('es-CR')}
-                      </span>
-                      <button
-                        type="button"
-                        className="modal-tarea-eliminar"
-                        onClick={() => eliminarTarea(i)}
-                        disabled={tareas.length === 1}
-                        aria-label="Eliminar tarea"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <button type="button" className="modal-tarea-agregar" onClick={agregarTarea}>
-                  <Plus size={14} /> Agregar tarea
-                </button>
-              </div>
-
-              {/* Resumen de cotización */}
-              {total > 0 && (
-                <div className="modal-cotizacion-resumen">
-                  <div className="modal-cotizacion-fila">
-                    <span>Total de horas</span>
-                    <span>{totalHoras} h</span>
-                  </div>
-                  <div className="modal-cotizacion-fila">
-                    <span>Subtotal</span>
-                    <span>₡{subtotal.toLocaleString('es-CR')}</span>
-                  </div>
-                  <div className="modal-cotizacion-fila">
-                    <span>IVA (13 %)</span>
-                    <span>₡{iva.toLocaleString('es-CR')}</span>
-                  </div>
-                  <div className="modal-cotizacion-fila modal-cotizacion-total">
-                    <span>Total</span>
-                    <span>₡{total.toLocaleString('es-CR')}</span>
-                  </div>
-
-                  {presupuestoMin > 0 && (
-                    <p className={`modal-presupuesto-alerta ${
-                      total >= presupuestoMin && total <= presupuestoMax
-                        ? 'modal-presupuesto-alerta--dentro'
-                        : total > presupuestoMax
-                          ? 'modal-presupuesto-alerta--supera'
-                          : 'modal-presupuesto-alerta--bajo'
-                    }`}>
-                      {total >= presupuestoMin && total <= presupuestoMax
-                        ? 'Tu cotización está dentro del presupuesto'
-                        : total > presupuestoMax
-                          ? `Tu cotización supera el presupuesto máximo (₡${presupuestoMax.toLocaleString('es-CR')})`
-                          : 'Tu cotización está por debajo del mínimo esperado'}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Error de validación */}
-              {errorCotizacion && (
-                <p className="modal-error-cotizacion">{errorCotizacion}</p>
-              )}
-
               {/* Mensaje de presentación */}
               <div className="modal-campo">
                 <label className="modal-label">
-                  <Mail size={14} /> {t(`${T_NS}.campoMensaje`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
+                  <Mail size={14} /> Mensaje de presentación <span className="modal-opcional">(opcional)</span>
                 </label>
                 <textarea
                   className="modal-textarea"
-                  placeholder="Ej: Tengo experiencia en React y Node.js, he trabajado en proyectos similares..."
+                  placeholder="Contale al empresario por qué te interesa el proyecto, tu experiencia, etc."
                   rows={3}
                   value={mensaje}
                   onChange={(e) => setMensaje(e.target.value)}
                 />
               </div>
 
+              {/* Monto de la propuesta */}
               <div className="modal-campo">
                 <label className="modal-label">
-                  <DollarSign size={14} /> {t(`${T_NS}.campoPropuesta`)} <span className="modal-opcional">{t(`${T_NS}.opcional`)}</span>
+                  <DollarSign size={14} /> Tu propuesta económica
                 </label>
                 <input
                   className="modal-input"
                   type="number"
                   min="0"
-                  max="9999999"
                   step="100"
-                  placeholder="Ej: 2500"
-                  value={presupuesto}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val.length <= 7) setPresupuesto(val);
-                  }}
+                  placeholder="Ej: 1500"
+                  value={monto}
+                  onChange={(e) => setMonto(e.target.value)}
                 />
-                <span className="modal-ayuda">{t(`${T_NS}.campoPropuestaHint`)}</span>
+                <span className="modal-ayuda">Indicá el monto total que cobrarías por el proyecto.</span>
+              </div>
+
+              {/* Condiciones */}
+              <div className="modal-campo">
+                <label className="modal-label checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={aceptaCondiciones}
+                    onChange={(e) => setAceptaCondiciones(e.target.checked)}
+                    className="modal-checkbox"
+                  />
+                  <span>Acepto las condiciones del proyecto y me comprometo a cumplir con los plazos y entregables acordados.</span>
+                </label>
               </div>
             </div>
 
@@ -610,20 +484,20 @@ export default function ProyectoDetalle() {
                 onClick={() => setMostrarModal(false)}
                 disabled={enviando}
               >
-                {t(`${T_NS}.cancelar`)}
+                Cancelar
               </button>
               <button
                 type="button"
                 className="modal-btn modal-btn-primary"
                 onClick={confirmarPostulacion}
-                disabled={enviando || (modoEdicion && !hayCambios)}
+                disabled={enviando || !aceptaCondiciones || (modoEdicion && !hayCambios)}
               >
                 {enviando ? (
-                  <>{t(`${T_NS}.guardando`)}</>
+                  <>Guardando...</>
                 ) : modoEdicion && !hayCambios ? (
-                  <><Send size={16} /> {t(`${T_NS}.sinCambios`)}</>
+                  <><Send size={16} /> Sin cambios</>
                 ) : (
-                  <><Send size={16} /> {modoEdicion ? t(`${T_NS}.guardarCambios`) : t(`${T_NS}.postularmeBtn`)}</>
+                  <><Send size={16} /> {modoEdicion ? 'Guardar cambios' : 'Enviar propuesta'}</>
                 )}
               </button>
             </div>
