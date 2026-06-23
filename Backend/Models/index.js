@@ -29,6 +29,7 @@ const ConversacionIA = require('./conversacionIA')(sequelize, DataTypes);
 const Auditoria = require('./auditoria')(sequelize, DataTypes);
 const Configuracion = require('./configuracion')(sequelize, DataTypes);
 const CodigoRecuperacion = require('./codigoRecuperacion')(sequelize, DataTypes);
+const Resena = require('./resena')(sequelize, DataTypes);
 // ========================
 // RELACIONES
 // ========================
@@ -170,6 +171,9 @@ Pago.belongsTo(ProyectoPlataforma, { foreignKey: 'id_proyecto', as: 'proyecto' }
 ProyectoPlataforma.hasMany(Reporte, { foreignKey: 'id_proyecto', as: 'reportes' });
 Reporte.belongsTo(ProyectoPlataforma, { foreignKey: 'id_proyecto', as: 'proyecto' });
 
+ProyectoPlataforma.hasMany(Resena, { foreignKey: 'id_proyecto', as: 'resenas' });
+Resena.belongsTo(ProyectoPlataforma, { foreignKey: 'id_proyecto', as: 'proyecto' });
+
 Usuario.hasMany(Reporte, { foreignKey: 'id_usuario', as: 'reportes_hechos' });
 Reporte.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
 
@@ -213,5 +217,6 @@ module.exports = {
   CatalogoSector,
   ConversacionIA,
   Auditoria,
-  Configuracion
+  Configuracion,
+  Resena,
 };

@@ -263,7 +263,17 @@ const listarPropuestas = async (req, res) => {
     const propuestas = await Propuesta.findAll({
       where: { id_perfil_empresario: perfil.id_perfil_empresario },
       include: [
-        { model: Postulacion, as: 'postulaciones' },
+        {
+          model: Postulacion,
+          as: 'postulaciones',
+          include: [
+            {
+              model: PerfilEstudiante,
+              as: 'perfilEstudiante',
+              include: [{ model: Usuario, as: 'usuario', attributes: ['nombre'] }],
+            },
+          ],
+        },
         { model: Oferta, as: 'ofertas' },
         { model: ProyectoPlataforma, as: 'proyecto' },
       ],
@@ -1368,6 +1378,39 @@ const actualizarEstadoPostulacionEmpleo = async (req, res) => {
   }
 };
 
+const completarProyecto = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { id_proyecto } = req.params;
+
+    const proyecto = await ProyectoPlataforma.findByPk(id_proyecto, {
+      include: [{ model: Propuesta, as: 'propuesta' }],
+    });
+
+    if (!proyecto) {
+      return res.status(404).json({ success: false, message: 'Proyecto no encontrado.' });
+    }
+
+    if (proyecto.propuesta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+      return res.status(403).json({ success: false, message: 'No tenés permiso sobre este proyecto.' });
+    }
+
+    if (!['EN_PROGRESO', 'EN_REVISION'].includes(proyecto.estado)) {
+      return res.status(400).json({ success: false, message: 'El proyecto no está en un estado que permita finalizarlo.' });
+    }
+
+    proyecto.estado = 'COMPLETADO';
+    proyecto.fecha_completado = new Date();
+    await proyecto.save();
+
+    res.json({ success: true, data: proyecto });
+  } catch (error) {
+    responderError(res, error, 'Error al completar el proyecto.');
+  }
+};
+
 module.exports = {
   aceptarOferta,
   actualizarEstadoPostulacion,
@@ -1379,6 +1422,7 @@ module.exports = {
   actualizarPropuesta,
   crearOfertaEmpleo,
   crearPropuesta,
+  completarProyecto,
   eliminarPropuesta,
   enviarMensaje,
   listarEntregables,
@@ -1400,5 +1444,5 @@ module.exports = {
   obtenerResumen,
   rechazarOferta,
   subirFotoPerfil,
-  };
+};
 

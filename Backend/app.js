@@ -38,6 +38,7 @@ const agentRoutes = require('./Routes/agentRoutes');
 const conversacionIARoutes = require('./Routes/conversacionIARoutes');
 const dashboardEgresadoRoutes = require('./Routes/dashboardEgresadoRoutes');
 const adminRoutes = require('./Routes/adminRoutes');
+const resenaRoutes = require('./Routes/resenaRoutes');
 
 const app = express();
 
@@ -130,6 +131,7 @@ app.use('/api/agent', agentRoutes);
 app.use('/api/conversaciones-ia', conversacionIARoutes);
 app.use('/api/dashboard-egresado', dashboardEgresadoRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/resenas', resenaRoutes);
 
 // ── Health check ───────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
