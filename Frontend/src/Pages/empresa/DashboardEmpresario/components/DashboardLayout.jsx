@@ -41,10 +41,10 @@ export default function DashboardLayout({ activePage, children }) {
 
   const sidebarItems = [
     { key: 'inicio', label: t('empresaLayout.sidebar.inicio'), icon: Home, path: '/DashboardEmpresario' },
-    { key: 'proyectos', label: t('empresaLayout.sidebar.proyectos'),    icon: FolderOpen,  path: '/DashboardEmpresario/proyectos' },
-    { key: 'empleos',   label: t('empresaLayout.sidebar.empleos'), icon: Briefcase,   path: '/DashboardEmpresario/empleos' },
+    { key: 'proyectos', label: t('empresaLayout.sidebar.proyectos'), icon: FolderOpen, path: '/DashboardEmpresario/proyectos' },
+    { key: 'empleos', label: t('empresaLayout.sidebar.empleos'), icon: Briefcase, path: '/DashboardEmpresario/empleos' },
     { key: 'postulaciones', label: 'Postulaciones', icon: Users, path: '/empresa/postulaciones' },
-    { key: 'ofertas',   label: t('empresaLayout.sidebar.ofertas'), icon: FileText,    path: '/DashboardEmpresario/ofertas' },
+    { key: 'ofertas', label: t('empresaLayout.sidebar.ofertas'), icon: FileText, path: '/DashboardEmpresario/ofertas' },
     { key: 'entregables', label: t('empresaLayout.sidebar.entregables'), icon: Package, path: '/DashboardEmpresario/entregables' },
     { key: 'mensajes', label: t('empresaLayout.sidebar.mensajes'), icon: MessageSquare, path: '/DashboardEmpresario/mensajes' },
     { key: 'talento', label: t('empresaLayout.sidebar.talento'), icon: Users, path: '/DashboardEmpresario/talento' },

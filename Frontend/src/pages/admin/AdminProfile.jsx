@@ -232,17 +232,17 @@ export default function AdminProfile() {
                 {t('admin.common.support')}
               </button>
             </div>
-          <ElementoBarraLateral icon={Settings} label={t('admin.config.menuTitle')} isActive={activeMenu === 'config'} onClick={() => setActiveMenu('config')} />
-          <button 
-            onClick={manejarCerrarSesion}
-            className="admin-logout-button"
-            type="button"
-            disabled={cerrandoSesion}
-          >
-            <LogOut size={20} /> {cerrandoSesion ? t('admin.common.loggingOut') : t('admin.common.logout')}
-          </button>
-        </div>
-      </aside>
+            <ElementoBarraLateral icon={Settings} label={t('admin.config.menuTitle')} isActive={activeMenu === 'config'} onClick={() => setActiveMenu('config')} />
+            <button
+              onClick={manejarCerrarSesion}
+              className="admin-logout-button"
+              type="button"
+              disabled={cerrandoSesion}
+            >
+              <LogOut size={20} /> {cerrandoSesion ? t('admin.common.loggingOut') : t('admin.common.logout')}
+            </button>
+          </div>
+        </aside>
 
         <main className="admin-main fwd-fondo-decorativo">
           <div className="admin-page-heading">
@@ -261,97 +261,97 @@ export default function AdminProfile() {
           </div>
 
           <div className="admin-content">
-          {activeMenu === 'dashboard' && (
-            <>
-              {overviewError && (
-                <div className="admin-config-message error">
-                  {overviewError}
-                </div>
-              )}
+            {activeMenu === 'dashboard' && (
+              <>
+                {overviewError && (
+                  <div className="admin-config-message error">
+                    {overviewError}
+                  </div>
+                )}
 
-              <section className="admin-stats-grid">
-                <TarjetaEstadistica title={t('admin.dashboard.totalUsers')} value={overviewLoading ? '...' : overviewData.totalUsuarios} icon={Users} trend="Global" isPositive={true} colorClass="text-accent" />
-                <TarjetaEstadistica title={t('admin.dashboard.pendingCompanies')} value={overviewLoading ? '...' : overviewData.empresasPendientes} icon={Building} trend="Revision" isPositive={overviewData.empresasPendientes === 0} colorClass="text-magenta" />
-                <TarjetaEstadistica title={t('admin.dashboard.pendingVerifications')} value={overviewLoading ? '...' : overviewData.verifiPendientes} icon={Clock} trend="Pendientes" isPositive={overviewData.verifiPendientes === 0} colorClass="text-warning" />
-              </section>
+                <section className="admin-stats-grid">
+                  <TarjetaEstadistica title={t('admin.dashboard.totalUsers')} value={overviewLoading ? '...' : overviewData.totalUsuarios} icon={Users} trend="Global" isPositive={true} colorClass="text-accent" />
+                  <TarjetaEstadistica title={t('admin.dashboard.pendingCompanies')} value={overviewLoading ? '...' : overviewData.empresasPendientes} icon={Building} trend="Revision" isPositive={overviewData.empresasPendientes === 0} colorClass="text-magenta" />
+                  <TarjetaEstadistica title={t('admin.dashboard.pendingVerifications')} value={overviewLoading ? '...' : overviewData.verifiPendientes} icon={Clock} trend="Pendientes" isPositive={overviewData.verifiPendientes === 0} colorClass="text-warning" />
+                </section>
 
-              <section className="admin-panel">
-                <div className="admin-panel-header">
-                  <h3>{t('admin.dashboard.recentActivity')}</h3>
-                  <button className="admin-text-button" type="button" onClick={() => cargarOverview({ mostrarCarga: true })} disabled={overviewLoading}>
-                    <RefreshCw size={15} />
-                    {t('admin.dashboard.update')}
-                  </button>
-                </div>
-                
-                <div className="admin-table-wrap">
-                  <table className="admin-table">
-                    <thead>
-                      <tr>
-                        <th>{t('admin.dashboard.entityUser')}</th>
-                        <th>{t('admin.dashboard.action')}</th>
-                        <th>{t('admin.dashboard.date')}</th>
-                        <th>{t('admin.dashboard.status')}</th>
-                        <th className="admin-table-actions">{t('admin.dashboard.details')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {overviewLoading ? (
-                        <tr><td colSpan="5" className="admin-muted-cell">{t('admin.dashboard.loadingActivity')}</td></tr>
-                      ) : overviewData.actividadReciente.length === 0 ? (
-                        <tr><td colSpan="5" className="admin-muted-cell">{t('admin.dashboard.noActivity')}</td></tr>
-                      ) : (
-                        overviewData.actividadReciente.map((evento) => (
-                          <tr key={evento.id_auditoria}>
-                            <td>
-                              <div className="admin-entity-cell">
-                                <span className="admin-entity-icon accent">
-                                  {evento.entidad === 'PerfilEstudiante' ? <GraduationCap size={14} /> : <Building size={14} />}
-                                </span>
-                                <span>{evento.actor}</span>
-                              </div>
-                            </td>
-                            <td>{evento.accion}</td>
-                            <td>{new Date(evento.fecha).toLocaleString(t('es-CR'), { dateStyle: 'medium', timeStyle: 'short' })}</td>
-                            <td><InsigniaEstado status={t('admin.profile.dashboard.statusCompleted')} /></td>
-                            <td className="admin-table-actions">
-                              <button 
-                                className="admin-row-action" 
-                                type="button" 
-                                aria-label="Ver detalles" 
-                                title={evento.entidad}
-                                onClick={() => setModalAuditoria({ open: true, evento })}
-                              >
-                                <MoreVertical size={18} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            </>
-          )}
+                <section className="admin-panel">
+                  <div className="admin-panel-header">
+                    <h3>{t('admin.dashboard.recentActivity')}</h3>
+                    <button className="admin-text-button" type="button" onClick={() => cargarOverview({ mostrarCarga: true })} disabled={overviewLoading}>
+                      <RefreshCw size={15} />
+                      {t('admin.dashboard.update')}
+                    </button>
+                  </div>
 
-          <Suspense fallback={
-            <div className="admin-empty-state" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span className="admin-muted-cell">{t('admin.common.loading', 'Cargando módulo...')}</span>
-            </div>
-          }>
-            {activeMenu === 'usuarios' && <AdminUsuarios onAdminChange={cargarOverview} />}
-            {activeMenu === 'egresados' && <AdminEgresados onAdminChange={cargarOverview} />}
-            {activeMenu === 'empresas' && <AdminEmpresas onAdminChange={cargarOverview} />}
-            {activeMenu === 'proyectos' && <AdminProyectos onAdminChange={cargarOverview} />}
-            {activeMenu === 'reportes' && <AdminReportes onAdminChange={cargarOverview} />}
-            {activeMenu === 'auditoria' && <AdminAuditoria />}
-            {activeMenu === 'sistema' && <AdminSistema />}
-            {activeMenu === 'config' && <AdminConfiguracion onAdminChange={cargarOverview} />}
-          </Suspense>
-          
-        </div>
-      </main>
+                  <div className="admin-table-wrap">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>{t('admin.dashboard.entityUser')}</th>
+                          <th>{t('admin.dashboard.action')}</th>
+                          <th>{t('admin.dashboard.date')}</th>
+                          <th>{t('admin.dashboard.status')}</th>
+                          <th className="admin-table-actions">{t('admin.dashboard.details')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {overviewLoading ? (
+                          <tr><td colSpan="5" className="admin-muted-cell">{t('admin.dashboard.loadingActivity')}</td></tr>
+                        ) : overviewData.actividadReciente.length === 0 ? (
+                          <tr><td colSpan="5" className="admin-muted-cell">{t('admin.dashboard.noActivity')}</td></tr>
+                        ) : (
+                          overviewData.actividadReciente.map((evento) => (
+                            <tr key={evento.id_auditoria}>
+                              <td>
+                                <div className="admin-entity-cell">
+                                  <span className="admin-entity-icon accent">
+                                    {evento.entidad === 'PerfilEstudiante' ? <GraduationCap size={14} /> : <Building size={14} />}
+                                  </span>
+                                  <span>{evento.actor}</span>
+                                </div>
+                              </td>
+                              <td>{evento.accion}</td>
+                              <td>{new Date(evento.fecha).toLocaleString(t('es-CR'), { dateStyle: 'medium', timeStyle: 'short' })}</td>
+                              <td><InsigniaEstado status={t('admin.profile.dashboard.statusCompleted')} /></td>
+                              <td className="admin-table-actions">
+                                <button
+                                  className="admin-row-action"
+                                  type="button"
+                                  aria-label="Ver detalles"
+                                  title={evento.entidad}
+                                  onClick={() => setModalAuditoria({ open: true, evento })}
+                                >
+                                  <MoreVertical size={18} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              </>
+            )}
+
+            <Suspense fallback={
+              <div className="admin-empty-state" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span className="admin-muted-cell">{t('admin.common.loading', 'Cargando módulo...')}</span>
+              </div>
+            }>
+              {activeMenu === 'usuarios' && <AdminUsuarios onAdminChange={cargarOverview} />}
+              {activeMenu === 'egresados' && <AdminEgresados onAdminChange={cargarOverview} />}
+              {activeMenu === 'empresas' && <AdminEmpresas onAdminChange={cargarOverview} />}
+              {activeMenu === 'proyectos' && <AdminProyectos onAdminChange={cargarOverview} />}
+              {activeMenu === 'reportes' && <AdminReportes onAdminChange={cargarOverview} />}
+              {activeMenu === 'auditoria' && <AdminAuditoria />}
+              {activeMenu === 'sistema' && <AdminSistema />}
+              {activeMenu === 'config' && <AdminConfiguracion onAdminChange={cargarOverview} />}
+            </Suspense>
+
+          </div>
+        </main>
       </div>
 
       <AdminDetalleAuditoriaModal

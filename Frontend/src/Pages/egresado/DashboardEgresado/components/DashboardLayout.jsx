@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { RUTAS } from '../../../../routes/rutas';
 import '../../../empresa/DashboardEmpresario/DashboardEmpresario.css';
 import '../styles/DashboardEgresado.css';
+import fwdDarkLogo from '../../../../assets/fwdcrdark.png';
 
 export default function DashboardLayout({ children }) {
   const { t } = useTranslation();
@@ -300,78 +301,78 @@ export default function DashboardLayout({ children }) {
 
       <div className="de-body">
         <aside className="de-sidebar">
-            <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
-              <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
-              <div className="de-sidebar-profile-info">
-                <span className="de-sidebar-name">{displayName}</span>
-                <span className="de-sidebar-role">{tituloFwd}</span>
-              </div>
+          <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
+            <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
+            <div className="de-sidebar-profile-info">
+              <span className="de-sidebar-name">{displayName}</span>
+              <span className="de-sidebar-role">{tituloFwd}</span>
             </div>
-            <div>
-              <nav className="de-sidebar-nav">
-                {sidebarItems.map((item) => {
-                  const Icon = item.icon;
-                  if (item.children) {
-                    const algunaActiva = item.children.some((h) => h.key === activePage);
-                    const mostrarSublista = postulacionesExpandido || algunaActiva;
-                    return (
-                      <div key={item.key} className="de-sidebar-group">
-                        <button
-                          className={`de-sidebar-link de-sidebar-group-btn ${algunaActiva ? 'active' : ''}`}
-                          type="button"
-                          onClick={() => setPostulacionesExpandido((v) => !v)}
-                        >
-                          <Icon size={18} className="de-sidebar-icon" />
-                          {item.label}
-                          <span className={`de-sidebar-chevron ${mostrarSublista ? 'open' : ''}`}>
-                            <ChevronRight size={14} />
-                          </span>
-                        </button>
-                        {mostrarSublista && (
-                          <div className="de-sidebar-sublist">
-                            {item.children.map((hijo) => {
-                              const ChildIcon = hijo.icon || FileText;
-                              return (
-                                <button
-                                  key={hijo.key}
-                                  className={`de-sidebar-link de-sidebar-sublink ${activePage === hijo.key ? 'active' : ''}`}
-                                  type="button"
-                                  onClick={() => navigate(hijo.path)}
-                                >
-                                  <ChildIcon size={16} className="de-sidebar-icon" />
-                                  {hijo.label}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
+          </div>
+          <div>
+            <nav className="de-sidebar-nav">
+              {sidebarItems.map((item) => {
+                const Icon = item.icon;
+                if (item.children) {
+                  const algunaActiva = item.children.some((h) => h.key === activePage);
+                  const mostrarSublista = postulacionesExpandido || algunaActiva;
                   return (
-                    <button
-                      key={item.key}
-                      className={`de-sidebar-link ${activePage === item.key ? 'active' : ''}`}
-                      type="button"
-                      onClick={() => navigate(item.path)}
-                    >
-                      <Icon size={18} className="de-sidebar-icon" />
-                      {item.label}
-                    </button>
+                    <div key={item.key} className="de-sidebar-group">
+                      <button
+                        className={`de-sidebar-link de-sidebar-group-btn ${algunaActiva ? 'active' : ''}`}
+                        type="button"
+                        onClick={() => setPostulacionesExpandido((v) => !v)}
+                      >
+                        <Icon size={18} className="de-sidebar-icon" />
+                        {item.label}
+                        <span className={`de-sidebar-chevron ${mostrarSublista ? 'open' : ''}`}>
+                          <ChevronRight size={14} />
+                        </span>
+                      </button>
+                      {mostrarSublista && (
+                        <div className="de-sidebar-sublist">
+                          {item.children.map((hijo) => {
+                            const ChildIcon = hijo.icon || FileText;
+                            return (
+                              <button
+                                key={hijo.key}
+                                className={`de-sidebar-link de-sidebar-sublink ${activePage === hijo.key ? 'active' : ''}`}
+                                type="button"
+                                onClick={() => navigate(hijo.path)}
+                              >
+                                <ChildIcon size={16} className="de-sidebar-icon" />
+                                {hijo.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   );
-                })}
-              </nav>
-            </div>
+                }
+                return (
+                  <button
+                    key={item.key}
+                    className={`de-sidebar-link ${activePage === item.key ? 'active' : ''}`}
+                    type="button"
+                    onClick={() => navigate(item.path)}
+                  >
+                    <Icon size={18} className="de-sidebar-icon" />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-            <div className="de-sidebar-help">
-              <p className="de-sidebar-help-title">{t('empresaLayout.help.title')}</p>
-              <p className="de-sidebar-help-text">{t('empresaLayout.help.text')}</p>
-              <button className="de-sidebar-help-btn" type="button" onClick={() => navigate(RUTAS.egresadoSoporte)}>
-                <HelpCircle size={14} />
-                {t('empresaLayout.help.button')}
-              </button>
-            </div>
-          </aside>
+          <div className="de-sidebar-help">
+            <p className="de-sidebar-help-title">{t('empresaLayout.help.title')}</p>
+            <p className="de-sidebar-help-text">{t('empresaLayout.help.text')}</p>
+            <button className="de-sidebar-help-btn" type="button" onClick={() => navigate(RUTAS.egresadoSoporte)}>
+              <HelpCircle size={14} />
+              {t('empresaLayout.help.button')}
+            </button>
+          </div>
+        </aside>
 
         <main className="de-main fwd-fondo-decorativo">
           <div className="de-main-content">{children}</div>
