@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 export default function CTASection() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <section className="cta-section">
@@ -16,7 +18,10 @@ export default function CTASection() {
 
         <div className="cta-buttons">
 
-          <button className="landing-btn landing-btn-yellow">
+          <button 
+            className="landing-btn landing-btn-yellow"
+            onClick={() => navigate('/registro')}
+          >
             {t('landing.cta.btnRegister', 'Registrarse Gratis')}
           </button>
 

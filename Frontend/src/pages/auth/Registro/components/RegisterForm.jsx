@@ -5,7 +5,7 @@ import { authService } from '../../../../services/authService';
 import { RUTAS } from '../../../../routes/rutas';
 import '../../AuthPages.css';
 import { useTranslation } from 'react-i18next';
-const RegisterForm = () => {
+const RegisterForm = ({ onSwitchMode }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -380,7 +380,13 @@ const RegisterForm = () => {
       {/* Footer */}
       <div className="auth-footer">
         {t('auth.register.hasAccount')}{' '}
-        <Link to={RUTAS.login}>{t('auth.register.loginNow')}</Link>
+        {onSwitchMode ? (
+          <button type="button" className="switch-mode-btn" onClick={onSwitchMode}>
+            {t('auth.register.loginNow')}
+          </button>
+        ) : (
+          <Link to={RUTAS.login}>{t('auth.register.loginNow')}</Link>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Eye, EyeOff } from 'lucide-react';
 import { authService } from '../../../../services/authService';
 import { useAuth } from '../../../../context/AuthContext';
 import { obtenerRol, rutaDashboardDeRol, RUTAS } from '../../../../routes/rutas.js';
@@ -146,8 +147,9 @@ const LoginForm = ({ onSwitchMode }) => {
               className="toggle-password"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
-              {showPassword ? '🙈' : '👁️'}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
         </div>
@@ -184,7 +186,13 @@ const LoginForm = ({ onSwitchMode }) => {
       {/* Footer */}
       <div className="auth-footer">
         {t('auth.login.noAccount')}{' '}
-        <Link to={RUTAS.registro}>{t('auth.login.registerNow')}</Link>
+        {onSwitchMode ? (
+          <button type="button" className="switch-mode-btn" onClick={onSwitchMode}>
+            {t('auth.login.registerNow')}
+          </button>
+        ) : (
+          <Link to={RUTAS.registro}>{t('auth.login.registerNow')}</Link>
+        )}
       </div>
     </div>
   );

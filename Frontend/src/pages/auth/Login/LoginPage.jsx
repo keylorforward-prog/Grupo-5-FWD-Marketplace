@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import LoginForm from './components/LoginForm';
 import RegisterForm from '../Registro/components/RegisterForm';
 import LanguageSwitcher from '../../../components/comun/LanguageSwitcher';
@@ -18,6 +20,12 @@ const LoginPage = () => {
 
   return (
     <div className="fwd-auth-wrapper">
+      <div style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000 }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: '#5A3F47', fontWeight: 'bold', background: 'rgba(255,255,255,0.8)', padding: '8px 16px', borderRadius: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          <ArrowLeft size={18} />
+          <span>Volver al inicio</span>
+        </Link>
+      </div>
       <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 1000 }}>
         <LanguageSwitcher />
       </div>
@@ -78,7 +86,7 @@ const LoginPage = () => {
             <div className="auth-brand-panel inner-panel">
               <div className="brand-logo-row">
                 <div className="brand-logo-circle">
-                  <img src="/Imgs/FWD - Sintesis-01.png" alt="FWD Logo" />
+                  <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="FWD Logo" />
                 </div>
                 <span className="brand-logo-text">FWD Junior</span>
               </div>
@@ -110,7 +118,7 @@ const LoginPage = () => {
             <div className="auth-brand-panel inner-panel">
               <div className="brand-logo-row">
                 <div className="brand-logo-circle">
-                  <img src="/Imgs/FWD - Sintesis-01.png" alt="FWD Logo" />
+                  <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="FWD Logo" />
                 </div>
                 <span className="brand-logo-text">FWD Junior</span>
               </div>

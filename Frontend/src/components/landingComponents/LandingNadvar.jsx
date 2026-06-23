@@ -9,8 +9,6 @@ export default function LandingNavbar() {
   return (
     <nav className="landing-navbar">
       <div className="landing-navbar-left">
-        <Link to="/proyectos">{t('landing.projects', 'Projects')}</Link>
-        <Link to="/juniors">{t('landing.juniors', 'Juniors')}</Link>
       </div>
 
       <div className="landing-navbar-logo">
@@ -18,7 +16,6 @@ export default function LandingNavbar() {
       </div>
 
       <div className="landing-navbar-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <Link to="/empresas">{t('landing.empresas', 'Empresas')}</Link>
 
         <ThemeSwitcher />
         <LanguageSwitcher />

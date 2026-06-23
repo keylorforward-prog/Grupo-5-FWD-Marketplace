@@ -16,7 +16,7 @@
 
 /* ── Brand Panel (left side) ─────────────────────────────────────────────── */
 .auth-brand-panel {
-  background: linear-gradient(160deg, #7B2FBE 0%, #9D4EDD 45%, #9D4EDD 100%);
+  background: linear-gradient(135deg, #20BEC6 0%, var(--pink, #B90064) 100%);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -589,7 +589,7 @@
   width: 100%;
   min-height: 100vh;
   overflow: hidden;
-  background: linear-gradient(160deg, #7B2FBE 0%, #9D4EDD 100%);
+  background: linear-gradient(135deg, #20BEC6 0%, var(--pink, #B90064) 100%);
 }
 
 .fwd-auth-wrapper .form-container {
