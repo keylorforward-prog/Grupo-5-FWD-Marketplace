@@ -159,9 +159,12 @@
   background: color-mix(in srgb, var(--primary) 3.5%, var(--surface));
   box-shadow: inset 3px 0 var(--primary);
 }
-.admin-verification-page .admin-table { min-width: 1240px; }
-.admin-verification-page .admin-table th:nth-child(1) { width: 20%; }
-.admin-verification-page .admin-table th:nth-child(8) { width: 25%; }
+.admin-verification-page .admin-table {
+  max-width: 100%;
+  min-width: 0;
+}
+.admin-verification-page .admin-table th:nth-child(1) { width: 21%; }
+.admin-verification-page .admin-table th:nth-child(7) { width: 22%; }
 
 @media (max-width: 1200px) {
   .admin-verification-metrics { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
@@ -178,7 +181,7 @@
   .admin-verification-metric { min-height: 96px; }
 }
 
-.admin-followup-modal { width: min(760px, calc(100vw - 2rem)); max-height: min(820px, calc(100vh - 2rem)); overflow: auto; }
+.admin-followup-modal { width: min(760px, calc(100dvw - 2rem)); max-height: min(820px, calc(100dvh - 2rem)); overflow: auto; }
 .admin-followup-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.4rem; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--surface)), var(--surface)); }
 .admin-followup-header span { color: var(--primary); font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 .admin-followup-header h3 { margin: .3rem 0 .15rem; color: var(--ink-strong); font-size: 1.35rem; }

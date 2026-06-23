@@ -1,5 +1,5 @@
 require('dotenv').config(); //SI 
-const { S3Client, ListBucketsCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, HeadBucketCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
@@ -13,12 +13,12 @@ const s3Client = new S3Client({
 });
 
 const testS3Connection = async () => {
+  const bucket = process.env.S3_BUCKET_NAME || 'marketplacefwd';
   try {
-    const response = await s3Client.send(new ListBucketsCommand({}));
-    console.log('✅ Conexión a AWS S3 exitosa. Buckets disponibles:');
-    console.log(response.Buckets.map((b) => `- ${b.Name}`).join('\n'));
+    await s3Client.send(new HeadBucketCommand({ Bucket: bucket }));
+    console.log(`✅ Conexión a AWS S3 exitosa. Bucket disponible: ${bucket}`);
   } catch (error) {
-    console.error('❌ Error al conectar con AWS S3:', error.message);
+    console.error(`❌ Error al conectar con AWS S3 bucket "${bucket}":`, error.message);
   }
 };
 

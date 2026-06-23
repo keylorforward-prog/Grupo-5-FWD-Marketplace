@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Search } from 'lucide-react';
 import { adminService } from '../../../services/adminService';
 import { useDebounce } from '../../../hooks/useDebounce';
@@ -8,21 +8,32 @@ export default function AdminBusquedaGlobal({ onNavigate }) {
   const [resultados, setResultados] = useState(null);
   const debounced = useDebounce(query, 300);
   const ref = useRef(null);
+  const cacheRef = useRef(new Map());
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
-    if (debounced.trim().length < 2) {
-      setResultados(null);
+    const termino = debounced.trim();
+    if (termino.length < 2) {
       return;
     }
 
-    let activo = true;
-    adminService.buscarGlobal(debounced).then((res) => {
-      if (activo && res.success) setResultados(res.data);
-    });
+    const cacheKey = termino.toLocaleLowerCase('es-CR');
+    const cached = cacheRef.current.get(cacheKey);
+    if (cached) {
+      setResultados(cached);
+      return;
+    }
 
-    return () => {
-      activo = false;
-    };
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+    adminService.buscarGlobal(termino).then((res) => {
+      if (requestIdRef.current !== requestId || !res.success) return;
+      cacheRef.current.set(cacheKey, res.data);
+      if (cacheRef.current.size > 20) {
+        cacheRef.current.delete(cacheRef.current.keys().next().value);
+      }
+      setResultados(res.data);
+    });
   }, [debounced]);
 
   useEffect(() => {
@@ -33,24 +44,30 @@ export default function AdminBusquedaGlobal({ onNavigate }) {
     return () => document.removeEventListener('mousedown', cerrar);
   }, []);
 
-  const abrir = (menu) => {
+  const abrir = useCallback((menu) => {
     setResultados(null);
     setQuery('');
     onNavigate(menu);
+  }, [onNavigate]);
+
+  const manejarBusqueda = (event) => {
+    const value = event.target.value;
+    setQuery(value);
+    if (value.trim().length < 2) setResultados(null);
   };
 
-  const grupos = [
+  const grupos = useMemo(() => [
     ['usuarios', 'Usuarios', 'usuarios'],
     ['empresas', 'Empresas', 'empresas'],
     ['egresados', 'Egresados', 'egresados'],
     ['reportes', 'Reportes', 'reportes'],
     ['auditoria', 'Auditoría', 'auditoria'],
-  ];
+  ], []);
 
   return (
     <div className="admin-global-search" ref={ref}>
       <Search size={16} />
-      <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar en admin..." />
+      <input value={query} onChange={manejarBusqueda} placeholder="Buscar en admin..." />
       {resultados && (
         <div className="admin-global-results">
           {grupos.map(([key, label, menu]) => (
