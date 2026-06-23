@@ -39,12 +39,13 @@ import {
 import ElementoBarraLateral from '../../components/comun/ElementoBarraLateral';
 import TarjetaEstadistica from '../../components/comun/TarjetaEstadistica';
 import InsigniaEstado from '../../components/comun/InsigniaEstado';
-import LanguageSwitcher from '../../components/comun/LanguageSwitcher';
+
+const DEFAULT_ADMIN_AVATAR = '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
 
 export default function AdminProfile() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
   const [overviewData, setOverviewData] = useState({
@@ -132,6 +133,7 @@ export default function AdminProfile() {
   };
 
   const encabezado = menuTitles[activeMenu] || menuTitles.dashboard;
+  const adminAvatar = user?.foto_perfil || user?.avatar_url || DEFAULT_ADMIN_AVATAR;
   const totalAlertas = useMemo(
     () => overviewData.verifiPendientes + overviewData.empresasPendientes + overviewData.reportesAbiertos,
     [overviewData.empresasPendientes, overviewData.reportesAbiertos, overviewData.verifiPendientes]
@@ -188,9 +190,16 @@ export default function AdminProfile() {
             <AdminBusquedaGlobal onNavigate={setActiveMenu} />
             <AdminCampanaNotificaciones onNavigate={setActiveMenu} />
             <button className="admin-profile-pill" type="button" onClick={() => setActiveMenu('config')}>
-              <span className="admin-profile-avatar">AD</span>
+              <img
+                className="admin-profile-avatar"
+                src={adminAvatar}
+                alt={user?.nombre || t('header.administrator')}
+                width="42"
+                height="42"
+                decoding="async"
+              />
               <span className="admin-profile-copy">
-                <span className="admin-profile-name">{t('header.administrator')}</span>
+                <span className="admin-profile-name">{user?.nombre || t('header.administrator')}</span>
                 <span className="admin-profile-role">FWD Workspace</span>
               </span>
             </button>

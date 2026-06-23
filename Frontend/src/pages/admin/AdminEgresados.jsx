@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useEffect, memo } from 'react';
+import { useCallback, useMemo, useRef, useState, useEffect, memo } from 'react';
 import { adminService } from '../../services/adminService';
 import { useTranslation } from 'react-i18next';
 import {
@@ -71,12 +71,6 @@ const obtenerIniciales = (nombre, fallback) => {
     .toUpperCase();
 };
 
-const estadoClase = (estado) => {
-  if (estado === 'ACTIVA' || estado === 'VERIFICADO') return 'success';
-  if (estado === 'SUSPENDIDA' || estado === 'RECHAZADO') return 'danger';
-  return 'warning';
-};
-
 const normalizarEgresado = (perfil) => {
   const usuario = perfil.usuario || {};
   const evidenciaValida = esEvidenciaS3Fwd(perfil.titulo_fwd);
@@ -140,6 +134,7 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
   const [metricasServidor, setMetricasServidor] = useState(null);
   const [estadoTiempoReal, setEstadoTiempoReal] = useState('conectando');
   const [ultimaActualizacion, setUltimaActualizacion] = useState(null);
+  const ultimaCargaSilenciosaRef = useRef(0);
   const filtrosDebounced = useDebounce(filtros, 220);
 
   const cargarSolicitudes = useCallback(async ({ silencioso = false } = {}) => {
@@ -174,7 +169,11 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
   useEffect(() => {
     let eventSource;
     const actualizarSilenciosamente = () => {
-      if (document.visibilityState === 'visible') cargarSolicitudes({ silencioso: true });
+      if (document.visibilityState !== 'visible') return;
+      const ahora = Date.now();
+      if (ahora - ultimaCargaSilenciosaRef.current < 10000) return;
+      ultimaCargaSilenciosaRef.current = ahora;
+      cargarSolicitudes({ silencioso: true });
     };
     const intervalo = window.setInterval(actualizarSilenciosamente, 30000);
 
@@ -252,8 +251,6 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
             return compararTexto(b.nombre, a.nombre);
           case 'type':
             return compararTexto(a.tipoLabel, b.tipoLabel) || compararTexto(a.nombre, b.nombre);
-          case 'status':
-            return compararTexto(a.estado, b.estado) || timestamp(a.fecha) - timestamp(b.fecha);
           case 'updated':
             return timestamp(b.fechaActualizacion) - timestamp(a.fechaActualizacion);
           case 'oldest':
@@ -389,7 +386,6 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
               <option value="name-asc">Nombre (A-Z)</option>
               <option value="name-desc">Nombre (Z-A)</option>
               <option value="type">Tipo de usuario</option>
-              <option value="status">Estado</option>
               <option value="updated">Fecha de actualización</option>
             </select>
           </div>
@@ -451,7 +447,6 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
                 <th>Solicitud</th>
                 <th>Tipo</th>
                 <th>Identificación</th>
-                <th>Estado</th>
                 <th>Fecha solicitud</th>
                 <th>Antigüedad</th>
                 <th>Evidencia</th>
@@ -460,10 +455,10 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="8" className="admin-muted-cell">Cargando verificaciones...</td></tr>
+                <tr><td colSpan="7" className="admin-muted-cell">Cargando verificaciones...</td></tr>
               ) : solicitudes.length === 0 ? (
                 <tr>
-                  <td colSpan="8">
+                  <td colSpan="7">
                     <div className="admin-empty-inline">
                       <ShieldCheck size={22} />
                       No hay solicitudes pendientes de verificación.
@@ -472,7 +467,7 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
                 </tr>
               ) : solicitudesVisibles.length === 0 ? (
                 <tr>
-                  <td colSpan="8">
+                  <td colSpan="7">
                     <div className="admin-empty-inline">
                       <Search size={22} />
                       No hay solicitudes que coincidan con los filtros.
@@ -503,11 +498,6 @@ const AdminEgresados = memo(function AdminEgresados({ onAdminChange }) {
                         </span>
                       </td>
                       <td className="admin-muted-cell">{solicitud.cedula || 'Sin cédula'}</td>
-                      <td>
-                        <span className={`admin-status-pill ${estadoClase(solicitud.estado)}`}>
-                          {solicitud.estado}
-                        </span>
-                      </td>
                       <td className="admin-muted-cell">{formatearFecha(solicitud.fecha)}</td>
                       <td className="admin-muted-cell">{calcularAntiguedad(solicitud.fecha)}</td>
                       <td>

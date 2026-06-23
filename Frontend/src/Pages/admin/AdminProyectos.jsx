@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { adminService } from '../../services/adminService';
 import { 
@@ -18,7 +18,9 @@ import {
 } from 'lucide-react';
 import InsigniaEstado from '../../components/comun/InsigniaEstado';
 
-export default function AdminProyectos({ onAdminChange }) {
+const TABS_DETALLE_PROYECTO = ['RESUMEN', 'OFERTAS', 'MENSAJES', 'ACTIVIDAD', 'SEGUIMIENTO', 'AUDITORIA'];
+
+const AdminProyectos = memo(function AdminProyectos({ onAdminChange }) {
   const { t } = useTranslation();
   
   // Listado
@@ -209,7 +211,7 @@ export default function AdminProyectos({ onAdminChange }) {
         )}
 
         <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem', paddingBottom: '0.5rem' }}>
-          {['RESUMEN', 'OFERTAS', 'MENSAJES', 'ACTIVIDAD', 'SEGUIMIENTO', 'AUDITORIA'].map(tab => (
+          {TABS_DETALLE_PROYECTO.map(tab => (
             <button
               key={tab}
               className={`admin-nav-link ${tabActiva === tab ? 'active' : ''}`}
@@ -512,16 +514,16 @@ export default function AdminProyectos({ onAdminChange }) {
   }
 
   return (
-    <div className="admin-config-section" style={{ animation: 'fadeIn 0.3s ease' }}>
+    <div className="admin-config-section admin-projects-page" style={{ animation: 'fadeIn 0.3s ease' }}>
       {mensajeLocal && (
-        <div className={`admin-config-message ${mensajeLocal.tipo}`} style={{ marginBottom: '1.5rem' }}>
+        <div className={`admin-config-message ${mensajeLocal.tipo}`}>
           {mensajeLocal.tipo === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
           {mensajeLocal.texto}
         </div>
       )}
 
-      <div className="admin-toolbar" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        <div className="admin-search-wrapper" style={{ flex: 1, minWidth: '250px' }}>
+      <div className="admin-toolbar admin-projects-toolbar">
+        <div className="admin-search-wrapper admin-projects-search">
           <Search size={16} className="admin-search-icon" />
           <input
             type="text"
@@ -532,7 +534,7 @@ export default function AdminProyectos({ onAdminChange }) {
           />
         </div>
 
-        <div className="admin-filter-wrapper">
+        <div className="admin-filter-wrapper admin-projects-filter">
           <Filter size={16} className="admin-filter-icon" />
           <select 
             className="admin-filter-select"
@@ -548,9 +550,9 @@ export default function AdminProyectos({ onAdminChange }) {
         </div>
       </div>
 
-      <div className="admin-panel">
+      <div className="admin-panel admin-projects-panel">
         <div className="admin-table-wrap">
-          <table className="admin-table">
+          <table className="admin-table admin-projects-table">
             <thead>
               <tr>
                 <th>{t('admin.proyectos.tableTitle', 'Título')}</th>
@@ -614,4 +616,6 @@ export default function AdminProyectos({ onAdminChange }) {
       )}
     </div>
   );
-}
+});
+
+export default AdminProyectos;

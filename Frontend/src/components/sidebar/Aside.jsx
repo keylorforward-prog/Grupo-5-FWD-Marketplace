@@ -5,8 +5,8 @@ import { RUTAS } from '../../routes/rutas';
 import './Aside.css';
 
 const usuarioPorDefecto = {
-  nombre: 'Alex Rivera',
-  rol: 'JUNIOR DEVELOPER',
+  nombre: 'Egresado',
+  rol: 'ESTUDIANTE',
   avatar: '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png',
 };
 

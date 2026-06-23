@@ -22,11 +22,42 @@ const sendRecoveryEmail = async ({
 
     return response;
   } catch (error) {
-    console.error('Error enviando correo:', error);
-    throw error;
+    console.error('Error enviando correo de recuperacion:', error);
+  }
+};
+
+const sendPostulacionEmail = async ({
+  userEmail,
+  userName,
+  titulo,
+  estado,
+  mensaje,
+}) => {
+  try {
+    const templateId = estado === 'RECHAZADA' || estado === 'rechazada'
+      ? 'template_rechazo'
+      : 'template_aceptacion';
+
+    await emailjs.send(
+      'service_1xndwac',
+      templateId,
+      {
+        user_name: userName,
+        email: userEmail,
+        titulo_oferta: titulo,
+        mensaje: mensaje || '',
+      },
+      {
+        publicKey: process.env.EMAILJS_PUBLIC_KEY,
+        privateKey: process.env.EMAILJS_PRIVATE_KEY,
+      }
+    );
+  } catch (error) {
+    console.error('Error enviando correo de postulacion:', error);
   }
 };
 
 module.exports = {
   sendRecoveryEmail,
+  sendPostulacionEmail,
 };

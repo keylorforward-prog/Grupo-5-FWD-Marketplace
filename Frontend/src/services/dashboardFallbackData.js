@@ -210,8 +210,8 @@ export const DATOS_FALLBACK = {
     },
   ],
   perfil: {
-    nombre: 'Alex Rivera',
-    correo: 'alex.rivera@fwd.com',
+    nombre: 'Egresado FWD',
+    correo: 'egresado@fwd.com',
     telefono: '+506 8888-7777',
     foto_perfil: null,
     titulo_fwd: 'Junior Frontend Developer',
@@ -219,8 +219,8 @@ export const DATOS_FALLBACK = {
     sede_graduacion: 'San José',
     reputacion_total: 4.5,
     tecnologias: ['React', 'JavaScript', 'CSS', 'Figma', 'Node.js', 'Git'],
-    portfolio: 'https://alexrivera.dev',
-    linkedin: 'https://linkedin.com/in/alexrivera',
+    portfolio: 'https://egresado.dev',
+    linkedin: 'https://linkedin.com/in/egresado',
     educacion: [
       { titulo: 'Técnico en Desarrollo Web', institucion: 'FWD', año: 2025 },
     ],
