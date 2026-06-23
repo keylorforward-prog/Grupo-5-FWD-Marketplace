@@ -568,28 +568,60 @@ const listarMensajesRecientes = async (req, res) => {
       order: [['fecha_envio', 'DESC']],
     });
 
-    console.log('=== DEBUG MENSAJES ===');
-    console.log('recibidos count:', recibidos.length, 'enviados count:', enviados.length);
-    const rawDump = [...recibidos, ...enviados].map(c => ({
-      id: c.id_postulacion,
-      tipoRef: c.tipo_referencia,
-      postEstado: c.postulacion?.estado,
-      postEmpEstado: c.postulacionEmpleo?.estado,
-      postEstudiante: c.postulacion?.id_perfil_estudiante,
-      postEmpEstudiante: c.postulacionEmpleo?.id_perfil_estudiante,
-      contacto: c.postulacion?.propuesta?.perfilEmpresario?.usuario?.nombre
-        || c.postulacionEmpleo?.oferta?.perfilEmpresario?.usuario?.nombre
-        || '?',
-    }));
-    console.log('RAW:', JSON.stringify(rawDump, null, 2));
+    const idsConConv = new Set([...recibidos, ...enviados].map(c => c.id_postulacion));
 
-    const todas = [...recibidos, ...enviados].filter(c => {
+    const postSinConv = await Postulacion.findAll({
+      where: {
+        id_perfil_estudiante: perfil.id_perfil_estudiante,
+        estado: ESTADOS_ACEPTADOS,
+        id_postulacion: { [Op.notIn]: [...idsConConv].filter(Boolean) },
+      },
+    });
+
+    for (const p of postSinConv) {
+      await Conversacion.create({
+        id_postulacion: p.id_postulacion,
+        id_usuario_emisor: userId,
+        mensaje: 'Has sido aceptado. ¡Envía tu primer mensaje!',
+        leido: false,
+        tipo_referencia: 'postulacion',
+      });
+    }
+
+    const postEmpSinConv = await PostulacionEmpleo.findAll({
+      where: {
+        id_perfil_estudiante: perfil.id_perfil_estudiante,
+        estado: ESTADOS_ACEPTADOS,
+        id_postulacion_empleo: { [Op.notIn]: [...idsConConv].filter(Boolean) },
+      },
+    });
+
+    for (const p of postEmpSinConv) {
+      await Conversacion.create({
+        id_postulacion: p.id_postulacion_empleo,
+        id_usuario_emisor: userId,
+        mensaje: 'Has sido aceptado. ¡Envía tu primer mensaje!',
+        leido: false,
+        tipo_referencia: 'postulacion_empleo',
+      });
+    }
+
+    const todas = [
+      ...(await Conversacion.findAll({
+        include: [
+          INCLUDE_POSTULACION({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
+          INCLUDE_POSTULACION_EMPLEO({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
+          { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'] },
+        ],
+        order: [['fecha_envio', 'DESC']],
+      })),
+      ...enviados,
+    ].filter(c => {
       if (c.tipo_referencia === 'postulacion_empleo') {
         return ESTADOS_ACEPTADOS.includes(c.postulacionEmpleo?.estado);
       }
       return ESTADOS_ACEPTADOS.includes(c.postulacion?.estado);
     });
-    console.log('Filtradas count:', todas.length);
 
     const agrupadas = Object.values(
       todas.reduce((acc, c) => {

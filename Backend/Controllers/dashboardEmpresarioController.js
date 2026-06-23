@@ -1357,6 +1357,17 @@ const actualizarEstadoPostulacion = async (req, res) => {
         },
       });
       await Promise.all(otrasPostulaciones.map((p) => p.update({ estado: 'RECHAZADA' })));
+
+      const existeConv = await Conversacion.findOne({ where: { id_postulacion: postulacion.id_postulacion } });
+      if (!existeConv) {
+        await Conversacion.create({
+          id_postulacion: postulacion.id_postulacion,
+          id_usuario_emisor: req.user.id_usuario,
+          mensaje: mensaje || `¡Felicidades! Has sido aceptado para "${postulacion.propuesta.titulo}".`,
+          leido: false,
+          tipo_referencia: 'postulacion',
+        });
+      }
     }
 
     const tituloPropuesta = postulacion.propuesta.titulo;
@@ -1451,6 +1462,17 @@ const actualizarEstadoPostulacionEmpleo = async (req, res) => {
         },
       });
       await Promise.all(otrasPostulaciones.map((p) => p.update({ estado: 'RECHAZADA' })));
+
+      const existeConv = await Conversacion.findOne({ where: { id_postulacion: postulacion.id_postulacion_empleo } });
+      if (!existeConv) {
+        await Conversacion.create({
+          id_postulacion: postulacion.id_postulacion_empleo,
+          id_usuario_emisor: req.user.id_usuario,
+          mensaje: mensaje || `¡Felicidades! Has sido aceptado para "${postulacion.oferta.titulo}".`,
+          leido: false,
+          tipo_referencia: 'postulacion_empleo',
+        });
+      }
     }
 
     const tituloOferta = postulacion.oferta.titulo;
