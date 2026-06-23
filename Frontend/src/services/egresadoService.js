@@ -151,4 +151,14 @@ export const egresadoService = {
     const respuesta = await apiClient.delete(`/postulaciones/${id}`);
     return respuesta.data;
   },
+
+  async crearResena(datos) {
+    const respuesta = await apiClient.post('/resenas', datos);
+    return respuesta.data;
+  },
+
+  async obtenerResenaPropia(idProyecto, rol) {
+    const respuesta = await apiClient.get(`/resenas/propia/${idProyecto}/${rol}`);
+    return respuesta.data;
+  },
 };
