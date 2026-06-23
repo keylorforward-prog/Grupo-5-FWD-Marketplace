@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, FolderOpen, GitFork, Package, SearchX } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
+import { egresadoService } from '../../../../../services/egresadoService';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
 import { formatearProyecto } from '../../utils/dashboardEgresadoFormatters';
+import ModalResena from '../../../../../components/ModalResena/ModalResena';
 
 const AVATAR_DEFECTO = '/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png';
 
@@ -27,6 +29,27 @@ export default function MisProyectos() {
 
   const [detalleId, setDetalleId] = useState(null);
   const [entregablesId, setEntregablesId] = useState(null);
+  const [yaCalificados, setYaCalificados] = useState({});
+  const [modalResena, setModalResena] = useState({ abierto: false, proyecto: null });
+
+  useEffect(() => {
+    const completados = proyectos.filter((p) => p.estadoRaw === 'COMPLETADO');
+    if (!completados.length) return;
+    let activo = true;
+    Promise.all(
+      completados.map(async (p) => {
+        try {
+          const r = await egresadoService.obtenerResenaPropia(p.id, 'EGRESADO');
+          return [p.id, !!r?.data];
+        } catch {
+          return [p.id, false];
+        }
+      })
+    ).then((pares) => {
+      if (activo) setYaCalificados(Object.fromEntries(pares));
+    });
+    return () => { activo = false; };
+  }, [proyectos]);
 
   const proyectos = useMemo(() => (data || []).map(formatearProyecto), [data]);
 
@@ -107,6 +130,24 @@ export default function MisProyectos() {
                       <span>{t('egresadoProyectos.inicio')}: {p.fechaInicio}</span>
                       <span>{t('egresadoProyectos.fin')}: {p.fechaFin}</span>
                     </div>
+
+                    {p.estadoRaw === 'COMPLETADO' && (
+                      <div style={{ marginTop: '0.5rem' }}>
+                        {yaCalificados[p.id]
+                          ? <span style={{ fontSize: '0.78rem', color: 'var(--ink-muted)' }}>Ya calificaste este proyecto</span>
+                          : (
+                            <button
+                              className="de-btn-primary"
+                              type="button"
+                              style={{ fontSize: '0.8rem', padding: '0.4rem 0.9rem', minHeight: 'unset' }}
+                              onClick={() => setModalResena({ abierto: true, proyecto: p })}
+                            >
+                              Calificar
+                            </button>
+                          )
+                        }
+                      </div>
+                    )}
 
                     {expandido && (
                       <div className="de-project-detail" style={{ marginTop: '1rem' }}>
@@ -193,6 +234,20 @@ export default function MisProyectos() {
             );
           })}
         </div>
+      )}
+
+      {modalResena.abierto && modalResena.proyecto && (
+        <ModalResena
+          idProyecto={modalResena.proyecto.id}
+          rolAutor="EGRESADO"
+          nombreContraparte={modalResena.proyecto.empresa}
+          onClose={() => setModalResena({ abierto: false, proyecto: null })}
+          onExito={() => {
+            const id = modalResena.proyecto.id;
+            setModalResena({ abierto: false, proyecto: null });
+            setYaCalificados((prev) => ({ ...prev, [id]: true }));
+          }}
+        />
       )}
     </>
   );

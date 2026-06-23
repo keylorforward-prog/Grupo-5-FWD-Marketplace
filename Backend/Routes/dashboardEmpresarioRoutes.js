@@ -25,6 +25,7 @@ router.post('/ofertas-empleo', dashboardEmpresarioController.crearOfertaEmpleo);
 router.get('/ofertas', dashboardEmpresarioController.listarOfertas);
 router.post('/ofertas/:id_oferta/aceptar', dashboardEmpresarioController.aceptarOferta);
 router.post('/ofertas/:id_oferta/rechazar', dashboardEmpresarioController.rechazarOferta);
+router.put('/proyectos/:id_proyecto/completar', dashboardEmpresarioController.completarProyecto);
 router.get('/postulaciones', dashboardEmpresarioController.listarPostulaciones);
 router.get('/postulaciones-empleo', dashboardEmpresarioController.listarPostulacionesEmpleo);
 router.put('/postulaciones/:id/estado', dashboardEmpresarioController.actualizarEstadoPostulacion);

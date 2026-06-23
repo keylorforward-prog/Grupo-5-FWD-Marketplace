@@ -99,10 +99,10 @@ const getExtractionPrompt = (nombreEmpresa) => `Analizá el siguiente historial 
 El JSON debe tener exactamente estos campos:
 - title: nombre corto del proyecto
 - description: descripción profesional del proyecto en exactamente 3 párrafos, separados por \\n\\n en el JSON. Estructura obligatoria:
-  Párrafo 1 — Contexto y problema: qué hace el negocio y qué problema concreto enfrenta. Usa SIEMPRE el nombre "${nombreEmpresa || 'La empresa'}" para referirte al negocio en la descripción. NUNCA inventes nombres ficticios como "Pollo Frito Don Carlos".
-  Párrafo 2 — Solución propuesta: qué debe construir el desarrollador y para qué sirve. Ejemplo: "Se requiere desarrollar un sistema web que permita registrar las ventas diarias..."
-  Párrafo 3 — Alcance y usuarios: quiénes usarán el sistema y el alcance esperado para el plazo del proyecto. Ejemplo: "El sistema será utilizado por el dueño y los cajeros del local..."
-  Redactá en tercera persona, tono profesional pero claro, sin tecnicismos innecesarios. Basate en lo que el empresario realmente dijo en la conversación, no inventes datos que no mencionó.
+  Párrafo 1 — Contexto y problema: describe qué hace el negocio del empresario y qué problema enfrenta, usando EXCLUSIVAMENTE el rubro y datos reales de la conversación. Usa el nombre "${nombreEmpresa || 'La empresa'}" para referirte al negocio. Prohibido inventar nombres de negocios ficticios. El primer sustantivo debe ser el rubro real que mencionó el empresario.
+  Párrafo 2 — Solución propuesta: describe la solución de software a construir, según lo que el empresario pidió en la conversación.
+  Párrafo 3 — Alcance y usuarios: menciona quiénes usarán el sistema y el alcance esperado, según lo hablado.
+  Redactá en tercera persona, tono profesional pero claro, sin tecnicismos innecesarios. Basate ÚNICAMENTE en lo que el empresario dijo en la conversación, sin inventar datos.
 - area_negocio: sector o industria del proyecto
 - stack: array con SIEMPRE entre 3 y 5 tecnologías apropiadas para el proyecto. Elegí según la naturaleza del proyecto:
   - Sistema web con base de datos y usuarios: ["React", "Node.js", "PostgreSQL", "Tailwind CSS"]
@@ -118,12 +118,7 @@ El JSON debe tener exactamente estos campos:
 - budget_currency: 'USD' si habló en dólares, 'CRC' si habló en colones. Si no mencionó presupuesto, dejá el string vacío. NO hagas ninguna conversión ni cálculo. Solo extraé los números tal como los dijo y la moneda.
 - usa_ia: true siempre — porque este proyecto fue creado con asistencia de inteligencia artificial por el agente de FWD Marketplace
 - raw_requirements: lista de requerimientos en viñetas, cada uno en su propia línea con un guion. Al final de cada requerimiento agregá entre paréntesis su nivel de complejidad para un desarrollador junior: (básico), (intermedio) o (avanzado).
-  Ejemplo:
-  - Registrar ventas con distintos medios de pago (intermedio)
-  - Mostrar un listado de las ventas del día (básico)
-  - Generar informes financieros automáticos en PDF (avanzado)
-  - Controlar el inventario de productos (intermedio)
-  Esto ayuda al desarrollador a dimensionar el esfuerzo del proyecto. Mantené máximo 8 requerimientos. Priorizá lo que el empresario realmente mencionó. Si la conversación no dio suficiente detalle, completá con los más lógicos para ese negocio y marcalos con (inferido) antes del nivel de complejidad. Incluí si el sistema debe integrarse con herramientas actuales o arranca desde cero.
+  Lista de 5 a 8 requerimientos funcionales derivados de lo que el empresario pidió. No uses ejemplos prefabricados; los requerimientos salen de la conversación real. Mantené máximo 8. Si la conversación no dio suficiente detalle, completá con los más lógicos para ese negocio y marcalos con (inferido) antes del nivel. Incluí si el sistema debe integrarse con herramientas actuales o arranca desde cero.
 
 Si un campo no fue mencionado: string vacío para textos, array vacío para stack, 0 para números.
 
@@ -143,16 +138,26 @@ function historyToPlainText(history) {
     .join('\n');
 }
 
+const TOKEN_COMPLETA = /\[?\s*ENTREVISTA[_\s]*COMPLETA\s*\]?/i;
+
 function detectState(text) {
-  return text.includes('[ENTREVISTA_COMPLETA]') ? 'confirming' : 'interviewing';
+  return TOKEN_COMPLETA.test(text) ? 'confirming' : 'interviewing';
 }
 
 function cleanMessage(text) {
-  return text.replace('[ENTREVISTA_COMPLETA]', '').trim();
+  return text.replace(TOKEN_COMPLETA, '').trim();
 }
 
 function stripMarkdown(text) {
   return text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+}
+
+function extraerJSON(texto) {
+  const limpio = texto.replace(/```json/gi, '').replace(/```/g, '').trim();
+  const inicio = limpio.indexOf('{');
+  const fin = limpio.lastIndexOf('}');
+  if (inicio === -1 || fin === -1) return limpio;
+  return limpio.slice(inicio, fin + 1);
 }
 
 exports.interview = async (req, res) => {
@@ -189,24 +194,43 @@ exports.interview = async (req, res) => {
 };
 
 exports.extract = async (req, res) => {
-  try {
-    const { history, nombreEmpresa } = req.body;
-    const historialTexto = historyToPlainText(history || []);
+  const { history, nombreEmpresa } = req.body;
+  const historialTexto = historyToPlainText(history || []);
+  const prompt = getExtractionPrompt(nombreEmpresa) + '\n' + historialTexto;
 
-    const response = await client.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      max_tokens: 800,
-      messages: [{ role: 'user', content: getExtractionPrompt(nombreEmpresa) + '\n' + historialTexto }],
-    });
-
-    const text = response.choices[0].message.content ?? '';
-    const data = JSON.parse(stripMarkdown(text));
-
-    res.json({ success: true, data });
-  } catch (error) {
-    console.error('Agent extract error:', error.message);
-    res.status(500).json({ success: false, message: 'No pudimos procesar tu proyecto. Intentá de nuevo.' });
+  async function intentarExtraccion(modelo, usarJsonMode) {
+    const params = {
+      model: modelo,
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }],
+    };
+    if (usarJsonMode) params.response_format = { type: 'json_object' };
+    const response = await client.chat.completions.create(params);
+    const txt = response.choices[0]?.message?.content ?? '';
+    return JSON.parse(extraerJSON(txt));
   }
+
+  const estrategias = [
+    () => intentarExtraccion('llama-3.3-70b-versatile', true),
+    () => intentarExtraccion('llama-3.3-70b-versatile', false),
+    () => intentarExtraccion('llama-3.1-8b-instant', true),
+    () => intentarExtraccion('llama-3.1-8b-instant', false),
+  ];
+
+  let ultimoError;
+  for (const estrategia of estrategias) {
+    try {
+      const data = await estrategia();
+      return res.json({ success: true, data });
+    } catch (e) {
+      ultimoError = e;
+      console.error('Estrategia de extracción falló:', e.message);
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+  }
+
+  console.error('Todas las estrategias fallaron:', ultimoError?.message);
+  return res.status(500).json({ success: false, message: 'No pudimos procesar tu proyecto. Intentá de nuevo.' });
 };
 
 exports.correct = async (req, res) => {

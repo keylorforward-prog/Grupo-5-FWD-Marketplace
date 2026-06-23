@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Check, CheckCircle, ChevronDown, ChevronUp, Clock, Edit3, ExternalLink, Eye, PauseCircle, PlayCircle, Plus, Save, Trash2, XCircle, AlertTriangle } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
+import ModalResena from '../../../../../components/ModalResena/ModalResena';
 import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
@@ -34,6 +35,10 @@ export default function Proyectos() {
   const [eliminarModal, setEliminarModal] = useState({ abierto: false, id: null, nombre: '' });
   const [confirmText, setConfirmText] = useState('');
   const [cerrarConfirm, setCerrarConfirm] = useState({ abierto: false, id: null, nombre: '' });
+  const [finalizarConfirm, setFinalizarConfirm] = useState({ abierto: false, idProyecto: null, nombre: '' });
+  const [finalizandoId, setFinalizandoId] = useState(null);
+  const [yaCalificados, setYaCalificados] = useState({});
+  const [modalResena, setModalResena] = useState({ abierto: false, propuesta: null });
 
   const { data: propuestas, loading, error } = useDashboardEmpresarioRequest(
     () => dashboardEmpresarioService.obtenerPropuestas(),
@@ -43,6 +48,25 @@ export default function Proyectos() {
 
   const proyectos = propuestas.map(formatearPropuesta);
   const refrescarPropuestas = () => setRefreshKey((key) => key + 1);
+
+  useEffect(() => {
+    const completadas = propuestas.filter((p) => p.proyecto?.estado === 'COMPLETADO');
+    if (!completadas.length) return;
+    let activo = true;
+    Promise.all(
+      completadas.map(async (p) => {
+        try {
+          const r = await dashboardEmpresarioService.obtenerResenaPropia(p.proyecto.id_proyecto, 'EMPRESARIO');
+          return [p.proyecto.id_proyecto, !!r?.data];
+        } catch {
+          return [p.proyecto.id_proyecto, false];
+        }
+      })
+    ).then((pares) => {
+      if (activo) setYaCalificados(Object.fromEntries(pares));
+    });
+    return () => { activo = false; };
+  }, [propuestas]);
 
   const historialPropuestas = propuestas
     .filter((p) => p.estado === 'CERRADA' || p.estado === 'CANCELADA')
@@ -152,6 +176,31 @@ export default function Proyectos() {
     if (!id) return;
     cerrarCerrarConfirm();
     await cambiarEstado(id, 'CERRADA');
+  };
+
+  const abrirFinalizarConfirm = (idProyecto, nombre) => {
+    setFinalizarConfirm({ abierto: true, idProyecto, nombre });
+  };
+
+  const cerrarFinalizarConfirm = () => {
+    setFinalizarConfirm({ abierto: false, idProyecto: null, nombre: '' });
+  };
+
+  const ejecutarFinalizar = async () => {
+    const { idProyecto } = finalizarConfirm;
+    if (!idProyecto) return;
+    cerrarFinalizarConfirm();
+    setFinalizandoId(idProyecto);
+    setMensaje('');
+    try {
+      await dashboardEmpresarioService.completarProyecto(idProyecto);
+      setMensaje('Proyecto marcado como finalizado.');
+      refrescarPropuestas();
+    } catch (err) {
+      setMensaje(err.response?.data?.message || 'Error al finalizar el proyecto.');
+    } finally {
+      setFinalizandoId(null);
+    }
   };
 
   const renderDetallePropuesta = (propuesta) => {
@@ -307,6 +356,33 @@ export default function Proyectos() {
                 >
                   {estaExpandido ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
+                {(propuesta.proyecto?.estado === 'EN_PROGRESO' || propuesta.proyecto?.estado === 'EN_REVISION') && (
+                  <button
+                    className="de-btn-primary"
+                    type="button"
+                    style={{ fontSize: '0.8rem', padding: '0.4rem 0.9rem' }}
+                    onClick={() => abrirFinalizarConfirm(propuesta.proyecto.id_proyecto, p.name)}
+                    disabled={finalizandoId === propuesta.proyecto.id_proyecto}
+                    aria-label="Finalizar proyecto"
+                  >
+                    <CheckCircle size={14} /> Finalizar
+                  </button>
+                )}
+                {propuesta.proyecto?.estado === 'COMPLETADO' && (
+                  yaCalificados[propuesta.proyecto.id_proyecto]
+                    ? <span style={{ fontSize: '0.78rem', color: 'var(--ink-muted)', whiteSpace: 'nowrap' }}>Ya calificaste</span>
+                    : (
+                      <button
+                        className="de-btn-primary"
+                        type="button"
+                        style={{ fontSize: '0.8rem', padding: '0.4rem 0.9rem' }}
+                        onClick={() => setModalResena({ abierto: true, propuesta })}
+                        aria-label="Calificar proyecto"
+                      >
+                        Calificar
+                      </button>
+                    )
+                )}
                 <button className="de-project-icon-button danger" type="button" onClick={() => abrirEliminar(propuesta.id_propuesta, p.name)} disabled={estaOcupado} aria-label={t('empresaProyectos.aria.delete')}>
                   <Trash2 size={16} />
                 </button>
@@ -376,6 +452,45 @@ export default function Proyectos() {
               </button>
               <button className="de-btn-primary" onClick={ejecutarCerrar}>
                 <Check size={15} /> Sí, cerrar proyecto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalResena.abierto && modalResena.propuesta && (
+        <ModalResena
+          idProyecto={modalResena.propuesta.proyecto.id_proyecto}
+          rolAutor="EMPRESARIO"
+          nombreContraparte={
+            modalResena.propuesta.postulaciones?.find((p) => p.estado === 'CONTRATADO')
+              ?.perfilEstudiante?.usuario?.nombre || 'el egresado'
+          }
+          onClose={() => setModalResena({ abierto: false, propuesta: null })}
+          onExito={() => {
+            const id = modalResena.propuesta.proyecto.id_proyecto;
+            setModalResena({ abierto: false, propuesta: null });
+            setYaCalificados((prev) => ({ ...prev, [id]: true }));
+          }}
+        />
+      )}
+
+      {finalizarConfirm.abierto && (
+        <div className="de-confirm-overlay" onClick={cerrarFinalizarConfirm}>
+          <div className="de-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="de-confirm-icon">
+              <CheckCircle size={32} />
+            </div>
+            <p>Finalizar proyecto</p>
+            <p className="de-confirm-sub">
+              ¿Marcar <strong>{finalizarConfirm.nombre}</strong> como finalizado? El proyecto pasará a estado COMPLETADO.
+            </p>
+            <div className="de-confirm-actions">
+              <button className="de-btn-outline" onClick={cerrarFinalizarConfirm}>
+                Cancelar
+              </button>
+              <button className="de-btn-primary" onClick={ejecutarFinalizar}>
+                <CheckCircle size={15} /> Sí, finalizar
               </button>
             </div>
           </div>

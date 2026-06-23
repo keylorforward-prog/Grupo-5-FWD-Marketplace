@@ -272,7 +272,17 @@ const listarPropuestas = async (req, res) => {
     const propuestas = await Propuesta.findAll({
       where: { id_perfil_empresario: perfil.id_perfil_empresario },
       include: [
-        { model: Postulacion, as: 'postulaciones' },
+        {
+          model: Postulacion,
+          as: 'postulaciones',
+          include: [
+            {
+              model: PerfilEstudiante,
+              as: 'perfilEstudiante',
+              include: [{ model: Usuario, as: 'usuario', attributes: ['nombre'] }],
+            },
+          ],
+        },
         { model: Oferta, as: 'ofertas' },
         { model: ProyectoPlataforma, as: 'proyecto' },
       ],
@@ -1540,6 +1550,7 @@ module.exports = {
   actualizarPropuesta,
   crearOfertaEmpleo,
   crearPropuesta,
+  completarProyecto,
   eliminarPropuesta,
   enviarMensaje,
   listarEntregables,
@@ -1561,5 +1572,5 @@ module.exports = {
   obtenerResumen,
   rechazarOferta,
   subirFotoPerfil,
-  };
+};
 

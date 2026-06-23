@@ -159,4 +159,16 @@ export const dashboardEmpresarioService = {
   obtenerPagos(params) {
     return get('/dashboard-empresario/pagos', params);
   },
+
+  completarProyecto(idProyecto) {
+    return apiClient.put(`/dashboard-empresario/proyectos/${idProyecto}/completar`).then(extraerData);
+  },
+
+  crearResena(datos) {
+    return apiClient.post('/resenas', datos).then(extraerData);
+  },
+
+  obtenerResenaPropia(idProyecto, rol) {
+    return get(`/resenas/propia/${idProyecto}/${rol}`);
+  },
 };
