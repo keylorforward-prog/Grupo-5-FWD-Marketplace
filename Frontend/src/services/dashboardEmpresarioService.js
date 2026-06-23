@@ -148,6 +148,10 @@ export const dashboardEmpresarioService = {
     await apiClient.delete(`/dashboard-empresario/historial/${id}`);
   },
 
+  actualizarEstadoPostulacionBatch(ids, estado, mensaje = '') {
+    return apiClient.put('/dashboard-empresario/postulaciones/batch-estado', { ids, estado, mensaje }).then(extraerData);
+  },
+
   obtenerEvaluaciones(params) {
     return get('/dashboard-empresario/evaluaciones', params);
   },

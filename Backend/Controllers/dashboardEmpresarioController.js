@@ -19,12 +19,21 @@ const {
   sequelize,
   Usuario,
 } = require('../Models');
+const { sendPostulacionEmail } = require('../Services/emailService');
 
 const DOS_MINUTOS = 2 * 60 * 1000;
 
 const actualizarPendiente = async (postulacion) => {
   if (postulacion.estado === 'ENVIADA' && Date.now() - new Date(postulacion.fecha_postulacion).getTime() >= DOS_MINUTOS) {
     postulacion.estado = 'PENDIENTE';
+    await postulacion.save();
+  }
+};
+
+const normalizarEstadoEmpleo = async (postulacion) => {
+  const mapa = { enviada: 'ENVIADA', vista: 'EN_REVISION', aceptada: 'ACEPTADO', rechazada: 'RECHAZADA' };
+  if (mapa[postulacion.estado]) {
+    postulacion.estado = mapa[postulacion.estado];
     await postulacion.save();
   }
 };
@@ -144,7 +153,7 @@ const actualizarPerfil = async (req, res) => {
     const perfil = await obtenerPerfilEmpresario(req, res);
     if (!perfil) return;
 
-    const camposPermitidos = ['sector', 'descripcion', 'sitio_web', 'telefono_whatsapp'];
+    const camposPermitidos = ['nombre_empresa', 'sector', 'descripcion', 'sitio_web', 'telefono_whatsapp'];
     const cambios = camposPermitidos.reduce((acumulado, campo) => {
       if (Object.prototype.hasOwnProperty.call(req.body, campo)) {
         acumulado[campo] = req.body[campo];
@@ -847,6 +856,9 @@ const listarPostulacionesEmpleo = async (req, res) => {
       limit: obtenerLimite(req.query.limit),
     });
 
+    await Promise.all(postulaciones.map(actualizarPendiente));
+    await Promise.all(postulaciones.map(normalizarEstadoEmpleo));
+
     res.json({ success: true, data: postulaciones });
   } catch (error) {
     responderError(res, error, 'Error al obtener las postulaciones de empleo.');
@@ -858,43 +870,48 @@ const listarMensajesRecientes = async (req, res) => {
     const perfil = await obtenerPerfilEmpresario(req, res);
     if (!perfil) return;
 
-    const includePostulacion = {
-      model: Postulacion,
-      as: 'postulacion',
-      required: true,
-      include: [
-        {
-          model: Propuesta,
-          as: 'propuesta',
-          required: true,
-          where: { id_perfil_empresario: perfil.id_perfil_empresario },
-        },
-        {
-          model: PerfilEstudiante,
-          as: 'perfilEstudiante',
-          include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }],
-        },
-      ],
-    };
-
     const conversaciones = await Conversacion.findAll({
-      include: [includePostulacion],
       order: [['fecha_envio', 'DESC']],
     });
 
-    const agrupadas = Object.values(
-      conversaciones.reduce((acc, c) => {
-        const key = c.id_postulacion;
-        if (!acc[key] || new Date(c.fecha_envio) > new Date(acc[key].fecha_envio)) {
-          const estudiante = c.postulacion?.perfilEstudiante?.usuario || null;
-          if (estudiante) estudiante.rol = 'estudiante';
-          acc[key] = { ...(c.toJSON ? c.toJSON() : c), contacto: estudiante };
-        }
-        return acc;
-      }, {})
-    ).slice(0, obtenerLimite(req.query.limit));
+    const agrupadas = {};
+    for (const c of conversaciones) {
+      const key = c.id_postulacion;
+      if (agrupadas[key] && new Date(c.fecha_envio) <= new Date(agrupadas[key].fecha_envio)) continue;
 
-    res.json({ success: true, data: agrupadas });
+      const tipoRef = c.tipo_referencia || 'postulacion';
+      let estudiante = null;
+
+      if (tipoRef === 'postulacion_empleo') {
+        const postulacion = await PostulacionEmpleo.findByPk(c.id_postulacion, {
+          include: [
+            { model: OfertaEmpleo, as: 'oferta', where: { id_perfil_empresario: perfil.id_perfil_empresario } },
+            { model: PerfilEstudiante, as: 'estudiante', include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }] },
+          ],
+        });
+        if (postulacion) {
+          estudiante = postulacion.estudiante?.usuario || null;
+        }
+      } else {
+        const postulacion = await Postulacion.findByPk(c.id_postulacion, {
+          include: [
+            { model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } },
+            { model: PerfilEstudiante, as: 'perfilEstudiante', include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }] },
+          ],
+        });
+        if (postulacion) {
+          estudiante = postulacion.perfilEstudiante?.usuario || null;
+        }
+      }
+
+      if (!estudiante) continue;
+
+      if (estudiante) estudiante.rol = 'estudiante';
+      agrupadas[key] = { ...(c.toJSON ? c.toJSON() : c), contacto: estudiante };
+    }
+
+    const resultado = Object.values(agrupadas).slice(0, obtenerLimite(req.query.limit));
+    res.json({ success: true, data: resultado });
   } catch (error) {
     responderError(res, error, 'Error al obtener mensajes recientes.');
   }
@@ -1078,25 +1095,45 @@ const obtenerConversacion = async (req, res) => {
     const userId = req.user.id_usuario;
     const { idPostulacion } = req.params;
 
-    const postulacion = await Postulacion.findByPk(idPostulacion, {
-      include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
+    const primeraConv = await Conversacion.findOne({
+      where: { id_postulacion: idPostulacion },
+      order: [['fecha_envio', 'ASC']],
     });
-    if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+    const tipoRef = primeraConv?.tipo_referencia || 'postulacion';
 
-    const [mensajes, perfilEst] = await Promise.all([
-      Conversacion.findAll({
-        where: { id_postulacion: idPostulacion },
+    let contacto = null;
+    if (tipoRef === 'postulacion_empleo') {
+      const postulacion = await PostulacionEmpleo.findByPk(idPostulacion, {
         include: [
-          { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] },
+          { model: OfertaEmpleo, as: 'oferta', required: true },
         ],
-        order: [['fecha_envio', 'ASC']],
-      }),
-      PerfilEstudiante.findByPk(postulacion.id_perfil_estudiante, {
+      });
+      if (!postulacion || postulacion.oferta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+        return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+      }
+      const perfilEst = await PerfilEstudiante.findByPk(postulacion.id_perfil_estudiante, {
         include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] }],
-      }),
-    ]);
+      });
+      contacto = perfilEst?.usuario || null;
+    } else {
+      const postulacion = await Postulacion.findByPk(idPostulacion, {
+        include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
+      });
+      if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+      const perfilEst = await PerfilEstudiante.findByPk(postulacion.id_perfil_estudiante, {
+        include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] }],
+      });
+      contacto = perfilEst?.usuario || null;
+    }
 
-    const contacto = perfilEst?.usuario || null;
+    const mensajes = await Conversacion.findAll({
+      where: { id_postulacion: idPostulacion },
+      include: [
+        { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil', 'rol'] },
+      ],
+      order: [['fecha_envio', 'ASC']],
+    });
+
     if (contacto) contacto.rol = 'estudiante';
 
     res.json({ success: true, data: { mensajes, contacto } });
@@ -1116,16 +1153,30 @@ const enviarMensaje = async (req, res) => {
       return res.status(400).json({ success: false, message: 'id_postulacion y mensaje son requeridos.' });
     }
 
-    const postulacion = await Postulacion.findByPk(id_postulacion, {
+    let tipoRef = 'postulacion';
+
+    const postulacionProyecto = await Postulacion.findByPk(id_postulacion, {
       include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
     });
-    if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+
+    if (postulacionProyecto) {
+      tipoRef = 'postulacion';
+    } else {
+      const postulacionEmpleo = await PostulacionEmpleo.findByPk(id_postulacion, {
+        include: [{ model: OfertaEmpleo, as: 'oferta', required: true }],
+      });
+      if (!postulacionEmpleo || postulacionEmpleo.oferta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+        return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+      }
+      tipoRef = 'postulacion_empleo';
+    }
 
     const nuevo = await Conversacion.create({
       id_postulacion,
       id_usuario_emisor: userId,
       mensaje: mensaje.trim(),
       leido: false,
+      tipo_referencia: tipoRef,
     });
 
     const creado = await Conversacion.findByPk(nuevo.id_conversacion, {
@@ -1145,10 +1196,26 @@ const marcarLeidos = async (req, res) => {
     const userId = req.user.id_usuario;
     const { idPostulacion } = req.params;
 
-    const postulacion = await Postulacion.findByPk(idPostulacion, {
-      include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
+    const primeraConv = await Conversacion.findOne({
+      where: { id_postulacion: idPostulacion },
     });
-    if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+    if (!primeraConv) return res.status(404).json({ success: false, message: 'Conversación no encontrada.' });
+
+    const tipoRef = primeraConv.tipo_referencia || 'postulacion';
+
+    if (tipoRef === 'postulacion_empleo') {
+      const postulacion = await PostulacionEmpleo.findByPk(idPostulacion, {
+        include: [{ model: OfertaEmpleo, as: 'oferta', required: true }],
+      });
+      if (!postulacion || postulacion.oferta.id_perfil_empresario !== perfil.id_perfil_empresario) {
+        return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+      }
+    } else {
+      const postulacion = await Postulacion.findByPk(idPostulacion, {
+        include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
+      });
+      if (!postulacion) return res.status(404).json({ success: false, message: 'Postulación no encontrada.' });
+    }
 
     await Conversacion.update(
       { leido: true },
@@ -1252,6 +1319,17 @@ const actualizarEstadoPostulacion = async (req, res) => {
     const estadoAnterior = postulacion.estado;
     await postulacion.update({ estado });
 
+    if (estado === 'ACEPTADO' || estado === 'CONTRATADO') {
+      const otrasPostulaciones = await Postulacion.findAll({
+        where: {
+          id_propuesta: postulacion.id_propuesta,
+          id_postulacion: { [Op.ne]: postulacion.id_postulacion },
+          estado: { [Op.notIn]: ['RECHAZADA', 'rechazada'] },
+        },
+      });
+      await Promise.all(otrasPostulaciones.map((p) => p.update({ estado: 'RECHAZADA' })));
+    }
+
     const tituloPropuesta = postulacion.propuesta.titulo;
     const usuarioEstudiante = postulacion.perfilEstudiante?.usuario;
 
@@ -1272,6 +1350,15 @@ const actualizarEstadoPostulacion = async (req, res) => {
           mensaje: notifMensaje,
           leido: false,
           fecha: new Date(),
+        });
+      }
+      if (estado === 'RECHAZADA' || estado === 'ACEPTADO' || estado === 'CONTRATADO') {
+        sendPostulacionEmail({
+          userEmail: usuarioEstudiante.correo,
+          userName: usuarioEstudiante.nombre,
+          titulo: tituloPropuesta,
+          estado,
+          mensaje: notifMensaje,
         });
       }
     }
@@ -1324,15 +1411,18 @@ const actualizarEstadoPostulacionEmpleo = async (req, res) => {
 
     const estadoAnterior = postulacion.estado;
 
-    const mapaEstadoDB = {
-      EN_REVISION: 'vista',
-      PRESSELECCIONADA: 'vista',
-      PRESELECCIONADA: 'vista',
-      RECHAZADA: 'rechazada',
-      CONTRATADO: 'aceptada',
-      ACEPTADO: 'aceptada',
-    };
-    await postulacion.update({ estado: mapaEstadoDB[estado] || estado.toLowerCase() });
+    await postulacion.update({ estado });
+
+    if (estado === 'ACEPTADO' || estado === 'CONTRATADO') {
+      const otrasPostulaciones = await PostulacionEmpleo.findAll({
+        where: {
+          id_oferta_empleo: postulacion.id_oferta_empleo,
+          id_postulacion_empleo: { [Op.ne]: postulacion.id_postulacion_empleo },
+          estado: { [Op.notIn]: ['RECHAZADA', 'rechazada'] },
+        },
+      });
+      await Promise.all(otrasPostulaciones.map((p) => p.update({ estado: 'RECHAZADA' })));
+    }
 
     const tituloOferta = postulacion.oferta.titulo;
     const usuarioEstudiante = postulacion.estudiante?.usuario;
@@ -1356,6 +1446,15 @@ const actualizarEstadoPostulacionEmpleo = async (req, res) => {
           fecha: new Date(),
         });
       }
+      if (estado === 'RECHAZADA' || estado === 'ACEPTADO' || estado === 'CONTRATADO') {
+        sendPostulacionEmail({
+          userEmail: usuarioEstudiante.correo,
+          userName: usuarioEstudiante.nombre,
+          titulo: tituloOferta,
+          estado,
+          mensaje: notifMensaje,
+        });
+      }
     }
 
     res.json({
@@ -1368,10 +1467,72 @@ const actualizarEstadoPostulacionEmpleo = async (req, res) => {
   }
 };
 
+const actualizarEstadoPostulacionBatch = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+
+    const { ids, estado, mensaje } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: 'Debes proporcionar un array de IDs.' });
+    }
+
+    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'RECHAZADA'];
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({ success: false, message: `Estado invalido para operacion batch. Validos: ${estadosValidos.join(', ')}` });
+    }
+
+    const postulaciones = await Postulacion.findAll({
+      where: { id_postulacion: { [Op.in]: ids } },
+      include: [{ model: Propuesta, as: 'propuesta', required: true }],
+    });
+
+    const postulacionesEmpleo = await PostulacionEmpleo.findAll({
+      where: { id_postulacion_empleo: { [Op.in]: ids } },
+      include: [{ model: OfertaEmpleo, as: 'oferta', required: true }],
+    });
+
+    const todas = [...postulaciones, ...postulacionesEmpleo];
+    const autorizadas = todas.filter((p) => {
+      const duenio = p.propuesta?.id_perfil_empresario ?? p.oferta?.id_perfil_empresario;
+      return duenio === perfil.id_perfil_empresario;
+    });
+
+    await Promise.all(autorizadas.map((p) => p.update({ estado })));
+
+    if (estado === 'RECHAZADA') {
+      Promise.all(autorizadas.map(async (p) => {
+        const estudiante = p.perfilEstudiante ?? p.estudiante;
+        const usuarioEstudiante = estudiante?.usuario;
+        const titulo = p.propuesta?.titulo ?? p.oferta?.titulo ?? '';
+        if (usuarioEstudiante) {
+          sendPostulacionEmail({
+            userEmail: usuarioEstudiante.correo,
+            userName: usuarioEstudiante.nombre,
+            titulo,
+            estado: 'RECHAZADA',
+            mensaje: 'Tu postulacion no ha sido seleccionada.',
+          });
+        }
+      }));
+    }
+
+    res.json({
+      success: true,
+      message: `${autorizadas.length} postulaciones actualizadas a "${estado}".`,
+      data: { actualizadas: autorizadas.length, totalRecibidas: ids.length },
+    });
+  } catch (error) {
+    responderError(res, error, 'Error al actualizar postulaciones en lote.');
+  }
+};
+
 module.exports = {
   aceptarOferta,
   actualizarEstadoPostulacion,
   actualizarEstadoPostulacionEmpleo,
+  actualizarEstadoPostulacionBatch,
   actualizarHistorial,
   crearHistorial,
   eliminarHistorial,

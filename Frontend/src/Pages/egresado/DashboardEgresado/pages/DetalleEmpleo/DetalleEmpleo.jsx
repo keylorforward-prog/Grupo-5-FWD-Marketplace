@@ -28,11 +28,17 @@ const formatoSalario = (min, max) => {
 };
 
 const ETQ_ESTADO = {
-  enviada: 'egresadoPostulaciones.flujoEnviada',
-  vista: 'egresadoPostulaciones.flujoRevision',
-  aceptada: 'egresadoPostulaciones.flujoAceptada',
-  rechazada: 'egresadoPostulaciones.flujoRechazada',
+  ENVIADA: 'egresadoPostulaciones.flujoEnviada',
+  PENDIENTE: 'egresadoPostulaciones.flujoPendiente',
+  EN_REVISION: 'egresadoPostulaciones.flujoRevision',
+  PRESSELECCIONADA: 'egresadoPostulaciones.flujoPreseleccionada',
+  PRESELECCIONADA: 'egresadoPostulaciones.flujoPreseleccionada',
+  RECHAZADA: 'egresadoPostulaciones.flujoRechazada',
+  CONTRATADO: 'egresadoPostulaciones.flujoAceptada',
+  ACEPTADO: 'egresadoPostulaciones.flujoAceptada',
 };
+
+
 
 export default function DetalleEmpleo() {
   const { t } = useTranslation();
@@ -76,7 +82,7 @@ export default function DetalleEmpleo() {
     return () => { activo = false; };
   }, [id]);
 
-  const cvRequerido = !modoEdicion && !cvUrl.trim();
+  const cvRequerido = false;
   const confirmarPostulacion = async () => {
     if (cvRequerido) return;
     setEnviando(true);
@@ -474,7 +480,6 @@ export default function DetalleEmpleo() {
                 <input
                   className="modal-input"
                   type="url"
-                  required
                   placeholder={t(`${T_NS}.cvPlaceholder`)}
                   value={cvUrl}
                   onChange={(e) => setCvUrl(e.target.value)}

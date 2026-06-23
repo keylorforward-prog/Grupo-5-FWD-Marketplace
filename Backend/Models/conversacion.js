@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     id_usuario_emisor: { type: DataTypes.INTEGER, allowNull: false },
     mensaje: { type: DataTypes.TEXT, allowNull: false },
     leido: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-    fecha_envio: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW }
+    fecha_envio: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
+    tipo_referencia: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'postulacion' }
   }, { tableName: 'conversacion', timestamps: false, underscored: true, freezeTableName: true });
 };

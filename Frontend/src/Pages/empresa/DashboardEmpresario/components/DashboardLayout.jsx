@@ -64,7 +64,7 @@ export default function DashboardLayout({ activePage, children }) {
     return document.documentElement.dataset.theme || localStorage.getItem('tema') || 'light';
   });
   const menuPerfilRef = useRef(null);
-  const displayName = user?.nombre || 'Empresa';
+  const displayName = user?.nombre_empresa || user?.nombre || 'Empresa';
   const profileRole = t('empresaLayout.profile.role');
   const company = profileRole.toUpperCase();
   const email = user?.correo || user?.email || 'empresa@fwd.com';

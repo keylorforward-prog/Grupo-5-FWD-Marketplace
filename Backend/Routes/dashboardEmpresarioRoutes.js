@@ -29,6 +29,7 @@ router.get('/postulaciones', dashboardEmpresarioController.listarPostulaciones);
 router.get('/postulaciones-empleo', dashboardEmpresarioController.listarPostulacionesEmpleo);
 router.put('/postulaciones/:id/estado', dashboardEmpresarioController.actualizarEstadoPostulacion);
 router.put('/postulaciones-empleo/:id/estado', dashboardEmpresarioController.actualizarEstadoPostulacionEmpleo);
+router.put('/postulaciones/batch-estado', dashboardEmpresarioController.actualizarEstadoPostulacionBatch);
 router.get('/talento-recomendado', dashboardEmpresarioController.listarTalento);
 router.get('/entregables', dashboardEmpresarioController.listarEntregables);
 router.get('/mensajes-recientes', dashboardEmpresarioController.listarMensajesRecientes);

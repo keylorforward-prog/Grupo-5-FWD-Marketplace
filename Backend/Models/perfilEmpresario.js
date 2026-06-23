@@ -1,7 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define('PerfilEmpresario', {
     id_perfil_empresario: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    id_usuario: { type: DataTypes.INTEGER, allowNull: false, unique: true },
+    id_usuario: { type: DataTypes.INTEGER, allowNull: false },
+    nombre_empresa: { type: DataTypes.STRING(150), allowNull: true },
     sector: { type: DataTypes.STRING(100), allowNull: true },
     descripcion: { type: DataTypes.TEXT, allowNull: true },
     logo: { type: DataTypes.STRING(500), allowNull: true },
