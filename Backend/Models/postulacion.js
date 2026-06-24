@@ -12,8 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     subtotal:        { type: DataTypes.DECIMAL(10,2), allowNull: true },
     iva:             { type: DataTypes.DECIMAL(10,2), allowNull: true },
     total:           { type: DataTypes.DECIMAL(10,2), allowNull: true },
-    estado: { type: DataTypes.ENUM('ENVIADA','EN_REVISION','PRESSELECCIONADA','RECHAZADA','CONTRATADO'), allowNull: false, defaultValue: 'ENVIADA' },
-    estado: { type: DataTypes.ENUM('ENVIADA','PENDIENTE','EN_REVISION','PRESSELECCIONADA','PRESELECCIONADA','RECHAZADA','CONTRATADO','ACEPTADO'), allowNull: false, defaultValue: 'ENVIADA' },
+    estado: { type: DataTypes.ENUM('ENVIADA','PENDIENTE','EN_REVISION','PRESELECCIONADA','RECHAZADA','CONTRATADO'), allowNull: false, defaultValue: 'ENVIADA' },
     fecha_postulacion: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW }
   }, { 
     tableName: 'postulacion', 

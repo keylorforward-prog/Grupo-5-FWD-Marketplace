@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Search, SearchX, Mail, MailOpen, Inbox, Send, Clock, User, ChevronLeft, Building, Shield } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useAuth } from '../../../../../context/AuthContext';
@@ -219,8 +219,10 @@ const guardarLeidos = (set) => {
 export default function Mensajes() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
-  const [conversacionActiva, setConversacionActiva] = useState(null);
+  const [conversacionActiva, setConversacionActiva] = useState(location.state?.idPostulacion || null);
+  const [chatNuevoParams] = useState(location.state || null);
   const [leidosLocal, setLeidosLocal] = useState(() => cargarLeidos());
   const [busqueda, setBusqueda] = useState('');
   const userId = user?.id_usuario;
@@ -256,7 +258,10 @@ export default function Mensajes() {
 
   const conversationActivaData = conversaciones.find(
     (c) => c.idPostulacion === conversacionActiva
-  );
+  ) || (chatNuevoParams?.idPostulacion === conversacionActiva ? {
+    proyecto: chatNuevoParams.proyecto,
+    contacto: chatNuevoParams.contacto
+  } : null);
 
   const abrirChat = (id) => {
     setConversacionActiva(id);

@@ -31,11 +31,9 @@ const ETQ_ESTADO = {
   ENVIADA: 'egresadoPostulaciones.flujoEnviada',
   PENDIENTE: 'egresadoPostulaciones.flujoPendiente',
   EN_REVISION: 'egresadoPostulaciones.flujoRevision',
-  PRESSELECCIONADA: 'egresadoPostulaciones.flujoPreseleccionada',
   PRESELECCIONADA: 'egresadoPostulaciones.flujoPreseleccionada',
   RECHAZADA: 'egresadoPostulaciones.flujoRechazada',
   CONTRATADO: 'egresadoPostulaciones.flujoAceptada',
-  ACEPTADO: 'egresadoPostulaciones.flujoAceptada',
 };
 
 

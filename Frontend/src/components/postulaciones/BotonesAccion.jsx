@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, X, CheckCircle2, Send, UserCheck } from 'lucide-react';
+import { Eye, X, CheckCircle2, Send, UserCheck, MessageSquare } from 'lucide-react';
 import Tooltip from '../ui/Tooltip';
 import Emergente from '../ui/Emergente';
 import MiniCalendario from './MiniCalendario';
@@ -14,6 +14,7 @@ export default function BotonesAccion({
   alInvitar,
   alRechazar,
   alAceptar,
+  alMensajear,
 }) {
   const [showRechazar, setShowRechazar] = useState(false);
   const [showAceptar, setShowAceptar] = useState(false);
@@ -45,6 +46,18 @@ export default function BotonesAccion({
             className="de-project-icon-button"
           >
             <Eye size={17} />
+          </button>
+        </Tooltip>
+
+        {/* Mensaje */}
+        <Tooltip content="Enviar mensaje">
+          <button
+            type="button"
+            onClick={() => alMensajear(idCandidato)}
+            aria-label={`Enviar mensaje a ${nombreCandidato}`}
+            className="de-project-icon-button"
+          >
+            <MessageSquare size={17} />
           </button>
         </Tooltip>
 
@@ -118,7 +131,7 @@ export default function BotonesAccion({
         onConfirm={handleRechazar}
         onCancel={() => { setShowRechazar(false); setMotivo(''); }}
       >
-        <p className="text-sm text-gray-600 mb-3">
+        <p>
           ¿Estás seguro de que deseas rechazar a <strong>{nombreCandidato}</strong>? Se le notificará al candidato.
         </p>
         <textarea
@@ -126,7 +139,6 @@ export default function BotonesAccion({
           onChange={(e) => setMotivo(e.target.value)}
           placeholder="Escribe un mensaje para el candidato (opcional)..."
           rows={3}
-          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-200 resize-none mb-4"
         />
       </DialogoConfirmacion>
 
@@ -140,7 +152,7 @@ export default function BotonesAccion({
         onConfirm={handleAceptar}
         onCancel={() => { setShowAceptar(false); setMotivo(''); }}
       >
-        <p className="text-sm text-gray-600 mb-3">
+        <p>
           ¿Estás seguro de que deseas aceptar a <strong>{nombreCandidato}</strong>? Se le notificará al candidato.
         </p>
         <textarea
@@ -148,7 +160,6 @@ export default function BotonesAccion({
           onChange={(e) => setMotivo(e.target.value)}
           placeholder="Escribe un mensaje para el candidato (opcional)..."
           rows={3}
-          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-200 resize-none mb-4"
         />
       </DialogoConfirmacion>
     </>
