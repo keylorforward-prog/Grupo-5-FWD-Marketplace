@@ -32,6 +32,8 @@ export default function MisProyectos() {
   const [yaCalificados, setYaCalificados] = useState({});
   const [modalResena, setModalResena] = useState({ abierto: false, proyecto: null });
 
+  const proyectos = useMemo(() => (data || []).map(formatearProyecto), [data]);
+
   useEffect(() => {
     const completados = proyectos.filter((p) => p.estadoRaw === 'COMPLETADO');
     if (!completados.length) return;
@@ -50,8 +52,6 @@ export default function MisProyectos() {
     });
     return () => { activo = false; };
   }, [proyectos]);
-
-  const proyectos = useMemo(() => (data || []).map(formatearProyecto), [data]);
 
   const toggleDetalle = (id) => {
     setDetalleId((prev) => (prev === id ? null : id));

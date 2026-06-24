@@ -91,6 +91,8 @@ ProyectoPlataforma.belongsTo(Propuesta, { foreignKey: 'id_propuesta', as: 'propu
 
 Postulacion.hasMany(Conversacion, { foreignKey: 'id_postulacion', as: 'conversaciones' });
 Conversacion.belongsTo(Postulacion, { foreignKey: 'id_postulacion', as: 'postulacion' });
+PostulacionEmpleo.hasMany(Conversacion, { foreignKey: 'id_postulacion', as: 'conversaciones_empleo' });
+Conversacion.belongsTo(PostulacionEmpleo, { foreignKey: 'id_postulacion', as: 'postulacionEmpleo' });
 
 Usuario.hasMany(Conversacion, { foreignKey: 'id_usuario_emisor', as: 'conversaciones_iniciadas' });
 Conversacion.belongsTo(Usuario, { foreignKey: 'id_usuario_emisor', as: 'emisor' });
