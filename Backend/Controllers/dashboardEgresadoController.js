@@ -308,7 +308,7 @@ const listarPostulaciones = async (req, res) => {
 };
 
 const normalizarEstadoEmpleo = async (postulacion) => {
-  const mapa = { enviada: 'ENVIADA', vista: 'EN_REVISION', aceptada: 'ACEPTADO', rechazada: 'RECHAZADA' };
+  const mapa = { enviada: 'ENVIADA', vista: 'EN_REVISION', aceptada: 'CONTRATADO', rechazada: 'RECHAZADA' };
   if (mapa[postulacion.estado]) {
     postulacion.estado = mapa[postulacion.estado];
     await postulacion.save();

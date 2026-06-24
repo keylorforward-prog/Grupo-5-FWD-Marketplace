@@ -14,11 +14,9 @@ const estadoPostulacion = (estado) => {
     ENVIADA: ['Enviada', 'nueva'],
     PENDIENTE: ['Pendiente', 'pendiente'],
     EN_REVISION: ['En Revisión', 'revision'],
-    PRESSELECCIONADA: ['Preseleccionada', 'recepcion'],
     PRESELECCIONADA: ['Preseleccionada', 'recepcion'],
     RECHAZADA: ['Rechazada', 'rechazado'],
     CONTRATADO: ['Aceptado', 'finalizado'],
-    ACEPTADO: ['Aceptado', 'finalizado'],
   };
   return mapa[estado] ?? [estado || 'Sin estado', 'pendiente'];
 };

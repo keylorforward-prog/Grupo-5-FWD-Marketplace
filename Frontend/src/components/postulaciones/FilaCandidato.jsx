@@ -44,6 +44,7 @@ export default function FilaCandidato({
   alInvitar,
   alRechazar,
   alAceptar,
+  alMensajear,
 }) {
   const { id, name, location, stacks, coverLetter, status, estaInvitado, avatar, estadoRaw } = candidate;
   const infoEstado = configEstado[status] ?? configEstado.nuevo;
@@ -141,6 +142,7 @@ export default function FilaCandidato({
           alInvitar={alInvitar}
           alRechazar={alRechazar}
           alAceptar={alAceptar}
+          alMensajear={alMensajear}
         />
       </td>
     </tr>

@@ -182,13 +182,10 @@ const estadoPostulacion = (estado) => {
     vista: 'nuevo',
     PENDIENTE: 'pendiente',
     EN_REVISION: 'en_revision',
-    PRESSELECCIONADA: 'entrevistado',
     PRESELECCIONADA: 'entrevistado',
     RECHAZADA: 'rechazado',
     rechazada: 'rechazado',
-    CONTRATADO: 'entrevistado',
-    ACEPTADO: 'aceptado',
-    aceptada: 'aceptado',
+    CONTRATADO: 'aceptado',
   };
   return mapa[estado] ?? 'nuevo';
 };
@@ -211,7 +208,7 @@ export const formatearPostulacion = (postulacion) => {
     coverLetter: postulacion.mensaje_presentacion || 'Sin carta de presentacion registrada.',
     status: estadoPostulacion(postulacion.estado),
     estadoRaw: postulacion.estado,
-    estaInvitado: postulacion.estado === 'PRESSELECCIONADA' || postulacion.estado === 'PRESELECCIONADA' || postulacion.estado === 'CONTRATADO' || postulacion.estado === 'ACEPTADO',
+    estaInvitado: postulacion.estado === 'PRESELECCIONADA' || postulacion.estado === 'CONTRATADO',
     proyecto: postulacion.propuesta?.titulo || '',
     perfil: formatearTalento(perfil),
   };
@@ -235,7 +232,7 @@ export const formatearPostulacionEmpleo = (postulacion) => {
     coverLetter: postulacion.carta_presentacion || 'Sin carta de presentacion registrada.',
     status: estadoPostulacion(postulacion.estado),
     estadoRaw: postulacion.estado,
-    estaInvitado: ['entrevistado', 'ACEPTADO', 'aceptada', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'CONTRATADO'].includes(postulacion.estado),
+    estaInvitado: ['PRESELECCIONADA', 'CONTRATADO'].includes(postulacion.estado),
     proyecto: postulacion.oferta?.titulo || postulacion.oferta?.cargo || '',
     perfil: formatearTalento(estudiante),
     esEmpleo: true,

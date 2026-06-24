@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Check, CheckCircle, ChevronDown, ChevronUp, Clock, Edit3, ExternalLink, Eye, PauseCircle, PlayCircle, Plus, Save, Trash2, XCircle, AlertTriangle } from 'lucide-react';
+import { Check, CheckCircle, ChevronDown, ChevronUp, Clock, Edit3, ExternalLink, Eye, PauseCircle, PlayCircle, Plus, Save, Trash2, XCircle, AlertTriangle, Sparkles } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import ModalResena from '../../../../../components/ModalResena/ModalResena';
 import DashboardLayout from '../../components/DashboardLayout';
@@ -258,9 +258,14 @@ export default function Proyectos() {
             Gestiona tus proyectos activos y el historial de trabajos realizados.
           </p>
         </div>
-        <button className="de-btn-primary" type="button" onClick={() => navigate('/DashboardEmpresario/publicar-proyecto')}>
-          <Plus size={18} /> {t('empresaProyectos.btnPublish')}
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button className="de-btn-primary" type="button" onClick={() => navigate('/DashboardEmpresario/publicar-proyecto')}>
+            <Plus size={18} /> {t('empresaProyectos.btnPublish')}
+          </button>
+          <button className="de-btn-outline" type="button" onClick={() => navigate('/DashboardEmpresario/crear-proyecto-ia')}>
+            <Sparkles size={18} /> {t('empresaDashboardInicio.hero.btnAIPublish')}
+          </button>
+        </div>
       </div>
 
       {mensaje && (
