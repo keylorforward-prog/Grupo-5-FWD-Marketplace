@@ -1,5 +1,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import ecoImg from '../../assets/eco_smart_preview.png';
+import nexusImg from '../../assets/nexus_fintech_preview.png';
+import quantumImg from '../../assets/quantum_health_preview.png';
 
 export default function ProjectCarousel() {
   const { t } = useTranslation();
@@ -22,6 +25,7 @@ export default function ProjectCarousel() {
       author: 'Juan Pérez',
       initials: 'JP',
       techs: ['Python', 'TensorFlow', 'React', 'AWS'],
+      image: ecoImg,
     },
     {
       title: 'Nexus FinTech Dashboard',
@@ -29,6 +33,7 @@ export default function ProjectCarousel() {
       author: 'Ana García',
       initials: 'AG',
       techs: ['Next.js', 'TypeScript', 'D3.js', 'PostgreSQL'],
+      image: nexusImg,
     },
     {
       title: 'Quantum Health App',
@@ -36,6 +41,7 @@ export default function ProjectCarousel() {
       author: 'Marcos López',
       initials: 'ML',
       techs: ['Flutter', 'Firebase', 'Node.js'],
+      image: quantumImg,
     },
   ];
 
@@ -71,7 +77,8 @@ export default function ProjectCarousel() {
             key={project.title}
             className="project-card"
           >
-            <div className="project-image">
+            <div className="project-image" style={{ overflow: 'hidden' }}>
+              <img src={project.image} alt={project.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <div className="project-overlay">
                 <span>{t('landing.carousel.techsUsed', 'Technologies Used')}</span>
 

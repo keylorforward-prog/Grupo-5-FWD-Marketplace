@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import LoginForm from './components/LoginForm';
 import RegisterForm from '../Registro/components/RegisterForm';
 import LanguageSwitcher from '../../../components/comun/LanguageSwitcher';
+import fwdDarkLogo from '../../../assets/fwdcrdark.png';
 import '../AuthPages.css';
 
 const LoginPage = () => {
@@ -88,7 +89,7 @@ const LoginPage = () => {
                 <div className="brand-logo-circle">
                   <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="FWD Logo" />
                 </div>
-                <span className="brand-logo-text">FWD Junior</span>
+                <img src={fwdDarkLogo} alt="FWD Junior" style={{ height: '32px', width: 'auto', objectFit: 'contain', marginLeft: '12px' }} />
               </div>
               <div className="brand-heading">
                 <h1>
@@ -120,7 +121,7 @@ const LoginPage = () => {
                 <div className="brand-logo-circle">
                   <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png" alt="FWD Logo" />
                 </div>
-                <span className="brand-logo-text">FWD Junior</span>
+                <img src={fwdDarkLogo} alt="FWD Junior" style={{ height: '32px', width: 'auto', objectFit: 'contain', marginLeft: '12px' }} />
               </div>
               <div className="brand-heading">
                 <h1>

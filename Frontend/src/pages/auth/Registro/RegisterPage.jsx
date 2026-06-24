@@ -1,4 +1,5 @@
 import RegisterForm from "./components/RegisterForm";
+import fwdDarkLogo from '../../../assets/fwdcrdark.png';
 import "../AuthPages.css";
 
 const RegisterPage = () => {
@@ -10,7 +11,7 @@ const RegisterPage = () => {
           <div className="brand-logo-circle w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-sm">
             <img src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis.svg" alt="FWD Logo" className="w-8 h-8 object-contain" />
           </div>
-          <span className="brand-logo-text text-white font-bold text-xl">FWD Junior</span>
+          <img src={fwdDarkLogo} alt="FWD Junior" className="h-8 w-auto object-contain ml-2" />
         </div>
 
         <div className="brand-heading">
