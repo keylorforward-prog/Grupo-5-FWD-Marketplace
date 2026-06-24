@@ -358,17 +358,12 @@ main {
   transform: translateX(-50%);
 }
 
-.landing-navbar-logo span {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.65rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.5px;
-  display: inline-block;
-  animation: float 5s ease-in-out infinite;
+.landing-navbar-logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.08));
 }
 
 /* Acceder button — compact in navbar */
@@ -505,7 +500,7 @@ main {
 
 /* --- Hero Logo (right column) --- */
 .hero-logo {
-  width: 500px;
+  width: 380px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -516,7 +511,7 @@ main {
 }
 
 .hero-logo-img {
-  width: 380px;
+  width: 280px;
   height: auto;
   object-fit: contain;
   animation: float 5s ease-in-out infinite;
@@ -1222,11 +1217,11 @@ main {
   }
 
   .hero-logo {
-    width: 420px;
+    width: 340px;
   }
 
   .hero-logo-img {
-    width: 320px;
+    width: 250px;
   }
 
   .features-section {
@@ -1298,7 +1293,7 @@ main {
   }
 
   .hero-logo-img {
-    width: 260px;
+    width: 220px;
   }
 
   /* Features */
@@ -1363,7 +1358,7 @@ main {
 /* Extra small */
 @media (max-width: 420px) {
   .hero-logo-img {
-    width: 200px;
+    width: 180px;
   }
 
   .footer-grid {

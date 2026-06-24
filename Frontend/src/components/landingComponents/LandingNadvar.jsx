@@ -12,7 +12,11 @@ export default function LandingNavbar() {
       </div>
 
       <div className="landing-navbar-logo">
-        <span>FWD.</span>
+        <img
+          src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.png"
+          alt="FWD Costa Rica"
+          className="landing-navbar-logo-img"
+        />
       </div>
 
       <div className="landing-navbar-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
