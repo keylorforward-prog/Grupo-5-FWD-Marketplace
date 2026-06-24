@@ -880,8 +880,62 @@ const listarMensajesRecientes = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEmpresario(req, res);
     if (!perfil) return;
+    const limit = obtenerLimite(req.query.limit);
+    const idEmpresario = perfil.id_perfil_empresario;
+
+    const [propuestas, ofertasEmpleo] = await Promise.all([
+      Propuesta.findAll({
+        where: { id_perfil_empresario: idEmpresario },
+        attributes: ['id_propuesta'],
+      }),
+      OfertaEmpleo.findAll({
+        where: { id_perfil_empresario: idEmpresario },
+        attributes: ['id_oferta_empleo'],
+      }),
+    ]);
+
+    const idsPropuesta = propuestas.map(p => p.id_propuesta);
+    const idsOferta = ofertasEmpleo.map(o => o.id_oferta_empleo);
+
+    const [postulaciones, postulacionesEmpleo] = await Promise.all([
+      idsPropuesta.length
+        ? Postulacion.findAll({
+            where: { id_propuesta: { [Op.in]: idsPropuesta }, estado: ESTADOS_ACEPTADOS },
+            attributes: ['id_postulacion', 'estado'],
+            include: [
+              { model: PerfilEstudiante, as: 'perfilEstudiante', include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }] },
+            ],
+          })
+        : Promise.resolve([]),
+      idsOferta.length
+        ? PostulacionEmpleo.findAll({
+            where: { id_oferta_empleo: { [Op.in]: idsOferta }, estado: ESTADOS_ACEPTADOS },
+            attributes: ['id_postulacion_empleo', 'estado'],
+            include: [
+              { model: PerfilEstudiante, as: 'estudiante', include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }] },
+            ],
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const idsPost = postulaciones.map(p => p.id_postulacion);
+    const idsEmp = postulacionesEmpleo.map(p => p.id_postulacion_empleo);
+    const todosLosIds = [...idsPost, ...idsEmp];
+
+    if (todosLosIds.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const estudiantePorId = {};
+    for (const p of postulaciones) {
+      estudiantePorId[`post_${p.id_postulacion}`] = p.perfilEstudiante?.usuario || null;
+    }
+    for (const p of postulacionesEmpleo) {
+      estudiantePorId[`emp_${p.id_postulacion_empleo}`] = p.estudiante?.usuario || null;
+    }
 
     const conversaciones = await Conversacion.findAll({
+      where: { id_postulacion: { [Op.in]: todosLosIds } },
       order: [['fecha_envio', 'DESC']],
     });
 
@@ -891,37 +945,17 @@ const listarMensajesRecientes = async (req, res) => {
       if (agrupadas[key] && new Date(c.fecha_envio) <= new Date(agrupadas[key].fecha_envio)) continue;
 
       const tipoRef = c.tipo_referencia || 'postulacion';
-      let estudiante = null;
-
-      if (tipoRef === 'postulacion_empleo') {
-        const postulacion = await PostulacionEmpleo.findByPk(c.id_postulacion, {
-          include: [
-            { model: OfertaEmpleo, as: 'oferta', where: { id_perfil_empresario: perfil.id_perfil_empresario } },
-            { model: PerfilEstudiante, as: 'estudiante', include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }] },
-          ],
-        });
-        if (postulacion && ESTADOS_ACEPTADOS.includes(postulacion.estado?.toUpperCase())) {
-          estudiante = postulacion.estudiante?.usuario || null;
-        }
-      } else {
-        const postulacion = await Postulacion.findByPk(c.id_postulacion, {
-          include: [
-            { model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } },
-            { model: PerfilEstudiante, as: 'perfilEstudiante', include: [{ model: Usuario, as: 'usuario', attributes: ['id_usuario', 'nombre', 'cedula', 'foto_perfil', 'rol'] }] },
-          ],
-        });
-        if (postulacion && ESTADOS_ACEPTADOS.includes(postulacion.estado?.toUpperCase())) {
-          estudiante = postulacion.perfilEstudiante?.usuario || null;
-        }
-      }
+      let estudiante = tipoRef === 'postulacion_empleo'
+        ? estudiantePorId[`emp_${key}`]
+        : estudiantePorId[`post_${key}`];
 
       if (!estudiante) continue;
 
-      if (estudiante) estudiante.rol = 'estudiante';
+      estudiante.rol = 'estudiante';
       agrupadas[key] = { ...(c.toJSON ? c.toJSON() : c), contacto: estudiante };
     }
 
-    const resultado = Object.values(agrupadas).slice(0, obtenerLimite(req.query.limit));
+    const resultado = Object.values(agrupadas).slice(0, limit);
     res.json({ success: true, data: resultado });
   } catch (error) {
     responderError(res, error, 'Error al obtener mensajes recientes.');
