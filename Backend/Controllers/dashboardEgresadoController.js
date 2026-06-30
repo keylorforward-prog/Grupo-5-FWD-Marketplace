@@ -548,80 +548,73 @@ const listarMensajesRecientes = async (req, res) => {
     const perfil = await obtenerPerfilEstudiante(req, res);
     if (!perfil) return;
     const userId = req.user.id_usuario;
+    const limit = obtenerLimite(req.query.limit);
+    const idPerfil = perfil.id_perfil_estudiante;
 
-    const recibidos = await Conversacion.findAll({
+    const [postulaciones, postulacionesEmpleo] = await Promise.all([
+      Postulacion.findAll({
+        where: { id_perfil_estudiante: idPerfil, estado: ESTADOS_ACEPTADOS },
+        attributes: ['id_postulacion'],
+      }),
+      PostulacionEmpleo.findAll({
+        where: { id_perfil_estudiante: idPerfil, estado: ESTADOS_ACEPTADOS },
+        attributes: ['id_postulacion_empleo'],
+      }),
+    ]);
+
+    const idsPost = postulaciones.map(p => p.id_postulacion);
+    const idsEmp = postulacionesEmpleo.map(p => p.id_postulacion_empleo);
+    const todosLosIds = [...idsPost, ...idsEmp];
+
+    if (todosLosIds.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const mensajes = await Conversacion.findAll({
+      where: { id_postulacion: { [Op.in]: todosLosIds } },
       include: [
-        INCLUDE_POSTULACION({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
-        INCLUDE_POSTULACION_EMPLEO({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
         { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'] },
       ],
       order: [['fecha_envio', 'DESC']],
     });
 
-    const enviados = await Conversacion.findAll({
-      where: { id_usuario_emisor: userId },
-      include: [
-        INCLUDE_POSTULACION({ estado: ESTADOS_ACEPTADOS }),
-        INCLUDE_POSTULACION_EMPLEO({ estado: ESTADOS_ACEPTADOS }),
-        { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'] },
-      ],
-      order: [['fecha_envio', 'DESC']],
-    });
+    const idsConConv = new Set(mensajes.map(m => m.id_postulacion));
+    const sinConv = todosLosIds.filter(id => !idsConConv.has(id));
 
-    const idsConConv = new Set([...recibidos, ...enviados].map(c => c.id_postulacion));
-
-    const postSinConv = await Postulacion.findAll({
-      where: {
-        id_perfil_estudiante: perfil.id_perfil_estudiante,
-        estado: ESTADOS_ACEPTADOS,
-        id_postulacion: { [Op.notIn]: [...idsConConv].filter(Boolean) },
-      },
-    });
-
-    for (const p of postSinConv) {
-      await Conversacion.create({
-        id_postulacion: p.id_postulacion,
+    if (sinConv.length) {
+      const nuevas = sinConv.map(id => ({
+        id_postulacion: id,
         id_usuario_emisor: userId,
         mensaje: 'Has sido aceptado. ¡Envía tu primer mensaje!',
         leido: false,
-        tipo_referencia: 'postulacion',
-      });
+        tipo_referencia: idsPost.includes(id) ? 'postulacion' : 'postulacion_empleo',
+      }));
+      await Conversacion.bulkCreate(nuevas);
     }
 
-    const postEmpSinConv = await PostulacionEmpleo.findAll({
-      where: {
-        id_perfil_estudiante: perfil.id_perfil_estudiante,
-        estado: ESTADOS_ACEPTADOS,
-        id_postulacion_empleo: { [Op.notIn]: [...idsConConv].filter(Boolean) },
-      },
-    });
-
-    for (const p of postEmpSinConv) {
-      await Conversacion.create({
-        id_postulacion: p.id_postulacion_empleo,
-        id_usuario_emisor: userId,
-        mensaje: 'Has sido aceptado. ¡Envía tu primer mensaje!',
-        leido: false,
-        tipo_referencia: 'postulacion_empleo',
-      });
-    }
-
-    const todas = [
-      ...(await Conversacion.findAll({
-        include: [
-          INCLUDE_POSTULACION({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
-          INCLUDE_POSTULACION_EMPLEO({ id_perfil_estudiante: perfil.id_perfil_estudiante, estado: ESTADOS_ACEPTADOS }),
-          { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'] },
-        ],
-        order: [['fecha_envio', 'DESC']],
-      })),
-      ...enviados,
-    ].filter(c => {
-      if (c.tipo_referencia === 'postulacion_empleo') {
-        return ESTADOS_ACEPTADOS.includes(c.postulacionEmpleo?.estado);
-      }
-      return ESTADOS_ACEPTADOS.includes(c.postulacion?.estado);
-    });
+    const [todasPost, todasEmp] = await Promise.all([
+      idsPost.length
+        ? Conversacion.findAll({
+            where: { id_postulacion: { [Op.in]: idsPost }, tipo_referencia: 'postulacion' },
+            include: [
+              INCLUDE_POSTULACION({ estado: ESTADOS_ACEPTADOS }),
+              { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'] },
+            ],
+            order: [['fecha_envio', 'DESC']],
+          })
+        : Promise.resolve([]),
+      idsEmp.length
+        ? Conversacion.findAll({
+            where: { id_postulacion: { [Op.in]: idsEmp }, tipo_referencia: 'postulacion_empleo' },
+            include: [
+              INCLUDE_POSTULACION_EMPLEO({ estado: ESTADOS_ACEPTADOS }),
+              { model: Usuario, as: 'emisor', attributes: ['id_usuario', 'nombre', 'foto_perfil'] },
+            ],
+            order: [['fecha_envio', 'DESC']],
+          })
+        : Promise.resolve([]),
+    ]);
+    const todas = [...todasPost, ...todasEmp];
 
     const agrupadas = Object.values(
       todas.reduce((acc, c) => {
@@ -631,10 +624,13 @@ const listarMensajesRecientes = async (req, res) => {
         }
         return acc;
       }, {})
-    ).slice(0, obtenerLimite(req.query.limit));
+    ).slice(0, limit);
 
     res.json({ success: true, data: agrupadas });
   } catch (error) {
+    console.error('=== listarMensajesRecientes ERROR:', error.message);
+    if (error.original) console.error('SQL:', error.original.message);
+    if (error.stack) console.error('Stack:', error.stack.split('\n').slice(0,5).join('\n'));
     responderError(res, error, 'Error al obtener mensajes recientes.');
   }
 };
