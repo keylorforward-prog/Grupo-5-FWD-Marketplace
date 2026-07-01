@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft, CheckCircle2, Eye, FileText, XCircle } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
@@ -19,19 +19,20 @@ export default function Ofertas() {
   const [procesando, setProcesando] = useState(null);
   const [perfilSeleccionado, setPerfilSeleccionado] = useState(null);
 
-  const cargarProyectos = async () => {
+  const cargarProyectos = useCallback(async () => {
     setLoadingProyectos(true);
     try {
       const resultado = await dashboardEmpresarioService.obtenerPropuestas({ limit: 100 });
       setProyectos(resultado || []);
     } catch (err) {
+      console.error(err);
       setProyectos([]);
     } finally {
       setLoadingProyectos(false);
     }
-  };
+  }, []);
 
-  const cargarOfertas = async () => {
+  const cargarOfertas = useCallback(async () => {
     if (!idPropuesta) {
       setData([]);
       setLoading(false);
@@ -48,15 +49,17 @@ export default function Ofertas() {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    cargarProyectos();
-  }, []);
-
-  useEffect(() => {
-    cargarOfertas();
   }, [idPropuesta]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    cargarProyectos();
+  }, [cargarProyectos]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    cargarOfertas();
+  }, [cargarOfertas]);
 
   const ofertas = useMemo(() => data.map(formatearOferta), [data]);
   const proyectoSeleccionado = useMemo(

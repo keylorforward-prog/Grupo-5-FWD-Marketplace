@@ -74,25 +74,25 @@ export default function FeaturesSection() {
         <div className="hiw-steps">
           <div className="hiw-step">
             <div className="hiw-number">01</div>
-            <img src="/Imgs/FLECHAS/Flechas-01.png" alt="" className="hiw-arrow" />
+            <img src="/Imgs/FLECHAS/Flechas-01.png" alt="Imagen descriptiva" className="hiw-arrow" />
             <h4>{t('landing.hiw.step1', 'Crea tu perfil')}</h4>
             <p>{t('landing.hiw.step1desc', 'Regístrate como egresado o empresa y completa tu perfil profesional.')}</p>
           </div>
           <div className="hiw-connector">
-            <img src="/Imgs/FLECHAS/Flechas-03.png" alt="" />
+            <img src="/Imgs/FLECHAS/Flechas-03.png" alt="Imagen descriptiva" />
           </div>
           <div className="hiw-step">
             <div className="hiw-number">02</div>
-            <img src="/Imgs/FLECHAS/Flechas-05.png" alt="" className="hiw-arrow" />
+            <img src="/Imgs/FLECHAS/Flechas-05.png" alt="Imagen descriptiva" className="hiw-arrow" />
             <h4>{t('landing.hiw.step2', 'Conecta y aplica')}</h4>
             <p>{t('landing.hiw.step2desc', 'Explora proyectos reales y postúlate a los que encajan con tus habilidades.')}</p>
           </div>
           <div className="hiw-connector">
-            <img src="/Imgs/FLECHAS/Flechas-07.png" alt="" />
+            <img src="/Imgs/FLECHAS/Flechas-07.png" alt="Imagen descriptiva" />
           </div>
           <div className="hiw-step">
             <div className="hiw-number">03</div>
-            <img src="/Imgs/FLECHAS/Flechas-08.png" alt="" className="hiw-arrow" />
+            <img src="/Imgs/FLECHAS/Flechas-08.png" alt="Imagen descriptiva" className="hiw-arrow" />
             <h4>{t('landing.hiw.step3', 'Crece y valídate')}</h4>
             <p>{t('landing.hiw.step3desc', 'Completa proyectos, obtén certificaciones y construye tu reputación profesional.')}</p>
           </div>

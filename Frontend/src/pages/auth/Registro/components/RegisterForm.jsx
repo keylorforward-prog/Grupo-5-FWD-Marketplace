@@ -112,7 +112,6 @@ const RegisterForm = () => {
             fontSize: '0.95rem',
             lineHeight: '1.6',
             textAlign: 'center',
-            backdropFilter: 'blur(8px)',
             boxShadow: '0 4px 12px color-mix(in srgb, var(--primary) 8%, transparent)'
           }}>
             <div style={{

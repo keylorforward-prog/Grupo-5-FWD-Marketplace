@@ -41,9 +41,9 @@ function TarjetaProyecto({ proyecto, postulado }) {
       <div className="encabezadoTarjeta">
         <div className={`iconoProyectoContenedor acento-${proyecto.colorAcento}`}>
           {proyecto.empresaLogo ? (
-            <img src={proyecto.empresaLogo} alt="" className="iconoProyectoLogo" />
+            <img src={proyecto.empresaLogo} alt="Imagen descriptiva" className="iconoProyectoLogo" />
           ) : (
-            <img src={FLECHAS[indiceFlecha(proyecto.id)]} alt="" className="iconoProyectoLogo" />
+            <img src={FLECHAS[indiceFlecha(proyecto.id)]} alt="Imagen descriptiva" className="iconoProyectoLogo" />
           )}
         </div>
         <div className="tituloTarjetaContenedor">

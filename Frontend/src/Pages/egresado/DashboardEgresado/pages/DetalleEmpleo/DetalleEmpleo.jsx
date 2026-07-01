@@ -362,7 +362,7 @@ export default function DetalleEmpleo() {
             <div className="detalle-empresaInfo">
               <div className="detalle-empresaAvatar">
                 {empresa.logo ? (
-                  <img src={empresa.logo} alt="" className="detalle-empresaLogo" />
+                  <img src={empresa.logo} alt="Imagen descriptiva" className="detalle-empresaLogo" />
                 ) : (
                   usuarioEmpresa.nombre?.charAt(0) || 'E'
                 )}

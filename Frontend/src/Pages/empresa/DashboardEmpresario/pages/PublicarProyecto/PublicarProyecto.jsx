@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
@@ -10,28 +10,29 @@ const PRESUPUESTO_MINIMO = 100000;
 export default function PublicarProyecto() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [formulario, setFormulario] = useState({
-    titulo: '',
-    descripcion: '',
-    tecnologias_requeridas: '',
-    presupuesto_min: '',
-    presupuesto_max: '',
-    plazo_dias: '15',
+  const [formulario, setFormulario] = useState(() => {
+    const datosAgente = location.state?.datosAgente;
+    if (datosAgente) {
+      return {
+        titulo: datosAgente.titulo || '',
+        descripcion: datosAgente.descripcion || '',
+        tecnologias_requeridas: datosAgente.tecnologias_requeridas || '',
+        presupuesto_min: datosAgente.presupuesto_min || '',
+        presupuesto_max: datosAgente.presupuesto_max || '',
+        plazo_dias: datosAgente.plazo_dias || '15',
+      };
+    }
+    return {
+      titulo: '',
+      descripcion: '',
+      tecnologias_requeridas: '',
+      presupuesto_min: '',
+      presupuesto_max: '',
+      plazo_dias: '15',
+    };
   });
   const [githubUrl, setGithubUrl] = useState('');
   const [documentoAdjunto, setDocumentoAdjunto] = useState(null);
-  useEffect(() => {
-    const datosAgente = location.state?.datosAgente;
-    if (!datosAgente) return;
-    setFormulario({
-      titulo: datosAgente.titulo || '',
-      descripcion: datosAgente.descripcion || '',
-      tecnologias_requeridas: datosAgente.tecnologias_requeridas || '',
-      presupuesto_min: datosAgente.presupuesto_min || '',
-      presupuesto_max: datosAgente.presupuesto_max || '',
-      plazo_dias: datosAgente.plazo_dias || '15',
-    });
-  }, [location.state]);
 
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');

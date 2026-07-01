@@ -38,9 +38,9 @@ function TarjetaEmpleo({ empleo, yaPostulado }) {
         <div className="te-empresa-info">
           <div className="te-avatar">
             {empleo.empresaLogo ? (
-              <img src={empleo.empresaLogo} alt="" className="te-avatar-img" />
+              <img src={empleo.empresaLogo} alt="Imagen descriptiva" className="te-avatar-img" />
             ) : (
-              <img src={FLECHAS[indiceFlecha(empleo.id)]} alt="" className="te-avatar-img" />
+              <img src={FLECHAS[indiceFlecha(empleo.id)]} alt="Imagen descriptiva" className="te-avatar-img" />
             )}
           </div>
           <div>

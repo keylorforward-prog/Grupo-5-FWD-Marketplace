@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Filter, ChevronLeft, ChevronRight, UserCheck, X, Send } from 'lucide-react';
+import { Filter, ChevronLeft, ChevronRight, UserCheck, X } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../services/dashboardEmpresarioService';
 import FilaCandidato from '../../../components/postulaciones/FilaCandidato';
 import AccionesMasivas from '../../../components/postulaciones/AccionesMasivas';
@@ -36,8 +36,6 @@ export default function GestionPostulaciones() {
 
   useEffect(() => {
     let activo = true;
-    setLoading(true);
-    setError(null);
 
     Promise.all([
       dashboardEmpresarioService.obtenerPostulaciones().catch(() => []),
@@ -132,7 +130,7 @@ export default function GestionPostulaciones() {
     return dashboardEmpresarioService.actualizarEstadoPostulacion(id, estado, mensaje);
   }, [esbozoCandidato]);
 
-  const manejarInvitacion = useCallback(async (id, _date, _time, _msg) => {
+  const manejarInvitacion = useCallback(async (id) => {
     setAccionCargando(id);
     try {
       await actualizarEstado(id, 'PRESELECCIONADA');

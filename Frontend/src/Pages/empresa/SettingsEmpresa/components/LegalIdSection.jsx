@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText, FileDown } from 'lucide-react';
 
@@ -8,11 +8,7 @@ const LegalIdSection = () => {
   const [currentFileUrl, setCurrentFileUrl] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  useEffect(() => {
-    fetchProfileData();
-  }, []);
-
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const userStr = localStorage.getItem('user');
@@ -34,7 +30,12 @@ const LegalIdSection = () => {
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProfileData();
+  }, [fetchProfileData]);
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
