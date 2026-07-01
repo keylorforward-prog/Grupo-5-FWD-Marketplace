@@ -1,31 +1,37 @@
 import { useTranslation } from 'react-i18next';
+import { TrendingUp, Award, Briefcase, DollarSign } from 'lucide-react';
+
+const stats = [
+  { icon: <Briefcase size={24} />, value: '150+', label: 'Empresas aliadas', color: 'stat-blue' },
+  { icon: <TrendingUp size={24} />,  value: '85%',  label: 'Tasa de empleabilidad', color: 'stat-magenta' },
+  { icon: <Award size={24} />,       value: '500+', label: 'Proyectos ejecutados', color: 'stat-purple' },
+  { icon: <DollarSign size={24} />,  value: '$2M+', label: 'Talento movilizado', color: 'stat-cyan' },
+];
 
 export default function StatsSection() {
   const { t } = useTranslation();
 
   return (
     <section className="stats-section">
-
-      <div className="stat-item">
-        <h3>150+</h3>
-        <span>{t('landing.stats.companies', 'EMPRESAS ALIADAS')}</span>
+      <div className="stats-bg-pattern" />
+      <div className="stats-inner">
+        {stats.map((s, i) => (
+          <div key={i} className={`stat-item ${s.color}`}>
+            <div className="stat-icon">{s.icon}</div>
+            <h3>{s.value}</h3>
+            <span>{t(`landing.stats.${i}`, s.label)}</span>
+          </div>
+        ))}
       </div>
 
-      <div className="stat-item">
-        <h3>85%</h3>
-        <span>{t('landing.stats.hired', 'TASA DE EMPLEABILIDAD')}</span>
+      {/* Logos strip */}
+      <div className="partners-strip">
+        <p className="partners-label">{t('landing.partners', 'Con la confianza de empresas líderes')}</p>
+        <div className="partners-logos">
+          <img src="/Imgs/Logotipo/Digital/FWD - Logotipo.svg" alt="FWD" className="partner-logo" />
+          <img src="/Imgs/Logotipo/Digital/FWD - Logotipo - Slogan.svg" alt="FWD Slogan" className="partner-logo partner-logo-wide" />
+        </div>
       </div>
-
-      <div className="stat-item">
-        <h3>500+</h3>
-        <span>{t('landing.stats.projects', 'PROYECTOS EJECUTADOS')}</span>
-      </div>
-
-      <div className="stat-item">
-        <h3>$2M+</h3>
-        <span>{t('landing.stats.talent', 'TALENTO MOVILIZADO')}</span>
-      </div>
-
     </section>
   );
 }
