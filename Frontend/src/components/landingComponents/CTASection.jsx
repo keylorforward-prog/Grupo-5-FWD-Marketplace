@@ -15,8 +15,8 @@ export default function CTASection() {
 
         {/* FWD Logo watermark */}
         <img
-          src="/Imgs/Logotipo/Digital/FWD - Logotipo - Slogan.svg"
-          alt=""
+          src="/Imgs/Comunidad icon-01.png"
+          alt="Imagen descriptiva"
           className="cta-watermark"
           aria-hidden="true"
         />

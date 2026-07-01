@@ -1,4 +1,4 @@
-const { sequelize } = require('./Models');
+const { sequelize } = require('../Models');
 
 async function alterTable() {
   try {

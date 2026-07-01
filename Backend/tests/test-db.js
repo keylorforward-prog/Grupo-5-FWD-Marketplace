@@ -1,4 +1,4 @@
-const { Usuario, PerfilEmpresario } = require('./Models');
+const { Usuario, PerfilEmpresario } = require('../Models');
 
 async function test() {
   try {

@@ -153,16 +153,12 @@ export const egresadoDashboardService = {
   },
 
   async subirDocumentoCv(file) {
-    try {
-      const formData = new FormData();
-      formData.append('documento_cv', file);
-      const respuesta = await apiClient.post('/dashboard-egresado/perfil/cv-documento', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      return extraerData(respuesta);
-    } catch (error) {
-      throw error;
-    }
+    const formData = new FormData();
+    formData.append('documento_cv', file);
+    const respuesta = await apiClient.post('/dashboard-egresado/perfil/cv-documento', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return extraerData(respuesta);
   },
 
   async obtenerCatalogoTecnologias() {

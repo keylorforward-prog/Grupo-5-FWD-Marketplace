@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Propuesta, PerfilEmpresario, Usuario, Oferta } = require('./Models');
+const { Propuesta, PerfilEmpresario, Usuario, Oferta } = require('../Models');
 const { Op } = require('sequelize');
 
 async function test() {

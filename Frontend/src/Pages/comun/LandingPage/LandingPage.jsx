@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import Navbar from '../../../components/comun/Navbar.jsx';
 import Button from '../../../components/comun/Button.jsx';

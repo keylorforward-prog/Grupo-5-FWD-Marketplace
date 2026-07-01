@@ -281,7 +281,7 @@ export default function PerfilEmpresa() {
             <span className="de-profile-banner-blob yellow" />
             <span className="de-profile-banner-blob magenta" />
             <span className="de-profile-banner-blob aqua" />
-            <img src="/Imgs/FLECHAS/Flechas-01.png" alt="" />
+            <img src="/Imgs/FLECHAS/Flechas-01.png" alt="Imagen descriptiva" />
           </div>
         </section>
 

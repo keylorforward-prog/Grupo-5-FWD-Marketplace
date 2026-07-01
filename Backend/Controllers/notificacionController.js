@@ -39,7 +39,9 @@ exports.getById = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const data = await Notificacion.create(req.body);
+    // Prevención de Mass Assignment
+    const { id, estado, rol, contrasena, ...safeData } = req.body;
+    const data = await Notificacion.create(safeData);
     res.status(201).json({ success: true, data });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -48,10 +50,12 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
+    // Prevención de Mass Assignment
+    const { id, estado, rol, contrasena, ...safeData } = req.body;
     const where = { id_notificacion: req.params.id };
     if (req.user) where.id_usuario = req.user.id_usuario;
 
-    const [updated] = await Notificacion.update(req.body, { where });
+    const [updated] = await Notificacion.update(safeData, { where });
     if (!updated) return res.status(404).json({ success: false, message: 'No encontrado' });
     const data = await Notificacion.findByPk(req.params.id);
     res.status(200).json({ success: true, data });

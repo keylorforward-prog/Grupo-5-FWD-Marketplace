@@ -21,7 +21,9 @@ exports.getById = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const data = await Reporte.create(req.body);
+    // Prevención de Mass Assignment
+    const { id, estado, rol, contrasena, ...safeData } = req.body;
+    const data = await Reporte.create(safeData);
     res.status(201).json({ success: true, data });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -30,7 +32,9 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const [updated] = await Reporte.update(req.body, { where: { id_reporte: req.params.id } });
+    // Prevención de Mass Assignment
+    const { id, estado, rol, contrasena, ...safeData } = req.body;
+    const [updated] = await Reporte.update(safeData, { where: { id_reporte: req.params.id } });
     if (!updated) return res.status(404).json({ success: false, message: 'No encontrado' });
     const data = await Reporte.findByPk(req.params.id);
     res.status(200).json({ success: true, data });

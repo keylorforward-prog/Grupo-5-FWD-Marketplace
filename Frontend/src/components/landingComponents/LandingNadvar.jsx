@@ -16,7 +16,7 @@ export default function LandingNavbar() {
       <div className="landing-navbar-logo">
         <Link to="/">
           <img
-            src="/Imgs/Logotipo/Digital/FWD - Logotipo - Slogan.svg"
+            src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"
             alt="FWD Marketplace"
             className="navbar-logo-img"
           />
@@ -28,7 +28,7 @@ export default function LandingNavbar() {
         <ThemeSwitcher />
         <LanguageSwitcher />
         <Link to="/login" className="landing-btn landing-btn-primary">
-          {t('landing.acceder', 'Acceder')}
+          {t('landing.acceder', 'Iniciar sesión')}
         </Link>
       </div>
     </nav>

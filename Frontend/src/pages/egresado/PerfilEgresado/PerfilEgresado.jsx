@@ -31,7 +31,7 @@ function PerfilEgresado() {
             <span className="bannerBlob bannerBlobAqua"></span>
             <img
               src="/Imgs/FLECHAS/Flechas-01.png"
-              alt=""
+              alt="Imagen descriptiva"
               className="decoracionBannerFlecha"
             />
           </div>

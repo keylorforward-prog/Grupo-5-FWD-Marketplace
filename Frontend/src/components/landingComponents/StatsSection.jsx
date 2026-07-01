@@ -28,8 +28,8 @@ export default function StatsSection() {
       <div className="partners-strip">
         <p className="partners-label">{t('landing.partners', 'Con la confianza de empresas líderes')}</p>
         <div className="partners-logos">
-          <img src="/Imgs/Logotipo/Digital/FWD - Logotipo.svg" alt="FWD" className="partner-logo" />
-          <img src="/Imgs/Logotipo/Digital/FWD - Logotipo - Slogan.svg" alt="FWD Slogan" className="partner-logo partner-logo-wide" />
+          <img src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg" alt="FWD" className="partner-logo" />
+          <img src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg" alt="FWD" className="partner-logo partner-logo-wide" />
         </div>
       </div>
     </section>

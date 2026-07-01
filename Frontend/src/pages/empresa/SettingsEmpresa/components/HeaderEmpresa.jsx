@@ -198,7 +198,7 @@ const HeaderEmpresa = () => {
           </div>
         </div>
         
-        <div className="se-user-profile">
+        <div className="se-user-profile" role="button" tabIndex={0} onClick={() => setShowProfileMenu(!showProfileMenu)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowProfileMenu(!showProfileMenu); } }} style={{ cursor: 'pointer', position: 'relative' }}>
           <div style={{ textAlign: 'right' }}>
             <p className="se-label-bold" style={{ margin: 0, color: 'var(--color-on-surface)' }}>{userName}</p>
             <p style={{ margin: 0, fontSize: '10px', color: 'var(--color-vibrant-blue)', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em' }}>{userRole}</p>

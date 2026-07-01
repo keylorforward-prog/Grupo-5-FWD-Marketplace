@@ -140,7 +140,7 @@ function ChatViewEmpresa({ idPostulacion, proyecto, contacto: contactoProp, onBa
         </button>
         <div className="chat-header-avatar">
           {contacto?.foto_perfil ? (
-            <img src={contacto.foto_perfil} alt="" className="chat-header-avatar-img" />
+            <img src={contacto.foto_perfil} alt="Imagen descriptiva" className="chat-header-avatar-img" />
           ) : (
             <span className="chat-header-avatar-inicial">{(contacto?.nombre || '?')[0]}</span>
           )}
@@ -220,7 +220,7 @@ const cargarLeidos = () => {
 };
 
 const guardarLeidos = (set) => {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...set])); } catch {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...set])); } catch (err) { console.error('Error saving read messages to localStorage:', err); }
 };
 
 export default function Mensajes() {
@@ -359,7 +359,7 @@ export default function Mensajes() {
                   >
                     <div className={`mensajes-item-avatar${!c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion) ? ' unread' : ''}`}>
                       {c.contacto?.foto_perfil ? (
-                        <img src={c.contacto.foto_perfil} alt="" className="mensajes-avatar-img" />
+                        <img src={c.contacto.foto_perfil} alt="Imagen descriptiva" className="mensajes-avatar-img" />
                       ) : (
                         <span className="mensajes-avatar-inicial">{inicial}</span>
                       )}

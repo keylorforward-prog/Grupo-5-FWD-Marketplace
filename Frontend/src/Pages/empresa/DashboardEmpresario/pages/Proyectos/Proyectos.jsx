@@ -139,7 +139,7 @@ export default function Proyectos() {
   }, []);
 
   const ejecutarEliminar = useCallback(async () => {
-    const { id, tipo } = eliminarModal;
+    const { id } = eliminarModal;
     if (!id) return;
     setAccionandoId(id);
     setMensaje('');
@@ -289,7 +289,7 @@ export default function Proyectos() {
           return (
             <div key={p.id} className="de-project-item de-project-item-managed">
               <div className={`de-project-icon-wrap ${p.iconColor}`}>
-                <img src={p.arrowSrc} alt="" className="de-project-arrow" width="24" height="24" loading="lazy" decoding="async" />
+                <img src={p.arrowSrc} alt="Imagen descriptiva" className="de-project-arrow" width="24" height="24" loading="lazy" decoding="async" />
               </div>
               <div className="de-project-info">
                 <div className="de-project-name">
