@@ -60,7 +60,8 @@ const LoginForm = ({ onSwitchMode }) => {
         className="btn-google"
         id="google-login"
         onClick={() => {
-          window.location.href = "http://localhost:3000/api/auth/google"
+          const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+          window.location.href = `${baseUrl.replace(/\/api$/, '')}/api/auth/google`;
         }}
       >
         <svg className="google-icon" viewBox="0 0 24 24">
@@ -78,7 +79,8 @@ const LoginForm = ({ onSwitchMode }) => {
         className="btn-github mt-3"
         id="github-login"
         onClick={() => {
-          window.location.href = "http://localhost:3000/api/auth/github"
+          const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+          window.location.href = `${baseUrl.replace(/\/api$/, '')}/api/auth/github`;
         }}
       >
         <svg className="github-icon" viewBox="0 0 24 24" fill="white">

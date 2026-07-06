@@ -289,6 +289,7 @@
       "button": "Go to Help Center"
     },
     "footer": {
+      "copy": "© {{year}} FWD Costa Rica. All rights reserved.",
       "rights": "All rights reserved.",
       "terms": "Terms and Conditions",
       "privacy": "Privacy Policy",
