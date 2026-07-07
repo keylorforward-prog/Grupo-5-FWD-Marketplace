@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const config = require('../Config/config');
-const { register, login, adminLogin, logout, me, completarPerfil, forgotPassword, verifyRecoveryCode, resetPassword } = require('../Controllers/authController');
+const { register, login, adminLogin, logout, me, updatePassword, completarPerfil, forgotPassword, verifyRecoveryCode, resetPassword } = require('../Controllers/authController');
 const { verifyToken } = require('../Middleware/authMiddleware');
 const multer = require('multer');
 
@@ -136,6 +136,7 @@ router.post('/logout', logout);
  *         description: Token inválido o expirado
  */
 router.get('/me', verifyToken, me);
+router.put('/update-password', verifyToken, updatePassword);
 
 /**
  * @swagger

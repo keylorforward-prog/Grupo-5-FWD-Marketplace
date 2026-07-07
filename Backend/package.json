@@ -7,6 +7,7 @@
     "start": "node app.js",
     "dev": "node app.js",
     "dev:watch": "node --watch app.js",
+    "check:s3": "node Config/aws.js",
     "seed:ofertas": "node scripts/seedOfertas.js",
     "seed:conversaciones": "node scripts/seedConversaciones.js",
     "test:resenas": "node scripts/testResenas.js",
