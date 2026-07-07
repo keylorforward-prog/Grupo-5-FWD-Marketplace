@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../../../../context/AuthContext';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
+import { formatearTelefono, esTelefonoValido } from '../../../../../utils/inputMasks';
 import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 
@@ -44,12 +45,6 @@ const normalizarPerfil = (perfil, usuario) => ({
   ...perfil,
   usuario: perfil?.usuario ?? usuario ?? {},
 });
-
-const normalizarWhatsapp = (valor) => {
-  const digitos = valor.replace(/\D/g, '').slice(0, 8);
-  if (digitos.length <= 4) return digitos;
-  return `${digitos.slice(0, 4)}-${digitos.slice(4)}`;
-};
 
 const obtenerSectorInicial = (sector) => {
   if (!sector) return { seleccionado: '', otro: '' };
@@ -105,7 +100,7 @@ export default function PerfilEmpresa() {
           descripcion: perfilNormalizado.descripcion ?? '',
           logo: perfilNormalizado.logo ?? '',
           sitio_web: perfilNormalizado.sitio_web ?? '',
-          telefono_whatsapp: normalizarWhatsapp(perfilNormalizado.telefono_whatsapp ?? ''),
+          telefono_whatsapp: formatearTelefono(perfilNormalizado.telefono_whatsapp ?? ''),
         });
       } catch (err) {
         if (activo) setError(err);
@@ -156,7 +151,7 @@ export default function PerfilEmpresa() {
   };
 
   const actualizarWhatsapp = (valor) => {
-    actualizarCampo('telefono_whatsapp', normalizarWhatsapp(valor));
+    actualizarCampo('telefono_whatsapp', formatearTelefono(valor));
     setErrorValidacion('');
   };
 
@@ -187,14 +182,14 @@ export default function PerfilEmpresa() {
       descripcion: perfil.descripcion ?? '',
       logo: perfil.logo ?? '',
       sitio_web: perfil.sitio_web ?? '',
-      telefono_whatsapp: normalizarWhatsapp(perfil.telefono_whatsapp ?? ''),
+      telefono_whatsapp: formatearTelefono(perfil.telefono_whatsapp ?? ''),
     });
     setEditando(false);
   };
 
   const guardarPerfil = async () => {
     const sectorFinal = sectorSeleccionado === SECTOR_OTRO ? sectorOtro.trim() : sectorSeleccionado;
-    const whatsappValido = /^\d{4}-\d{4}$/.test(borrador.telefono_whatsapp);
+    const whatsappValido = esTelefonoValido(borrador.telefono_whatsapp);
 
     if (!sectorFinal) {
       setErrorValidacion('Selecciona un sector o escribe uno en Otro.');
@@ -226,7 +221,7 @@ export default function PerfilEmpresa() {
         descripcion: perfilNormalizado.descripcion ?? '',
         logo: perfilNormalizado.logo ?? '',
         sitio_web: perfilNormalizado.sitio_web ?? '',
-        telefono_whatsapp: normalizarWhatsapp(perfilNormalizado.telefono_whatsapp ?? ''),
+        telefono_whatsapp: formatearTelefono(perfilNormalizado.telefono_whatsapp ?? ''),
       });
       setEditando(false);
     } catch (err) {
