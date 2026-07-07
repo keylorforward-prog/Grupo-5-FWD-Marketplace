@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
+import { MENSAJE_TELEFONO_INVALIDO, esTelefonoValido, formatearTelefono } from '../../../../../utils/inputMasks';
 import EstadoDatos from '../../components/EstadoDatos';
 import DashboardLayout from '../../components/DashboardLayout';
 
@@ -41,7 +42,7 @@ export default function Configuracion() {
           correo: usuario.correo || '',
           sector: perfil.sector || '',
           sitio_web: perfil.sitio_web || '',
-          telefono_whatsapp: perfil.telefono_whatsapp || '',
+          telefono_whatsapp: formatearTelefono(perfil.telefono_whatsapp || ''),
           descripcion: perfil.descripcion || '',
         }));
       })
@@ -56,10 +57,16 @@ export default function Configuracion() {
 
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    const valor = name === 'telefono_whatsapp' ? formatearTelefono(value) : value;
+    setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : valor }));
   }, []);
 
   const handleGuardar = useCallback(async () => {
+    if (form.telefono_whatsapp && !esTelefonoValido(form.telefono_whatsapp)) {
+      setMensaje({ tipo: 'error', texto: MENSAJE_TELEFONO_INVALIDO });
+      return;
+    }
+
     setGuardando(true);
     setMensaje(null);
     try {
@@ -146,7 +153,7 @@ export default function Configuracion() {
             <input className="de-form-control" name="correo" value={form.correo} onChange={handleChange} placeholder="Correo de empresa" aria-label="Correo de empresa" type="email" />
             <input className="de-form-control" name="sector" value={form.sector} onChange={handleChange} placeholder="Sector" aria-label="Sector" />
             <input className="de-form-control" name="sitio_web" value={form.sitio_web} onChange={handleChange} placeholder="Sitio web" aria-label="Sitio web" />
-            <input className="de-form-control" name="telefono_whatsapp" value={form.telefono_whatsapp} onChange={handleChange} placeholder="WhatsApp (0000-0000)" aria-label="WhatsApp" />
+            <input className="de-form-control" name="telefono_whatsapp" value={form.telefono_whatsapp} onChange={handleChange} placeholder="7104-1281" aria-label="WhatsApp" inputMode="numeric" maxLength={9} />
             <textarea
               className="de-form-control de-form-textarea"
               name="descripcion"

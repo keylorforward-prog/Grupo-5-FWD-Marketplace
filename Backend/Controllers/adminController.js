@@ -19,7 +19,7 @@ const {
 } = require('../Models');
 const { Op } = require('sequelize');
 const { HeadBucketCommand } = require('@aws-sdk/client-s3');
-const { s3Client } = require('../Config/aws');
+const { describeS3Error, s3Client } = require('../Config/aws');
 const { activityBus, publishAdminActivity } = require('../Services/adminActivityService');
 
 const CONFIGURACION_DEFAULTS = [
@@ -1352,7 +1352,13 @@ exports.healthSistema = async (req, res) => {
     await s3Client.send(new HeadBucketCommand({ Bucket: process.env.S3_BUCKET_NAME || 'marketplacefwd' }));
     s3 = { ...s3, ok: true, latencyMs: Date.now() - s3Started };
   } catch (error) {
-    s3 = { ...s3, ok: false, latencyMs: Date.now() - s3Started, message: error.message };
+    const detalle = describeS3Error(error);
+    const partes = [
+      detalle.message,
+      detalle.code && `code ${detalle.code}`,
+      detalle.status && `status ${detalle.status}`,
+    ].filter(Boolean);
+    s3 = { ...s3, ok: false, latencyMs: Date.now() - s3Started, message: partes.join(' · ') || 'Error desconocido de S3' };
   }
 
   res.json({
@@ -1365,7 +1371,8 @@ exports.healthSistema = async (req, res) => {
         JWT_SECRET: Boolean(process.env.JWT_SECRET),
         AWS_REGION: Boolean(process.env.AWS_REGION),
         S3_BUCKET_NAME: Boolean(process.env.S3_BUCKET_NAME),
-        AWS_ACCESS_KEY_ID: Boolean(process.env.AWS_ACCESS_KEY_ID)
+        AWS_ACCESS_KEY_ID: Boolean(process.env.AWS_ACCESS_KEY_ID),
+        AWS_SECRET_ACCESS_KEY: Boolean(process.env.AWS_SECRET_ACCESS_KEY)
       }
     }
   });

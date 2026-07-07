@@ -4,6 +4,14 @@ import { useAuth } from '../../../context/AuthContext';
 import { authService } from '../../../services/authService';
 import { RUTAS, obtenerRol, rutaDashboardDeRol } from '../../../routes/rutas';
 import { Camera, Tag, CreditCard, Smartphone, GraduationCap, Building2, Factory, FileText, AlertCircle, Clock, Link as LinkIcon } from 'lucide-react';
+import {
+  MENSAJE_CEDULA_INVALIDA,
+  MENSAJE_TELEFONO_INVALIDO,
+  esCedulaValida,
+  esTelefonoValido,
+  formatearCedula,
+  formatearTelefono,
+} from '../../../utils/inputMasks';
 import '../AuthPages.css';
 import './CompletarPerfil.css';
 
@@ -46,7 +54,13 @@ const CompletarPerfil = () => {
   }, [user, navigate]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const valor = name === 'cedula'
+      ? formatearCedula(value)
+      : name === 'telefono_whatsapp'
+        ? formatearTelefono(value)
+        : value;
+    setForm({ ...form, [name]: valor });
     if (error) setError('');
   };
 
@@ -71,15 +85,18 @@ const CompletarPerfil = () => {
     e.preventDefault();
     const { rol, cedula, telefono_whatsapp, linkedin, tipo_empresa, sector } = form;
 
-    if (!cedula || !rol) {
+    if (!cedula || !rol || !telefono_whatsapp) {
       setError('Por favor completa todos los campos obligatorios.');
       return;
     }
     
-    // Validación cédula costarricense: formato X-XXXX-XXXX (física) o XX-XXXXXXX-XXX (jurídica)
-    const cedulaRegex = /^\d{1,2}-\d{3,4}-\d{3,4}$/;
-    if (!cedula.startsWith('GOOGLE_') && !cedula.startsWith('GITHUB_') && !cedulaRegex.test(cedula)) {
-      setError('Formato de cédula inválido. Ejemplos: 1-1231-8232 o 12-3456789-123');
+    if (!cedula.startsWith('GOOGLE_') && !cedula.startsWith('GITHUB_') && !esCedulaValida(cedula)) {
+      setError(MENSAJE_CEDULA_INVALIDA);
+      return;
+    }
+
+    if (!esTelefonoValido(telefono_whatsapp)) {
+      setError(MENSAJE_TELEFONO_INVALIDO);
       return;
     }
 
@@ -259,7 +276,7 @@ const CompletarPerfil = () => {
 
               {/* Cedula */}
               <div className="form-group">
-                <label htmlFor="cp-cedula" className="form-label">Cédula <span style={{ color: '#1B6CA8', fontWeight: 500 }}>(incluir guion)</span></label>
+                <label htmlFor="cp-cedula" className="form-label">Cédula</label>
                 <div className="input-wrapper">
                   <CreditCard size={20} className="input-icon" style={{position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)'}} />
                   <input
@@ -268,8 +285,10 @@ const CompletarPerfil = () => {
                     name="cedula"
                     value={form.cedula.startsWith('GOOGLE_') ? '' : form.cedula}
                     onChange={handleChange}
-                    placeholder="1-2342"
+                    placeholder="6-0491-0942"
                     className="form-input has-icon"
+                    inputMode="numeric"
+                    maxLength={11}
                     required
                   />
                 </div>
@@ -286,8 +305,11 @@ const CompletarPerfil = () => {
                     name="telefono_whatsapp"
                     value={form.telefono_whatsapp}
                     onChange={handleChange}
-                    placeholder="8888-8888"
+                    placeholder="7104-1281"
                     className="form-input has-icon"
+                    inputMode="numeric"
+                    maxLength={9}
+                    required
                   />
                 </div>
               </div>

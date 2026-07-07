@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Save, UserRound, X } from 'lucide-react';
+import {
+  MENSAJE_CEDULA_INVALIDA,
+  MENSAJE_TELEFONO_INVALIDO,
+  esCedulaValida,
+  esTelefonoValido,
+  formatearCedula,
+  formatearTelefono,
+} from '../../../utils/inputMasks';
 
 const usuarioInicial = {
   nombre: '',
@@ -57,11 +65,11 @@ export default function AdminUsuarioModal({
     setFormUsuario({
       ...usuarioInicial,
       nombre: usuario.nombre || '',
-      cedula: usuario.cedula || '',
+      cedula: formatearCedula(usuario.cedula || ''),
       correo: usuario.correo || '',
       rol: usuario.rol || 'ESTUDIANTE',
       estado_cuenta: usuario.estado_cuenta || 'PENDIENTE',
-      telefono_whatsapp: usuario.telefono_whatsapp || '',
+      telefono_whatsapp: formatearTelefono(usuario.telefono_whatsapp || ''),
       foto_perfil: usuario.foto_perfil || '',
       tipo_empresa: usuario.tipo_empresa || '',
       cargo: usuario.cargo || '',
@@ -79,7 +87,7 @@ export default function AdminUsuarioModal({
       estado_verificacion: usuario.perfilEstudiante?.estado_verificacion || 'PENDIENTE',
       reputacion_total: usuario.perfilEstudiante?.reputacion_total || '',
       descripcion: usuario.perfilEstudiante?.descripcion || '',
-      telefono_whatsapp: usuario.perfilEstudiante?.telefono_whatsapp || '',
+      telefono_whatsapp: formatearTelefono(usuario.perfilEstudiante?.telefono_whatsapp || ''),
       motivo_rechazo: usuario.perfilEstudiante?.motivo_rechazo || '',
       metodo_verificacion: usuario.perfilEstudiante?.metodo_verificacion || '',
       match_automatico: Boolean(usuario.perfilEstudiante?.match_automatico),
@@ -92,7 +100,7 @@ export default function AdminUsuarioModal({
       descripcion: usuario.perfilEmpresario?.descripcion || '',
       logo: usuario.perfilEmpresario?.logo || '',
       sitio_web: usuario.perfilEmpresario?.sitio_web || '',
-      telefono_whatsapp: usuario.perfilEmpresario?.telefono_whatsapp || '',
+      telefono_whatsapp: formatearTelefono(usuario.perfilEmpresario?.telefono_whatsapp || ''),
       cedula_juridica_archivo: usuario.perfilEmpresario?.cedula_juridica_archivo || '',
     });
   }, [usuario]);
@@ -104,11 +112,41 @@ export default function AdminUsuarioModal({
 
   if (!open || !usuario) return null;
 
-  const cambiarUsuario = (campo, valor) => setFormUsuario((actual) => ({ ...actual, [campo]: valor }));
-  const cambiarEstudiante = (campo, valor) => setFormEstudiante((actual) => ({ ...actual, [campo]: valor }));
-  const cambiarEmpresario = (campo, valor) => setFormEmpresario((actual) => ({ ...actual, [campo]: valor }));
+  const cambiarUsuario = (campo, valor) => {
+    const normalizado = campo === 'cedula'
+      ? formatearCedula(valor)
+      : campo === 'telefono_whatsapp'
+        ? formatearTelefono(valor)
+        : valor;
+    setFormUsuario((actual) => ({ ...actual, [campo]: normalizado }));
+  };
+  const cambiarEstudiante = (campo, valor) => {
+    const normalizado = campo === 'telefono_whatsapp' ? formatearTelefono(valor) : valor;
+    setFormEstudiante((actual) => ({ ...actual, [campo]: normalizado }));
+  };
+  const cambiarEmpresario = (campo, valor) => {
+    const normalizado = campo === 'telefono_whatsapp' ? formatearTelefono(valor) : valor;
+    setFormEmpresario((actual) => ({ ...actual, [campo]: normalizado }));
+  };
 
   const guardar = () => {
+    if (formUsuario.cedula && !esCedulaValida(formUsuario.cedula)) {
+      window.alert(MENSAJE_CEDULA_INVALIDA);
+      return;
+    }
+    if (formUsuario.telefono_whatsapp && !esTelefonoValido(formUsuario.telefono_whatsapp)) {
+      window.alert(MENSAJE_TELEFONO_INVALIDO);
+      return;
+    }
+    if (formUsuario.rol === 'ESTUDIANTE' && formEstudiante.telefono_whatsapp && !esTelefonoValido(formEstudiante.telefono_whatsapp)) {
+      window.alert(MENSAJE_TELEFONO_INVALIDO);
+      return;
+    }
+    if (formUsuario.rol === 'EMPRESARIO' && formEmpresario.telefono_whatsapp && !esTelefonoValido(formEmpresario.telefono_whatsapp)) {
+      window.alert(MENSAJE_TELEFONO_INVALIDO);
+      return;
+    }
+
     const payload = {
       usuario: {
         ...formUsuario,
@@ -148,7 +186,7 @@ export default function AdminUsuarioModal({
           </label>
           <label className="admin-edit-field">
             <span>Cédula</span>
-            <input value={formUsuario.cedula} onChange={(event) => cambiarUsuario('cedula', event.target.value)} />
+            <input value={formUsuario.cedula} onChange={(event) => cambiarUsuario('cedula', event.target.value)} inputMode="numeric" maxLength={11} placeholder="6-0491-0942" />
           </label>
           <label className="admin-edit-field">
             <span>Correo</span>
@@ -156,7 +194,7 @@ export default function AdminUsuarioModal({
           </label>
           <label className="admin-edit-field">
             <span>WhatsApp</span>
-            <input value={formUsuario.telefono_whatsapp} onChange={(event) => cambiarUsuario('telefono_whatsapp', event.target.value)} />
+            <input value={formUsuario.telefono_whatsapp} onChange={(event) => cambiarUsuario('telefono_whatsapp', event.target.value)} inputMode="numeric" maxLength={9} placeholder="7104-1281" />
           </label>
           <label className="admin-edit-field">
             <span>Rol</span>
@@ -249,7 +287,7 @@ export default function AdminUsuarioModal({
               </label>
               <label className="admin-edit-field">
                 <span>WhatsApp perfil</span>
-                <input value={formEstudiante.telefono_whatsapp} onChange={(event) => cambiarEstudiante('telefono_whatsapp', event.target.value)} />
+                <input value={formEstudiante.telefono_whatsapp} onChange={(event) => cambiarEstudiante('telefono_whatsapp', event.target.value)} inputMode="numeric" maxLength={9} placeholder="7104-1281" />
               </label>
               <label className="admin-edit-field admin-edit-field-wide">
                 <span>Motivo rechazo</span>
@@ -277,7 +315,7 @@ export default function AdminUsuarioModal({
               </label>
               <label className="admin-edit-field">
                 <span>WhatsApp perfil</span>
-                <input value={formEmpresario.telefono_whatsapp} onChange={(event) => cambiarEmpresario('telefono_whatsapp', event.target.value)} />
+                <input value={formEmpresario.telefono_whatsapp} onChange={(event) => cambiarEmpresario('telefono_whatsapp', event.target.value)} inputMode="numeric" maxLength={9} placeholder="7104-1281" />
               </label>
               <label className="admin-edit-field admin-edit-field-wide">
                 <span>Logo URL</span>
