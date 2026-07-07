@@ -2,6 +2,14 @@ import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import apiClient from '../../../../services/apiClient';
+import {
+  MENSAJE_CEDULA_INVALIDA,
+  MENSAJE_TELEFONO_INVALIDO,
+  esCedulaValida,
+  esTelefonoValido,
+  formatearCedula,
+  formatearTelefono,
+} from '../../../../utils/inputMasks';
 
 const CompanyProfile = () => {
   const { user, login } = useAuth();
@@ -42,8 +50,8 @@ const CompanyProfile = () => {
             nombre_empresa: result.data.nombre_empresa || '',
             nombre: result.data.nombre || '',
             sitio_web: result.data.sitio_web || '',
-            cedula: result.data.cedula || '',
-            telefono_whatsapp: result.data.telefono_whatsapp || '',
+            cedula: formatearCedula(result.data.cedula || ''),
+            telefono_whatsapp: formatearTelefono(result.data.telefono_whatsapp || ''),
             sector: result.data.sector || '',
             descripcion: result.data.descripcion || ''
           });
@@ -59,12 +67,27 @@ const CompanyProfile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const valor = name === 'cedula'
+      ? formatearCedula(value)
+      : name === 'telefono_whatsapp'
+        ? formatearTelefono(value)
+        : value;
+    setFormData(prev => ({ ...prev, [name]: valor }));
   };
 
   const handleSave = async () => {
     const userId = user?.id || user?.id_usuario;
     if (!userId) return;
+    if (formData.cedula && !esCedulaValida(formData.cedula)) {
+      setMensaje(MENSAJE_CEDULA_INVALIDA);
+      setTimeout(() => setMensaje(null), 3000);
+      return;
+    }
+    if (formData.telefono_whatsapp && !esTelefonoValido(formData.telefono_whatsapp)) {
+      setMensaje(MENSAJE_TELEFONO_INVALIDO);
+      setTimeout(() => setMensaje(null), 3000);
+      return;
+    }
     
     setIsSaving(true);
     setMensaje(null);
@@ -160,7 +183,7 @@ const CompanyProfile = () => {
               color: mensaje === 'exito' ? '#065f46' : '#991b1b',
               fontSize: 'var(--text-label-sm)', fontWeight: 500,
             }}>
-              {mensaje === 'exito' ? 'Cambios guardados correctamente.' : 'Error al guardar los cambios.'}
+              {mensaje === 'exito' ? 'Cambios guardados correctamente.' : mensaje === 'error' ? 'Error al guardar los cambios.' : mensaje}
             </p>
           )}
 
@@ -184,12 +207,12 @@ const CompanyProfile = () => {
             
             <div className="se-input-group">
               <label className="se-label-bold">{t('companyProfile.legalId')}</label>
-              <input type="text" className="se-input se-body-md" name="cedula" value={formData.cedula} onChange={handleInputChange} placeholder={t('companyProfile.legalId')} />
+              <input type="text" className="se-input se-body-md" name="cedula" value={formData.cedula} onChange={handleInputChange} placeholder="6-0491-0942" inputMode="numeric" maxLength={11} />
             </div>
 
             <div className="se-input-group">
               <label className="se-label-bold">{t('companyProfile.contactNumber', 'Número de Contacto')}</label>
-              <input type="text" className="se-input se-body-md" name="telefono_whatsapp" value={formData.telefono_whatsapp} onChange={handleInputChange} placeholder={t('companyProfile.contactNumber', 'Número de Contacto')} />
+              <input type="text" className="se-input se-body-md" name="telefono_whatsapp" value={formData.telefono_whatsapp} onChange={handleInputChange} placeholder="7104-1281" inputMode="numeric" maxLength={9} />
             </div>
             
             <div className="se-input-group">
