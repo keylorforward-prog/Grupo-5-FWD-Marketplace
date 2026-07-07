@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 module.exports = {
   jwt: {
     secret: process.env.JWT_SECRET || 'fallback_secret_change_in_production',
@@ -9,6 +11,9 @@ module.exports = {
     port: process.env.PORT || 3000,
   },
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origins: [
+      frontendUrl,
+      'http://localhost:5173',
+    ],
   },
 };
