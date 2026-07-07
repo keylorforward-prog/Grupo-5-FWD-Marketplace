@@ -11,6 +11,10 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "https://grupo-5-fwd-marketplace-backend.onrender.com/api/$1"
+    },
+    {
       "handle": "filesystem"
     },
     {
