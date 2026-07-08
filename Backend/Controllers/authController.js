@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
+<<<<<<< HEAD
+const {Usuario,PerfilEstudiante,PerfilEmpresario,CodigoRecuperacion} = require('../Models');
+=======
 const { sequelize, Usuario, PerfilEstudiante, PerfilEmpresario, CodigoRecuperacion } = require('../Models');
+>>>>>>> d484eb4090edbc13f882214eded7253e0543bf11
 const config = require('../Config/config');
 const { uploadFileToS3 } = require('../Config/aws');
 const { sendRecoveryEmail } = require('../Services/emailService');
@@ -71,6 +75,8 @@ const respuestaConflictoCedula = (res) => res.status(409).json({
   code: 'CEDULA_ALREADY_EXISTS',
 });
 
+<<<<<<< HEAD
+=======
 const ROLES_REGISTRO = new Set(['ESTUDIANTE', 'EMPRESARIO']);
 
 const esErrorAlmacenamiento = (error) => {
@@ -123,6 +129,7 @@ const subirArchivosRegistro = async (req, rol, archivoTituloFwd) => {
   return archivos;
 };
 
+>>>>>>> d484eb4090edbc13f882214eded7253e0543bf11
 // ── Controladores ─────────────────────────────────────────────────────────────
 
 const register = async (req, res) => {
@@ -466,7 +473,11 @@ const completarPerfil = async (req, res) => {
 
     const usuarioConCedula = await Usuario.findOne({
       where: {
+<<<<<<< HEAD
+        cedula,
+=======
         cedula: cedulaNormalizada,
+>>>>>>> d484eb4090edbc13f882214eded7253e0543bf11
         id_usuario: { [Op.ne]: userId }
       }
     });
@@ -539,11 +550,18 @@ const completarPerfil = async (req, res) => {
     });
 
   } catch (error) {
+<<<<<<< HEAD
+    console.error('Error en completarPerfil:', error);
+    if (esConflictoCedula(error)) {
+      return respuestaConflictoCedula(res);
+    }
+=======
     registrarErrorAuth('Error en completarPerfil', error);
     if (esConflictoCedula(error)) {
       return respuestaConflictoCedula(res);
     }
     if (esErrorAlmacenamiento(error)) return responderErrorAlmacenamiento(res);
+>>>>>>> d484eb4090edbc13f882214eded7253e0543bf11
 
     return res.status(500).json({
       success: false,
