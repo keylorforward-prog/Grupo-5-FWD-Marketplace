@@ -14,11 +14,13 @@ import {
   History,
   Home,
   LogOut,
+  Menu,
   MessageSquare,
   Moon,
   Settings,
   Sun,
   User,
+  X,
 } from 'lucide-react';
 import LanguageSwitcher from '../../../../components/comun/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
@@ -53,6 +55,7 @@ export default function DashboardLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
+  const [sidebarMovilAbierto, setSidebarMovilAbierto] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
   const [confirmandoCerrarSesion, setConfirmandoCerrarSesion] = useState(false);
   const [tema, setTema] = useState(() => {
@@ -160,6 +163,14 @@ export default function DashboardLayout({ children }) {
       <header className="de-header">
         <div className="de-header-inner">
           <div className="de-header-left">
+            <button
+              className="de-hamburger de-link-button"
+              type="button"
+              onClick={() => setSidebarMovilAbierto((v) => !v)}
+              aria-label="Menú"
+            >
+              {sidebarMovilAbierto ? <X size={22} /> : <Menu size={22} />}
+            </button>
             <button className="de-brand de-link-button" type="button" onClick={() => navigate('/egresado/dashboard')}>
               <img
                 className="de-brand-logo"
@@ -298,9 +309,13 @@ export default function DashboardLayout({ children }) {
         </div>
       </header>
 
+      {sidebarMovilAbierto && (
+        <div className="de-sidebar-overlay" onClick={() => setSidebarMovilAbierto(false)} />
+      )}
+
       <div className="de-body">
-        <aside className="de-sidebar">
-            <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
+        <aside className={`de-sidebar ${sidebarMovilAbierto ? 'de-sidebar--open' : ''}`}>
+            <div className="de-sidebar-profile" onClick={() => { setMenuPerfilAbierto((abierto) => !abierto); setSidebarMovilAbierto(false); }}>
               <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
               <div className="de-sidebar-profile-info">
                 <span className="de-sidebar-name">{displayName}</span>
@@ -336,7 +351,7 @@ export default function DashboardLayout({ children }) {
                                   key={hijo.key}
                                   className={`de-sidebar-link de-sidebar-sublink ${activePage === hijo.key ? 'active' : ''}`}
                                   type="button"
-                                  onClick={() => navigate(hijo.path)}
+                                  onClick={() => { navigate(hijo.path); setSidebarMovilAbierto(false); }}
                                 >
                                   <ChildIcon size={16} className="de-sidebar-icon" />
                                   {hijo.label}
@@ -353,7 +368,7 @@ export default function DashboardLayout({ children }) {
                       key={item.key}
                       className={`de-sidebar-link ${activePage === item.key ? 'active' : ''}`}
                       type="button"
-                      onClick={() => navigate(item.path)}
+                      onClick={() => { navigate(item.path); setSidebarMovilAbierto(false); }}
                     >
                       <Icon size={18} className="de-sidebar-icon" />
                       {item.label}
@@ -366,7 +381,7 @@ export default function DashboardLayout({ children }) {
             <div className="de-sidebar-help">
               <p className="de-sidebar-help-title">{t('empresaLayout.help.title')}</p>
               <p className="de-sidebar-help-text">{t('empresaLayout.help.text')}</p>
-              <button className="de-sidebar-help-btn" type="button" onClick={() => navigate(RUTAS.egresadoSoporte)}>
+              <button className="de-sidebar-help-btn" type="button" onClick={() => { navigate(RUTAS.egresadoSoporte); setSidebarMovilAbierto(false); }}>
                 <HelpCircle size={14} />
                 {t('empresaLayout.help.button')}
               </button>
@@ -387,6 +402,29 @@ export default function DashboardLayout({ children }) {
           </footer>
         </main>
       </div>
+
+      <nav className="de-bottom-nav">
+        {[
+          { key: 'inicio', label: t('egresadoLayout.sidebar.inicio'), icon: Home, path: '/egresado/dashboard' },
+          { key: 'explorar', label: t('egresadoLayout.sidebar.explorar'), icon: Compass, path: '/egresado/dashboard/explorar' },
+          { key: 'proyectos', label: t('egresadoLayout.sidebar.proyectos'), icon: FolderOpen, path: '/egresado/dashboard/proyectos' },
+          { key: 'mensajes', label: t('egresadoLayout.sidebar.mensajes'), icon: MessageSquare, path: '/egresado/dashboard/mensajes' },
+          { key: 'perfil', label: t('egresadoLayout.profile.perfil'), icon: User, path: RUTAS.egresadoPerfil },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.key}
+              className={`de-bottom-nav-item de-link-button ${activePage === item.key ? 'active' : ''}`}
+              type="button"
+              onClick={() => navigate(item.path)}
+            >
+              <Icon size={20} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
 
       {confirmandoCerrarSesion && (
         <div className="de-confirm-overlay" onClick={() => setConfirmandoCerrarSesion(false)}>

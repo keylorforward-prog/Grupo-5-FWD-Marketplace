@@ -60,3 +60,27 @@
   border-radius: 50%;
   animation: fwdPulso 2.2s ease-out infinite;
 }
+
+/* ============================================
+   RESPONSIVE DESIGN (NUEVO)
+   ============================================ */
+
+@media (max-width: 768px) {
+  .encabezadoComun {
+    padding: 10px 16px;
+  }
+  
+  .encabezadoTitulo {
+    font-size: 15px;
+  }
+  
+  .accionesUsuario {
+    gap: 6px;
+  }
+  
+  .botonCampana {
+    width: 36px;
+    height: 36px;
+  }
+}
+

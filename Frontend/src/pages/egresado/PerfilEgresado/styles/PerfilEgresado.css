@@ -1506,3 +1506,112 @@
 .spin {
   animation: spin 0.8s linear infinite;
 }
+
+/* ============================================
+   RESPONSIVE DESIGN (NUEVO)
+   ============================================ */
+
+/* ── Tablet (1024px e inferior) ── */
+@media (max-width: 1024px) {
+  .contenidoPrincipalPerfil {
+    flex-direction: column;
+    padding: 0 24px;
+    margin-top: -40px;
+  }
+
+  .columnaLateralPerfil {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: start;
+  }
+}
+
+/* ── Móvil Grande (768px e inferior) ── */
+@media (max-width: 768px) {
+  .bannerSuperior {
+    padding: 40px 24px 60px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .decoracionBannerFlecha {
+    display: none;
+  }
+  
+  .tituloBanner {
+    font-size: 32px;
+  }
+  
+  .columnaLateralPerfil {
+    grid-template-columns: 1fr;
+  }
+  
+  .gridSkills, .listaSoftSkills {
+    gap: 8px;
+  }
+  
+  .itemPostulacion {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .infoPostulacion {
+    width: 100%;
+  }
+
+  .etiquetasPostulacion {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+  
+  .itemProyectoAcademico {
+    flex-direction: column;
+  }
+  
+  .iconoProyectoAcademico {
+    margin-bottom: 12px;
+  }
+}
+
+/* ── Móvil Pequeño (480px e inferior) ── */
+@media (max-width: 480px) {
+  .bannerSuperior {
+    padding: 30px 16px 50px;
+  }
+  
+  .tituloBanner {
+    font-size: 26px;
+  }
+  
+  .subtituloBanner {
+    font-size: 14px;
+  }
+
+  .contenidoPrincipalPerfil {
+    padding: 0 16px;
+    margin-top: -30px;
+  }
+  
+  .tarjetaPerfilBase {
+    padding: 20px 16px;
+  }
+  
+  .accionesPostulacion, .headerPostulacion {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .headerProyectoAcademico {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .btnPrimarioModal, .btnSecundarioModal {
+    width: 100%;
+    justify-content: center;
+  }
+}
