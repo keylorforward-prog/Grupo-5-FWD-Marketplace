@@ -52,6 +52,13 @@ export const formatearPostulacion = (postulacion) => {
     mensaje: postulacion.mensaje_presentacion,
     empresa: usuarioEmpresa.nombre || 'Empresa',
     empresaLogo: perfilEmpresario.logo || null,
+    // Campos de cotización
+    tarifaHora:  postulacion.tarifa_hora  != null ? Number(postulacion.tarifa_hora)  : null,
+    totalHoras:  postulacion.total_horas  != null ? Number(postulacion.total_horas)  : null,
+    subtotal:    postulacion.subtotal     != null ? Number(postulacion.subtotal)     : null,
+    iva:         postulacion.iva          != null ? Number(postulacion.iva)          : null,
+    total:       postulacion.total        != null ? Number(postulacion.total)        : null,
+    presupuestoMax: postulacion.presupuesto_max != null ? Number(postulacion.presupuesto_max) : null,
   };
 };
 
@@ -132,7 +139,7 @@ export const formatearPostulacionEmpleo = (postulacion) => {
     titulo: oferta.cargo || oferta.titulo || 'Oferta de empleo',
     descripcion: oferta.descripcion || '',
     tecnologias: (oferta.tecnologias_requeridas || '').split(',').map((t) => t.trim()).filter(Boolean),
-    presupuesto: oferta.rango_salarial_max || oferta.rango_salarial_min || null,
+    presupuesto: oferta.salario_max || oferta.salario_min || null,
     estado: status,
     estadoRaw: postulacion.estado,
     tipoEstado: statusType,

@@ -785,6 +785,8 @@
     "campoPretension": "Pretensión salarial",
     "pretensionPlaceholder": "Ej: 1500000",
     "pretensionHint": "Opcional. Indicá el salario mensual que esperás.",
+    "pretensionHintMin": "Mínimo sugerido: ${{min}}. Indicá el salario mensual que esperás.",
+    "errorPretensionMin": "La pretensión salarial no puede ser menor a ${{min}}.",
     "pretensionLabel": "Pretensión salarial",
     "guardando": "Guardando...",
     "sinCambios": "Sin cambios",

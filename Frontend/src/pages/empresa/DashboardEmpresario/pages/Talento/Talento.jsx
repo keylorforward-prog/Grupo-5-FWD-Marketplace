@@ -2,7 +2,6 @@ import { lazy, Suspense, useMemo, useState } from 'react';
 import { CheckCircle2, ChevronLeft, ChevronRight, Eye, Search, X } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import { catalogoTecnologias } from '../../../../../data/proyectosEgresado';
-import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
 import { formatearTalento } from '../../utils/dashboardEmpresarioFormatters';
@@ -72,7 +71,7 @@ export default function Talento() {
   };
 
   return (
-    <DashboardLayout activePage="talento">
+    <>
       <div className="de-page-heading">
         <h1>Talento Recomendado</h1>
         <p className="de-page-subtitle">Mostrando 10 egresados por pagina.</p>
@@ -203,6 +202,6 @@ export default function Talento() {
           <PerfilEgresadoModal perfil={perfilSeleccionado} onClose={() => setPerfilSeleccionado(null)} />
         </Suspense>
       )}
-    </DashboardLayout>
+    </>
   );
 }

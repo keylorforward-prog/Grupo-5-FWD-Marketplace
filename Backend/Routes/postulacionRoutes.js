@@ -102,4 +102,22 @@ router.put('/:id', controller.update);
  */
 router.delete('/:id', controller.delete);
 
+/**
+ * @swagger
+ * /api/postulaciones/explicar-precio:
+ *   post:
+ *     summary: Explicar el precio de una cotización usando IA
+ *     tags: [Postulacion]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Explicación generada
+ */
+router.post('/explicar-precio', controller.explicarPrecio);
+
 module.exports = router;

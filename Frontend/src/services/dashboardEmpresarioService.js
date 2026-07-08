@@ -108,6 +108,10 @@ export const dashboardEmpresarioService = {
     return get('/dashboard-empresario/entregables', params);
   },
 
+  actualizarEstadoEntregable(id, estado) {
+    return apiClient.put(`/dashboard-empresario/entregables/${id}/estado`, { estado }).then(extraerData);
+  },
+
   obtenerMensajesRecientes(params) {
     return get('/dashboard-empresario/mensajes-recientes', params);
   },

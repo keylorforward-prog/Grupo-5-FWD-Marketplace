@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useNotificaciones } from '../../../../../hooks/useNotificaciones';
-import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import { formatearNotificacion } from '../../utils/dashboardEmpresarioFormatters';
 
@@ -9,7 +8,7 @@ export default function Notificaciones() {
   const notificaciones = useMemo(() => data.map(formatearNotificacion), [data]);
 
   return (
-    <DashboardLayout activePage="notificaciones">
+    <>
       <div className="de-page-heading">
         <h1>Notificaciones</h1>
       </div>
@@ -25,6 +24,6 @@ export default function Notificaciones() {
           </div>
         ))}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

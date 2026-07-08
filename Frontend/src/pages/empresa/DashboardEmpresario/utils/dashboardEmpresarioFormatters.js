@@ -126,8 +126,14 @@ export const formatearOferta = (oferta) => {
 export const formatearEntregable = (entregable) => ({
   id: entregable.id_entregable,
   name: entregable.titulo,
-  meta: entregable.proyecto?.titulo || entregable.descripcion || 'Sin proyecto asociado',
+  descripcion: entregable.descripcion || '',
+  tipo: entregable.tipo,
   status: entregable.estado,
+  archivoUrl: entregable.archivo_url || null,
+  fecha: entregable.fecha_creacion ? new Date(entregable.fecha_creacion).toLocaleDateString() : '—',
+  proyecto: entregable.proyecto?.propuesta?.titulo || entregable.proyecto?.titulo || 'Sin proyecto',
+  proyectoId: entregable.id_proyecto,
+  empresa: entregable.proyecto?.propuesta?.perfilEmpresario?.usuario?.nombre || '',
 });
 
 export const formatearMensaje = (conversacion) => {

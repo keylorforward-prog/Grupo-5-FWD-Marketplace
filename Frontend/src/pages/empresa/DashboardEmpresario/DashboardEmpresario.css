@@ -3367,6 +3367,58 @@
   color: var(--ink-muted);
 }
 
+.de-deliverable-desc {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.de-deliverable-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.de-btn-icon {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-raised);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.de-btn-icon:hover {
+  background: var(--surface-hover);
+  color: var(--ink-strong);
+}
+
+.de-btn-icon.success { color: #22c55e; }
+.de-btn-icon.success:hover { background: rgba(34, 197, 94, 0.1); }
+.de-btn-icon.warning { color: #f59e0b; }
+.de-btn-icon.warning:hover { background: rgba(245, 158, 11, 0.1); }
+
+.de-dimmed { opacity: 0.5; pointer-events: none; }
+
+.conteoProyectos {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  background: var(--surface-sunken);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
 /* ── Messages Panel ────────────────────────────────────────────────────── */
 .de-message-item {
   display: flex;

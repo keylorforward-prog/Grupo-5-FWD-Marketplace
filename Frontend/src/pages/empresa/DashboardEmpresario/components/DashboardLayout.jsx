@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import CampanaNotificaciones from '../../../../components/notificaciones/CampanaNotificaciones';
 import {
@@ -28,7 +28,7 @@ import {
 import LanguageSwitcher from '../../../../components/comun/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
-export default function DashboardLayout({ activePage, children }) {
+export default function DashboardLayout() {
   const { t } = useTranslation();
   const navLinks = [
     { label: t('empresaLayout.nav.inicio'), icon: Home, path: '/DashboardEmpresario', key: 'inicio' },
@@ -56,6 +56,26 @@ export default function DashboardLayout({ activePage, children }) {
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const activePage = (() => {
+    const path = location.pathname;
+    if (path === '/DashboardEmpresario' || path === '/DashboardEmpresario/') return 'inicio';
+    const seg = path.split('/')[2];
+    if (seg === 'perfil') return 'perfil';
+    if (seg === 'proyectos') return 'proyectos';
+    if (seg === 'empleos') return 'empleos';
+    if (seg === 'ofertas') return 'ofertas';
+    if (seg === 'entregables') return 'entregables';
+    if (seg === 'mensajes') return 'mensajes';
+    if (seg === 'talento') return 'talento';
+    if (seg === 'historial') return 'historial';
+    if (seg === 'evaluaciones') return 'evaluaciones';
+    if (seg === 'facturacion') return 'facturacion';
+    if (seg === 'notificaciones') return 'notificaciones';
+    if (seg === 'ayuda') return 'ayuda';
+    if (seg === 'configuracion') return 'configuracion';
+    return seg || 'inicio';
+  })();
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
   const [sidebarMovilAbierto, setSidebarMovilAbierto] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
@@ -319,7 +339,7 @@ export default function DashboardLayout({ activePage, children }) {
         </aside>
 
         <main className="de-main fwd-fondo-decorativo">
-          <div className="de-main-content">{children}</div>
+          <div className="de-main-content"><Outlet /></div>
         </main>
       </div>
 

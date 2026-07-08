@@ -33,6 +33,7 @@ router.put('/postulaciones-empleo/:id/estado', dashboardEmpresarioController.act
 router.put('/postulaciones/batch-estado', dashboardEmpresarioController.actualizarEstadoPostulacionBatch);
 router.get('/talento-recomendado', dashboardEmpresarioController.listarTalento);
 router.get('/entregables', dashboardEmpresarioController.listarEntregables);
+router.put('/entregables/:id/estado', dashboardEmpresarioController.actualizarEstadoEntregable);
 router.get('/mensajes-recientes', dashboardEmpresarioController.listarMensajesRecientes);
 router.get('/conversacion/:idPostulacion', dashboardEmpresarioController.obtenerConversacion);
 router.post('/enviar-mensaje', dashboardEmpresarioController.enviarMensaje);

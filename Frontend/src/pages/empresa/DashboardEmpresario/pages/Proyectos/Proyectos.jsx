@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Check, CheckCircle, ChevronDown, ChevronUp, Clock, Edit3, ExternalLink, Eye, PauseCircle, PlayCircle, Plus, Save, Trash2, XCircle, AlertTriangle, Sparkles } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import ModalResena from '../../../../../components/ModalResena/ModalResena';
-import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
 import { formatearPropuesta } from '../../utils/dashboardEmpresarioFormatters';
@@ -250,7 +249,7 @@ export default function Proyectos() {
   };
 
   return (
-    <DashboardLayout activePage="proyectos">
+    <>
       <div className="de-page-heading">
         <div>
           <h1>{t('empresaProyectos.title')}</h1>
@@ -546,6 +545,6 @@ export default function Proyectos() {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </>
   );
 }

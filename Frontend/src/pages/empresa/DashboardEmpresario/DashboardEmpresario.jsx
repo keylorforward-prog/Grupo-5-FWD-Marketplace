@@ -1,6 +1,11 @@
+import { Outlet } from 'react-router-dom';
 import './DashboardEmpresario.css';
-import Inicio from './pages/Inicio/Inicio';
+import DashboardLayout from './components/DashboardLayout';
 
 export default function DashboardEmpresario() {
-  return <Inicio />;
+  return (
+    <DashboardLayout>
+      <Outlet />
+    </DashboardLayout>
+  );
 }

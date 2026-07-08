@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../../context/AuthContext';
-import DashboardLayout from '../../components/DashboardLayout';
 import { Plus, Trash2, History, MessageSquare } from 'lucide-react';
 import './CrearProyectoIA.css';
 
@@ -365,7 +364,7 @@ export default function CrearProyectoIA() {
   }
 
   return (
-    <DashboardLayout activePage="proyectos">
+    <>
       <div className="de-page-heading">
         <p className="de-eyebrow">Nuevo proyecto</p>
         <h1>
@@ -592,6 +591,6 @@ export default function CrearProyectoIA() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -161,4 +161,9 @@ export const egresadoService = {
     const respuesta = await apiClient.get(`/resenas/propia/${idProyecto}/${rol}`);
     return respuesta.data;
   },
+
+  async explicarPrecio(datos) {
+    const respuesta = await apiClient.post('/postulaciones/explicar-precio', datos);
+    return respuesta.data?.explicacion ?? '';
+  },
 };

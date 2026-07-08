@@ -18,6 +18,7 @@ const ForgotPasswordPage = lazy(() => import('../pages/RecuperacionContra/Forgot
 
 // Empresa
 const DashboardEmpresario = lazy(() => import('../pages/empresa/DashboardEmpresario/DashboardEmpresario'));
+const Inicio = lazy(() => import('../pages/empresa/DashboardEmpresario/pages/Inicio/Inicio'));
 const ProyectosEmpresario = lazy(() => import('../pages/empresa/DashboardEmpresario/pages/Proyectos/Proyectos'));
 const OfertasEmpresario = lazy(() => import('../pages/empresa/DashboardEmpresario/pages/Ofertas/Ofertas'));
 const EntregablesEmpresario = lazy(() => import('../pages/empresa/DashboardEmpresario/pages/Entregables/Entregables'));
@@ -156,25 +157,25 @@ export default function Routing() {
               <DashboardEmpresario />
             </RutaProtegida>
           }
-        />
-
-        {/* Subrutas de Empresa Dashboard */}
-        <Route path="/DashboardEmpresario/perfil" element={<RutaProtegida rolPermitido="empresa"><PerfilEmpresa /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/proyectos" element={<RutaProtegida rolPermitido="empresa"><ProyectosEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/empleos" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpleo /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/publicar-empleo" element={<RutaProtegida rolPermitido="empresa"><PublicarEmpleo /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/ofertas" element={<RutaProtegida rolPermitido="empresa"><OfertasEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/entregables" element={<RutaProtegida rolPermitido="empresa"><EntregablesEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/mensajes" element={<RutaProtegida rolPermitido="empresa"><MensajesEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/talento" element={<RutaProtegida rolPermitido="empresa"><TalentoEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/historial" element={<RutaProtegida rolPermitido="empresa"><HistorialEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/evaluaciones" element={<RutaProtegida rolPermitido="empresa"><EvaluacionesEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/facturacion" element={<RutaProtegida rolPermitido="empresa"><FacturacionEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/notificaciones" element={<RutaProtegida rolPermitido="empresa"><NotificacionesEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/ayuda" element={<RutaProtegida rolPermitido="empresa"><AyudaEmpresario /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/publicar-proyecto" element={<RutaProtegida rolPermitido="empresa"><PublicarProyecto /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/crear-proyecto-ia" element={<RutaProtegida rolPermitido="empresa"><CrearProyectoIA /></RutaProtegida>} />
-        <Route path="/DashboardEmpresario/configuracion" element={<RutaProtegida rolPermitido="empresa"><ConfiguracionEmpresario /></RutaProtegida>} />
+        >
+          <Route index element={<Inicio />} />
+          <Route path="perfil" element={<PerfilEmpresa />} />
+          <Route path="proyectos" element={<ProyectosEmpresario />} />
+          <Route path="empleos" element={<OfertasEmpleo />} />
+          <Route path="publicar-empleo" element={<PublicarEmpleo />} />
+          <Route path="ofertas" element={<OfertasEmpresario />} />
+          <Route path="entregables" element={<EntregablesEmpresario />} />
+          <Route path="mensajes" element={<MensajesEmpresario />} />
+          <Route path="talento" element={<TalentoEmpresario />} />
+          <Route path="historial" element={<HistorialEmpresario />} />
+          <Route path="evaluaciones" element={<EvaluacionesEmpresario />} />
+          <Route path="facturacion" element={<FacturacionEmpresario />} />
+          <Route path="notificaciones" element={<NotificacionesEmpresario />} />
+          <Route path="ayuda" element={<AyudaEmpresario />} />
+          <Route path="publicar-proyecto" element={<PublicarProyecto />} />
+          <Route path="crear-proyecto-ia" element={<CrearProyectoIA />} />
+          <Route path="configuracion" element={<ConfiguracionEmpresario />} />
+        </Route>
 
         <Route
           path={RUTAS.empresaPostulaciones}

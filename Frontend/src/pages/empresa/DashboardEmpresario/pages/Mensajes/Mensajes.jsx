@@ -1,11 +1,11 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Search, SearchX, Mail, MailOpen, Inbox, Send, ChevronLeft, User, Building, Shield } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import { useAuth } from '../../../../../context/AuthContext';
-import DashboardLayout from '../../components/DashboardLayout';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
+import useChatSocket from '../../../../../hooks/useChatSocket';
 import '../../../../egresado/DashboardEgresado/styles/DashboardEgresado.css';
 import '../../DashboardEmpresario.css';
 
@@ -76,7 +76,33 @@ function ChatViewEmpresa({ idPostulacion, proyecto, contacto: contactoProp, onBa
   const [nuevoMensaje, setNuevoMensaje] = useState('');
   const chatEndRef = useRef(null);
   const chatMessagesRef = useRef(null);
+  const userId = user?.id_usuario;
 
+  // Socket.io
+  const onNewMessage = useCallback((msg) => {
+    setMensajes((prev) => {
+      if (prev.some((m) => m.id_conversacion === msg.id_conversacion)) return prev;
+      return [...prev, msg];
+    });
+  }, []);
+
+  const onMessagesRead = useCallback((data) => {
+    setMensajes((prev) => prev.map((m) => {
+      if (m.id_usuario_emisor !== userId && (!data.id_mensaje || m.id_conversacion === data.id_mensaje)) {
+        return { ...m, leido: true };
+      }
+      return m;
+    }));
+  }, [userId]);
+
+  const { sendMessage, startTyping, stopTyping, markRead, typingUser } = useChatSocket({
+    idPostulacion,
+    onNewMessage,
+    onMessagesRead,
+    userId,
+  });
+
+  // Cargar mensajes históricos via REST
   useEffect(() => {
     let activo = true;
     setCargando(true);
@@ -86,11 +112,12 @@ function ChatViewEmpresa({ idPostulacion, proyecto, contacto: contactoProp, onBa
         setMensajes(data?.mensajes || data || []);
         if (data?.contacto) setContacto(data.contacto);
         dashboardEmpresarioService.marcarLeidos(idPostulacion).catch(() => {});
+        markRead();
       })
       .catch(() => {})
       .finally(() => { if (activo) setCargando(false); });
     return () => { activo = false; };
-  }, [idPostulacion]);
+  }, [idPostulacion, markRead]);
 
   useEffect(() => {
     if (chatMessagesRef.current && chatEndRef.current) {
@@ -98,20 +125,39 @@ function ChatViewEmpresa({ idPostulacion, proyecto, contacto: contactoProp, onBa
     }
   }, [mensajes]);
 
-  const userId = user?.id_usuario;
-
   const handleEnviar = async () => {
     const texto = nuevoMensaje.trim();
     if (!texto || enviando) return;
     setEnviando(true);
-    try {
-      const creado = await dashboardEmpresarioService.enviarMensaje(idPostulacion, texto);
-      setMensajes((prev) => [...prev, creado]);
-      setNuevoMensaje('');
-    } catch {
-      alert(t(`${T_NS}.errorEnvio`));
-    } finally {
-      setEnviando(false);
+    stopTyping();
+    // Intentar socket primero, fallback a REST
+    if (sendMessage) {
+      sendMessage(texto, (resp) => {
+        if (resp?.success) {
+          setMensajes((prev) => [...prev, resp.data]);
+          setNuevoMensaje('');
+          setEnviando(false);
+        } else {
+          // Fallback REST
+          dashboardEmpresarioService.enviarMensaje(idPostulacion, texto)
+            .then((creado) => {
+              setMensajes((prev) => [...prev, creado]);
+              setNuevoMensaje('');
+            })
+            .catch(() => alert(t(`${T_NS}.errorEnvio`)))
+            .finally(() => setEnviando(false));
+        }
+      });
+    } else {
+      try {
+        const creado = await dashboardEmpresarioService.enviarMensaje(idPostulacion, texto);
+        setMensajes((prev) => [...prev, creado]);
+        setNuevoMensaje('');
+      } catch {
+        alert(t(`${T_NS}.errorEnvio`));
+      } finally {
+        setEnviando(false);
+      }
     }
   };
 
@@ -120,6 +166,12 @@ function ChatViewEmpresa({ idPostulacion, proyecto, contacto: contactoProp, onBa
       e.preventDefault();
       handleEnviar();
     }
+  };
+
+  const handleInputChange = (e) => {
+    setNuevoMensaje(e.target.value);
+    if (e.target.value) startTyping();
+    else stopTyping();
   };
 
   const agruparPorFecha = useMemo(() => {
@@ -191,6 +243,12 @@ function ChatViewEmpresa({ idPostulacion, proyecto, contacto: contactoProp, onBa
           </div>
         ))}
         <div ref={chatEndRef} />
+        {typingUser && (
+          <div className="chat-typing">
+            <span className="chat-typing-dots"><span /> <span /> <span /></span>
+            <span className="chat-typing-text">{typingUser} está escribiendo...</span>
+          </div>
+        )}
       </div>
 
       <div className="chat-input-bar">
@@ -199,7 +257,7 @@ function ChatViewEmpresa({ idPostulacion, proyecto, contacto: contactoProp, onBa
           type="text"
           placeholder={t(`${T_NS}.escribeMensaje`)}
           value={nuevoMensaje}
-          onChange={(e) => setNuevoMensaje(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           disabled={enviando}
         />
@@ -280,7 +338,6 @@ export default function Mensajes() {
   };
 
   return (
-    <DashboardLayout activePage="mensajes">
       <div style={{ padding: '1.5rem 2rem', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div className="de-page-heading" style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -409,6 +466,5 @@ export default function Mensajes() {
         </div>
       )}
     </div>
-    </DashboardLayout>
   );
 }

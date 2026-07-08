@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, FolderOpen, GitFork, Package, SearchX } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, FolderOpen, GitFork, Package, SearchX, Upload, X, Loader } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { egresadoService } from '../../../../../services/egresadoService';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
@@ -31,6 +31,32 @@ export default function MisProyectos() {
   const [entregablesId, setEntregablesId] = useState(null);
   const [yaCalificados, setYaCalificados] = useState({});
   const [modalResena, setModalResena] = useState({ abierto: false, proyecto: null });
+  const [modalUpload, setModalUpload] = useState({ abierto: false, proyectoId: null });
+  const [uploadForm, setUploadForm] = useState({ titulo: '', tipo: 'PARCIAL', descripcion: '', archivo: null });
+  const [subiendo, setSubiendo] = useState(false);
+
+  const resetUploadForm = () => setUploadForm({ titulo: '', tipo: 'PARCIAL', descripcion: '', archivo: null });
+
+  const handleUpload = async () => {
+    if (!uploadForm.titulo.trim() || !modalUpload.proyectoId) return;
+    setSubiendo(true);
+    try {
+      const fd = new FormData();
+      fd.append('id_proyecto', String(modalUpload.proyectoId));
+      fd.append('titulo', uploadForm.titulo.trim());
+      fd.append('tipo', uploadForm.tipo);
+      if (uploadForm.descripcion.trim()) fd.append('descripcion', uploadForm.descripcion.trim());
+      if (uploadForm.archivo) fd.append('archivo', uploadForm.archivo);
+      await egresadoDashboardService.crearEntregable(fd);
+      setModalUpload({ abierto: false, proyectoId: null });
+      resetUploadForm();
+      window.location.reload();
+    } catch {
+      alert('Error al subir el entregable.');
+    } finally {
+      setSubiendo(false);
+    }
+  };
 
   const proyectos = useMemo(() => (data || []).map(formatearProyecto), [data]);
 
@@ -190,9 +216,19 @@ export default function MisProyectos() {
 
                           {verEntregables && (
                             <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
-                              <strong style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                                {t('egresadoProyectos.historialEntregables')}
-                              </strong>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <strong style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                                  {t('egresadoProyectos.historialEntregables')}
+                                </strong>
+                                <button
+                                  className="de-project-btn"
+                                  type="button"
+                                  onClick={() => { setModalUpload({ abierto: true, proyectoId: p.id }); resetUploadForm(); }}
+                                  style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                                >
+                                  <Upload size={12} /> Subir entregable
+                                </button>
+                              </div>
                               {p.entregables.length === 0 ? (
                                 <p style={{ fontSize: '0.82rem', color: 'var(--ink-subtle)', marginTop: '0.25rem' }}>{t('egresadoProyectos.sinEntregables')}</p>
                               ) : (
@@ -248,6 +284,51 @@ export default function MisProyectos() {
             setYaCalificados((prev) => ({ ...prev, [id]: true }));
           }}
         />
+      )}
+
+      {modalUpload.abierto && (
+        <div className="modal-overlay" onClick={() => !subiendo && setModalUpload({ abierto: false, proyectoId: null })}>
+          <div className="modal-contenido" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <button className="modal-cerrar" type="button" onClick={() => setModalUpload({ abierto: false, proyectoId: null })}>
+              <X size={18} />
+            </button>
+            <div className="modal-icono"><Upload size={28} /></div>
+            <h2 className="modal-titulo">Subir entregable</h2>
+            <div className="modal-form" style={{ marginTop: '1rem' }}>
+              <div className="modal-campo">
+                <label className="modal-label">Título *</label>
+                <input className="modal-input" type="text" placeholder="Ej: Módulo de autenticación" value={uploadForm.titulo}
+                  onChange={(e) => setUploadForm((f) => ({ ...f, titulo: e.target.value }))} />
+              </div>
+              <div className="modal-campo">
+                <label className="modal-label">Tipo *</label>
+                <select className="modal-input" value={uploadForm.tipo}
+                  onChange={(e) => setUploadForm((f) => ({ ...f, tipo: e.target.value }))}>
+                  <option value="PARCIAL">Parcial</option>
+                  <option value="FINAL">Final</option>
+                </select>
+              </div>
+              <div className="modal-campo">
+                <label className="modal-label">Descripción <span className="modal-opcional">(Opcional)</span></label>
+                <textarea className="modal-textarea" rows={3} placeholder="Breve descripción del entregable..." value={uploadForm.descripcion}
+                  onChange={(e) => setUploadForm((f) => ({ ...f, descripcion: e.target.value }))} />
+              </div>
+              <div className="modal-campo">
+                <label className="modal-label">Archivo <span className="modal-opcional">(Opcional)</span></label>
+                <input className="modal-input" type="file"
+                  onChange={(e) => setUploadForm((f) => ({ ...f, archivo: e.target.files[0] }))} />
+              </div>
+            </div>
+            <div className="modal-acciones">
+              <button className="modal-btn modal-btn-secondary" type="button" onClick={() => setModalUpload({ abierto: false, proyectoId: null })} disabled={subiendo}>
+                Cancelar
+              </button>
+              <button className="modal-btn modal-btn-primary" type="button" onClick={handleUpload} disabled={subiendo || !uploadForm.titulo.trim()}>
+                {subiendo ? <><Loader size={16} /> Subiendo...</> : <><Upload size={16} /> Subir</>}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
