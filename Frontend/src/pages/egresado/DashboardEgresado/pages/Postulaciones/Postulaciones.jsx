@@ -1,10 +1,11 @@
 import { useMemo, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Eye, Building2, FolderOpen, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Eye, Building2, FolderOpen, MessageSquare, Calculator } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
 import { formatearPostulacion, formatearPostulacionEmpleo } from '../../utils/dashboardEgresadoFormatters';
+import { TIPO_CAMBIO_CRC } from '../../../../../utils/calculadoraCotizacion';
 
 const acentos = ['azul', 'aqua', 'naranja', 'morado', 'magenta', 'amarillo'];
 
@@ -204,6 +205,13 @@ export default function Postulaciones() {
                         <span className="post-metaItem">
                           <DollarSign size={13} />
                           ${Number(p.presupuesto).toLocaleString('en-US')}
+                        </span>
+                      )}
+                      {p.total && (
+                        <span className="post-metaItem post-cotizacion-badge">
+                          <Calculator size={13} />
+                          Cotiz: ${p.total.toLocaleString('en-US')}
+                          <span className="post-crc">/ ₡{Math.round(p.total * TIPO_CAMBIO_CRC).toLocaleString('es-CR')}</span>
                         </span>
                       )}
                       {p.mensaje && (

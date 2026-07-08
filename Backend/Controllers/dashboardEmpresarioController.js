@@ -1053,6 +1053,33 @@ const eliminarHistorial = async (req, res) => {
   }
 };
 
+const actualizarEstadoEntregable = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEmpresario(req, res);
+    if (!perfil) return;
+    const { id } = req.params;
+    const { estado, comentario } = req.body;
+    if (!['APROBADO', 'CON_CAMBIOS'].includes(estado)) {
+      return res.status(400).json({ success: false, message: 'Estado debe ser APROBADO o CON_CAMBIOS.' });
+    }
+    const entregable = await Entregable.findByPk(id, {
+      include: [{
+        model: ProyectoPlataforma,
+        as: 'proyecto',
+        include: [{ model: Propuesta, as: 'propuesta', where: { id_perfil_empresario: perfil.id_perfil_empresario } }],
+      }],
+    });
+    if (!entregable) {
+      return res.status(404).json({ success: false, message: 'Entregable no encontrado.' });
+    }
+    entregable.estado = estado;
+    await entregable.save();
+    res.json({ success: true, data: entregable });
+  } catch (error) {
+    responderError(res, error, 'Error al actualizar estado del entregable.');
+  }
+};
+
 const listarEvaluaciones = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEmpresario(req, res);
@@ -1635,6 +1662,7 @@ const completarProyecto = async (req, res) => {
 
 module.exports = {
   aceptarOferta,
+  actualizarEstadoEntregable,
   actualizarEstadoPostulacion,
   actualizarEstadoPostulacionEmpleo,
   actualizarEstadoPostulacionBatch,

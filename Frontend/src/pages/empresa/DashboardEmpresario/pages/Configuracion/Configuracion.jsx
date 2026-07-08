@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import { MENSAJE_TELEFONO_INVALIDO, esTelefonoValido, formatearTelefono } from '../../../../../utils/inputMasks';
 import EstadoDatos from '../../components/EstadoDatos';
-import DashboardLayout from '../../components/DashboardLayout';
 
 const ESTADO_INICIAL = {
   nombre_empresa: '',
@@ -108,23 +107,15 @@ export default function Configuracion() {
   }, [passActual, passNueva]);
 
   if (loading) {
-    return (
-      <DashboardLayout activePage="configuracion">
-        <EstadoDatos loading={true} />
-      </DashboardLayout>
-    );
+    return <EstadoDatos loading={true} />;
   }
 
   if (error) {
-    return (
-      <DashboardLayout activePage="configuracion">
-        <EstadoDatos error={error} />
-      </DashboardLayout>
-    );
+    return <EstadoDatos error={error} />;
   }
 
   return (
-    <DashboardLayout activePage="configuracion">
+    <>
       <div className="de-page-heading">
         <h1>Configuracion</h1>
       </div>
@@ -201,6 +192,6 @@ export default function Configuracion() {
           </div>
         </section>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

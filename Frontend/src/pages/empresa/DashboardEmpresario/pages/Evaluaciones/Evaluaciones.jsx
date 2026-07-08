@@ -1,5 +1,4 @@
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
-import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
 import { formatearEvaluacion } from '../../utils/dashboardEmpresarioFormatters';
@@ -13,7 +12,7 @@ export default function Evaluaciones() {
   const evaluaciones = data.map(formatearEvaluacion);
 
   return (
-    <DashboardLayout activePage="evaluaciones">
+    <>
       <div className="de-page-heading">
         <h1>Evaluaciones</h1>
       </div>
@@ -33,6 +32,6 @@ export default function Evaluaciones() {
           </div>
         ))}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

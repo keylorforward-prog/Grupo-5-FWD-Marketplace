@@ -785,6 +785,8 @@
     "campoPretension": "Salary expectation",
     "pretensionPlaceholder": "E.g.: 1500",
     "pretensionHint": "Optional. Enter your expected monthly salary.",
+    "pretensionHintMin": "Suggested minimum: ${{min}}. Enter your expected monthly salary.",
+    "errorPretensionMin": "Salary expectation cannot be lower than ${{min}}.",
     "pretensionLabel": "Salary expectation",
     "guardando": "Saving...",
     "sinCambios": "No changes",

@@ -1,10 +1,11 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Search, SearchX, Mail, MailOpen, Inbox, Send, Clock, User, ChevronLeft, Building, Shield } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useAuth } from '../../../../../context/AuthContext';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
+import useChatSocket from '../../../../../hooks/useChatSocket';
 import '../../styles/DashboardEgresado.css';
 
 const ROLE_ICONS = {
@@ -69,6 +70,30 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
   const [nuevoMensaje, setNuevoMensaje] = useState('');
   const chatEndRef = useRef(null);
   const chatMessagesRef = useRef(null);
+  const userId = user?.id_usuario;
+
+  const onNewMessage = useCallback((msg) => {
+    setMensajes((prev) => {
+      if (prev.some((m) => m.id_conversacion === msg.id_conversacion)) return prev;
+      return [...prev, msg];
+    });
+  }, []);
+
+  const onMessagesRead = useCallback((data) => {
+    setMensajes((prev) => prev.map((m) => {
+      if (m.id_usuario_emisor !== userId && (!data.id_mensaje || m.id_conversacion === data.id_mensaje)) {
+        return { ...m, leido: true };
+      }
+      return m;
+    }));
+  }, [userId]);
+
+  const { sendMessage, startTyping, stopTyping, markRead, typingUser } = useChatSocket({
+    idPostulacion,
+    onNewMessage,
+    onMessagesRead,
+    userId,
+  });
 
   useEffect(() => {
     let activo = true;
@@ -79,11 +104,12 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
         setMensajes(data?.mensajes || data || []);
         if (data?.contacto) setContacto(data.contacto);
         egresadoDashboardService.marcarLeidos(idPostulacion).catch(() => {});
+        markRead();
       })
       .catch(() => {})
       .finally(() => { if (activo) setCargando(false); });
     return () => { activo = false; };
-  }, [idPostulacion]);
+  }, [idPostulacion, markRead]);
 
   useEffect(() => {
     if (chatMessagesRef.current && chatEndRef.current) {
@@ -91,20 +117,37 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
     }
   }, [mensajes]);
 
-  const userId = user?.id_usuario;
-
   const handleEnviar = async () => {
     const texto = nuevoMensaje.trim();
     if (!texto || enviando) return;
     setEnviando(true);
-    try {
-      const creado = await egresadoDashboardService.enviarMensaje(idPostulacion, texto);
-      setMensajes((prev) => [...prev, creado]);
-      setNuevoMensaje('');
-    } catch {
-      alert(t('egresadoMensajes.errorEnvio'));
-    } finally {
-      setEnviando(false);
+    stopTyping();
+    if (sendMessage) {
+      sendMessage(texto, (resp) => {
+        if (resp?.success) {
+          setMensajes((prev) => [...prev, resp.data]);
+          setNuevoMensaje('');
+          setEnviando(false);
+        } else {
+          egresadoDashboardService.enviarMensaje(idPostulacion, texto)
+            .then((creado) => {
+              setMensajes((prev) => [...prev, creado]);
+              setNuevoMensaje('');
+            })
+            .catch(() => alert(t('egresadoMensajes.errorEnvio')))
+            .finally(() => setEnviando(false));
+        }
+      });
+    } else {
+      try {
+        const creado = await egresadoDashboardService.enviarMensaje(idPostulacion, texto);
+        setMensajes((prev) => [...prev, creado]);
+        setNuevoMensaje('');
+      } catch {
+        alert(t('egresadoMensajes.errorEnvio'));
+      } finally {
+        setEnviando(false);
+      }
     }
   };
 
@@ -113,6 +156,12 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
       e.preventDefault();
       handleEnviar();
     }
+  };
+
+  const handleInputChange = (e) => {
+    setNuevoMensaje(e.target.value);
+    if (e.target.value) startTyping();
+    else stopTyping();
   };
 
   const agruparPorFecha = useMemo(() => {
@@ -184,6 +233,12 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
           </div>
         ))}
         <div ref={chatEndRef} />
+        {typingUser && (
+          <div className="chat-typing">
+            <span className="chat-typing-dots"><span /> <span /> <span /></span>
+            <span className="chat-typing-text">{typingUser} está escribiendo...</span>
+          </div>
+        )}
       </div>
 
       <div className="chat-input-bar">
@@ -192,7 +247,7 @@ function ChatView({ idPostulacion, proyecto, contacto: contactoProp, onBack }) {
           type="text"
           placeholder={t('egresadoMensajes.escribeMensaje')}
           value={nuevoMensaje}
-          onChange={(e) => setNuevoMensaje(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           disabled={enviando}
         />

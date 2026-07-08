@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
-import DashboardLayout from '../../components/DashboardLayout';
 import {
   TITULOS_PUESTO,
   AREAS_DEPARTAMENTO,
@@ -133,7 +132,7 @@ export default function PublicarEmpleo() {
   };
 
   return (
-    <DashboardLayout activePage="empleos">
+    <>
       <div className="de-page-heading">
         <p className="de-eyebrow">Empresa</p>
         <h1>Publicar Oferta de Empleo</h1>
@@ -391,6 +390,6 @@ export default function PublicarEmpleo() {
 
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

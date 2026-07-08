@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft, CheckCircle2, Eye, FileText, XCircle } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
-import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import PerfilEgresadoModal from '../../components/PerfilEgresadoModal';
 import { formatearOferta } from '../../utils/dashboardEmpresarioFormatters';
@@ -115,7 +114,7 @@ export default function Ofertas() {
   };
 
   return (
-    <DashboardLayout activePage="ofertas">
+    <>
       <div className="de-page-heading">
         <h1>{tituloProyecto ? `Ofertas: ${tituloProyecto}` : 'Ofertas Recibidas'}</h1>
         {idPropuesta && (
@@ -220,6 +219,6 @@ export default function Ofertas() {
         )}
       </div>
       <PerfilEgresadoModal perfil={perfilSeleccionado} onClose={() => setPerfilSeleccionado(null)} />
-    </DashboardLayout>
+    </>
   );
 }

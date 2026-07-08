@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import apiClient from '../../../../../services/apiClient';
-import DashboardLayout from '../../components/DashboardLayout';
 import './PublicarProyecto.css';
 const PRESUPUESTO_MINIMO = 100000;
 
@@ -131,7 +130,7 @@ export default function PublicarProyecto() {
   };
 
   return (
-    <DashboardLayout activePage="proyectos">
+    <>
       <div className="de-page-heading">
         <div>
           <p className="de-eyebrow">Empresa</p>
@@ -257,6 +256,6 @@ export default function PublicarProyecto() {
           </section>
         </div>
       )}
-    </DashboardLayout>
+    </>
   );
 }

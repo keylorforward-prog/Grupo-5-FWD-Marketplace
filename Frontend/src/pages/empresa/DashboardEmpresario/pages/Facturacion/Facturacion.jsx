@@ -1,5 +1,4 @@
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
-import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
 import { formatearPago } from '../../utils/dashboardEmpresarioFormatters';
@@ -13,7 +12,7 @@ export default function Facturacion() {
   const pagos = data.map(formatearPago);
 
   return (
-    <DashboardLayout activePage="facturacion">
+    <>
       <div className="de-page-heading">
         <h1>Facturacion</h1>
       </div>
@@ -29,6 +28,6 @@ export default function Facturacion() {
           </div>
         ))}
       </div>
-    </DashboardLayout>
+    </>
   );
 }
