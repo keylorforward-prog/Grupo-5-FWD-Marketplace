@@ -4,6 +4,8 @@ import { useAuth } from '../../../../context/AuthContext';
 import CampanaNotificaciones from '../../../../components/notificaciones/CampanaNotificaciones';
 import {
   Bell,
+  Menu,
+  X,
   Briefcase,
   ChevronDown,
   FileText,
@@ -55,6 +57,7 @@ export default function DashboardLayout({ activePage, children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuPerfilAbierto, setMenuPerfilAbierto] = useState(false);
+  const [sidebarMovilAbierto, setSidebarMovilAbierto] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
   const [confirmandoCerrarSesion, setConfirmandoCerrarSesion] = useState(false);
   const [tema, setTema] = useState(() => {
@@ -127,6 +130,14 @@ export default function DashboardLayout({ activePage, children }) {
       <header className="de-header">
         <div className="de-header-inner">
           <div className="de-header-left">
+            <button
+              className="de-hamburger de-link-button"
+              type="button"
+              onClick={() => setSidebarMovilAbierto((v) => !v)}
+              aria-label="Menú"
+            >
+              {sidebarMovilAbierto ? <X size={22} /> : <Menu size={22} />}
+            </button>
             <button className="de-brand de-link-button" type="button" onClick={() => navigate('/DashboardEmpresario')}>
               <img
                 className="de-brand-logo"
@@ -264,9 +275,13 @@ export default function DashboardLayout({ activePage, children }) {
         </div>
       </header>
 
+      {sidebarMovilAbierto && (
+        <div className="de-sidebar-overlay" onClick={() => setSidebarMovilAbierto(false)} />
+      )}
+
       <div className="de-body">
-        <aside className="de-sidebar">
-          <div className="de-sidebar-profile" onClick={() => setMenuPerfilAbierto((abierto) => !abierto)}>
+        <aside className={`de-sidebar ${sidebarMovilAbierto ? 'de-sidebar--open' : ''}`}>
+          <div className="de-sidebar-profile" onClick={() => { setMenuPerfilAbierto((abierto) => !abierto); setSidebarMovilAbierto(false); }}>
             <img src={avatar} alt={displayName} className="de-sidebar-avatar" />
             <div className="de-sidebar-profile-info">
               <span className="de-sidebar-name">{displayName}</span>
@@ -283,7 +298,7 @@ export default function DashboardLayout({ activePage, children }) {
                     key={item.key}
                     className={`de-sidebar-link ${activePage === item.key ? 'active' : ''}`}
                     type="button"
-                    onClick={() => navigate(item.path)}
+                    onClick={() => { navigate(item.path); setSidebarMovilAbierto(false); }}
                   >
                     <Icon size={18} className="de-sidebar-icon" />
                     {item.label}
@@ -296,7 +311,7 @@ export default function DashboardLayout({ activePage, children }) {
           <div className="de-sidebar-help">
             <p className="de-sidebar-help-title">{t('empresaLayout.help.title')}</p>
             <p className="de-sidebar-help-text">{t('empresaLayout.help.text')}</p>
-            <button className="de-sidebar-help-btn" type="button" onClick={() => navigate('/soporte')}>
+            <button className="de-sidebar-help-btn" type="button" onClick={() => { navigate('/soporte'); setSidebarMovilAbierto(false); }}>
               <HelpCircle size={14} />
               {t('empresaLayout.help.button')}
             </button>
@@ -307,6 +322,29 @@ export default function DashboardLayout({ activePage, children }) {
           <div className="de-main-content">{children}</div>
         </main>
       </div>
+
+      <nav className="de-bottom-nav">
+        {[
+          { key: 'inicio', label: t('empresaLayout.nav.inicio'), icon: Home, path: '/DashboardEmpresario' },
+          { key: 'proyectos', label: t('empresaLayout.nav.proyectos'), icon: FolderOpen, path: '/DashboardEmpresario/proyectos' },
+          { key: 'postulaciones', label: 'Postulaciones', icon: Users, path: '/empresa/postulaciones' },
+          { key: 'mensajes', label: t('empresaLayout.nav.mensajes'), icon: MessageSquare, path: '/DashboardEmpresario/mensajes' },
+          { key: 'perfil', label: t('empresaLayout.profile.perfil'), icon: User, path: '/DashboardEmpresario/perfil' },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.key}
+              className={`de-bottom-nav-item de-link-button ${activePage === item.key ? 'active' : ''}`}
+              type="button"
+              onClick={() => navigate(item.path)}
+            >
+              <Icon size={20} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
 
       <footer className="de-footer">
         <span className="de-footer-copy">
