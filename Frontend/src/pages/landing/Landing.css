@@ -332,13 +332,13 @@ main { overflow: hidden; }
 /* Navbar center logo */
 .landing-navbar-logo {
   position: absolute;
-  left: 50%;
+  left: 47%;
   transform: translateX(-50%);
 }
 
 .navbar-logo-img {
-  height: 38px;
-  max-width: 132px;
+  height: 100px;
+  max-width: 200px;
   width: auto;
   object-fit: contain;
   transition: var(--t-base);
