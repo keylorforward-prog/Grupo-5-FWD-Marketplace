@@ -14,7 +14,7 @@ export default function LandingNavbar() {
       <div className="landing-navbar-logo">
         <Link to="/">
           <img
-            src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"
+            src="/Imgs/Logotipo/Digital/FWD - Logotipo - Slogan-01 v2.png"
             alt="FWD Marketplace"
             className="navbar-logo-img"
           />

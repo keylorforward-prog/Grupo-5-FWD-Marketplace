@@ -19,7 +19,7 @@ export default function LandingFooter() {
         <div className="footer-brand">
           <Link to="/" className="footer-logo-link" aria-label="FWD Marketplace">
             <img
-              src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg"
+              src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png"
               alt="FWD Marketplace"
               className="footer-logo"
             />
