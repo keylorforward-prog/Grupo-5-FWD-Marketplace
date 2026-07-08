@@ -576,9 +576,10 @@
   display: flex;
   max-width: 1480px;
   margin: 0 auto;
-  align-items: flex-start;
+  align-items: stretch;
   flex: 1;
   width: 100%;
+  height: calc(100vh - 70px);
 }
 
 /* ── Sidebar ───────────────────────────────────────────────────────────── */
