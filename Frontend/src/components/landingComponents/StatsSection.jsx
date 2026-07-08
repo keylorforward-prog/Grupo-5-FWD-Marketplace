@@ -27,10 +27,6 @@ export default function StatsSection() {
       {/* Logos strip */}
       <div className="partners-strip">
         <p className="partners-label">{t('landing.partners', 'Con la confianza de empresas líderes')}</p>
-        <div className="partners-logos">
-          <img src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg" alt="FWD" className="partner-logo" />
-          <img src="/Imgs/Logotipo/Digital/FWD - Logotipo-01.jpg" alt="FWD" className="partner-logo partner-logo-wide" />
-        </div>
       </div>
     </section>
   );
