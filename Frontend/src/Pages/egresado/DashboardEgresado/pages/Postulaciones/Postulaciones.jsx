@@ -1,7 +1,7 @@
 import { useMemo, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Eye, Building2, FolderOpen } from 'lucide-react';
+import { ArrowLeft, Briefcase, Calendar, DollarSign, SearchX, Clock, Eye, Building2, FolderOpen, MessageSquare } from 'lucide-react';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { useDashboardEgresadoRequest } from '../../hooks/useDashboardEgresadoRequest';
 import { formatearPostulacion, formatearPostulacionEmpleo } from '../../utils/dashboardEgresadoFormatters';
@@ -17,7 +17,7 @@ const ORDEN_FLUJO = [
   { key: 'ENVIADA', labelKey: 'flujoEnviada' },
   { key: 'PENDIENTE', labelKey: 'flujoPendiente' },
   { key: 'EN_REVISION', labelKey: 'flujoRevision' },
-  { key: 'PRESSELECCIONADA', labelKey: 'flujoPreseleccionada' },
+  { key: 'PRESELECCIONADA', labelKey: 'flujoPreseleccionada' },
   { key: 'FINAL', labelKey: '' },
 ];
 
@@ -26,12 +26,12 @@ function FlujoPostulacion({ estadoRaw }) {
   const pasoActual = estadoRaw === 'ENVIADA' ? 0
     : estadoRaw === 'PENDIENTE' ? 1
     : estadoRaw === 'EN_REVISION' ? 2
-    : (estadoRaw === 'PRESSELECCIONADA' || estadoRaw === 'PRESELECCIONADA') ? 3
-    : (estadoRaw === 'CONTRATADO' || estadoRaw === 'ACEPTADO') ? 4
+    : estadoRaw === 'PRESELECCIONADA' ? 3
+    : estadoRaw === 'CONTRATADO' ? 4
     : estadoRaw === 'RECHAZADA' ? 4
     : -1;
   const esRechazado = estadoRaw === 'RECHAZADA';
-  const esAceptado = estadoRaw === 'CONTRATADO' || estadoRaw === 'ACEPTADO';
+  const esAceptado = estadoRaw === 'CONTRATADO';
 
   return (
     <div className="post-flujo">
@@ -225,6 +225,22 @@ export default function Postulaciones() {
                     <Eye size={15} />
                     {t('egresadoPostulaciones.verProyecto')}
                   </button>
+                  {['EN_REVISION', 'PRESELECCIONADA', 'CONTRATADO'].includes(p.estadoRaw) && (
+                    <button
+                      className="post-btnDetalle"
+                      type="button"
+                      onClick={() => navigate('/egresado/dashboard/mensajes', {
+                        state: {
+                          idPostulacion: p.id,
+                          proyecto: p.titulo,
+                          contacto: { nombre: p.empresa || 'Empresa', foto_perfil: p.empresaLogo || null, rol: 'empresa' }
+                        }
+                      })}
+                    >
+                      <MessageSquare size={15} />
+                      {t('egresadoPostulaciones.mensajes', 'Mensajes')}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -283,6 +299,22 @@ export default function Postulaciones() {
                     <Eye size={15} />
                     {t('egresadoPostulaciones.verEmpleo')}
                   </button>
+                  {['EN_REVISION', 'PRESELECCIONADA', 'CONTRATADO'].includes(p.estadoRaw) && (
+                    <button
+                      className="post-btnDetalle"
+                      type="button"
+                      onClick={() => navigate('/egresado/dashboard/mensajes', {
+                        state: {
+                          idPostulacion: p.id,
+                          proyecto: p.titulo,
+                          contacto: { nombre: p.empresa || 'Empresa', foto_perfil: p.empresaLogo || null, rol: 'empresa' }
+                        }
+                      })}
+                    >
+                      <MessageSquare size={15} />
+                      {t('egresadoPostulaciones.mensajes', 'Mensajes')}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Search, SearchX, Mail, MailOpen, Inbox, Send, ChevronLeft, User, Building, Shield } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import { useAuth } from '../../../../../context/AuthContext';
@@ -140,7 +140,7 @@ function ChatViewEmpresa({ idPostulacion, proyecto, contacto: contactoProp, onBa
         </button>
         <div className="chat-header-avatar">
           {contacto?.foto_perfil ? (
-            <img src={contacto.foto_perfil} alt="" className="chat-header-avatar-img" />
+            <img src={contacto.foto_perfil} alt="Imagen descriptiva" className="chat-header-avatar-img" />
           ) : (
             <span className="chat-header-avatar-inicial">{(contacto?.nombre || '?')[0]}</span>
           )}
@@ -220,14 +220,16 @@ const cargarLeidos = () => {
 };
 
 const guardarLeidos = (set) => {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...set])); } catch {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...set])); } catch (err) { console.error('Error saving read messages to localStorage:', err); }
 };
 
 export default function Mensajes() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
-  const [conversacionActiva, setConversacionActiva] = useState(null);
+  const [conversacionActiva, setConversacionActiva] = useState(location.state?.idPostulacion || null);
+  const [chatNuevoParams] = useState(location.state || null);
   const [leidosLocal, setLeidosLocal] = useState(() => cargarLeidos());
   const [busqueda, setBusqueda] = useState('');
   const userId = user?.id_usuario;
@@ -263,7 +265,10 @@ export default function Mensajes() {
 
   const conversationActivaData = conversaciones.find(
     (c) => c.idPostulacion === conversacionActiva
-  );
+  ) || (chatNuevoParams?.idPostulacion === conversacionActiva ? {
+    proyecto: chatNuevoParams.proyecto,
+    contacto: chatNuevoParams.contacto
+  } : null);
 
   const abrirChat = (id) => {
     setConversacionActiva(id);
@@ -354,7 +359,7 @@ export default function Mensajes() {
                   >
                     <div className={`mensajes-item-avatar${!c.leido && !c.esPropio && !leidosLocal.has(c.idPostulacion) ? ' unread' : ''}`}>
                       {c.contacto?.foto_perfil ? (
-                        <img src={c.contacto.foto_perfil} alt="" className="mensajes-avatar-img" />
+                        <img src={c.contacto.foto_perfil} alt="Imagen descriptiva" className="mensajes-avatar-img" />
                       ) : (
                         <span className="mensajes-avatar-inicial">{inicial}</span>
                       )}

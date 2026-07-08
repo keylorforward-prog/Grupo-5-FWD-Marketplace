@@ -1,46 +1,43 @@
-import { ArrowRight } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import FwdLogo from '../../assets/fwd-logo.png';
+import { Award, LogIn } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function HeroSection() {
-  const { t } = useTranslation();
-
   return (
-    <section className="hero-section">
-      <div className="hero-content">
+    <section className="hero-section adelante-hero">
+      <div className="hero-stripes" aria-hidden="true" />
 
-        <span className="hero-badge">
-          {t('landing.hero.badge', 'FORWARD MOMENTUM ECOSYSTEM')}
-        </span>
+      <div className="hero-content">
+        <span className="hero-badge">PLATAFORMA DE EMPLEABILIDAD</span>
 
         <h1>
-          {t('landing.hero.title1', 'Construye el')} <span className="pink">{t('landing.hero.titlePink', 'Futuro')}</span>
-          <br />
-          {t('landing.hero.title2', 'de tu Carrera')} <span className="cyan">{t('landing.hero.titleCyan', 'Hoy.')}</span>
+          <span className="hero-title-highlight">Adelante.</span>{' '}
+          Tu camino hacia el empleo empieza aquí.
         </h1>
 
-        <p>
-          {t('landing.hero.description', 'Conectamos el talento emergente más brillante con proyectos reales de la industria.')}
+        <p className="hero-description">
+          La plataforma de empleabilidad para egresados de Fundación Forward Costa Rica.
         </p>
 
         <div className="hero-buttons">
-          <button className="landing-btn landing-btn-purple">
-            {t('landing.hero.btnExplore', 'Explorar Proyectos')}
-            <ArrowRight size={16} />
-          </button>
-
-          <button className="landing-btn landing-btn-white">
-            {t('landing.hero.btnCompanies', 'Para Empresas')}
-          </button>
+          <Link to="/login" className="landing-btn landing-btn-primary adelante-login-btn">
+            <LogIn size={18} />
+            Iniciar sesión
+          </Link>
         </div>
 
+        <div className="hero-award">
+          <span className="hero-award-icon" aria-hidden="true">
+            <Award size={20} />
+          </span>
+          <span>Premio AMCHAM 2025 — Negocios Sostenibles</span>
+        </div>
       </div>
 
-      <div className="hero-logo">
+      <div className="hero-visual" aria-hidden="true">
         <img
-          src={FwdLogo}
-          alt="FWD Marketplace Logo"
-          className="hero-logo-img"
+          src="/Imgs/Comunidad icon-01.png"
+          alt=""
+          className="hero-floating-img"
         />
       </div>
     </section>

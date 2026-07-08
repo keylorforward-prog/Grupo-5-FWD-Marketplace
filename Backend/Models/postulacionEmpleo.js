@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     carta_presentacion:    { type: DataTypes.TEXT, allowNull: true },
     cv_url:                { type: DataTypes.TEXT, allowNull: true },
     pretension_salarial:   { type: DataTypes.DECIMAL(10, 2), allowNull: true, defaultValue: null },
-    estado: { type: DataTypes.ENUM('enviada', 'vista', 'aceptada', 'rechazada', 'ENVIADA', 'PENDIENTE', 'EN_REVISION', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO', 'ACEPTADO'), allowNull: false, defaultValue: 'ENVIADA' },
+    estado: { type: DataTypes.ENUM('enviada', 'vista', 'aceptada', 'rechazada', 'ENVIADA', 'PENDIENTE', 'EN_REVISION', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO'), allowNull: false, defaultValue: 'ENVIADA' },
     fecha_postulacion:     { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   }, { tableName: 'postulacion_empleo', timestamps: false, underscored: true, freezeTableName: true });
 };

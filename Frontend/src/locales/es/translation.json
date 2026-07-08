@@ -289,6 +289,7 @@
       "button": "Ir al Centro de Ayuda"
     },
     "footer": {
+      "copy": "© {{year}} FWD Costa Rica. Todos los derechos reservados.",
       "rights": "Todos los derechos reservados.",
       "terms": "Términos y Condiciones",
       "privacy": "Política de Privacidad",
@@ -1068,7 +1069,7 @@
     "projects": "Proyectos",
     "juniors": "Juniors",
     "empresas": "Empresas",
-    "acceder": "Acceder",
+    "acceder": "Iniciar sesión",
     "hero": {
       "badge": "ECOSISTEMA FORWARD MOMENTUM",
       "title1": "Construye el",
@@ -1100,11 +1101,28 @@
     },
     "footer": {
       "rights": "Fundación Forward Costa Rica.",
+      "reserved": "Todos los derechos reservados.",
+      "kicker": "Ecosistema Forward Momentum",
+      "tagline": "Conectamos talento tech emergente con empresas que construyen productos reales, portafolios verificables y oportunidades de crecimiento.",
+      "location": "San José, Costa Rica · impacto regional",
+      "identity": "IDENTIDAD FWD",
+      "identityOne": "Talento que avanza",
+      "identityTwo": "Proyectos con validación real",
+      "identityThree": "Comunidad tecnológica inclusiva",
+      "identityFour": "Aprendizaje conectado al mercado",
       "platform": "PLATAFORMA",
+      "company": "FUNDACIÓN",
+      "community": "Comunidad",
+      "about": "Sobre FWD",
+      "blog": "Blog",
+      "support": "Soporte",
       "legal": "LEGAL",
       "contact": "CONTACTO",
       "privacy": "Privacidad",
-      "terms": "Términos"
+      "terms": "Términos",
+      "cookies": "Cookies",
+      "madeIn": "Hecho en Costa Rica",
+      "techForGood": "Tech for Good"
     },
     "stats": {
       "juniors": "Juniors Activos",

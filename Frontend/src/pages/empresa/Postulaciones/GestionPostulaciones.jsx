@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Filter, ChevronLeft, ChevronRight, UserCheck, X, Send } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Filter, ChevronLeft, ChevronRight, UserCheck, X } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../services/dashboardEmpresarioService';
 import FilaCandidato from '../../../components/postulaciones/FilaCandidato';
 import AccionesMasivas from '../../../components/postulaciones/AccionesMasivas';
@@ -28,14 +29,13 @@ const ETIQUETAS_ESTADO = {
 };
 
 export default function GestionPostulaciones() {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let activo = true;
-    setLoading(true);
-    setError(null);
 
     Promise.all([
       dashboardEmpresarioService.obtenerPostulaciones().catch(() => []),
@@ -130,10 +130,10 @@ export default function GestionPostulaciones() {
     return dashboardEmpresarioService.actualizarEstadoPostulacion(id, estado, mensaje);
   }, [esbozoCandidato]);
 
-  const manejarInvitacion = useCallback(async (id, _date, _time, _msg) => {
+  const manejarInvitacion = useCallback(async (id) => {
     setAccionCargando(id);
     try {
-      await actualizarEstado(id, 'PRESSELECCIONADA');
+      await actualizarEstado(id, 'PRESELECCIONADA');
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), estaInvitado: true, status: 'entrevistado' },
@@ -163,7 +163,7 @@ export default function GestionPostulaciones() {
   const manejarAceptacion = useCallback(async (id, mensaje = '') => {
     setAccionCargando(id);
     try {
-      await actualizarEstado(id, 'ACEPTADO', mensaje);
+      await actualizarEstado(id, 'CONTRATADO', mensaje);
       setCambiosLocales((prev) => ({
         ...prev,
         [id]: { ...(prev[id] ?? {}), status: 'aceptado', estaInvitado: true },
@@ -188,12 +188,22 @@ export default function GestionPostulaciones() {
     setPerfilSeleccionado(perfil);
   }, [actualizarEstado]);
 
+  const manejarMensajear = useCallback((idPostulacion, candidato) => {
+    navigate('/DashboardEmpresario/mensajes', { 
+      state: { 
+        idPostulacion, 
+        proyecto: candidato.proyecto,
+        contacto: { nombre: candidato.name, foto_perfil: candidato.avatar, rol: 'estudiante' }
+      } 
+    });
+  }, [navigate]);
+
   const manejarBatchPreseleccionar = useCallback(async () => {
     const ids = Array.from(idsSeleccionados);
     if (ids.length === 0) return;
     setAccionCargando('batch');
     try {
-      await dashboardEmpresarioService.actualizarEstadoPostulacionBatch(ids, 'PRESSELECCIONADA');
+      await dashboardEmpresarioService.actualizarEstadoPostulacionBatch(ids, 'PRESELECCIONADA');
       setCambiosLocales((prev) => {
         const next = { ...prev };
         ids.forEach((id) => {
@@ -360,6 +370,7 @@ export default function GestionPostulaciones() {
                       alInvitar={manejarInvitacion}
                       alRechazar={manejarRechazo}
                       alAceptar={manejarAceptacion}
+                      alMensajear={(id) => manejarMensajear(id, candidate)}
                     />
                   ))}
                   {!loading && !error && paginados.length === 0 && (

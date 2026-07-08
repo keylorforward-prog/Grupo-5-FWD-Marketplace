@@ -32,7 +32,7 @@ const actualizarPendiente = async (postulacion) => {
 };
 
 const normalizarEstadoEmpleo = async (postulacion) => {
-  const mapa = { enviada: 'ENVIADA', vista: 'EN_REVISION', aceptada: 'ACEPTADO', rechazada: 'RECHAZADA' };
+  const mapa = { enviada: 'ENVIADA', vista: 'EN_REVISION', aceptada: 'CONTRATADO', rechazada: 'RECHAZADA' };
   if (mapa[postulacion.estado]) {
     postulacion.estado = mapa[postulacion.estado];
     await postulacion.save();
@@ -1351,7 +1351,7 @@ const actualizarEstadoPostulacion = async (req, res) => {
     const { id } = req.params;
     const { estado, mensaje } = req.body;
 
-    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO', 'ACEPTADO'];
+    const estadosValidos = ['EN_REVISION', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO'];
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ success: false, message: `Estado invalido. Validos: ${estadosValidos.join(', ')}` });
     }
@@ -1382,7 +1382,7 @@ const actualizarEstadoPostulacion = async (req, res) => {
     const estadoAnterior = postulacion.estado;
     await postulacion.update({ estado });
 
-    if (estado === 'ACEPTADO' || estado === 'CONTRATADO') {
+    if (estado === 'CONTRATADO') {
       const otrasPostulaciones = await Postulacion.findAll({
         where: {
           id_propuesta: postulacion.id_propuesta,
@@ -1410,11 +1410,9 @@ const actualizarEstadoPostulacion = async (req, res) => {
     if (usuarioEstudiante) {
       const mapaMensajes = {
         EN_REVISION: `Tu postulacion para "${tituloPropuesta}" ha pasado a estar en revision.`,
-        PRESSELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloPropuesta}".`,
         PRESELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloPropuesta}".`,
         RECHAZADA: mensaje || `Tu postulacion para "${tituloPropuesta}" no ha sido seleccionada.`,
         CONTRATADO: mensaje || `¡Felicidades! Has sido contratado para "${tituloPropuesta}".`,
-        ACEPTADO: mensaje || `¡Felicidades! Has sido aceptado para "${tituloPropuesta}".`,
       };
       const notifMensaje = mapaMensajes[estado];
       if (notifMensaje) {
@@ -1426,7 +1424,7 @@ const actualizarEstadoPostulacion = async (req, res) => {
           fecha: new Date(),
         });
       }
-      if (estado === 'RECHAZADA' || estado === 'ACEPTADO' || estado === 'CONTRATADO') {
+      if (estado === 'RECHAZADA' || estado === 'CONTRATADO') {
         sendPostulacionEmail({
           userEmail: usuarioEstudiante.correo,
           userName: usuarioEstudiante.nombre,
@@ -1455,7 +1453,7 @@ const actualizarEstadoPostulacionEmpleo = async (req, res) => {
     const { id } = req.params;
     const { estado, mensaje } = req.body;
 
-    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO', 'ACEPTADO'];
+    const estadosValidos = ['EN_REVISION', 'PRESELECCIONADA', 'RECHAZADA', 'CONTRATADO'];
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ success: false, message: `Estado invalido. Validos: ${estadosValidos.join(', ')}` });
     }
@@ -1487,7 +1485,7 @@ const actualizarEstadoPostulacionEmpleo = async (req, res) => {
 
     await postulacion.update({ estado });
 
-    if (estado === 'ACEPTADO' || estado === 'CONTRATADO') {
+    if (estado === 'CONTRATADO') {
       const otrasPostulaciones = await PostulacionEmpleo.findAll({
         where: {
           id_oferta_empleo: postulacion.id_oferta_empleo,
@@ -1515,11 +1513,9 @@ const actualizarEstadoPostulacionEmpleo = async (req, res) => {
     if (usuarioEstudiante) {
       const mapaMensajes = {
         EN_REVISION: `Tu postulacion para "${tituloOferta}" ha pasado a estar en revision.`,
-        PRESSELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloOferta}".`,
         PRESELECCIONADA: mensaje || `¡Felicidades! Has sido preseleccionado para "${tituloOferta}".`,
         RECHAZADA: mensaje || `Tu postulacion para "${tituloOferta}" no ha sido seleccionada.`,
         CONTRATADO: mensaje || `¡Felicidades! Has sido contratado para "${tituloOferta}".`,
-        ACEPTADO: mensaje || `¡Felicidades! Has sido aceptado para "${tituloOferta}".`,
       };
       const notifMensaje = mapaMensajes[estado];
       if (notifMensaje) {
@@ -1531,7 +1527,7 @@ const actualizarEstadoPostulacionEmpleo = async (req, res) => {
           fecha: new Date(),
         });
       }
-      if (estado === 'RECHAZADA' || estado === 'ACEPTADO' || estado === 'CONTRATADO') {
+      if (estado === 'RECHAZADA' || estado === 'CONTRATADO') {
         sendPostulacionEmail({
           userEmail: usuarioEstudiante.correo,
           userName: usuarioEstudiante.nombre,
@@ -1563,7 +1559,7 @@ const actualizarEstadoPostulacionBatch = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Debes proporcionar un array de IDs.' });
     }
 
-    const estadosValidos = ['EN_REVISION', 'PRESSELECCIONADA', 'PRESELECCIONADA', 'RECHAZADA'];
+    const estadosValidos = ['EN_REVISION', 'PRESELECCIONADA', 'RECHAZADA'];
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ success: false, message: `Estado invalido para operacion batch. Validos: ${estadosValidos.join(', ')}` });
     }

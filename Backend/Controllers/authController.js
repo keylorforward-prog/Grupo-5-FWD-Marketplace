@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { Op } = require('sequelize');
 const {Usuario,PerfilEstudiante,PerfilEmpresario,CodigoRecuperacion} = require('../Models');
 const config = require('../Config/config');
 const { uploadFileToS3 } = require('../Config/aws');
@@ -50,6 +51,25 @@ const validarEvidenciaFwd = (archivo) => {
   }
   return null;
 };
+
+const esConflictoCedula = (error) => {
+  const codigo = error?.original?.code || error?.parent?.code || error?.code;
+  const restriccion = error?.original?.constraint || error?.parent?.constraint || error?.constraint;
+  const campos = error?.fields || error?.parent?.fields || {};
+
+  return codigo === '23505' && (
+    restriccion === 'usuario_cedula_key1' ||
+    restriccion === 'usuario_cedula_key' ||
+    Object.prototype.hasOwnProperty.call(campos, 'cedula')
+  );
+};
+
+const respuestaConflictoCedula = (res) => res.status(409).json({
+  success: false,
+  error: 'La cédula ingresada ya está registrada por otro usuario.',
+  field: 'cedula',
+  code: 'CEDULA_ALREADY_EXISTS',
+});
 
 // ── Controladores ─────────────────────────────────────────────────────────────
 
@@ -372,6 +392,17 @@ const completarPerfil = async (req, res) => {
       });
     }
 
+    const usuarioConCedula = await Usuario.findOne({
+      where: {
+        cedula,
+        id_usuario: { [Op.ne]: userId }
+      }
+    });
+
+    if (usuarioConCedula) {
+      return respuestaConflictoCedula(res);
+    }
+
     const archivoTituloFwd = obtenerArchivo(req, 'titulo_fwd_file');
     if (rol === 'ESTUDIANTE') {
       const errorEvidencia = validarEvidenciaFwd(archivoTituloFwd);
@@ -445,6 +476,10 @@ const completarPerfil = async (req, res) => {
 
   } catch (error) {
     console.error('Error en completarPerfil:', error);
+    if (esConflictoCedula(error)) {
+      return respuestaConflictoCedula(res);
+    }
+
     return res.status(500).json({
       success: false,
       message: 'Error interno del servidor',

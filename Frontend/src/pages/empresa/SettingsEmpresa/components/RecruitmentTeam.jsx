@@ -48,7 +48,7 @@ const RecruitmentTeam = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-base)' }}>
         {members.map((member) => (
           <div className="se-member-item" key={member.id}>
-            <div className="se-member-info" style={{ cursor: 'pointer' }} onClick={() => toggleOnline(member.id)}>
+            <div className="se-member-info" style={{ cursor: 'pointer' }} role="button" tabIndex={0} onClick={() => toggleOnline(member.id)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleOnline(member.id); } }}>
               <div className="se-member-avatar-wrapper">
                 <div className="se-member-avatar"
                   style={{
