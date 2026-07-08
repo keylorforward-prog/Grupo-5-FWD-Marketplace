@@ -305,19 +305,18 @@ export default function DashboardLayout({ activePage, children }) {
 
         <main className="de-main fwd-fondo-decorativo">
           <div className="de-main-content">{children}</div>
+          <footer className="de-footer">
+            <span className="de-footer-copy">
+              {t('empresaLayout.footer.copy').replace('{{year}}', new Date().getFullYear())}
+            </span>
+            <div className="de-footer-links">
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/terminos')}>{t('empresaLayout.footer.terms')}</button>
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/privacidad')}>{t('empresaLayout.footer.privacy')}</button>
+              <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/contacto')}>{t('empresaLayout.footer.contact')}</button>
+            </div>
+          </footer>
         </main>
       </div>
-
-      <footer className="de-footer">
-        <span className="de-footer-copy">
-          {t('empresaLayout.footer.copy').replace('{{year}}', new Date().getFullYear())}
-        </span>
-        <div className="de-footer-links">
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/terminos')}>{t('empresaLayout.footer.terms')}</button>
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/privacidad')}>{t('empresaLayout.footer.privacy')}</button>
-          <button className="de-footer-link de-link-button" type="button" onClick={() => navigate('/contacto')}>{t('empresaLayout.footer.contact')}</button>
-        </div>
-      </footer>
 
       {confirmandoCerrarSesion && (
         <div className="de-confirm-overlay" onClick={() => setConfirmandoCerrarSesion(false)}>
