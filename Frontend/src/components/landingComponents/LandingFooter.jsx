@@ -6,13 +6,22 @@ export default function LandingFooter() {
   return (
     <footer className="landing-footer">
 
-      <div className="footer-grid">
-
-        <div>
-          <h3>FWD.</h3>
-
-          <p>
-            {t('landing.footer.rights', 'Fundación Forward Costa Rica.')}
+      <div className="footer-top">
+        {/* Brand column */}
+        <div className="footer-brand">
+          <Link to="/" className="footer-logo-link" aria-label="FWD Marketplace">
+            <img
+              src="/Imgs/Logotipo/Digital/Sintesis/FWD - Sintesis-01.png"
+              alt="FWD Marketplace"
+              className="footer-logo"
+            />
+          </Link>
+          <span className="footer-kicker">
+            <Sparkles size={14} />
+            {t('landing.footer.kicker', 'Forward Momentum Ecosystem')}
+          </span>
+          <p className="footer-tagline">
+            {t('landing.footer.tagline', 'Conectamos talento tech emergente con empresas que construyen productos reales, portafolios verificables y oportunidades de crecimiento.')}
           </p>
         </div>
 

@@ -14,7 +14,13 @@ export default function LandingNavbar() {
       </div>
 
       <div className="landing-navbar-logo">
-        <span>FWD.</span>
+        <Link to="/">
+          <img
+            src="/Imgs/Logotipo/Digital/FWD - Logotipo - Slogan-01 v2.png"
+            alt="FWD Marketplace"
+            className="navbar-logo-img"
+          />
+        </Link>
       </div>
 
       <div className="landing-navbar-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

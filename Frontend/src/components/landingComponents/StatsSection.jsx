@@ -11,9 +11,9 @@ export default function StatsSection() {
         <span>{t('landing.stats.companies', 'EMPRESAS ALIADAS')}</span>
       </div>
 
-      <div className="stat-item">
-        <h3>85%</h3>
-        <span>{t('landing.stats.hired', 'TASA DE EMPLEABILIDAD')}</span>
+      {/* Logos strip */}
+      <div className="partners-strip">
+        <p className="partners-label">{t('landing.partners', 'Con la confianza de empresas líderes')}</p>
       </div>
 
       <div className="stat-item">
