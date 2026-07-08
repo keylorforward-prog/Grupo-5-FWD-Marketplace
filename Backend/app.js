@@ -42,10 +42,29 @@ const resenaRoutes = require('./Routes/resenaRoutes');
 
 const app = express();
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (config.cors.origins.includes(origin)) return true;
+
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === 'grupo-5-fwd-marketplace-front.vercel.app' ||
+      hostname.startsWith('grupo-5-fwd-marketplace-front-') && hostname.endsWith('.vercel.app');
+  } catch {
+    return false;
+  }
+};
+
 // ── Middlewares globales ───────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: config.cors.origin,
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`Origin not allowed by CORS: ${origin}`));
+    },
     credentials: true, // Necesario para enviar/recibir cookies
   })
 );

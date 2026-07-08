@@ -189,3 +189,35 @@
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* ============================================
+   RESPONSIVE DESIGN (NUEVO)
+   ============================================ */
+
+@media (max-width: 600px) {
+  .mr-modal {
+    width: calc(100% - 32px);
+    padding: 1.5rem;
+    margin: 16px;
+  }
+  
+  .mr-titulo {
+    font-size: 1.05rem;
+  }
+  
+  .mr-grupo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .mr-acciones {
+    flex-direction: column-reverse;
+  }
+  
+  .mr-btn-primary, .mr-btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
