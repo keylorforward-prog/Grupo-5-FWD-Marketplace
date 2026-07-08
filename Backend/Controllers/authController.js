@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
+<<<<<<< HEAD
 const {Usuario,PerfilEstudiante,PerfilEmpresario,CodigoRecuperacion} = require('../Models');
+=======
+const { sequelize, Usuario, PerfilEstudiante, PerfilEmpresario, CodigoRecuperacion } = require('../Models');
+>>>>>>> d484eb4090edbc13f882214eded7253e0543bf11
 const config = require('../Config/config');
 const { uploadFileToS3 } = require('../Config/aws');
 const { sendRecoveryEmail } = require('../Services/emailService');
@@ -71,16 +75,80 @@ const respuestaConflictoCedula = (res) => res.status(409).json({
   code: 'CEDULA_ALREADY_EXISTS',
 });
 
+<<<<<<< HEAD
+=======
+const ROLES_REGISTRO = new Set(['ESTUDIANTE', 'EMPRESARIO']);
+
+const esErrorAlmacenamiento = (error) => {
+  const metadata = error?.$metadata;
+  const code = error?.Code || error?.name || error?.code;
+  return Boolean(metadata?.httpStatusCode || code === 'InvalidAccessKeyId' || code === 'CredentialsProviderError');
+};
+
+const responderErrorAlmacenamiento = (res) => res.status(503).json({
+  success: false,
+  message: 'No se pudo almacenar el archivo requerido. Verifica la configuración de AWS S3 e intenta nuevamente.',
+  code: 'FILE_STORAGE_UNAVAILABLE',
+});
+
+const registrarErrorAuth = (contexto, error) => {
+  if (esErrorAlmacenamiento(error)) {
+    console.error(`${contexto}: fallo de almacenamiento`, {
+      name: error?.name,
+      code: error?.Code || error?.code,
+      status: error?.$metadata?.httpStatusCode,
+      requestId: error?.$metadata?.requestId,
+    });
+    return;
+  }
+
+  console.error(contexto, error);
+};
+
+const subirArchivosRegistro = async (req, rol, archivoTituloFwd) => {
+  const archivos = {
+    tituloFwdUrl: '',
+    cedulaJuridicaUrl: null,
+    fotoPerfilUrl: null,
+  };
+
+  if (rol === 'ESTUDIANTE' && archivoTituloFwd) {
+    archivos.tituloFwdUrl = await uploadFileToS3(archivoTituloFwd, 'titulos_fwd');
+  }
+
+  const archivoCedulaJuridica = obtenerArchivo(req, 'cedula_juridica_file');
+  if (rol === 'EMPRESARIO' && archivoCedulaJuridica) {
+    archivos.cedulaJuridicaUrl = await uploadFileToS3(archivoCedulaJuridica, 'cedulas_juridicas');
+  }
+
+  const archivoFotoPerfil = obtenerArchivo(req, 'foto_perfil_file');
+  if (archivoFotoPerfil) {
+    archivos.fotoPerfilUrl = await uploadFileToS3(archivoFotoPerfil, 'fotos_perfil');
+  }
+
+  return archivos;
+};
+
+>>>>>>> d484eb4090edbc13f882214eded7253e0543bf11
 // ── Controladores ─────────────────────────────────────────────────────────────
 
 const register = async (req, res) => {
   try {
     const { nombre, email, password, cedula, rol, telefono_whatsapp, titulo_fwd, tipo_empresa, sector } = req.body;
+    const correoNormalizado = String(email || '').trim().toLowerCase();
+    const cedulaNormalizada = String(cedula || '').trim();
 
     if (!nombre || !email || !password || !cedula || !rol) {
       return res.status(400).json({
         success: false,
         message: 'Todos los campos son requeridos: nombre, email, password, cedula, rol',
+      });
+    }
+
+    if (!ROLES_REGISTRO.has(rol)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rol inválido para registro.',
       });
     }
 
@@ -91,8 +159,16 @@ const register = async (req, res) => {
       });
     }
 
-    const existingUser = await Usuario.findOne({ where: { correo: email } });
+    const existingUser = await Usuario.findOne({
+      where: {
+        [Op.or]: [
+          { correo: correoNormalizado },
+          { cedula: cedulaNormalizada },
+        ],
+      },
+    });
     if (existingUser) {
+      if (existingUser.cedula === cedulaNormalizada) return respuestaConflictoCedula(res);
       return res.status(409).json({
         success: false,
         message: 'Ya existe una cuenta con ese email',
@@ -107,45 +183,37 @@ const register = async (req, res) => {
       }
     }
 
+    const archivos = await subirArchivosRegistro(req, rol, archivoTituloFwd);
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await Usuario.create({ 
-      nombre, 
-      correo: email, 
-      contrasena_hash: hashedPassword, 
-      cedula, 
-      rol,
-      telefono_whatsapp,
-      tipo_empresa: rol === 'EMPRESARIO' ? tipo_empresa : null,
-      perfil_completo: true
-    });
-
-    let finalTituloFwd = titulo_fwd || '';
-    let finalCedulaJuridicaUrl = null;
-    
-    if (req.files) {
-      if (rol === 'ESTUDIANTE' && archivoTituloFwd) {
-        finalTituloFwd = await uploadFileToS3(archivoTituloFwd, 'titulos_fwd');
-      }
-      if (rol === 'EMPRESARIO' && req.files['cedula_juridica_file'] && req.files['cedula_juridica_file'][0]) {
-        finalCedulaJuridicaUrl = await uploadFileToS3(req.files['cedula_juridica_file'][0], 'cedulas_juridicas');
-      }
-    }
-
-    if (rol === 'ESTUDIANTE') {
-      await PerfilEstudiante.create({
-        id_usuario: newUser.id_usuario,
-        titulo_fwd: finalTituloFwd,
-        telefono_whatsapp
-      });
-    } else if (rol === 'EMPRESARIO') {
-      await PerfilEmpresario.create({
-        id_usuario: newUser.id_usuario,
-        sector: sector || 'No especificado',
+    await sequelize.transaction(async (transaction) => {
+      const newUser = await Usuario.create({
+        nombre: String(nombre).trim(),
+        correo: correoNormalizado,
+        contrasena_hash: hashedPassword,
+        cedula: cedulaNormalizada,
+        rol,
         telefono_whatsapp,
-        cedula_juridica_archivo: finalCedulaJuridicaUrl
-      });
-    }
+        tipo_empresa: rol === 'EMPRESARIO' ? tipo_empresa : null,
+        foto_perfil: archivos.fotoPerfilUrl,
+        perfil_completo: true
+      }, { transaction });
+
+      if (rol === 'ESTUDIANTE') {
+        await PerfilEstudiante.create({
+          id_usuario: newUser.id_usuario,
+          titulo_fwd: archivos.tituloFwdUrl || titulo_fwd || '',
+          telefono_whatsapp
+        }, { transaction });
+      } else if (rol === 'EMPRESARIO') {
+        await PerfilEmpresario.create({
+          id_usuario: newUser.id_usuario,
+          sector: sector || 'No especificado',
+          telefono_whatsapp,
+          cedula_juridica_archivo: archivos.cedulaJuridicaUrl
+        }, { transaction });
+      }
+    });
     
     return res.status(201).json({
       success: true,
@@ -153,7 +221,10 @@ const register = async (req, res) => {
       message: '¡Cuenta creada exitosamente! Tu cuenta está pendiente de aprobación por un administrador. Te notificaremos cuando sea activada.',
     });
   } catch (error) {
-    console.error('Error en register:', error);
+    registrarErrorAuth('Error en register', error);
+    if (esConflictoCedula(error)) return respuestaConflictoCedula(res);
+    if (esErrorAlmacenamiento(error)) return responderErrorAlmacenamiento(res);
+
     return res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
@@ -376,11 +447,19 @@ const completarPerfil = async (req, res) => {
   try {
     const { rol, cedula, telefono_whatsapp, tipo_empresa, sector } = req.body;
     const userId = req.user.id_usuario;
+    const cedulaNormalizada = String(cedula || '').trim();
 
     if (!rol || !cedula) {
       return res.status(400).json({
         success: false,
         message: 'Rol y cédula son requeridos',
+      });
+    }
+
+    if (!ROLES_REGISTRO.has(rol)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Rol inválido para completar perfil.',
       });
     }
 
@@ -394,7 +473,11 @@ const completarPerfil = async (req, res) => {
 
     const usuarioConCedula = await Usuario.findOne({
       where: {
+<<<<<<< HEAD
         cedula,
+=======
+        cedula: cedulaNormalizada,
+>>>>>>> d484eb4090edbc13f882214eded7253e0543bf11
         id_usuario: { [Op.ne]: userId }
       }
     });
@@ -411,47 +494,39 @@ const completarPerfil = async (req, res) => {
       }
     }
 
-    // Actualizar datos del usuario
-    await user.update({
-      rol,
-      cedula,
-      telefono_whatsapp,
-      tipo_empresa: rol === 'EMPRESARIO' ? tipo_empresa : null,
-      perfil_completo: true
+    const archivos = await subirArchivosRegistro(req, rol, archivoTituloFwd);
+
+    await sequelize.transaction(async (transaction) => {
+      await user.update({
+        rol,
+        cedula: cedulaNormalizada,
+        telefono_whatsapp,
+        tipo_empresa: rol === 'EMPRESARIO' ? tipo_empresa : null,
+        foto_perfil: archivos.fotoPerfilUrl || user.foto_perfil,
+        perfil_completo: true
+      }, { transaction });
+
+      if (rol === 'ESTUDIANTE') {
+        const perfilExistente = await PerfilEstudiante.findOne({ where: { id_usuario: user.id_usuario }, transaction });
+        const datosPerfil = {
+          titulo_fwd: archivos.tituloFwdUrl,
+          telefono_whatsapp
+        };
+        if (perfilExistente) await perfilExistente.update(datosPerfil, { transaction });
+        else await PerfilEstudiante.create({ id_usuario: user.id_usuario, ...datosPerfil }, { transaction });
+      } else if (rol === 'EMPRESARIO') {
+        const perfilExistente = await PerfilEmpresario.findOne({ where: { id_usuario: user.id_usuario }, transaction });
+        const datosPerfil = {
+          sector: sector || 'No especificado',
+          telefono_whatsapp
+        };
+        if (archivos.cedulaJuridicaUrl) datosPerfil.cedula_juridica_archivo = archivos.cedulaJuridicaUrl;
+        if (perfilExistente) await perfilExistente.update(datosPerfil, { transaction });
+        else await PerfilEmpresario.create({ id_usuario: user.id_usuario, ...datosPerfil }, { transaction });
+      }
     });
 
-    let finalTituloFwd = '';
-    let finalCedulaJuridicaUrl = null;
-    let fotoUrl = user.foto_perfil;
-    
-    if (req.files) {
-      if (rol === 'ESTUDIANTE' && archivoTituloFwd) {
-        finalTituloFwd = await uploadFileToS3(archivoTituloFwd, 'titulos_fwd');
-      }
-      if (rol === 'EMPRESARIO' && req.files['cedula_juridica_file'] && req.files['cedula_juridica_file'][0]) {
-        finalCedulaJuridicaUrl = await uploadFileToS3(req.files['cedula_juridica_file'][0], 'cedulas_juridicas');
-      }
-      if (req.files['foto_perfil_file'] && req.files['foto_perfil_file'][0]) {
-        fotoUrl = await uploadFileToS3(req.files['foto_perfil_file'][0], 'fotos_perfil');
-        await user.update({ foto_perfil: fotoUrl });
-      }
-    }
-
-    // Crear perfil correspondiente
-    if (rol === 'ESTUDIANTE') {
-      await PerfilEstudiante.create({
-        id_usuario: user.id_usuario,
-        titulo_fwd: finalTituloFwd,
-        telefono_whatsapp
-      });
-    } else if (rol === 'EMPRESARIO') {
-      await PerfilEmpresario.create({
-        id_usuario: user.id_usuario,
-        sector: sector || 'No especificado',
-        telefono_whatsapp,
-        cedula_juridica_archivo: finalCedulaJuridicaUrl
-      });
-    }
+    await user.reload();
     
     // Generar nuevo token con los datos actualizados
     const token = generateToken(user);
@@ -475,10 +550,18 @@ const completarPerfil = async (req, res) => {
     });
 
   } catch (error) {
+<<<<<<< HEAD
     console.error('Error en completarPerfil:', error);
     if (esConflictoCedula(error)) {
       return respuestaConflictoCedula(res);
     }
+=======
+    registrarErrorAuth('Error en completarPerfil', error);
+    if (esConflictoCedula(error)) {
+      return respuestaConflictoCedula(res);
+    }
+    if (esErrorAlmacenamiento(error)) return responderErrorAlmacenamiento(res);
+>>>>>>> d484eb4090edbc13f882214eded7253e0543bf11
 
     return res.status(500).json({
       success: false,

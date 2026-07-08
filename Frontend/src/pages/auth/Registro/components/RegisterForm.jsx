@@ -3,6 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, CreditCard, Tag, Smartphone, GraduationCap, Building2, Factory, FileText, Lock, LockKeyhole, Eye, EyeOff, AlertCircle, Clock, Link as LinkIcon } from 'lucide-react';
 import { authService } from '../../../../services/authService';
 import { RUTAS } from '../../../../routes/rutas';
+import {
+  MENSAJE_CEDULA_INVALIDA,
+  MENSAJE_TELEFONO_INVALIDO,
+  esCedulaValida,
+  esTelefonoValido,
+  formatearCedula,
+  formatearTelefono,
+} from '../../../../utils/inputMasks';
 import '../../AuthPages.css';
 import { useTranslation } from 'react-i18next';
 const RegisterForm = () => {
@@ -23,7 +31,13 @@ const RegisterForm = () => {
   };
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const valor = name === 'cedula'
+      ? formatearCedula(value)
+      : name === 'telefono_whatsapp'
+        ? formatearTelefono(value)
+        : value;
+    setForm({ ...form, [name]: valor });
     if (error) setError('');
   };
 
@@ -36,15 +50,18 @@ const RegisterForm = () => {
     e.preventDefault();
     const { nombre, email, password, confirmPassword, cedula, rol, telefono_whatsapp, linkedin, titulo_fwd_file, tipo_empresa, sector, cedula_juridica_file } = form;
 
-    if (!nombre || !email || !password || !confirmPassword || !cedula || !rol) {
+    if (!nombre || !email || !password || !confirmPassword || !cedula || !rol || !telefono_whatsapp) {
       setError(t('auth.register.errFields'));
       return;
     }
 
-    // Validación cédula costarricense: formato X-XXXX-XXXX (física) o XX-XXXXXXX-XXX (jurídica)
-    const cedulaRegex = /^\d{1,2}-\d{3,4}-\d{3,4}$/;
-    if (!cedulaRegex.test(cedula)) {
-      setError('Formato de cédula inválido. Ejemplos: 1-1231-8232 o 12-3456789-123');
+    if (!esCedulaValida(cedula)) {
+      setError(MENSAJE_CEDULA_INVALIDA);
+      return;
+    }
+
+    if (!esTelefonoValido(telefono_whatsapp)) {
+      setError(MENSAJE_TELEFONO_INVALIDO);
       return;
     }
 
@@ -179,8 +196,10 @@ const RegisterForm = () => {
               name="cedula"
               value={form.cedula}
               onChange={handleChange}
-              placeholder={t('auth.register.cedulaPlaceholder')}
+              placeholder="6-0491-0942"
               className="form-input has-icon"
+              inputMode="numeric"
+              maxLength={11}
               required
             />
           </div>
@@ -215,8 +234,10 @@ const RegisterForm = () => {
               name="telefono_whatsapp"
               value={form.telefono_whatsapp}
               onChange={handleChange}
-              placeholder={t('auth.register.phonePlaceholder')}
+              placeholder="7104-1281"
               className="form-input has-icon"
+              inputMode="numeric"
+              maxLength={9}
               required
             />
           </div>
