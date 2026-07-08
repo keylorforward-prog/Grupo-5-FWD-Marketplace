@@ -120,3 +120,33 @@ exports.delete = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+const OpenAI = require('openai');
+
+exports.explicarPrecio = async (req, res) => {
+  try {
+    const { tarifa_hora, total_horas, complejidad, total, proyecto_titulo, tecnologias } = req.body;
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    const prompt = `
+Eres un mentor de freelancers junior en Costa Rica. Explica en 3-4 oraciones cortas, en primera persona y lenguaje simple (sin fórmulas complejas), por qué una cotización de $${total} USD es razonable para el proyecto "${proyecto_titulo}" considerando:
+- Tarifa: $${tarifa_hora}/hora
+- Horas estimadas: ${total_horas}
+- Complejidad: ${complejidad}
+- Tecnologías: ${tecnologias}
+Incluye una breve validación o consejo considerando el rango de mercado junior en Costa Rica ($8–$25/hora).
+    `.trim();
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 200,
+    });
+
+    res.json({ success: true, explicacion: completion.choices[0].message.content });
+  } catch (error) {
+    console.error('Error al explicar precio con IA:', error);
+    res.status(500).json({ success: false, message: 'No se pudo generar la explicación.' });
+  }
+};

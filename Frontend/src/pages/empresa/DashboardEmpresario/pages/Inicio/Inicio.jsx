@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../../../../context/AuthContext';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
-import DashboardLayout from '../../components/DashboardLayout';
 import {
   formatearEntregable,
   formatearMensaje,
@@ -60,7 +59,7 @@ export default function Inicio() {
   const irACrearProyectoIA = useCallback(() => navigate('/DashboardEmpresario/crear-proyecto-ia'), [navigate]);
 
   return (
-    <DashboardLayout activePage="inicio">
+    <>
       <section className="de-hero fwd-animar-entrada">
         <div className="de-hero-content">
           <span className="de-hero-kicker">{t('empresaDashboardInicio.hero.kicker')}</span>
@@ -268,6 +267,6 @@ export default function Inicio() {
           ))}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

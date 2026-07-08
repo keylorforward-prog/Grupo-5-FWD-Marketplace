@@ -4,10 +4,13 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft, DollarSign, Tag, Globe, Building2,
   Send, ExternalLink, Briefcase, Calendar, CheckCircle, X, Mail, Pencil, Trash2,
+  Calculator,
 } from 'lucide-react';
 import { egresadoService } from '../../../../../services/egresadoService';
 import { egresadoDashboardService } from '../../../../../services/egresadoDashboardService';
 import { categoriasProyecto } from '../../../../../data/proyectosEgresado';
+import CalculadoraCotizacion from '../../../../../components/postulaciones/CalculadoraCotizacion';
+import { formatUSD, formatCRC, TIPO_CAMBIO_CRC } from '../../../../../utils/calculadoraCotizacion';
 
 const etiquetaModalidad = { remoto: 'egresadoExplorar.components.remoto', hibrido: 'egresadoExplorar.components.hibrido', presencial: 'egresadoExplorar.components.presencial' };
 const T_NS = 'egresadoProyectoDetalle';
@@ -47,6 +50,7 @@ export default function ProyectoDetalle() {
   const [originalMonto, setOriginalMonto] = useState('');
   const [confirmarCancelar, setConfirmarCancelar] = useState(false);
   const [cancelando, setCancelando] = useState(false);
+  const [resultadoCotizacion, setResultadoCotizacion] = useState(null);
 
   useEffect(() => {
     let activo = true;
@@ -72,11 +76,15 @@ export default function ProyectoDetalle() {
       alert('Debés aceptar las condiciones del proyecto para continuar.');
       return;
     }
+    if (!resultadoCotizacion) {
+      alert('Completá la calculadora de cotización para continuar.');
+      return;
+    }
     setEnviando(true);
     try {
       const datos = {
         mensaje_presentacion: mensaje.trim() || undefined,
-        presupuesto_max: monto ? Number(monto) : undefined,
+        ...resultadoCotizacion.payloadBackend,
       };
 
       if (modoEdicion && postulacion) {
@@ -90,6 +98,7 @@ export default function ProyectoDetalle() {
       }
       setMostrarModal(false);
       setModoEdicion(false);
+      setResultadoCotizacion(null);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
@@ -114,25 +123,23 @@ export default function ProyectoDetalle() {
   };
 
   const hayCambios = modoEdicion
-    ? mensaje !== originalMensaje || monto !== originalMonto
+    ? mensaje !== originalMensaje || resultadoCotizacion !== null
     : true;
 
   const abrirModal = (editando = false) => {
     if (editando && postulacion) {
       const msg = postulacion.mensaje_presentacion || '';
-      const mon = postulacion.presupuesto_max ? String(postulacion.presupuesto_max) : '';
       setMensaje(msg);
-      setMonto(mon);
       setAceptaCondiciones(true);
       setOriginalMensaje(msg);
-      setOriginalMonto(mon);
+      setOriginalMonto('');
       setModoEdicion(true);
     } else {
       setMensaje('');
-      setMonto('');
       setAceptaCondiciones(false);
       setModoEdicion(false);
     }
+    setResultadoCotizacion(null);
     setMostrarModal(true);
   };
 
@@ -273,6 +280,29 @@ export default function ProyectoDetalle() {
                     <DollarSign size={14} /> {t(`${T_NS}.propuestaEconomica`)}
                   </span>
                   <p className="detalle-postulacion-valor">{formatoMoneda.format(postulacion.presupuesto_max)}</p>
+                </div>
+              )}
+
+              {/* Cotización detallada guardada */}
+              {postulacion.total != null && (
+                <div className="detalle-postulacion-cotizacion">
+                  <h4><Calculator size={14} /> Cotización enviada</h4>
+                  <dl className="cotizacion-dl">
+                    {postulacion.tarifa_hora != null && (
+                      <><dt>Tarifa / hora</dt><dd>{formatUSD(postulacion.tarifa_hora)}</dd></>
+                    )}
+                    {postulacion.total_horas != null && (
+                      <><dt>Total horas</dt><dd>{postulacion.total_horas} h</dd></>
+                    )}
+                    {postulacion.subtotal != null && (
+                      <><dt>Subtotal (ajustado)</dt><dd>{formatUSD(postulacion.subtotal)}</dd></>
+                    )}
+                    {postulacion.iva != null && (
+                      <><dt>IVA (13%)</dt><dd>{formatUSD(postulacion.iva)}</dd></>
+                    )}
+                    <><dt><strong>Total propuesto</strong></dt><dd><strong>{formatUSD(postulacion.total)}</strong></dd></>
+                    <><dt style={{color:'var(--fwd-text-muted)',fontSize:'0.75rem'}}>Equivalente CRC</dt><dd style={{fontSize:'0.75rem'}}>₡{Math.round(Number(postulacion.total) * TIPO_CAMBIO_CRC).toLocaleString('es-CR')}</dd></>
+                  </dl>
                 </div>
               )}
 
@@ -446,21 +476,23 @@ export default function ProyectoDetalle() {
                 />
               </div>
 
-              {/* Monto de la propuesta */}
+              {/* Calculadora de cotización */}
               <div className="modal-campo">
                 <label className="modal-label">
-                  <DollarSign size={14} /> Tu propuesta económica
+                  <Calculator size={14} /> Calculadora de cotización
                 </label>
-                <input
-                  className="modal-input"
-                  type="number"
-                  min="0"
-                  step="100"
-                  placeholder="Ej: 1500"
-                  value={monto}
-                  onChange={(e) => setMonto(e.target.value)}
+                <CalculadoraCotizacion
+                  proyecto={proyecto}
+                  onResultado={setResultadoCotizacion}
+                  initialData={modoEdicion ? {
+                    tarifa_hora:     postulacion?.tarifa_hora,
+                    desglose_tareas: postulacion?.desglose_tareas,
+                    complejidad:     postulacion?.complejidad,
+                  } : null}
                 />
-                <span className="modal-ayuda">Indicá el monto total que cobrarías por el proyecto.</span>
+                {!resultadoCotizacion && (
+                  <span className="modal-ayuda" style={{color:'var(--fwd-text-muted)'}}>Completá la calculadora para habilitar el envío.</span>
+                )}
               </div>
 
               {/* Condiciones */}
@@ -490,10 +522,12 @@ export default function ProyectoDetalle() {
                 type="button"
                 className="modal-btn modal-btn-primary"
                 onClick={confirmarPostulacion}
-                disabled={enviando || !aceptaCondiciones || (modoEdicion && !hayCambios)}
+                disabled={enviando || !aceptaCondiciones || !resultadoCotizacion || (modoEdicion && !hayCambios)}
               >
                 {enviando ? (
                   <>Guardando...</>
+                ) : !resultadoCotizacion ? (
+                  <><Calculator size={16} /> Completá la calculadora</>
                 ) : modoEdicion && !hayCambios ? (
                   <><Send size={16} /> Sin cambios</>
                 ) : (

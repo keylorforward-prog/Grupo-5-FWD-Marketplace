@@ -161,6 +161,22 @@ export const egresadoDashboardService = {
     return extraerData(respuesta);
   },
 
+  async listarEntregablesProyecto(idProyecto) {
+    try {
+      const respuesta = await apiClient.get(`/dashboard-egresado/proyectos/${idProyecto}/entregables`);
+      return extraerData(respuesta);
+    } catch { return []; }
+  },
+
+  async crearEntregable(formData) {
+    try {
+      const respuesta = await apiClient.post('/dashboard-egresado/entregables', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return extraerData(respuesta);
+    } catch { return null; }
+  },
+
   async obtenerCatalogoTecnologias() {
     try {
       const respuesta = await apiClient.get('/catalogo-tecnologias');

@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Briefcase } from 'lucide-react';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
-import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
 
@@ -28,7 +27,7 @@ export default function OfertasEmpleo() {
   );
 
   return (
-    <DashboardLayout activePage="empleos">
+    <>
       <div className="de-page-heading">
         <p className="de-eyebrow">Empresa</p>
         <h1>Ofertas de Empleo</h1>
@@ -70,6 +69,6 @@ export default function OfertasEmpleo() {
           </div>
         ))}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

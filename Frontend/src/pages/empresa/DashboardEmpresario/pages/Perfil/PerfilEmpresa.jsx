@@ -14,7 +14,6 @@ import {
 import { useAuth } from '../../../../../context/AuthContext';
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
 import { formatearTelefono, esTelefonoValido } from '../../../../../utils/inputMasks';
-import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 
 const PERFIL_INICIAL = {
@@ -261,7 +260,7 @@ export default function PerfilEmpresa() {
   };
 
   return (
-    <DashboardLayout activePage="perfil">
+    <>
       <div className="de-company-profile">
         <section className="de-profile-banner fwd-animar-fade">
           <div className="de-profile-banner-content">
@@ -480,6 +479,6 @@ export default function PerfilEmpresa() {
           </main>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

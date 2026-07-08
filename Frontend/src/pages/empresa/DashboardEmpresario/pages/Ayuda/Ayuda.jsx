@@ -1,8 +1,6 @@
-import DashboardLayout from '../../components/DashboardLayout';
-
 export default function Ayuda() {
   return (
-    <DashboardLayout activePage="ayuda">
+    <>
       <div className="de-page-heading">
         <h1>Centro de Ayuda</h1>
       </div>
@@ -15,6 +13,6 @@ export default function Ayuda() {
           <span className="de-badge recepcion">24/7</span>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

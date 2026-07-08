@@ -83,12 +83,19 @@ export default function DetalleEmpleo() {
   const cvRequerido = false;
   const confirmarPostulacion = async () => {
     if (cvRequerido) return;
+
+    const valPretension = pretension ? Number(pretension) : null;
+    if (valPretension != null && empleo.salario_min != null && valPretension < Number(empleo.salario_min)) {
+      setError(t(`${T_NS}.errorPretensionMin`, { min: Number(empleo.salario_min).toLocaleString('es-AR') }));
+      return;
+    }
+
     setEnviando(true);
     try {
       const payload = {
         carta_presentacion: carta.trim() || null,
         cv_url: cvUrl.trim() || null,
-        pretension_salarial: pretension ? Number(pretension) : null,
+        pretension_salarial: valPretension,
       };
       if (modoEdicion && postulacion) {
         await egresadoService.actualizarPostulacionEmpleo(postulacion.id_postulacion_empleo, payload);
@@ -128,6 +135,7 @@ export default function DetalleEmpleo() {
     : true;
 
   const abrirModal = (editando = false) => {
+    setError(null);
     if (editando && postulacion) {
       setCarta(postulacion.carta_presentacion || '');
       setCvUrl(postulacion.cv_url || '');
@@ -437,6 +445,9 @@ export default function DetalleEmpleo() {
                 : t(`${T_NS}.modalPostularMsg`)}
             </p>
 
+            {error && (
+              <div className="de-data-state error" style={{ marginBottom: '1rem', fontSize: '0.85rem' }}>{error}</div>
+            )}
             <div className="modal-resumen">
               <div className="modal-resumenItem">
                 <span className="modal-resumenLabel">{t(`${T_NS}.puesto`)}</span>
@@ -496,14 +507,18 @@ export default function DetalleEmpleo() {
                 <input
                   className="modal-input"
                   type="number"
-                  min="0"
+                  min={empleo.salario_min ?? 0}
                   max="9999999"
                   step="1000"
                   placeholder={t(`${T_NS}.pretensionPlaceholder`)}
                   value={pretension}
                   onChange={(e) => { const v = e.target.value; if (v.length <= 7) setPretension(v); }}
                 />
-                <span className="modal-ayuda">{t(`${T_NS}.pretensionHint`)}</span>
+                <span className="modal-ayuda">
+                  {empleo.salario_min != null
+                    ? t(`${T_NS}.pretensionHintMin`, { min: Number(empleo.salario_min).toLocaleString('es-AR') })
+                    : t(`${T_NS}.pretensionHint`)}
+                </span>
               </div>
             </div>
 

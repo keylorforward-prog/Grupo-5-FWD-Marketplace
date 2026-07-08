@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const swaggerUi = require('swagger-ui-express');
@@ -8,6 +9,7 @@ const sequelize = require('./Config/db');
 const config = require('./Config/config');
 const session = require('express-session');
 const passport = require('./Config/passport');
+const { initSocketIO } = require('./Services/socketService');
 const { auditContextMiddleware } = require('./Services/auditContext');
 
 const { ConversacionIA } = require('./Models');
@@ -200,8 +202,11 @@ const startServer = async () => {
       console.error('Error limpiando conversaciones de IA al inicio:', e.message);
     }
 
-    // 2. Levantar el servidor
-    app.listen(PORT, () => {
+    // 2. Crear servidor HTTP y attach Socket.io
+    const server = http.createServer(app);
+    initSocketIO(server);
+
+    server.listen(PORT, () => {
       console.log(`\n🚀 Servidor corriendo en http://localhost:${PORT}`);
       console.log(`📚 Swagger docs en  http://localhost:${PORT}/api-docs\n`);
     });

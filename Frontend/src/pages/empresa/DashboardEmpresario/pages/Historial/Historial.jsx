@@ -1,5 +1,4 @@
 import { dashboardEmpresarioService } from '../../../../../services/dashboardEmpresarioService';
-import DashboardLayout from '../../components/DashboardLayout';
 import EstadoDatos from '../../components/EstadoDatos';
 import { useDashboardEmpresarioRequest } from '../../hooks/useDashboardEmpresarioRequest';
 import { formatearHistorial } from '../../utils/dashboardEmpresarioFormatters';
@@ -13,7 +12,7 @@ export default function Historial() {
   const historial = data.map(formatearHistorial);
 
   return (
-    <DashboardLayout activePage="historial">
+    <>
       <div className="de-page-heading">
         <h1>Historial de Proyectos</h1>
       </div>
@@ -32,6 +31,6 @@ export default function Historial() {
           </div>
         ))}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

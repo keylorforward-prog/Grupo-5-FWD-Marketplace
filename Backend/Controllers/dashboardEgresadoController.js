@@ -543,6 +543,71 @@ const INCLUDE_POSTULACION_EMPLEO = (extraWhere) => ({
   }],
 });
 
+const listarEntregablesProyecto = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+    const { id } = req.params;
+    const proyecto = await ProyectoPlataforma.findOne({
+      where: { id_proyecto_plataforma: id },
+      include: [{
+        model: Propuesta,
+        as: 'propuesta',
+        include: [{ model: Postulacion, as: 'postulaciones', where: { id_perfil_estudiante: perfil.id_perfil_estudiante } }],
+      }],
+    });
+    if (!proyecto) return res.status(404).json({ success: false, message: 'Proyecto no encontrado.' });
+    const entregables = await Entregable.findAll({
+      where: { id_proyecto: id },
+      order: [['fecha_creacion', 'DESC']],
+    });
+    res.json({ success: true, data: entregables });
+  } catch (error) {
+    responderError(res, error, 'Error al listar entregables del proyecto.');
+  }
+};
+
+const crearEntregable = async (req, res) => {
+  try {
+    const perfil = await obtenerPerfilEstudiante(req, res);
+    if (!perfil) return;
+    const { id_proyecto, titulo, tipo, descripcion } = req.body;
+    if (!id_proyecto || !titulo || !tipo) {
+      return res.status(400).json({ success: false, message: 'id_proyecto, titulo y tipo son requeridos.' });
+    }
+    if (!['PARCIAL', 'FINAL'].includes(tipo)) {
+      return res.status(400).json({ success: false, message: 'El tipo debe ser PARCIAL o FINAL.' });
+    }
+    const proyecto = await ProyectoPlataforma.findOne({
+      where: { id_proyecto_plataforma: id_proyecto },
+      include: [{
+        model: Propuesta,
+        as: 'propuesta',
+        include: [{ model: Postulacion, as: 'postulaciones', where: { id_perfil_estudiante: perfil.id_perfil_estudiante } }],
+      }],
+    });
+    if (!proyecto) return res.status(404).json({ success: false, message: 'Proyecto no encontrado o no autorizado.' });
+
+    let archivo_url = null;
+    if (req.file) {
+      const { uploadFileToS3 } = require('../Config/aws');
+      archivo_url = await uploadFileToS3(req.file, 'entregables');
+    }
+
+    const entregable = await Entregable.create({
+      id_proyecto: Number(id_proyecto),
+      titulo,
+      descripcion: descripcion || null,
+      tipo,
+      estado: 'ENVIADO',
+      archivo_url,
+    });
+    res.status(201).json({ success: true, data: entregable });
+  } catch (error) {
+    responderError(res, error, 'Error al crear entregable.');
+  }
+};
+
 const listarMensajesRecientes = async (req, res) => {
   try {
     const perfil = await obtenerPerfilEstudiante(req, res);
@@ -963,6 +1028,10 @@ const postularOfertaEmpleo = async (req, res) => {
       return res.status(409).json({ success: false, message: 'Ya postulaste a esta oferta.' });
     }
 
+    if (pretension_salarial != null && oferta.salario_min != null && Number(pretension_salarial) < Number(oferta.salario_min)) {
+      return res.status(400).json({ success: false, message: `La pretensión salarial no puede ser menor al salario mínimo de $${Number(oferta.salario_min).toLocaleString('es-AR')}.` });
+    }
+
     const postulacion = await PostulacionEmpleo.create({
       id_oferta_empleo,
       id_perfil_estudiante: perfil.id_perfil_estudiante,
@@ -994,6 +1063,14 @@ const actualizarPostulacionEmpleo = async (req, res) => {
     }
 
     const { carta_presentacion, cv_url, pretension_salarial } = req.body;
+
+    if (pretension_salarial !== undefined && pretension_salarial != null) {
+      const oferta = await OfertaEmpleo.findByPk(postulacion.id_oferta_empleo);
+      if (oferta && oferta.salario_min != null && Number(pretension_salarial) < Number(oferta.salario_min)) {
+        return res.status(400).json({ success: false, message: `La pretensión salarial no puede ser menor al salario mínimo de $${Number(oferta.salario_min).toLocaleString('es-AR')}.` });
+      }
+    }
+
     if (carta_presentacion !== undefined) postulacion.carta_presentacion = carta_presentacion;
     if (cv_url !== undefined) postulacion.cv_url = cv_url;
     if (pretension_salarial !== undefined) postulacion.pretension_salarial = pretension_salarial != null ? Number(pretension_salarial) : null;
@@ -1065,6 +1142,8 @@ module.exports = {
   postularOfertaEmpleo,
   actualizarPostulacionEmpleo,
   eliminarPostulacionEmpleo,
+  listarEntregablesProyecto,
+  crearEntregable,
   listarMensajesRecientes,
   listarOfertas,
   obtenerConversacion,

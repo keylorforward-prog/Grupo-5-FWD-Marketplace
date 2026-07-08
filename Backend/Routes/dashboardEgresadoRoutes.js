@@ -28,6 +28,8 @@ router.get('/ofertas-empleo/:id',          controller.obtenerOfertaEmpleo);
 router.post('/ofertas-empleo/postular',   controller.postularOfertaEmpleo);
 router.put('/ofertas-empleo/postulacion/:id',  controller.actualizarPostulacionEmpleo);
 router.delete('/ofertas-empleo/postulacion/:id', controller.eliminarPostulacionEmpleo);
+router.get('/proyectos/:id/entregables', controller.listarEntregablesProyecto);
+router.post('/entregables', upload.single('archivo'), controller.crearEntregable);
 router.get('/notificaciones', controller.listarNotificaciones);
 router.put('/notificaciones/:id/leer', controller.marcarNotificacionLeida);
 router.put('/notificaciones/leer-todas', controller.marcarTodasNotificacionesLeidas);
