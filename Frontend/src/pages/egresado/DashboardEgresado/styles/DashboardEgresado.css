@@ -4708,3 +4708,173 @@
   background: #dc2626;
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
 }
+
+/* ============================================
+   RESPONSIVE DESIGN (NUEVO)
+   ============================================ */
+
+/* ── Tablet (1024px e inferior) ── */
+@media (max-width: 1024px) {
+  .contenidoPrincipal {
+    padding: 32px 16px;
+  }
+  
+  .seccionListado {
+    flex-direction: column;
+  }
+  
+  .barraFiltrosEgresado {
+    width: 100%;
+    position: relative;
+    top: 0;
+    max-height: none;
+    margin-bottom: 24px;
+    z-index: 10;
+  }
+
+  .gridResultadosEgresado {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .seccionHero {
+    gap: 20px;
+  }
+  
+  .ilustracionHero {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+/* ── Móvil Grande (768px e inferior) ── */
+@media (max-width: 768px) {
+  .seccionHero {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px 0;
+  }
+  
+  .textoHero {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .tituloHero {
+    font-size: 32px;
+  }
+  
+  .contenedorBusqueda {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .categoriasRapidas {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .gridResultadosEgresado {
+    grid-template-columns: 1fr;
+  }
+  
+  .tarjetaProyecto, .tarjetaEmpleo {
+    padding: 20px;
+  }
+
+  .cabeceraListaResultados {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .accionesResultados {
+    width: 100%;
+  }
+
+  .selectOrden {
+    width: 100%;
+  }
+
+  .encabezadoProyecto h3, .encabezadoEmpleo h3 {
+    font-size: 1.1rem;
+  }
+  
+  .etiquetasCard {
+    flex-wrap: wrap;
+  }
+  
+  /* Modales */
+  .contenedorModal {
+    width: calc(100% - 32px);
+    margin: 16px;
+    max-height: calc(100vh - 32px);
+  }
+  
+  .formularioModalEgresado {
+    grid-template-columns: 1fr;
+  }
+  
+  .accionesModalEgresado {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btnPrimarioModal, .btnSecundarioModal {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .estadisticasRapidas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Móvil Pequeño (480px e inferior) ── */
+@media (max-width: 480px) {
+  .contenidoPrincipal {
+    padding: 24px 12px;
+    padding-bottom: 80px; /* Espacio para bottom nav */
+  }
+
+  .tituloHero {
+    font-size: 28px;
+  }
+  
+  .subtituloHero {
+    font-size: 15px;
+  }
+  
+  .categoriasRapidas {
+    grid-template-columns: 1fr;
+  }
+  
+  .barraBusqueda {
+    padding: 0 12px;
+  }
+  
+  .metadatosProyecto, .metadatosEmpleo {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .footerProyecto, .footerEmpleo {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .btnPostularListado {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tarjetaFiltroGrupo {
+    padding: 16px;
+  }
+
+  .paginacionContainer {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+

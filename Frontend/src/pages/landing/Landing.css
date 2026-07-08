@@ -1691,3 +1691,121 @@ main { overflow: hidden; }
   .cta-buttons { flex-direction: column; }
   .partners-logos { gap: 2rem; }
 }
+
+/* =============================================================
+   14. MOBILE NAVIGATION & REFINEMENTS (NUEVO)
+   ============================================================= */
+
+/* Hamburger Button */
+.landing-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  z-index: 1000;
+  padding: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Navbar links container for desktop */
+.landing-navbar-links {
+  display: contents; /* Keeps original layout on desktop */
+}
+
+@media (max-width: 768px) {
+  /* Navbar */
+  .landing-navbar {
+    justify-content: space-between;
+  }
+  
+  .landing-navbar-logo {
+    position: static;
+    transform: none;
+    margin: 0;
+  }
+  
+  .landing-hamburger {
+    display: flex;
+  }
+  
+  .landing-navbar-left,
+  .landing-navbar-right {
+    display: flex;
+  }
+  
+  .landing-navbar-links {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: var(--navbar-h);
+    left: 0;
+    right: 0;
+    background: var(--adelante-purple);
+    padding: 2rem;
+    gap: 1.5rem;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transform: translateY(-150%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 999;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  
+  .landing-navbar-links-open {
+    transform: translateY(0);
+  }
+  
+  .landing-navbar-left,
+  .landing-navbar-right {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 1.5rem;
+  }
+  
+  .landing-navbar-left a,
+  .landing-navbar-right a {
+    font-size: 1.1rem;
+  }
+  
+  .landing-btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Hero Refinements */
+  .hero-section {
+    padding-top: calc(var(--navbar-h) + 20px);
+    padding-bottom: 40px;
+    gap: 2rem;
+  }
+  
+  .hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .hero-description {
+    font-size: 1.1rem;
+  }
+  
+  /* Info Cards Stacking */
+  .features-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .feature-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+}
+
